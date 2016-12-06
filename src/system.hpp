@@ -5,27 +5,26 @@
 #include <cstdint>
 #include <boost/dynamic_bitset.hpp>
 
+#include "types.hpp"
 #include "random.hpp"
 #include "model.hpp"
 #include "network.hpp"
 
 namespace stdmMf {
 
-
 class System : public RngClass {
 private:
-    std::shared_ptr<const Network> network;
-    std::shared_ptr<Model> model;
+    const std::shared_ptr<const Network> network_;
+    const std::shared_ptr<Model> model_;
 
-    const uint32_t num_nodes;
+    const uint32_t num_nodes_;
 
-    boost::dynamic_bitset<> inf_status;
-    boost::dynamic_bitset<> trt_status;
+    boost::dynamic_bitset<> inf_status_;
+    boost::dynamic_bitset<> trt_status_;
 
-    std::vector<std::pair< boost::dynamic_bitset<>,
-                           boost::dynamic_bitset<> > > history;
+    std::vector<inf_trt_pair> history_;
 
-    uint32_t time;
+    uint32_t time_;
 
 public:
     System(std::shared_ptr<const Network> network,
@@ -52,9 +51,9 @@ public:
 
     void erase_history();
 
-    boost::dynamic_bitset<> get_inf_status() const;
+    boost::dynamic_bitset<> inf_status() const;
 
-    boost::dynamic_bitset<> get_trt_status() const;
+    boost::dynamic_bitset<> trt_status() const;
 
     void start();
 

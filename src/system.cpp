@@ -7,27 +7,27 @@ namespace stdmMf {
 
 System::System(std::shared_ptr<const Network> network,
         std::shared_ptr<Model> model)
-    : RngClass(), network(network), model(model), num_nodes(network->size()),
-      inf_status(num_nodes), trt_status(num_nodes), time(0) {
+    : RngClass(), network_(network), model_(model), num_nodes_(network->size()),
+      inf_status_(num_nodes_), trt_status_(num_nodes_), time_(0) {
 }
 
 
 uint32_t System::n_inf() const {
-    return this->inf_status.count();
+    return this->inf_status_.count();
 }
 
 uint32_t System::n_not() const {
-    return this->num_nodes - this->inf_status.count();
+    return this->num_nodes_ - this->inf_status_.count();
 }
 
 uint32_t System::n_trt() const {
-    return this->trt_status.count();
+    return this->trt_status_.count();
 }
 
 std::vector<uint32_t> System::inf_nodes() const {
     std::vector<uint32_t> inds;
-    for (uint32_t i = 0; i < this->num_nodes; ++i) {
-        if (this->inf_status.test(i)) {
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+        if (this->inf_status_.test(i)) {
             inds.push_back(i);
         }
     }
@@ -37,8 +37,8 @@ std::vector<uint32_t> System::inf_nodes() const {
 
 std::vector<uint32_t> System::not_nodes() const {
     std::vector<uint32_t> inds;
-    for (uint32_t i = 0; i < this->num_nodes; ++i) {
-        if (!this->inf_status.test(i)) {
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+        if (!this->inf_status_.test(i)) {
             inds.push_back(i);
         }
     }
@@ -47,44 +47,46 @@ std::vector<uint32_t> System::not_nodes() const {
 }
 
 std::vector<uint32_t> System::status() const {
-    std::vector<uint32_t> node_status;
-    for (uint32_t i = 0; i < this->num_nodes; ++i) {
+    std::vector<uint32_t> status;
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         uint32_t status_i = 0;
 
-        if (this->inf_status.test(i)) {
+        if (this->inf_status_.test(i)) {
             status_i = 2;
         }
 
-        if (this->trt_status.test(i)) {
+        if (this->trt_status_.test(i)) {
             status_i++;
         }
+
+        status.push_back(status_i);
     }
 
-    return node_status;
+    return status;
 }
 
 void System::cleanse() {
-    this->inf_status.reset();
+    this->inf_status_.reset();
 }
 
 void System::plague() {
-    this->inf_status.set();
+    this->inf_status_.set();
 }
 
 void System::wipe_trt() {
-    this->trt_status.reset();
+    this->trt_status_.reset();
 }
 
 void System::erase_history() {
-    this->history.clear();
+    this->history_.clear();
 }
 
-boost::dynamic_bitset<> System::get_inf_status() const {
-    return this->inf_status;
+boost::dynamic_bitset<> System::inf_status() const {
+    return this->inf_status_;
 }
 
-boost::dynamic_bitset<> System::get_trt_status() const {
-    return this->trt_status;
+boost::dynamic_bitset<> System::trt_status() const {
+    return this->trt_status_;
 }
 
 void System::start() {
@@ -93,19 +95,18 @@ void System::start() {
     this->erase_history();
 
     const uint32_t num_starts =
-        static_cast<uint32_t>(ceil(this->num_nodes * 0.1));
+        static_cast<uint32_t>(ceil(this->num_nodes_ * 0.1));
     std::vector<int> infs = this->rng->sample_range(
-            0, this->num_nodes, num_starts);
+            0, this->num_nodes_, num_starts);
 
     for (uint32_t i = 0; i < num_starts; ++i) {
-        this->inf_status.set(infs.at(i));
+        this->inf_status_.set(infs.at(i));
     }
 }
 
 void System::update_history() {
-    this->history.push_back(std::pair<
-            boost::dynamic_bitset<> ,boost::dynamic_bitset<> >(
-                    this->inf_status, this->trt_status));
+    this->history_.push_back(
+            inf_trt_pair(this->inf_status_, this->trt_status_));
 }
 
 void System::turn_clock() {
@@ -120,10 +121,10 @@ void System::turn_clock(const std::vector<double> & probs) {
     this->update_history();
 
     // update infection status
-    for (uint32_t i = 0; i < this->num_nodes; ++i) {
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         double r = this->rng->runif_01();
         if (r < probs.at(i)) {
-            this->inf_status.flip(i);
+            this->inf_status_.flip(i);
         }
     }
 
