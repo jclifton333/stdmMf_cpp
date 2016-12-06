@@ -1,0 +1,40 @@
+syntax = "proto2";
+
+package stdmMf;
+
+
+// represent a location in the network for a unit
+message Node {
+  // a unique identifier for the node
+  optional uint32 index = 1;
+
+  // location in space
+  optional double x = 2;
+  optional double y = 3;
+
+  // adjacent nodes corresponding to the actions available for Units
+  optional uint32 up = 4;
+  optional uint32 down = 5;
+  optional uint32 left = 6;
+  optional uint32 right = 7;
+}
+
+// a network will have a list of nodes as the foundation
+message NodeList {
+  repeated Node nodes = 1;
+}
+
+// settings to initialize a network object
+message NetworkInit {
+  // Only a grid network so far
+  enum NetType {
+    GRID = 0;
+  }
+
+  optional NetType type = 1;
+
+  // possible values to customize for networks
+  optional uint32 dim_x = 2;
+  optional uint32 dim_y = 3;
+  optional bool wrap = 4 [default = false];
+}
