@@ -17,8 +17,6 @@ set(HEAD_HASH)
 
 file(READ "@HEAD_FILE@" HEAD_CONTENTS LIMIT 1024)
 
-message("GIT in file")
-
 string(STRIP "${HEAD_CONTENTS}" HEAD_CONTENTS)
 if(HEAD_CONTENTS MATCHES "ref")
 	# named branch
