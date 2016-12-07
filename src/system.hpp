@@ -37,12 +37,6 @@ public:
 
     uint32_t n_trt() const;
 
-    std::vector<uint32_t> inf_nodes() const;
-
-    std::vector<uint32_t> not_nodes() const;
-
-    std::vector<uint32_t> status() const;
-
     void cleanse();
 
     void plague();

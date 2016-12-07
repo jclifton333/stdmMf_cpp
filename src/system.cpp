@@ -25,47 +25,6 @@ uint32_t System::n_trt() const {
     return this->trt_status_.count();
 }
 
-std::vector<uint32_t> System::inf_nodes() const {
-    std::vector<uint32_t> inds;
-    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-        if (this->inf_status_.test(i)) {
-            inds.push_back(i);
-        }
-    }
-
-    return inds;
-}
-
-std::vector<uint32_t> System::not_nodes() const {
-    std::vector<uint32_t> inds;
-    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-        if (!this->inf_status_.test(i)) {
-            inds.push_back(i);
-        }
-    }
-
-    return inds;
-}
-
-std::vector<uint32_t> System::status() const {
-    std::vector<uint32_t> status;
-    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-        uint32_t status_i = 0;
-
-        if (this->inf_status_.test(i)) {
-            status_i = 2;
-        }
-
-        if (this->trt_status_.test(i)) {
-            status_i++;
-        }
-
-        status.push_back(status_i);
-    }
-
-    return status;
-}
-
 void System::cleanse() {
     this->inf_status_.reset();
 }
