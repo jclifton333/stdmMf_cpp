@@ -9,7 +9,20 @@ namespace stdmMf {
 class NoCovEdgeModel : public Model {
 private:
     const uint32_t par_size_;
-    std::vector<double> par_;
+
+    double intcp_inf_latent_;
+    double intcp_inf_;
+    double intcp_rec_;
+    double trt_act_inf_;
+    double trt_act_rec_;
+    double trt_pre_inf_;
+
+    double inf_b(const uint32_t & b_node, const bool & b_trt) const;
+
+    double a_inf_b(const uint32_t & a_node, const uint32_t & b_node,
+            const bool & a_trt, const bool & b_trt) const;
+
+    double rec_b(const uint32_t & b_node, const bool & b_trt) const;
 
 public:
     NoCovEdgeModel();
