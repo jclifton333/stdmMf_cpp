@@ -7,8 +7,9 @@ namespace stdmMf {
 
 System::System(std::shared_ptr<const Network> network,
         std::shared_ptr<Model> model)
-    : RngClass(), network_(network), model_(model), num_nodes_(network->size()),
-      inf_status_(num_nodes_), trt_status_(num_nodes_), time_(0) {
+    : RngClass(), network_(network), model_(model),
+      num_nodes_(this->network_->size()), inf_status_(this->num_nodes_),
+      trt_status_(this->num_nodes_), time_(0) {
 }
 
 
