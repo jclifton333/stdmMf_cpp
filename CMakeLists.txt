@@ -15,8 +15,4 @@ if (OPENMP_FOUND)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-include(GetGitRevisionDescription)
-
-git_describe(GIT_DESCRIBE_VAR)
-
 add_subdirectory(src)
