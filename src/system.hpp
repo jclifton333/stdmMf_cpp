@@ -27,8 +27,8 @@ private:
     uint32_t time_;
 
 public:
-    System(std::shared_ptr<const Network> network,
-            std::shared_ptr<Model> model);
+    System(const std::shared_ptr<const Network> & network,
+            const std::shared_ptr<Model> & model);
 
 
     uint32_t n_inf() const;
