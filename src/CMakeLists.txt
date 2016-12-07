@@ -3,7 +3,6 @@ find_package(Protobuf REQUIRED)
 
 include(GetGitRevisionDescription)
 git_describe(GIT_DESCRIBE_VAR)
-message(${GIT_DESCRIBE_VAR})
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/git_description.cpp.in"
   "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp" @ONLY)
