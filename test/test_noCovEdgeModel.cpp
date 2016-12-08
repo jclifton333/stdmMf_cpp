@@ -91,6 +91,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
             [&rng](double & x) {
                 x = rng.runif_01();
             });
+    m.par(par);
 
     // generate history
     std::vector<BitsetPair> history;

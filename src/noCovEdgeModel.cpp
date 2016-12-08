@@ -114,7 +114,7 @@ double NoCovEdgeModel::ll(const std::vector<BitsetPair> & history) const {
             ll_value += std::log(std::max(1e-14, p));
         }
     }
-    return ll_value;
+    return ll_value / (history_size - 1);
 }
 
 
@@ -216,6 +216,7 @@ std::vector<double> NoCovEdgeModel::ll_grad(
             }
         }
     }
+    mult_b_to_a(grad_value, 1.0 / (history_size - 1));
     return grad_value;
 }
 
@@ -224,7 +225,6 @@ double NoCovEdgeModel::inf_b(const uint32_t & b_node,
         const bool & b_trt) const {
     const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
-
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
 }
 
