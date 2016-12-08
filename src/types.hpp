@@ -2,12 +2,13 @@
 #define TYPES_HPP
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/serialization/strong_typedef.hpp>
 
 namespace stdmMf {
 
 
-typedef std::pair<boost::dynamic_bitset<>,
-                  boost::dynamic_bitset<> > inf_trt_pair;
+using BitsetPair = std::pair<boost::dynamic_bitset<>,
+                             boost::dynamic_bitset<> >;
 
 
 } // namespace stdmMf

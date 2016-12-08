@@ -73,5 +73,83 @@ std::vector<uint32_t> combine_sets(const boost::dynamic_bitset<> & one,
 }
 
 
+std::vector<double> add_a_and_b(const std::vector<double> & a,
+        const std::vector<double> & b) {
+    const uint32_t a_size = a.size();
+    CHECK_EQ(a_size, b.size());
+    std::vector<double> res;
+    res.reserve(a_size);
+    for (uint32_t i = 0; i < a_size; ++i) {
+        res.push_back(a.at(i) + b.at(i));
+    }
+    return res;
+}
+
+std::vector<double> add_a_and_b(const std::vector<double> & a,
+        const double & b) {
+    const uint32_t a_size = a.size();
+    std::vector<double> res;
+    res.reserve(a_size);
+    for (uint32_t i = 0; i < a_size; ++i) {
+        res.push_back(a.at(i) + b);
+    }
+    return res;
+}
+
+void add_b_to_a(std::vector<double> & a, const std::vector<double> & b) {
+    const uint32_t a_size = a.size();
+    CHECK_EQ(a_size, b.size());
+    for (uint32_t i = 0; i < a_size; ++i) {
+        a.at(i) += b.at(i);
+    }
+}
+
+void add_b_to_a(std::vector<double> & a, const double & b) {
+    const uint32_t a_size = a.size();
+    for (uint32_t i = 0; i < a_size; ++i) {
+        a.at(i) += b;
+    }
+}
+
+std::vector<double> mult_a_and_b(const std::vector<double> & a,
+        const std::vector<double> & b) {
+    const uint32_t a_size = a.size();
+    CHECK_EQ(a_size, b.size());
+    std::vector<double> res;
+    res.reserve(a_size);
+    for (uint32_t i = 0; i < a_size; ++i) {
+        res.push_back(a.at(i) * b.at(i));
+    }
+    return res;
+}
+
+std::vector<double> mult_a_and_b(const std::vector<double> & a,
+        const double & b) {
+    const uint32_t a_size = a.size();
+    std::vector<double> res;
+    res.reserve(a_size);
+    for (uint32_t i = 0; i < a_size; ++i) {
+        res.push_back(a.at(i) * b);
+    }
+    return res;
+}
+
+void mult_b_to_a(std::vector<double> & a, const std::vector<double> & b) {
+    const uint32_t a_size = a.size();
+    CHECK_EQ(a_size, b.size());
+    for (uint32_t i = 0; i < a_size; ++i) {
+        a.at(i) *= b.at(i);
+    }
+}
+
+void mult_b_to_a(std::vector<double> & a, const double & b) {
+    const uint32_t a_size = a.size();
+    for (uint32_t i = 0; i < a_size; ++i) {
+        a.at(i) *= b;
+    }
+}
+
+
+
 
 } // namespace stdmMf

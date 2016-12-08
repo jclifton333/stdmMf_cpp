@@ -62,53 +62,53 @@ std::shared_ptr<Network> Network::gen_grid(
             // up
             if (y > 0) {
                 const uint32_t neigh = i-1;
-                n->set_up(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else if(wrap) {
                 const uint32_t neigh = i + dim_y - 1;
-                n->set_up(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else {
-                n->set_up(i);
+                n->add_neigh(i);
             }
 
             // down
             if (y < (dim_y - 1)) {
                 const uint32_t neigh = i + 1;
-                n->set_down(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else if (wrap) {
                 const uint32_t neigh = i - dim_y + 1;
-                n->set_down(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else {
-                n->set_down(i);
+                n->add_neigh(i);
             }
 
             // left
             if (x > 0) {
                 const uint32_t neigh = i - dim_y;
-                n->set_left(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else if (wrap) {
                 const uint32_t neigh = network->num_nodes - dim_y + y;
-                n->set_left(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else {
-                n->set_left(i);
+                n->add_neigh(i);
             }
 
             // right
             if (x < (dim_x - 1)) {
                 const uint32_t neigh = i + dim_y;
-                n->set_right(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else if (wrap) {
                 const uint32_t neigh = y;
-                n->set_right(neigh);
+                n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
             } else {
-                n->set_right(i);
+                n->add_neigh(i);
             }
         }
 

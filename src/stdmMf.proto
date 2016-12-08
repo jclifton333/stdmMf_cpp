@@ -13,10 +13,7 @@ message Node {
   optional double y = 3;
 
   // adjacent nodes corresponding to the actions available for Units
-  optional uint32 up = 4;
-  optional uint32 down = 5;
-  optional uint32 left = 6;
-  optional uint32 right = 7;
+  repeated uint32 neigh = 4;
 }
 
 // a network will have a list of nodes as the foundation

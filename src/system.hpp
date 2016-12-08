@@ -19,10 +19,10 @@ private:
 
     const uint32_t num_nodes_;
 
-    boost::dynamic_bitset<> inf_status_;
-    boost::dynamic_bitset<> trt_status_;
+    boost::dynamic_bitset<> inf_bits_;
+    boost::dynamic_bitset<> trt_bits_;
 
-    std::vector<inf_trt_pair> history_;
+    std::vector<BitsetPair> history_;
 
     uint32_t time_;
 
