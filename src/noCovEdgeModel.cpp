@@ -54,7 +54,7 @@ std::vector<double> NoCovEdgeModel::probs(
     std::vector<uint32_t> status = combine_sets(inf_status, trt_status);
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         const uint32_t status_i = status.at(i);
-        const bool trt_i = (status_i % 2) == 1;
+        const bool trt_i = status_i % 2 == 1;
         if (status_i < 2) {
             // not infected -> infection probability
             const Node & node = this->network_->get_node(i);
@@ -63,12 +63,12 @@ std::vector<double> NoCovEdgeModel::probs(
             double prob = 1.0 - this->inf_b(i, trt_i); // latent prob
 
             // factor in neighbors
-            for (uint32_t j = 0; j < num_neigh; ++i) {
+            for (uint32_t j = 0; j < num_neigh; ++j) {
                 const uint32_t neigh = node.neigh(j);
                 const uint32_t status_neigh = status.at(neigh);
                 if (status_neigh >= 2) {
                     // if neighbor is infected
-                    const bool trt_neigh = (status_neigh % 2) == 1;
+                    const bool trt_neigh = status_neigh % 2 == 1;
                     prob *= 1.0 - this->a_inf_b(neigh, i, trt_neigh, trt_i);
                 }
             }
@@ -105,12 +105,12 @@ double NoCovEdgeModel::ll(const std::vector<BitsetPair> & history) const {
         const std::vector<uint32_t> unchanged = change_both_sets.second;
         const uint32_t num_unchanged = unchanged.size();
 
-        for (uint32_t i = 0; i < num_changed; ++i) {
-            const double p = probs.at(changed.at(i));
+        for (uint32_t j = 0; j < num_changed; ++j) {
+            const double p = probs.at(changed.at(j));
             ll_value += std::log(std::max(1e-14, p)); // for stability
         }
-        for (uint32_t i = 0; i < num_unchanged; ++i) {
-            const double p = 1.0 - probs.at(unchanged.at(i));
+        for (uint32_t j = 0; j < num_unchanged; ++j) {
+            const double p = 1.0 - probs.at(unchanged.at(j));
             ll_value += std::log(std::max(1e-14, p));
         }
     }
@@ -140,16 +140,65 @@ std::vector<double> NoCovEdgeModel::ll_grad(
         // convert bits to sets of indices
         const std::vector<uint32_t> inf_and_change =
             combine_sets(curr_inf, change_inf);
-        for (uint32_t j = 0; j < this->num_nodes_; ++i) {
+        for (uint32_t j = 0; j < this->num_nodes_; ++j) {
             const uint32_t status_j = inf_and_trt.at(j);
             const uint32_t change_j = inf_and_change.at(j);
 
-            const uint32_t trt_j = (status_j % 2) == 1;
+            const bool trt_j = status_j % 2 == 1;
             const double prob_j = probs.at(j);
+
             if (change_j < 2) {
                 // was uninfected
+                std::vector<double> val_to_add(this->par_size_, 0.0);
+
+                // neighbor effect
+                const Node & node_j = this->network_->get_node(j);
+                const uint32_t neigh_size = node_j.neigh_size();
+                for (uint32_t k = 0; k < neigh_size; ++k) {
+                    const uint32_t neigh = node_j.neigh(k);
+                    if (inf_and_trt.at(k) >= 2) {
+                        // if neighbor is infected
+                        const bool trt_k = inf_and_trt.at(k) % 2 == 1;
+                        const double prob_jk = this->a_inf_b(
+                                k, j, trt_k, trt_j);
+                        std::vector<double> grad_jk = this->a_inf_b_grad(
+                                k, j , trt_k, trt_j);
+
+                        if (prob_jk < 1.0) {
+                            mult_b_to_a(grad_jk, - 1.0 / (1.0 - prob_jk));
+                            add_b_to_a(val_to_add, grad_jk);
+                        }
+
+                    }
+                }
+
+                // latent effect
+                {
+                    const double prob_j_latent = this->inf_b(j, trt_j);
+                    std::vector<double> grad_j_latent = this->inf_b_grad(
+                            j, trt_j);
+                    if (prob_j_latent < 1.0) {
+                        mult_b_to_a(grad_j_latent,
+                                - 1.0 / (1.0 - prob_j_latent));
+                        add_b_to_a(val_to_add, grad_j_latent);
+                    }
+                }
+
+
+                if (change_j % 2 == 0) {
+                    // remains infected
+                    if (prob_j > 0.0) {
+                        mult_b_to_a(val_to_add, - (1.0 - prob_j) / prob_j);
+                        add_b_to_a(grad_value, val_to_add);
+                    }
+                } else {
+                    // became uninfected
+                    add_b_to_a(grad_value, val_to_add);
+                }
+            } else {
+                // was infected
                 std::vector<double> grad = this->rec_b_grad(j, trt_j);
-                if ((change_j % 2) == 0) {
+                if (change_j % 2 == 0) {
                     // remains uninfected
                     if (prob_j > 0.0) {
                         mult_b_to_a(grad, 1.0 / prob_j);
@@ -162,18 +211,10 @@ std::vector<double> NoCovEdgeModel::ll_grad(
                         add_b_to_a(grad_value, grad);
                     }
                 }
-            } else {
-                // was infected
-                if ((change_j % 2) == 0) {
-                    // remains infected
-                    // TODO: need to calculate gradient
-                } else {
-                    // became uninfected
-                    // TODO: need to calculate gradient
-                }
             }
         }
     }
+    return grad_value;
 }
 
 

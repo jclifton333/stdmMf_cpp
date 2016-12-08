@@ -68,6 +68,8 @@ std::vector<uint32_t> combine_sets(const boost::dynamic_bitset<> & one,
             ++combined_val;
             two_active = two.find_next(two_active);
         }
+
+        combined.push_back(combined_val);
     }
     return combined;
 }
