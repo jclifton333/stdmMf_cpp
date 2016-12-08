@@ -166,8 +166,10 @@ std::vector<double> NoCovEdgeModel::ll_grad(
                 // was infected
                 if ((change_j % 2) == 0) {
                     // remains infected
+                    // TODO: need to calculate gradient
                 } else {
                     // became uninfected
+                    // TODO: need to calculate gradient
                 }
             }
         }
