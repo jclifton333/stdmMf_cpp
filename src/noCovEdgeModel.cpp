@@ -123,6 +123,7 @@ std::vector<double> NoCovEdgeModel::ll_grad(
     std::vector<double> grad_value (this->par_size_, 0.0);
     const uint32_t history_size = history.size();
     for (uint32_t i = 0; i < (history_size - 1); ++i) {
+        // current infection and treatments
         const BitsetPair & curr_history = history.at(i);
         const boost::dynamic_bitset<> curr_inf = curr_history.first;
         const boost::dynamic_bitset<> curr_trt = curr_history.second;
@@ -147,7 +148,7 @@ std::vector<double> NoCovEdgeModel::ll_grad(
             const bool trt_j = status_j % 2 == 1;
             const double prob_j = probs.at(j);
 
-            if (change_j < 2) {
+            if (status_j < 2) {
                 // was uninfected
                 std::vector<double> val_to_add(this->par_size_, 0.0);
 
@@ -156,17 +157,18 @@ std::vector<double> NoCovEdgeModel::ll_grad(
                 const uint32_t neigh_size = node_j.neigh_size();
                 for (uint32_t k = 0; k < neigh_size; ++k) {
                     const uint32_t neigh = node_j.neigh(k);
-                    if (inf_and_trt.at(k) >= 2) {
+                    if (inf_and_trt.at(neigh) >= 2) {
                         // if neighbor is infected
-                        const bool trt_k = inf_and_trt.at(k) % 2 == 1;
-                        const double prob_jk = this->a_inf_b(
-                                k, j, trt_k, trt_j);
-                        std::vector<double> grad_jk = this->a_inf_b_grad(
-                                k, j , trt_k, trt_j);
+                        const bool trt_neigh = inf_and_trt.at(neigh) % 2 == 1;
+                        const double prob_jneigh = this->a_inf_b(
+                                neigh, j, trt_neigh, trt_j);
+                        std::vector<double> grad_jneigh = this->a_inf_b_grad(
+                                neigh, j , trt_neigh, trt_j);
 
-                        if (prob_jk < 1.0) {
-                            mult_b_to_a(grad_jk, - 1.0 / (1.0 - prob_jk));
-                            add_b_to_a(val_to_add, grad_jk);
+                        if (prob_jneigh < 1.0) {
+                            mult_b_to_a(grad_jneigh,
+                                    - 1.0 / (1.0 - prob_jneigh));
+                            add_b_to_a(val_to_add, grad_jneigh);
                         }
 
                     }
@@ -185,29 +187,29 @@ std::vector<double> NoCovEdgeModel::ll_grad(
                 }
 
 
-                if (change_j % 2 == 0) {
-                    // remains infected
+                if (change_j % 2 == 1) {
+                    // becomes infected
                     if (prob_j > 0.0) {
                         mult_b_to_a(val_to_add, - (1.0 - prob_j) / prob_j);
                         add_b_to_a(grad_value, val_to_add);
                     }
                 } else {
-                    // became uninfected
+                    // remains uninfected
                     add_b_to_a(grad_value, val_to_add);
                 }
             } else {
                 // was infected
                 std::vector<double> grad = this->rec_b_grad(j, trt_j);
-                if (change_j % 2 == 0) {
-                    // remains uninfected
+                if (change_j % 2 == 1) {
+                    // becomes uninfected
                     if (prob_j > 0.0) {
                         mult_b_to_a(grad, 1.0 / prob_j);
                         add_b_to_a(grad_value, grad);
                     }
                 } else {
-                    // became infected
+                    // remains infected
                     if (prob_j < 1.0) {
-                        mult_b_to_a(grad, 1.0 / (1.0 - prob_j));
+                        mult_b_to_a(grad, - 1.0 / (1.0 - prob_j));
                         add_b_to_a(grad_value, grad);
                     }
                 }
