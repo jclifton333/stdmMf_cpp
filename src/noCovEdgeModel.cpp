@@ -202,6 +202,51 @@ double NoCovEdgeModel::rec_b(const uint32_t & b_node,
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
 }
 
+std::vector<double> NoCovEdgeModel::inf_b_grad(const uint32_t & b_node,
+        const bool & b_trt) const {
+    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
+    LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
+
+    const double expBase = std::exp(std::min(100.0, base));
+    const double val = std::exp(base - 2.0 * std::log(1.0 + expBase));
+
+    std::vector<double> grad_val(this->par_size_, 0.0);
+    grad_val.at(0) = val;
+    grad_val.at(5) = b_trt * val;
+    return grad_val;
+}
+
+std::vector<double> NoCovEdgeModel::a_inf_b_grad(
+        const uint32_t & a_node, const uint32_t & b_node,
+        const bool & a_trt, const bool & b_trt) const {
+    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt
+        + this->trt_pre_inf_ * b_trt;
+    LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
+
+    const double expBase = std::exp(std::min(100.0, base));
+    const double val = std::exp(base - 2.0 * std::log(1.0 + expBase));
+
+    std::vector<double> grad_val(this->par_size_, 0.0);
+    grad_val.at(1) = val;
+    grad_val.at(3) = a_trt * val;
+    grad_val.at(5) = b_trt * val;
+    return grad_val;
+}
+
+std::vector<double> NoCovEdgeModel::rec_b_grad(
+        const uint32_t & b_node, const bool & b_trt) const {
+    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
+    LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
+
+    const double expBase = std::exp(std::min(100.0, base));
+    const double val = std::exp(base - 2.0 * std::log(1.0 + expBase));
+
+    std::vector<double> grad_val(this->par_size_, 0.0);
+    grad_val.at(2) = val;
+    grad_val.at(4) = b_trt * val;
+    return grad_val;
+}
+
 
 
 } // namespace stdmMf
