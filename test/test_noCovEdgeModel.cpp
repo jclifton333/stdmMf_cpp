@@ -97,6 +97,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
     std::vector<BitsetPair> history;
     boost::dynamic_bitset<> inf_bits(n->size());
     boost::dynamic_bitset<> trt_bits(n->size());
+
     // t = 0
     history.push_back(BitsetPair(inf_bits, trt_bits));
 
@@ -111,12 +112,11 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
     history.push_back(BitsetPair(inf_bits, trt_bits));
 
     // t = 2
+    inf_bits.flip(0);
     inf_bits.flip(4);
     inf_bits.flip(2);
 
     trt_bits.reset();
-    trt_bits.flip(4);
-    trt_bits.flip(5);
 
     history.push_back(BitsetPair(inf_bits, trt_bits));
 
@@ -141,7 +141,8 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
         double abserr;
         gsl_deriv_central(&F, par.at(i), 1e-8, &result, &abserr);
 
-        EXPECT_NEAR(grad_val.at(i), result, eps);
+        EXPECT_NEAR(grad_val.at(i), result, eps)
+            << "gradient failed for parameter " << i;
     }
 }
 
