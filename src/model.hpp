@@ -17,7 +17,7 @@ public:
 
     virtual uint32_t par_size() const = 0;
 
-    virtual void est_par(const std::vector<BitsetPair> & history) = 0;
+    virtual void est_par(const std::vector<BitsetPair> & history);
 
     virtual std::vector<double> probs(
             const boost::dynamic_bitset<> & inf_status,
@@ -30,9 +30,13 @@ public:
 };
 
 class ModelFit {
+private:
+    Model * const model_;
+    const std::vector<BitsetPair> & history_;
+
 public:
-    Model & model_;
-    std::vector<BitsetPair> history_;
+
+    ModelFit(Model * const model, const std::vector<BitsetPair> & history);
 
     static double obj_fn(const gsl_vector * x, void * params);
 
