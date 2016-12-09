@@ -41,12 +41,20 @@ void System::erase_history() {
     this->history_.clear();
 }
 
-boost::dynamic_bitset<> System::inf_status() const {
+const boost::dynamic_bitset<> & System::inf_bits() const {
     return this->inf_bits_;
 }
 
-boost::dynamic_bitset<> System::trt_status() const {
+const boost::dynamic_bitset<> & System::trt_bits() const {
     return this->trt_bits_;
+}
+
+void System::trt_bits(const boost::dynamic_bitset<> & trt_bits) {
+    this->trt_bits_ = trt_bits;
+}
+
+const std::vector<BitsetPair> & System::history() const {
+    return this->history_;
 }
 
 void System::start() {
@@ -70,9 +78,8 @@ void System::update_history() {
 }
 
 void System::turn_clock() {
-    // TODO: need a defined model first
-    std::vector<double> probs;
-
+    const std::vector<double> probs = this->model_->probs(this->inf_bits_,
+            this->trt_bits_);
     this->turn_clock(probs);
 }
 

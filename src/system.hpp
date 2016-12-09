@@ -45,9 +45,13 @@ public:
 
     void erase_history();
 
-    boost::dynamic_bitset<> inf_status() const;
+    const boost::dynamic_bitset<> & inf_bits() const;
 
-    boost::dynamic_bitset<> trt_status() const;
+    const boost::dynamic_bitset<> & trt_bits() const;
+
+    void trt_bits(const boost::dynamic_bitset<> & trt_bits);
+
+    const std::vector<BitsetPair> & history() const;
 
     void start();
 

@@ -1,12 +1,14 @@
 #ifndef AGENT_HPP
 #define AGENT_HPP
 
+#include "network.hpp"
 #include "types.hpp"
 
 namespace stdmMf {
 
 
 class Agent {
+protected:
     const std::shared_ptr<const Network> network_;
 
     const uint32_t num_nodes_;

@@ -1,6 +1,9 @@
 #ifndef PROXIMAL_AGENT_HPP
 #define PROXIMAL_AGENT_HPP
 
+#include "agent.hpp"
+#include "network.hpp"
+#include "random.hpp"
 
 namespace stdmMf {
 
