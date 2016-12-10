@@ -16,6 +16,8 @@ protected:
     const uint32_t num_trt_;
 
 public:
+    Agent(const std::shared_ptr<const Network> & network);
+
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history) = 0;

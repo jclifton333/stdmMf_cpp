@@ -4,7 +4,7 @@ namespace stdmMf {
 
 
 ProximalAgent::ProximalAgent(const std::shared_ptr<const Network> & network)
-    : network_(network), num_nodes_(network->size()), num_trt_(this->num_trt()){
+    : Agent(network) {
 }
 
 boost::dynamic_bitset<> apply_trt(const boost::dynamic_bitset<> & inf_bits,
