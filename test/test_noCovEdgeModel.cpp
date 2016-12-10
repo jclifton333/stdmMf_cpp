@@ -5,7 +5,7 @@
 #include "noCovEdgeModel.hpp"
 #include "random.hpp"
 #include "system.hpp"
-#include "proximalAgent.hpp"
+#include "randomAgent.hpp"
 #include "runner.hpp"
 
 namespace stdmMf {
@@ -17,6 +17,7 @@ public:
     T * m;
     int gradient_var;
     std::vector<BitsetPair> * history;
+    std::vector<double> par;
 };
 
 template <typename T>
@@ -26,6 +27,7 @@ public:
     int gradient_var;
     int hessian_var;
     std::vector<BitsetPair> * history;
+    std::vector<double> par;
 };
 
 const double eps = 1e-6;
@@ -33,7 +35,7 @@ const double eps = 1e-6;
 template <typename T>
 double f (double x, void * params) {
     GradientChecker<T> * gc = static_cast<GradientChecker<T>*>(params);
-    std::vector<double> par = gc->m->par();
+    std::vector<double> par = gc->par;
     par.at(gc->gradient_var) = x;
     gc->m->par(par);
     return gc->m->ll(*gc->history);
@@ -42,7 +44,7 @@ double f (double x, void * params) {
 template <typename T>
 double fGrad (double x, void * params) {
     HessianChecker<T> * hc = static_cast<HessianChecker<T>*>(params);
-    std::vector<double> par = hc->m->par();
+    std::vector<double> par = hc->par();
     par.at(hc->hessian_var) = x;
     hc->m->par(par);
     return hc->m->ll_grad(*hc->history);
@@ -77,64 +79,50 @@ TEST(TestNoCovEdgeModel, TestPar) {
 TEST(TestNoCovEdgeModel,TestLLGradient) {
     // generate network
     NetworkInit init;
-    init.set_dim_x(3);
-    init.set_dim_y(3);
+    init.set_dim_x(10);
+    init.set_dim_y(10);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
     // init model
-    NoCovEdgeModel m(n);
+    const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
 
     // set par
     Rng rng;
-    std::vector<double> par(m.par());
+    std::vector<double> par(m->par());
     std::for_each(par.begin(),par.end(),
             [&rng](double & x) {
-                x = rng.runif_01();
+                x = rng.rnorm_01();
             });
-    m.par(par);
+    m->par(par);
 
-    // generate history
-    std::vector<BitsetPair> history;
-    boost::dynamic_bitset<> inf_bits(n->size());
-    boost::dynamic_bitset<> trt_bits(n->size());
+    System s(n,m);
 
-    // t = 0
-    history.push_back(BitsetPair(inf_bits, trt_bits));
+    RandomAgent a(n);
 
-    // t = 1
-    inf_bits.flip(0);
-    inf_bits.flip(1);
-    inf_bits.flip(3);
+    runner(s, &a, 50);
 
-    trt_bits.flip(0);
-    trt_bits.flip(4);
-
-    history.push_back(BitsetPair(inf_bits, trt_bits));
-
-    // t = 2
-    inf_bits.flip(0);
-    inf_bits.flip(4);
-    inf_bits.flip(2);
-
-    trt_bits.reset();
-
-    history.push_back(BitsetPair(inf_bits, trt_bits));
+    std::vector<BitsetPair> history = s.history();
+    history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
 
 
-    // calculate gradient
+    // generate new parameters so gradient is not zero
+    std::for_each(par.begin(),par.end(),
+            [&rng](double & x) {
+                x = rng.rnorm_01();
+            });
+    m->par(par);
     const std::vector<double> grad_val =
-        m.ll_grad(history);
+        m->ll_grad(history);
 
     for (uint32_t i = 0; i < par.size(); ++i) {
-        m.par(par);
-
         GradientChecker<NoCovEdgeModel> gc;
-        gc.m = &m;
+        gc.m = m.get();
         gc.gradient_var = i;
         gc.history = &history;
+        gc.par = par;
 
         gsl_function F;
         F.function = &f<NoCovEdgeModel>;
@@ -142,7 +130,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
 
         double result;
         double abserr;
-        gsl_deriv_central(&F, par.at(i), 1e-8, &result, &abserr);
+        gsl_deriv_central(&F, par.at(i), 1e-3, &result, &abserr);
 
         EXPECT_NEAR(grad_val.at(i), result, eps)
             << "gradient failed for parameter " << i;
@@ -151,8 +139,8 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
 
 TEST(TestNoCovEdgeModel, EstPar) {
     NetworkInit init;
-    init.set_dim_x(10);
-    init.set_dim_y(10);
+    init.set_dim_x(20);
+    init.set_dim_y(40);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
@@ -170,7 +158,7 @@ TEST(TestNoCovEdgeModel, EstPar) {
 
     System s(n,m);
 
-    ProximalAgent a(n);
+    RandomAgent a(n);
 
     runner(s, &a, 500);
 
@@ -180,7 +168,7 @@ TEST(TestNoCovEdgeModel, EstPar) {
 
     const std::vector<double> est_par = m->par();
     for (uint32_t i = 0; i < m->par_size(); ++i) {
-        EXPECT_NEAR(par.at(i), est_par.at(i), 0.01)
+        EXPECT_NEAR(par.at(i), est_par.at(i), 0.1)
             << "Par " << i << " failed.";
     }
 }
