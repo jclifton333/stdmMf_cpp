@@ -47,11 +47,6 @@ void Model::est_par(const std::vector<BitsetPair> & history) {
 
         status = gsl_multimin_test_gradient(s->gradient,1e-3);
 
-        for(uint32_t pi = 0; pi < this->par_size(); ++pi){
-            std::cout << gsl_vector_get(s->x, pi) << " ";
-        }
-        std::cout << std::endl;
-
     }while(status == GSL_CONTINUE && iter < maxIter);
 
     // check for error
