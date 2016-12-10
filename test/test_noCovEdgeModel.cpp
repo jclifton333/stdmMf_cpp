@@ -4,6 +4,9 @@
 #include <gsl/gsl_deriv.h>
 #include "noCovEdgeModel.hpp"
 #include "random.hpp"
+#include "system.hpp"
+#include "proximalAgent.hpp"
+#include "runner.hpp"
 
 namespace stdmMf {
 
@@ -143,6 +146,42 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
 
         EXPECT_NEAR(grad_val.at(i), result, eps)
             << "gradient failed for parameter " << i;
+    }
+}
+
+TEST(TestNoCovEdgeModel, EstPar) {
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    const std::shared_ptr<Network> n = Network::gen_network(init);
+
+    const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
+
+    Rng rng;
+    std::vector<double> par;
+    for (uint32_t i = 0; i < m->par_size(); ++i) {
+        par.push_back(rng.rnorm_01());
+    }
+
+    m->par(par);
+
+    System s(n,m);
+
+    ProximalAgent a(n);
+
+    runner(s, &a, 500);
+
+    std::vector<BitsetPair> history = s.history();
+    history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
+    m->est_par(history);
+
+    const std::vector<double> est_par = m->par();
+    for (uint32_t i = 0; i < m->par_size(); ++i) {
+        EXPECT_NEAR(par.at(i), est_par.at(i), 0.01)
+            << "Par " << i << " failed.";
     }
 }
 
