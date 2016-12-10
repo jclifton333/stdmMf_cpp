@@ -19,7 +19,7 @@ boost::dynamic_bitset<> ProximalAgent::apply_trt(
         const Node & node = this->network_->get_node(i);
         const uint32_t num_neigh = node.neigh_size();
         for (uint32_t j = 0; j < num_neigh; ++j) {
-            if (inf_bits.test(node.neigh(j))) {
+            if (inf_bits.test(node.neigh(j)) != inf_bits.test(i)) {
                 next_to_opp = true;
                 break;
             }
