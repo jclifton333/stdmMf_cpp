@@ -7,7 +7,8 @@ ProximalAgent::ProximalAgent(const std::shared_ptr<const Network> & network)
     : Agent(network) {
 }
 
-boost::dynamic_bitset<> apply_trt(const boost::dynamic_bitset<> & inf_bits,
+boost::dynamic_bitset<> ProximalAgent::apply_trt(
+        const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
     std::vector<std::pair<double, uint32_t> > sorted;
 
