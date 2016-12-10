@@ -13,7 +13,7 @@ boost::dynamic_bitset<> RandomAgent::apply_trt(
         const std::vector<BitsetPair> & history) {
     const std::vector<int> ind_to_trt = this->rng->sample_range(0,
             this->num_nodes_, this->num_trt_);
-    boost::dynamic_bitset<> trt_bits;
+    boost::dynamic_bitset<> trt_bits(this->num_nodes_);
     for (uint32_t i = 0; i < this->num_trt_; ++i) {
         trt_bits.set(ind_to_trt.at(i));
     }
