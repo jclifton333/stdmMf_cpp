@@ -32,7 +32,7 @@ void Model::est_par(const std::vector<BitsetPair> & history) {
     T = gsl_multimin_fdfminimizer_vector_bfgs2;
     s = gsl_multimin_fdfminimizer_alloc(T,this->par_size());
 
-    gsl_multimin_fdfminimizer_set(s,&my_func,x,0.0001,0.1);
+    gsl_multimin_fdfminimizer_set(s,&my_func,x,0.01,0.1);
 
     // optimization
     int iter = 0;
@@ -45,7 +45,7 @@ void Model::est_par(const std::vector<BitsetPair> & history) {
         if(status)
             break;
 
-        status = gsl_multimin_test_gradient(s->gradient,1e-4);
+        status = gsl_multimin_test_gradient(s->gradient,1e-3);
 
         for(uint32_t pi = 0; pi < this->par_size(); ++pi){
             std::cout << gsl_vector_get(s->x, pi) << " ";
