@@ -42,11 +42,6 @@ uint32_t NoCovEdgeModel::par_size() const {
 }
 
 
-void NoCovEdgeModel::est_par(const std::vector<BitsetPair> & history) {
-    // TODO: Need ll() and ll_grad() first
-}
-
-
 std::vector<double> NoCovEdgeModel::probs(
         const boost::dynamic_bitset<> & inf_status,
         const boost::dynamic_bitset<> & trt_status) const {

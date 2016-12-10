@@ -49,8 +49,6 @@ public:
 
     virtual uint32_t par_size() const;
 
-    virtual void est_par(const std::vector<BitsetPair> & history);
-
     virtual std::vector<double> probs(
             const boost::dynamic_bitset<> & inf_status,
             const boost::dynamic_bitset<> & trt_status) const;
