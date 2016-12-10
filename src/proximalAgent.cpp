@@ -14,7 +14,7 @@ boost::dynamic_bitset<> ProximalAgent::apply_trt(
 
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         bool next_to_opp = false;
-        const double draw = this->rng.runif_01();
+        const double draw = this->rng->runif_01();
 
         const Node & node = this->network_->get_node(i);
         const uint32_t num_neigh = node.neigh_size();
