@@ -11,7 +11,8 @@ namespace stdmMf {
 class Rng {
 private:
     std::mt19937 gen;
-    std::uniform_real_distribution<double> dis;
+    std::uniform_real_distribution<double> dis_runif_01;
+    std::normal_distribution<double> dis_rnorm_01;
     uint32_t seed;
 
 public:
@@ -26,11 +27,17 @@ public:
     // generate random uniform between [0,1)
     double runif_01();
 
+    // generate random normal
+    double rnorm_01();
+
+    // generate random normal N(mu, sigma^2)
+    double rnorm(const double mu, const double sigma);
+
     // generate random uniform between [a,b)
-    double runif_ab(const double a, const double b);
+    double runif(const double a, const double b);
 
     // generate random uniform integer between [a,b) inclusive
-    int rint_ab(const int a, const int b);
+    int rint(const int a, const int b);
 
     // random sample from range without replacement
     std::vector<int> sample_range(const int a, const int b, const int n);

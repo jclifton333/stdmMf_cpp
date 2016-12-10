@@ -5,7 +5,7 @@ namespace stdmMf {
 
 
 Rng::Rng()
-    : gen(0), seed(0), dis(0., 1.) {
+    : gen(0), seed(0), dis_runif_01(0., 1.), dis_rnorm_01(0., 1.) {
 }
 
 void Rng::set_seed(const uint32_t seed) {
@@ -19,17 +19,25 @@ uint32_t Rng::get_seed() const {
 
 
 double Rng::runif_01() {
-    return dis(gen);
+    return dis_runif_01(gen);
 }
 
 
-double Rng::runif_ab(const double a, const double b) {
+double Rng::rnorm_01() {
+    return dis_rnorm_01(gen);
+}
+
+double Rng::rnorm(const double mu, const double sigma) {
+    return this->rnorm_01() * sigma + mu;
+}
+
+double Rng::runif(const double a, const double b) {
     CHECK_LT(a, b);
     return this->runif_01() * (b - a) + a;
 }
 
 
-int Rng::rint_ab(const int a, const int b) {
+int Rng::rint(const int a, const int b) {
     CHECK_LT(a, b);
     return static_cast<int>(this->runif_01() * (b - a)) + a;
 }
@@ -47,7 +55,7 @@ std::vector<int> Rng::sample_range(const int a, const int b, const int n) {
     std::vector<int> values;
     for (uint32_t i = 0; i < n; ++i) {
         // sample an index
-        const uint32_t ind = this->rint_ab(0, num_vals - i);
+        const uint32_t ind = this->rint(0, num_vals - i);
 
         // record the value
         values.push_back(choices.at(ind));
