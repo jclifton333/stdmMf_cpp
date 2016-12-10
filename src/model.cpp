@@ -89,7 +89,7 @@ double ModelFit::obj_fn(const gsl_vector * x, void * params){
     mf->model_->par(par);
 
     // return negative since GSL minimizes the function
-    double ll = mf->model_->ll(mf->history_);
+    const double ll = mf->model_->ll(mf->history_);
     CHECK(std::isfinite(ll)) << "Likelihood value is not finite";
     return - ll;
 }
@@ -103,7 +103,7 @@ void ModelFit::obj_fn_grad(const gsl_vector * x, void * params, gsl_vector * g){
 
     mf->model_->par(par);
 
-    std::vector<double> ll_grad = mf->model_->ll_grad(mf->history_);
+    const std::vector<double> ll_grad = mf->model_->ll_grad(mf->history_);
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
         // assign the negative of the gradient value
         // GSL minimizes the function, need to adjust the gradient too
@@ -125,8 +125,8 @@ void ModelFit::obj_fn_both(const gsl_vector * x, void * params, double * f,
 
     mf->model_->par(par);
 
-    double ll_value = mf->model_->ll(mf->history_);
-    std::vector<double> ll_grad = mf->model_->ll_grad(mf->history_);
+    const double ll_value = mf->model_->ll(mf->history_);
+    const std::vector<double> ll_grad = mf->model_->ll_grad(mf->history_);
 
     // log ll
     CHECK(std::isfinite(ll_value));
