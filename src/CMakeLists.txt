@@ -14,5 +14,5 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   noCovEdgeModel.cpp model.cpp agent.cpp runner.cpp randomAgent.cpp
-  proximalAgent.cpp
+  proximalAgent.cpp myopicAgent.cpp
   ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp")
