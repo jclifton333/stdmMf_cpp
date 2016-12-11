@@ -13,13 +13,14 @@ boost::dynamic_bitset<> ProximalAgent::apply_trt(
     std::vector<std::pair<double, uint32_t> > sorted;
 
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+        const bool inf_i = inf_bits.test(i);
         bool next_to_opp = false;
         const double draw = this->rng->runif_01();
 
         const Node & node = this->network_->get_node(i);
         const uint32_t num_neigh = node.neigh_size();
         for (uint32_t j = 0; j < num_neigh; ++j) {
-            if (inf_bits.test(node.neigh(j)) != inf_bits.test(i)) {
+            if (inf_i != inf_bits.test(node.neigh(j))) {
                 next_to_opp = true;
                 break;
             }
