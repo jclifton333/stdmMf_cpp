@@ -1,4 +1,5 @@
 #include "network.hpp"
+#include <algorithm>
 #include <glog/logging.h>
 
 
@@ -11,6 +12,70 @@ uint32_t Network::size() const {
 const Node & Network::get_node(const uint32_t index) const {
     return this->node_list.nodes(index);
 }
+
+// Retrieve the adjacency matrix
+boost::numeric::ublas::mapped_matrix<int> Network::get_adj() const {
+    return this->adj;
+}
+
+
+
+// runs of length run_length
+std::vector<NetworkRun> Network::runs_of_len(
+        const uint32_t & run_length) const {
+    std::vector<NetworkRun> runs;
+    runs_of_len_helper(runs, std::vector<uint32_t>(), 0, run_length);
+    return runs;
+}
+
+// runs of length run_length
+void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
+        const std::vector<uint32_t> & curr_run,
+        const uint32_t & curr_len, const uint32_t & target_len) const {
+    if (curr_len == target_len && curr_run.at(0) < curr_run.at(target_len-1)) {
+        // create NetworkRun
+        NetworkRun nr;
+        nr.nodes = curr_run;
+        nr.mask.reset(this->size());
+        boost::dynamic_bitset<> mask(this->size());
+        // set mask
+        std::for_each(nr.nodes.begin(), nr.nodes.end(),
+                [&nr] (const uint32_t & node) {
+                    nr.mask.set(node);
+                });
+
+        runs.push_back(nr);
+
+    } else if (curr_len > 0) {
+        // get the last node in the list
+        const Node & last_node = this->get_node(curr_run.at(curr_len - 1));
+        const uint32_t num_neigh = last_node.neigh_size();
+        // iterate over neighbors of last node
+        for (uint32_t i = 0; i < num_neigh; ++i) {
+            const uint32_t neigh = last_node.neigh(i);
+            auto neigh_it = std::find(curr_run.begin(), curr_run.end(), neigh);
+            // if a neighbor isn't already in the list
+            if (neigh_it != curr_run.end()) {
+                std::vector<uint32_t> next_run = curr_run;
+                next_run.push_back(neigh);
+                // proceed with run
+                runs_of_len_helper(runs, next_run, curr_len + 1, target_len);
+            }
+        }
+    } else {
+        for (uint32_t i = 0; i < this->size(); ++i) {
+            std::vector<uint32_t> next_run;
+            next_run.push_back(i);
+            runs_of_len_helper(runs, next_run, curr_len + 1, target_len);
+        }
+    }
+}
+
+// split runs by node
+static std::vector<std::vector<Network> > split_by_node(
+        const std::vector<NetworkRun> & runs) {
+}
+
 
 
 std::shared_ptr<Network> Network::gen_network(
