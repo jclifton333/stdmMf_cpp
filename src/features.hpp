@@ -16,7 +16,7 @@ public:
             const boost::dynamic_bitset<> & trt_bits,
             const std::vector<double> & prev_feat) = 0;
 
-    virtual uint32_t num_features() = 0;
+    virtual uint32_t num_features() const = 0;
 };
 
 
