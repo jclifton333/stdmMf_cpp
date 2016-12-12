@@ -44,6 +44,9 @@ public:
     // runs of length run_length
     std::vector<NetworkRun> runs_of_len(const uint32_t & run_length) const;
 
+    // runs of length run_length
+    std::vector<NetworkRun> runs_of_len_cumu(const uint32_t & run_length) const;
+
     // split runs by node
     std::vector<std::vector<NetworkRun> > split_by_node(
             const std::vector<NetworkRun> & runs) const;

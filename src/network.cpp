@@ -24,9 +24,33 @@ boost::numeric::ublas::mapped_matrix<int> Network::get_adj() const {
 std::vector<NetworkRun> Network::runs_of_len(
         const uint32_t & run_length) const {
     std::vector<NetworkRun> runs;
-    runs_of_len_helper(runs, std::vector<uint32_t>(), 0, run_length);
+    CHECK_GT(run_length, 0);
+    if (run_length == 1) {
+        for (uint32_t i = 0; i < this->size(); ++i) {
+            NetworkRun nr;
+            nr.nodes.push_back(i);
+            nr.mask.resize(this->size());
+            nr.mask.set(i);
+            runs.push_back(nr);
+        }
+    } else {
+        runs_of_len_helper(runs, std::vector<uint32_t>(), 0, run_length);
+    }
     return runs;
 }
+
+
+std::vector<NetworkRun> Network::runs_of_len_cumu(
+        const uint32_t & run_length) const {
+    std::vector<NetworkRun> runs;
+    for (uint32_t i = 0; i < run_length; ++i) {
+        std::vector<NetworkRun> runs_to_add;
+        runs_to_add = this->runs_of_len(i+1);
+        runs.insert(runs.end(),runs_to_add.begin(), runs_to_add.end());
+    }
+    return runs;
+}
+
 
 // runs of length run_length
 void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
@@ -36,7 +60,7 @@ void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
         // create NetworkRun
         NetworkRun nr;
         nr.nodes = curr_run;
-        nr.mask.reset(this->size());
+        nr.mask.resize(this->size());
         boost::dynamic_bitset<> mask(this->size());
         // set mask
         std::for_each(nr.nodes.begin(), nr.nodes.end(),
@@ -55,7 +79,7 @@ void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
             const uint32_t neigh = last_node.neigh(i);
             auto neigh_it = std::find(curr_run.begin(), curr_run.end(), neigh);
             // if a neighbor isn't already in the list
-            if (neigh_it != curr_run.end()) {
+            if (neigh_it == curr_run.end()) {
                 std::vector<uint32_t> next_run = curr_run;
                 next_run.push_back(neigh);
                 // proceed with run
@@ -78,10 +102,10 @@ std::vector<std::vector<NetworkRun> > Network::split_by_node(
     by_node.resize(this->size());
     const uint32_t num_runs = runs.size();
     for (uint32_t i = 0; i < num_runs; ++i) {
-        const NetworkRun run = runs.at(i);
-        const uint32_t run_length = run.nodes.size();
+        const NetworkRun nr = runs.at(i);
+        const uint32_t run_length = nr.nodes.size();
         for (uint32_t j = 0; j < run_length; ++j) {
-            by_node.at(run.nodes.at(j)).push_back(run);
+            by_node.at(nr.nodes.at(j)).push_back(nr);
         }
     }
 
