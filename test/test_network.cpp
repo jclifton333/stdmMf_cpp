@@ -193,6 +193,54 @@ TEST(TestNetwork,TestGridNetworkWrap) {
     EXPECT_EQ(net->get_node(8).neigh(3), 2);
 }
 
+TEST(TestNetwork, Runs2X2) {
+    NetworkInit init;
+    init.set_dim_x(2);
+    init.set_dim_y(2);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> net = Network::gen_network(init);
+
+    std::vector<NetworkRun> runs;
+
+    runs = net->runs_of_len(1);
+    EXPECT_EQ(runs.size(), 4);
+
+    runs = net->runs_of_len(2);
+    EXPECT_EQ(runs.size(), 4);
+
+    runs = net->runs_of_len(3);
+    EXPECT_EQ(runs.size(), 4);
+
+    runs = net->runs_of_len(4);
+    EXPECT_EQ(runs.size(), 4);
+
+    runs = net->runs_of_len(5);
+    EXPECT_EQ(runs.size(), 0);
+}
+
+TEST(TestNetwork, Runs3X3) {
+    NetworkInit init;
+    init.set_dim_x(3);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> net = Network::gen_network(init);
+
+    std::vector<NetworkRun> runs;
+
+    runs = net->runs_of_len(1);
+    EXPECT_EQ(runs.size(), 9);
+
+    runs = net->runs_of_len(2);
+    EXPECT_EQ(runs.size(), 12);
+
+    runs = net->runs_of_len(3);
+    EXPECT_EQ(runs.size(), 22);
+}
+
 
 
 } // namespace coopPE
