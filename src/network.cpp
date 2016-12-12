@@ -72,8 +72,20 @@ void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
 }
 
 // split runs by node
-static std::vector<std::vector<Network> > split_by_node(
-        const std::vector<NetworkRun> & runs) {
+std::vector<std::vector<NetworkRun> > Network::split_by_node(
+        const std::vector<NetworkRun> & runs) const {
+    std::vector<std::vector<NetworkRun> > by_node;
+    by_node.resize(this->size());
+    const uint32_t num_runs = runs.size();
+    for (uint32_t i = 0; i < num_runs; ++i) {
+        const NetworkRun run = runs.at(i);
+        const uint32_t run_length = run.nodes.size();
+        for (uint32_t j = 0; j < run_length; ++j) {
+            by_node.at(run.nodes.at(j)).push_back(run);
+        }
+    }
+
+    return by_node;
 }
 
 

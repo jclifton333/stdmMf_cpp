@@ -13,14 +13,14 @@ class NetworkRunFeatures : public Features {
 private:
     const std::shared_ptr<const Network> network_;
 
-    const std::vector<const NetworkRun> paths_;
-    const std::vector<const std::vector<const NetworkRun> > paths_by_node_;
+    const std::vector<NetworkRun> paths_;
+    const std::vector<std::vector<NetworkRun> > paths_by_node_;
     const uint32_t num_nodes_;
     const uint32_t run_length_;
 
 public:
     NetworkRunFeatures(const std::shared_ptr<const Network> & network,
-            const uint32 & run_length);
+            const uint32_t & run_length);
 
     virtual std::vector<double> get_features(
             const boost::dynamic_bitset<> & inf_bits,

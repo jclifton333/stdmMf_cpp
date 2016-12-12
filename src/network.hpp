@@ -45,8 +45,8 @@ public:
     std::vector<NetworkRun> runs_of_len(const uint32_t & run_length) const;
 
     // split runs by node
-    static std::vector<std::vector<Network> > split_by_node(
-            const std::vector<NetworkRun> & runs);
+    std::vector<std::vector<NetworkRun> > split_by_node(
+            const std::vector<NetworkRun> & runs) const;
 
     // generate a grid type network
     static std::shared_ptr<Network> gen_grid(
