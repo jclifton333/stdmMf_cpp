@@ -64,8 +64,12 @@ void NetworkRunFeatures::update_features(
         const boost::dynamic_bitset<> & inf_bits_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) {
-    for (uint32_t i = 0; i < num_runs_; ++i) {
-        const NetworkRun & nr = this->runs_.at(i);
+
+    const std::vector<NetworkRun> changed_runs(runs_by_node_.at(changed_node));
+    const uint32_t num_changed = changed_runs.size();
+
+    for (uint32_t i = 0; i < num_changed; ++i) {
+        const NetworkRun & nr = changed_runs.at(i);
         const uint32_t run_len = nr.nodes.size();
 
         boost::dynamic_bitset<> inf_mask_new(run_len);
@@ -87,21 +91,21 @@ void NetworkRunFeatures::update_features(
             if (trt_bits_old.test(node)) {
                 trt_mask_old.set(j);
             }
+        }
 
-            const uint32_t max_mask = 1 << run_len;
-            if (!inf_mask_new.all() || !trt_mask_new.all()) {
-                const uint32_t index = offset_.at(run_len - 1) +
-                    inf_mask_new.to_ulong() * max_mask +
-                    trt_mask_new.to_ulong();
-                feat.at(index) += 1.0;
-            }
+        const uint32_t max_mask = 1 << run_len;
+        if (!inf_mask_new.all() || !trt_mask_new.all()) {
+            const uint32_t index = offset_.at(run_len - 1) +
+                inf_mask_new.to_ulong() * max_mask +
+                trt_mask_new.to_ulong();
+            feat.at(index) += 1.0;
+        }
 
-            if (!inf_mask_old.all() || !trt_mask_old.all()) {
-                const uint32_t index = offset_.at(run_len - 1) +
-                    inf_mask_old.to_ulong() * max_mask +
-                    trt_mask_old.to_ulong();
-                feat.at(index) -= 1.0;
-            }
+        if (!inf_mask_old.all() || !trt_mask_old.all()) {
+            const uint32_t index = offset_.at(run_len - 1) +
+                inf_mask_old.to_ulong() * max_mask +
+                trt_mask_old.to_ulong();
+            feat.at(index) -= 1.0;
         }
     }
 }
