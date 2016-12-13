@@ -22,7 +22,7 @@ public:
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history) = 0;
 
-    virtual uint32_t num_trt();
+    virtual uint32_t num_trt() const;
 };
 
 
