@@ -107,4 +107,9 @@ void NetworkRunFeatures::update_features(
 }
 
 
+uint32_t NetworkRunFeatures::num_features() const {
+    return this->num_features_;
+}
+
+
 } // namespace stdmMf
