@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include <glog/logging.h>
 
+#include <random>
+
+#include "random.hpp"
 #include "network.hpp"
 #include "networkRunFeatures.hpp"
 
@@ -860,6 +863,111 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
     EXPECT_EQ(f.at(16), 0);
     EXPECT_EQ(f.at(17), 0);
     EXPECT_EQ(f.at(18), 0);
+}
+
+
+TEST(TestNetworkRunFeatures, UpdateFeatures) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(3);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    std::random_device device;
+    const uint32_t seed = device();
+    Rng rng;
+    rng.set_seed(seed);
+
+    NetworkRunFeatures nrf(n, 3);
+    for (uint32_t reps = 0; reps < 100; ++reps) {
+        const uint32_t num_inf = rng.rint(0, n->size());
+        const std::vector<int> inf_list =
+            rng.sample_range(0, n->size(), num_inf);
+
+        const uint32_t num_trt = rng.rint(0, n->size());
+        const std::vector<int> trt_list =
+            rng.sample_range(0, n->size(), num_trt);
+
+        boost::dynamic_bitset<> inf_bits(n->size()), trt_bits(n->size());
+        for (uint32_t i = 0; i < num_inf; ++i) {
+            inf_bits.set(inf_list.at(i));
+        }
+        for (uint32_t i = 0; i < num_trt; ++i) {
+            trt_bits.set(trt_list.at(i));
+        }
+
+        std::string inf_string, trt_string;
+        boost::to_string(inf_bits, inf_string);
+        boost::to_string(trt_bits, trt_string);
+
+
+        const std::vector<double> f_orig = nrf.get_features(inf_bits, trt_bits);
+
+        // flip inf
+        boost::dynamic_bitset<> inf_bits_flipped;
+        for (uint32_t i = 0; i < n->size(); ++i) {
+            inf_bits_flipped = inf_bits;
+            inf_bits_flipped.flip(i);
+            const std::vector<double> f_new = nrf.get_features(
+                    inf_bits_flipped, trt_bits);
+
+            std::vector<double> f_upd(f_orig);
+
+            nrf.update_features(i, inf_bits_flipped, trt_bits, inf_bits,
+                    trt_bits, f_upd);
+
+            for (uint32_t j = 0; j < nrf.num_features(); ++j) {
+                EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
+                    << "Flipping inf failed for node " << i <<
+                    " and feature " << j << " with seed " << seed << ".";
+            }
+        }
+
+        // flip trt
+        boost::dynamic_bitset<> trt_bits_flipped;
+        for (uint32_t i = 0; i < n->size(); ++i) {
+            trt_bits_flipped = trt_bits;
+            trt_bits_flipped.flip(i);
+            const std::vector<double> f_new = nrf.get_features(inf_bits,
+                    trt_bits_flipped);
+
+            std::vector<double> f_upd(f_orig);
+
+            nrf.update_features(i, inf_bits, trt_bits_flipped, inf_bits,
+                    trt_bits, f_upd);
+
+            for (uint32_t j = 0; j < nrf.num_features(); ++j) {
+                EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
+                    << "Flipping inf failed for node " << i <<
+                    " and feature " << j << " with seed " << seed << ".";
+            }
+        }
+
+        // flip both
+        for (uint32_t i = 0; i < n->size(); ++i) {
+            inf_bits_flipped = inf_bits;
+            inf_bits_flipped.flip(i);
+
+            trt_bits_flipped = trt_bits;
+            trt_bits_flipped.flip(i);
+            const std::vector<double> f_new = nrf.get_features(inf_bits_flipped,
+                    trt_bits_flipped);
+
+            std::vector<double> f_upd(f_orig);
+
+            nrf.update_features(i, inf_bits_flipped, trt_bits_flipped, inf_bits,
+                    trt_bits, f_upd);
+
+            for (uint32_t j = 0; j < nrf.num_features(); ++j) {
+                EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
+                    << "Flipping inf failed for node " << i <<
+                    " and feature " << j << " with seed " << seed << ".";
+            }
+        }
+    }
 }
 
 
