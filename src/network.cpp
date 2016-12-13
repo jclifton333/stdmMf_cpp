@@ -140,11 +140,6 @@ std::shared_ptr<Network> Network::gen_grid(
         const uint32_t dim_x, const uint32_t dim_y, const bool wrap) {
     std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
 
-    // Either dimension of 1 is not a grid.  Define this in another
-    // network.  Such as a "Line Netowrk".
-    CHECK_GT(dim_x,1);
-    CHECK_GT(dim_y,1);
-
     // iterate through grid column first
     network->num_nodes = dim_x * dim_y;
     network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
@@ -154,8 +149,18 @@ std::shared_ptr<Network> Network::gen_grid(
         for (uint32_t y = 0; y < dim_y; ++y, ++i) {
             Node * n = network->node_list.add_nodes();
             n->set_index(i);
-            n->set_x(static_cast<double>(x)/(dim_x - 1));
-            n->set_y(static_cast<double>(y)/(dim_y - 1));
+
+            if (dim_x > 1) {
+                n->set_x(static_cast<double>(x)/(dim_x - 1));
+            } else {
+                n->set_x(0.0);
+            }
+
+            if (dim_y > 1) {
+                n->set_y(static_cast<double>(y)/(dim_y - 1));
+            } else {
+                n->set_y(0.0);
+            }
 
             // nothing action
             network->adj(i,i) = 1;

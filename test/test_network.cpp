@@ -5,7 +5,85 @@
 namespace stdmMf {
 
 
-TEST(TestNetwork,TestGridNetworkNoWrap) {
+TEST(TestNetwork,TestGridNetwork1X3NoWrap) {
+    NetworkInit init;
+    init.set_dim_x(1);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> net = Network::gen_network(init);
+
+    ASSERT_EQ(net->size(),3);
+
+    // node 0
+    EXPECT_EQ(net->get_node(0).index(), 0);
+    EXPECT_NEAR(net->get_node(0).x(), 0., 1e-6);
+    EXPECT_NEAR(net->get_node(0).y(), 0., 1e-6);
+    EXPECT_EQ(net->get_node(0).neigh(0), 0);
+    EXPECT_EQ(net->get_node(0).neigh(1), 1);
+    EXPECT_EQ(net->get_node(0).neigh(2), 0);
+    EXPECT_EQ(net->get_node(0).neigh(3), 0);
+
+    // node 1
+    EXPECT_EQ(net->get_node(1).index(), 1);
+    EXPECT_NEAR(net->get_node(1).x(), 0., 1e-6);
+    EXPECT_NEAR(net->get_node(1).y(), 0.5, 1e-6);
+    EXPECT_EQ(net->get_node(1).neigh(0), 0);
+    EXPECT_EQ(net->get_node(1).neigh(1), 2);
+    EXPECT_EQ(net->get_node(1).neigh(2), 1);
+    EXPECT_EQ(net->get_node(1).neigh(3), 1);
+
+    // node 2
+    EXPECT_EQ(net->get_node(2).index(), 2);
+    EXPECT_NEAR(net->get_node(2).x(), 0., 1e-6);
+    EXPECT_NEAR(net->get_node(2).y(), 1.0, 1e-6);
+    EXPECT_EQ(net->get_node(2).neigh(0), 1);
+    EXPECT_EQ(net->get_node(2).neigh(1), 2);
+    EXPECT_EQ(net->get_node(2).neigh(2), 2);
+    EXPECT_EQ(net->get_node(2).neigh(3), 2);
+}
+
+TEST(TestNetwork,TestGridNetwork3X1NoWrap) {
+    NetworkInit init;
+    init.set_dim_x(3);
+    init.set_dim_y(1);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> net = Network::gen_network(init);
+
+    ASSERT_EQ(net->size(),3);
+
+    // node 0
+    EXPECT_EQ(net->get_node(0).index(), 0);
+    EXPECT_NEAR(net->get_node(0).x(), 0., 1e-6);
+    EXPECT_NEAR(net->get_node(0).y(), 0., 1e-6);
+    EXPECT_EQ(net->get_node(0).neigh(0), 0);
+    EXPECT_EQ(net->get_node(0).neigh(1), 0);
+    EXPECT_EQ(net->get_node(0).neigh(2), 0);
+    EXPECT_EQ(net->get_node(0).neigh(3), 1);
+
+    // node 1
+    EXPECT_EQ(net->get_node(1).index(), 1);
+    EXPECT_NEAR(net->get_node(1).x(), 0.5, 1e-6);
+    EXPECT_NEAR(net->get_node(1).y(), 0., 1e-6);
+    EXPECT_EQ(net->get_node(1).neigh(0), 1);
+    EXPECT_EQ(net->get_node(1).neigh(1), 1);
+    EXPECT_EQ(net->get_node(1).neigh(2), 0);
+    EXPECT_EQ(net->get_node(1).neigh(3), 2);
+
+    // node 2
+    EXPECT_EQ(net->get_node(2).index(), 2);
+    EXPECT_NEAR(net->get_node(2).x(), 1.0, 1e-6);
+    EXPECT_NEAR(net->get_node(2).y(), 0., 1e-6);
+    EXPECT_EQ(net->get_node(2).neigh(0), 2);
+    EXPECT_EQ(net->get_node(2).neigh(1), 2);
+    EXPECT_EQ(net->get_node(2).neigh(2), 1);
+    EXPECT_EQ(net->get_node(2).neigh(3), 2);
+}
+
+TEST(TestNetwork,TestGridNetwork3X3NoWrap) {
     NetworkInit init;
     init.set_dim_x(3);
     init.set_dim_y(3);
@@ -100,7 +178,7 @@ TEST(TestNetwork,TestGridNetworkNoWrap) {
 
 
 
-TEST(TestNetwork,TestGridNetworkWrap) {
+TEST(TestNetwork,TestGridNetwork3X3Wrap) {
     NetworkInit init;
     init.set_dim_x(3);
     init.set_dim_y(3);
