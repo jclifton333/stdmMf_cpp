@@ -13,6 +13,14 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS stdmMf.proto)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
-  noCovEdgeModel.cpp model.cpp agent.cpp runner.cpp randomAgent.cpp
-  proximalAgent.cpp myopicAgent.cpp networkRunFeatures.cpp
+  noCovEdgeModel.cpp model.cpp runner.cpp
+
+  ## agents
+  agent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
+  epsAgent.cpp stepAgent.cpp
+
+  ## features
+  networkRunFeatures.cpp
+
+  ## extra
   ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp")
