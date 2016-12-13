@@ -151,6 +151,34 @@ void mult_b_to_a(std::vector<double> & a, const double & b) {
     }
 }
 
+double dot_a_and_b(const std::vector<double> & a,
+        const std::vector<double> & b) {
+    const uint32_t size = a.size();
+    CHECK_EQ(size, b.size());
+
+    double dot = 0.0;
+    for (uint32_t i = 0; i < size; ++i) {
+        dot += a.at(i) * b.at(i);
+    }
+
+    return dot;
+}
+
+double l2_norm_sq(const std::vector<double> & a) {
+    const uint32_t size = a.size();
+
+    double norm = 0.0;
+    for (uint32_t i = 0; i < size; ++i) {
+        norm += a.at(i) * a.at(i);
+    }
+
+    return norm;
+}
+
+double l2_norm(const std::vector<double> & a) {
+    return std::sqrt(l2_norm_sq(a));
+}
+
 
 
 
