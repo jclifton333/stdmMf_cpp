@@ -31,9 +31,9 @@ std::vector<double> NetworkRunFeatures::get_features(
         const NetworkRun & nr = this->runs_.at(i);
         const uint32_t run_len = nr.nodes.size();
 
-        boost::dynamic_bitset<> inf_mask(run_length_);
-        boost::dynamic_bitset<> trt_mask(run_length_);
-        for (uint32_t j = 0; j < run_len; i++) {
+        boost::dynamic_bitset<> inf_mask(run_len);
+        boost::dynamic_bitset<> trt_mask(run_len);
+        for (uint32_t j = 0; j < run_len; j++) {
             if (inf_bits.test(nr.nodes.at(j))) {
                 inf_mask.set(j);
             }
@@ -43,7 +43,7 @@ std::vector<double> NetworkRunFeatures::get_features(
             }
         }
 
-        const uint32_t max_mask = (1 << (2*(i+1))) - 1;
+        const uint32_t max_mask = 1 << run_len;
         if (!inf_mask.all() || !trt_mask.all()) {
             const uint32_t index = offset_.at(run_len-1) +
                 inf_mask.to_ulong() * max_mask +
@@ -88,7 +88,7 @@ void NetworkRunFeatures::update_features(
                 trt_mask_old.set(j);
             }
 
-            const uint32_t max_mask = (1 << (2*(i+1))) - 1;
+            const uint32_t max_mask = 1 << run_len;
             if (!inf_mask_new.all() || !trt_mask_new.all()) {
                 const uint32_t index = offset_.at(run_len - 1) +
                     inf_mask_new.to_ulong() * max_mask +
