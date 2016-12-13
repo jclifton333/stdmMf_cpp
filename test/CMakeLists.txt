@@ -26,3 +26,9 @@ target_link_libraries(test_utilities ${GTEST_BOTH_LIBRARIES} stdmMf
   ${CMAKE_THREAD_LIBS_INIT} ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES}
   ${GSL_LIBRARIES})
 add_test(NAME test_utilities COMMAND test_utilities)
+
+add_executable(test_networkFunFeatures test_networkFunFeatures.cpp)
+target_link_libraries(test_networkFunFeatures ${GTEST_BOTH_LIBRARIES} stdmMf
+  ${CMAKE_THREAD_LIBS_INIT} ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES}
+  ${GSL_LIBRARIES})
+add_test(NAME test_networkFunFeatures COMMAND test_networkFunFeatures)
