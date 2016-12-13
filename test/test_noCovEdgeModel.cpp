@@ -6,6 +6,8 @@
 #include "random.hpp"
 #include "system.hpp"
 #include "randomAgent.hpp"
+#include "proximalAgent.hpp"
+#include "epsAgent.hpp"
 #include "runner.hpp"
 
 namespace stdmMf {
@@ -139,8 +141,8 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
 
 TEST(TestNoCovEdgeModel, EstPar) {
     NetworkInit init;
-    init.set_dim_x(20);
-    init.set_dim_y(40);
+    init.set_dim_x(10);
+    init.set_dim_y(10);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
@@ -151,25 +153,37 @@ TEST(TestNoCovEdgeModel, EstPar) {
     Rng rng;
     std::vector<double> par;
     for (uint32_t i = 0; i < m->par_size(); ++i) {
-        par.push_back(rng.rnorm_01());
+        par.push_back(rng.rnorm(-2.0, 1.0));
     }
 
     m->par(par);
 
     System s(n,m);
 
-    RandomAgent a(n);
+    const std::shared_ptr<ProximalAgent> pa(new ProximalAgent(n));
+    const std::shared_ptr<RandomAgent> ra(new RandomAgent(n));
+    EpsAgent ea(n, pa, ra, 0.1);
 
-    runner(s, &a, 500);
+    runner(s, &ea, 100);
 
     std::vector<BitsetPair> history = s.history();
     history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
+
+    // scale paramters
+    std::vector<double> start_par = par;
+    std::for_each(start_par.begin(), start_par.end(),
+            [] (double & x) {
+                x *= 10.0;
+            });
+
     m->est_par(history);
 
     const std::vector<double> est_par = m->par();
     for (uint32_t i = 0; i < m->par_size(); ++i) {
-        EXPECT_NEAR(par.at(i), est_par.at(i), 0.1)
-            << "Par " << i << " failed.";
+        const double diff = std::abs(par.at(i) - est_par.at(i));
+        EXPECT_LT(diff / par.at(i), 0.1)
+            << "Par " << i << " failed with truth " << par.at(i)
+            << " and estimate " << est_par.at(i);
     }
 }
 
