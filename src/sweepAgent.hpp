@@ -1,5 +1,5 @@
-#ifndef STEP_AGENT_HPP
-#define STEP_AGENT_HPP
+#ifndef SWEEP_AGENT_HPP
+#define SWEEP_AGENT_HPP
 
 #include "random.hpp"
 #include "agent.hpp"
@@ -9,7 +9,7 @@
 namespace stdmMf {
 
 
-class StepAgent : public Agent, public RngClass {
+class SweepAgent : public Agent, public RngClass {
 protected:
     const std::shared_ptr<Features> features_;
     const std::vector<double> coef_;
@@ -17,7 +17,7 @@ protected:
     const uint32_t max_sweeps_;
 
 public:
-    StepAgent(const std::shared_ptr<const Network> & network,
+    SweepAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features> & features,
             const std::vector<double> & coef,
             const uint32_t & max_sweeps);
@@ -42,4 +42,4 @@ public:
 } // namespace stdmMf
 
 
-#endif // STEP_AGENT_HPP
+#endif // SWEEP_AGENT_HPP

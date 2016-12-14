@@ -17,7 +17,7 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
 
   ## agents
   agent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
-  epsAgent.cpp stepAgent.cpp
+  epsAgent.cpp sweepAgent.cpp
 
   ## features
   networkRunFeatures.cpp

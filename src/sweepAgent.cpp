@@ -1,13 +1,13 @@
 #include <glog/logging.h>
 #include <set>
 #include <limits>
-#include "stepAgent.hpp"
+#include "sweepAgent.hpp"
 #include "utilities.hpp"
 
 namespace stdmMf {
 
 
-StepAgent::StepAgent(const std::shared_ptr<const Network> & network,
+SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Features> & features,
         const std::vector<double> & coef,
         const uint32_t & max_sweeps)
@@ -17,7 +17,7 @@ StepAgent::StepAgent(const std::shared_ptr<const Network> & network,
 }
 
 
-boost::dynamic_bitset<> StepAgent::apply_trt(
+boost::dynamic_bitset<> SweepAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
     boost::dynamic_bitset<> trt_bits(this->num_nodes_);
@@ -60,7 +60,7 @@ boost::dynamic_bitset<> StepAgent::apply_trt(
     return trt_bits;
 }
 
-void StepAgent::set_new_treatment(
+void SweepAgent::set_new_treatment(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
@@ -111,7 +111,7 @@ void StepAgent::set_new_treatment(
 }
 
 
-bool StepAgent::sweep_treatments(
+bool SweepAgent::sweep_treatments(
         boost::dynamic_bitset<> & trt_bits,
         double & best_val,
         std::set<uint32_t> & not_trt,
