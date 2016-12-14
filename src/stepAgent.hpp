@@ -12,18 +12,29 @@ namespace stdmMf {
 class StepAgent : public Agent, public RngClass {
 protected:
     const std::shared_ptr<Features> features_;
+    const std::vector<double> coef_;
 
     const uint32_t max_sweeps_;
 
 public:
     StepAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features> & features,
-            const uint32_t & max_sweeps,
-            const std::vector<double> & coef);
+            const std::vector<double> & coef,
+            const uint32_t & max_sweeps);
 
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history);
+
+    void set_new_treatment(boost::dynamic_bitset<> & trt_bits,
+            const boost::dynamic_bitset<> & inf_bits,
+            const std::set<uint32_t> & not_trt) const;
+
+    void sweep_treatments(boost::dynamic_bitset<> & trt_bits,
+            double & best_val,
+            const boost::dynamic_bitset<> & inf_bits,
+            const std::set<uint32_t> not_trt,
+            const std::set<uint32_t> has_trt) const;
 };
 
 
