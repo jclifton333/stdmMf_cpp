@@ -30,20 +30,41 @@ boost::dynamic_bitset<> StepAgent::apply_trt(
         not_trt.insert(i);
     }
 
-    std::vector<double> f(this->features_->get_features(inf_bits, trt_bits));
-
-    double best_val = dot_a_and_b(this->coef_, f);
-
     // initialize first treatment bits
     for (uint32_t i = 0; i < this->num_trt_; ++i) {
-
+        this->set_new_treatment(trt_bits, not_trt, has_trt, inf_bits);
     }
+
+    std::vector<double> f = this->features_->get_features(inf_bits, trt_bits);
+    double best_val = dot_a_and_b(this->coef_, f);
+
+    // sweep treatments
+    if (this->max_sweeps_ > 0) {
+        for (uint32_t i = 0; i < this->max_sweeps_; ++i) {
+            const bool changed = this->sweep_treatments(trt_bits, best_val,
+                    not_trt, has_trt, inf_bits);
+
+            if (!changed)
+                break;
+        }
+    } else {
+        bool changed = true;
+        while (changed) {
+            changed = this->sweep_treatments(trt_bits, best_val,
+                    not_trt, has_trt, inf_bits);
+        }
+    }
+
+    CHECK_EQ(trt_bits.count(), this->num_trt_);
+
+    return trt_bits;
 }
 
 void StepAgent::set_new_treatment(
         boost::dynamic_bitset<> & trt_bits,
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::set<uint32_t> & not_trt) const {
+        std::set<uint32_t> & not_trt,
+        std::set<uint32_t> & has_trt,
+        const boost::dynamic_bitset<> & inf_bits) const {
 
     std::set<uint32_t>::const_iterator it, end;
     end = not_trt.end();
@@ -73,11 +94,19 @@ void StepAgent::set_new_treatment(
     CHECK_GT(best_nodes.size(), 0);
     if (best_nodes.size() == 1) {
         // unique best node
-        trt_bits.set(best_nodes.at(0));
+        const uint32_t best_node = best_nodes.at(0);
+        trt_bits.set(best_node);
+        // update sets
+        not_trt.erase(best_node);
+        has_trt.insert(best_node);
     } else {
         // multiple best nodes
         const uint32_t index = this->rng->rint(0, best_nodes.size());
-        trt_bits.set(best_nodes.at(index));
+        const uint32_t best_node = best_nodes.at(index);
+        trt_bits.set(best_node);
+        // update sets
+        not_trt.erase(best_node);
+        has_trt.insert(best_node);
     }
 }
 

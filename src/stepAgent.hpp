@@ -27,8 +27,9 @@ public:
             const std::vector<BitsetPair> & history);
 
     void set_new_treatment(boost::dynamic_bitset<> & trt_bits,
-            const boost::dynamic_bitset<> & inf_bits,
-            const std::set<uint32_t> & not_trt) const;
+            std::set<uint32_t> & not_trt,
+            std::set<uint32_t> & has_trt,
+            const boost::dynamic_bitset<> & inf_bits) const;
 
     bool sweep_treatments(boost::dynamic_bitset<> & trt_bits,
             double & best_val,
