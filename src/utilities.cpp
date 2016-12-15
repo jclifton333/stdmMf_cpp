@@ -193,6 +193,7 @@ std::vector<double> recip_of(const std::vector<double> & a) {
     for (uint32_t i = 0; i < size; ++i) {
         a_recip.push_back(1.0 / a.at(i));
     }
+    return a_recip;
 }
 
 
