@@ -43,6 +43,10 @@ double l2_norm_sq(const std::vector<double> & a);
 
 double l2_norm(const std::vector<double> & a);
 
+void recip(std::vector<double> & a);
+
+std::vector<double> recip_of(const std::vector<double> & a);
+
 } // namespace stdmMf
 
 

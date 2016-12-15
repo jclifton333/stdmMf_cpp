@@ -179,6 +179,21 @@ double l2_norm(const std::vector<double> & a) {
     return std::sqrt(l2_norm_sq(a));
 }
 
+void recip(std::vector<double> & a) {
+    std::for_each(a.begin(), a.end(),
+            [] (double & x) {
+                x = 1.0 / x;
+            });
+}
+
+std::vector<double> recip_of(const std::vector<double> & a) {
+    std::vector<double> a_recip;
+    const uint32_t size = a.size();
+    a_recip.reserve(size);
+    for (uint32_t i = 0; i < size; ++i) {
+        a_recip.push_back(1.0 / a.at(i));
+    }
+}
 
 
 
