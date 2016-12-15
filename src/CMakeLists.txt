@@ -22,5 +22,8 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   ## features
   networkRunFeatures.cpp
 
+  ## optimization
+  optim.cpp simPerturb.cpp
+
   ## extra
   ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp")
