@@ -4,7 +4,13 @@
 
 namespace stdmMf {
 
-
+void Model::est_par(const boost::dynamic_bitset<> & inf_bits,
+        std::vector<BitsetPair> history) {
+    // this has been copied, so okay to modify
+    history.push_back(BitsetPair(inf_bits,
+                    boost::dynamic_bitset<>(inf_bits.size())));
+    this->est_par(history);
+}
 
 void Model::est_par(const std::vector<BitsetPair> & history) {
     CHECK_GT(history.size(), 1);
