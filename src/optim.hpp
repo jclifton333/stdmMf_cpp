@@ -11,7 +11,7 @@ namespace stdmMf {
 
 class Optim : public RngClass {
 protected:
-    const std::function<double(std::vector<double>, void *)> f_;
+    const std::function<double(const std::vector<double> & , void * const)> f_;
 
     std::vector<double> par_;
 
@@ -25,7 +25,8 @@ protected:
 public:
     enum ErrorCode {SUCCESS, CONTINUE, ERROR};
 
-    Optim(const std::function<double(std::vector<double>, void*)> & f,
+    Optim(const std::function<double(const std::vector<double> & ,
+                    void * const)> & f,
             const std::vector<double> & par,
             void * const data);
 

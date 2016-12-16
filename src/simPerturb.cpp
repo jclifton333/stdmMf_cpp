@@ -4,7 +4,8 @@ namespace stdmMf {
 
 
 SimPerturb::SimPerturb(
-        const std::function<double(std::vector<double>, void*)> & f,
+        const std::function<double(const std::vector<double> & ,
+                void * const)> & f,
         const std::vector<double> & par,
         void * const data,
         const double & c,

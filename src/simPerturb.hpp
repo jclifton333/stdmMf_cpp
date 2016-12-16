@@ -18,7 +18,8 @@ private:
     double step_size() const;
 
 public:
-    SimPerturb(const std::function<double(std::vector<double>, void*)> & f,
+    SimPerturb(const std::function<double(const std::vector<double> & ,
+                    void * const)> & f,
             const std::vector<double> & par,
             void * const data,
             const double & c,

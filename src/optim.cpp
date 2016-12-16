@@ -3,7 +3,8 @@
 namespace stdmMf {
 
 
-Optim::Optim(const std::function<double(std::vector<double>, void*)> & f,
+Optim::Optim(const std::function<double(const std::vector<double> & ,
+                void * const)> & f,
         const std::vector<double> & par,
         void * const data)
     : f_(f), par_(par), par_size_(par.size()), data_(data),
