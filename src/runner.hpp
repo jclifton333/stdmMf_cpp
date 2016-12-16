@@ -8,7 +8,7 @@
 namespace stdmMf {
 
 
-double runner(System & system, Agent * agent, const uint32_t & final_time);
+double runner(System * system, Agent * agent, const uint32_t & final_time);
 
 
 } // namespace stdmMf
