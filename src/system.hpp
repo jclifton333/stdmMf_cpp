@@ -47,6 +47,8 @@ public:
 
     const boost::dynamic_bitset<> & inf_bits() const;
 
+    void inf_bits(const boost::dynamic_bitset<> & inf_bits);
+
     const boost::dynamic_bitset<> & trt_bits() const;
 
     void trt_bits(const boost::dynamic_bitset<> & trt_bits);

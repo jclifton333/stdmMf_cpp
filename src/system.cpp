@@ -45,6 +45,10 @@ const boost::dynamic_bitset<> & System::inf_bits() const {
     return this->inf_bits_;
 }
 
+void System::inf_bits(const boost::dynamic_bitset<> & inf_bits) {
+    this->inf_bits_ = inf_bits;
+}
+
 const boost::dynamic_bitset<> & System::trt_bits() const {
     return this->trt_bits_;
 }
