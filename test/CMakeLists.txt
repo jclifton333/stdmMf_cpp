@@ -15,7 +15,8 @@ SET(test_src
   test_noCovEdgeModel
   test_utilities
   test_networkRunFeatures
-  test_sweepAgent)
+  test_sweepAgent
+  test_simPerturb)
 
 foreach(test_name ${test_src})
   add_executable(${test_name} ${test_name}.cpp)
