@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package stdmMf;
+
+// initializers for agents
+message AgentInit {
+  enum InitType {
+    NO_TRT = 0;
+    ALL_TRT = 1;
+    RANDOM = 2;
+    MYOPIC = 3;
+    MYOPIC_EST = 4;
+    STEP = 5;
+    VFN_MAX = 6;
+    BR_MIN = 7;
+  }
+
+  optional InitType type = 1;
+
+  optional NoTrtInit no_trt_init = 2;
+  optional AllTrtInit all_trt_init = 3;
+  optional RandomInit random_init = 4;
+  optional MyopicInit myopic_init = 5;
+  optional MyopicEstInit myopic_est_init = 6;
+  optional StepInit step_init = 7;
+  optional VfmMaxInit vfn_max_init = 8;
+  optional BrMinInit br_min_init = 9;
+}
+
+message NoTrtInit {
+  required string name = 1 [default="NoTrt"];
+}
