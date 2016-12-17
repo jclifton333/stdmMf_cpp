@@ -16,6 +16,15 @@ SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
 
+SweepAgent::SweepAgent(const SweepAgent & other)
+    : Agent(other), features_(other.features_->clone()),
+      max_sweeps_(other.max_sweeps_), coef_(other.coef_) {
+}
+
+std::shared_ptr<Agent> SweepAgent::clone() const{
+    return std::shared_ptr<Agent>(new SweepAgent(*this));
+}
+
 
 boost::dynamic_bitset<> SweepAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,

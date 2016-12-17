@@ -8,6 +8,14 @@ RandomAgent::RandomAgent(const std::shared_ptr<const Network> & network)
     : Agent(network) {
 }
 
+RandomAgent::RandomAgent(const RandomAgent & other)
+    : Agent(other) {
+}
+
+std::shared_ptr<Agent> RandomAgent::clone() const {
+    return std::shared_ptr<Agent>(new RandomAgent(*this));
+}
+
 boost::dynamic_bitset<> RandomAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {

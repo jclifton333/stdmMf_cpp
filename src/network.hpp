@@ -32,6 +32,8 @@ private:
 
 
 public:
+    std::shared_ptr<Network> clone() const;
+
     // number of nodes
     uint32_t size() const;
 
@@ -57,7 +59,6 @@ public:
 
     // generate a network from NetworkInit data
     static std::shared_ptr<Network> gen_network(const NetworkInit & init);
-
 };
 
 } // namespace stdmMf

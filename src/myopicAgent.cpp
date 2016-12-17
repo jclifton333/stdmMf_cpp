@@ -10,6 +10,14 @@ MyopicAgent::MyopicAgent(const std::shared_ptr<const Network> & network,
     : Agent(network), model_(model) {
 }
 
+MyopicAgent::MyopicAgent(const MyopicAgent & other)
+    : Agent(other), model_(other.model_->clone()) {
+}
+
+std::shared_ptr<Agent> MyopicAgent::clone() const {
+    return std::shared_ptr<Agent>(new MyopicAgent(*this));
+}
+
 
 boost::dynamic_bitset<> MyopicAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,

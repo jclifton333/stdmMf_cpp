@@ -25,6 +25,10 @@ public:
     NetworkRunFeatures(const std::shared_ptr<const Network> & network,
             const uint32_t & run_length);
 
+    NetworkRunFeatures(const NetworkRunFeatures & other);
+
+    virtual std::shared_ptr<Features> clone() const;
+
     virtual std::vector<double> get_features(
             const boost::dynamic_bitset<> & inf_bits,
             const boost::dynamic_bitset<> & trt_bits);

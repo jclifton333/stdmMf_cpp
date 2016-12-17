@@ -3,7 +3,7 @@
 #include <glog/logging.h>
 
 #include "system.hpp"
-#include "runner.hpp"
+#include "objFns.hpp"
 
 namespace stdmMf {
 
@@ -23,6 +23,18 @@ VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
     : Agent(network), features_(features), model_(model), num_reps_(num_reps),
       final_t_(final_t), c_(c), t_(t), a_(a), b_(b), ell_(ell),
       min_step_size_(min_step_size_) {
+}
+
+VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
+        const VfnMaxSimPerturbAgent & other)
+    : Agent(other), features_(other.features_->clone()),
+      model_(other.model_->clone()), num_reps_(other.num_reps_),
+      final_t_(other.final_t_), c_(other.c_), t_(other.t_), a_(other.a_),
+      b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_){
+}
+
+std::shared_ptr<Agent> VfnMaxSimPerturbAgent::clone() const {
+    return std::shared_ptr<Agent>(new VfnMaxSimPerturbAgent(*this));
 }
 
 boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(

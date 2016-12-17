@@ -5,9 +5,9 @@ namespace stdmMf {
 NetworkRunFeatures::NetworkRunFeatures(
         const std::shared_ptr<const Network> & network,
         const uint32_t & run_length)
-    : network_(network), num_nodes_(network->size()), run_length_(run_length),
-      runs_(network->runs_of_len_cumu(run_length)),
+    : network_(network), runs_(network->runs_of_len_cumu(run_length)),
       runs_by_node_(network->split_by_node(this->runs_)),
+      num_nodes_(network->size()), run_length_(run_length),
       num_runs_(this->runs_.size()){
 
     this->offset_.resize(run_length);
@@ -18,6 +18,17 @@ NetworkRunFeatures::NetworkRunFeatures(
     }
     this->num_features_ = curr_offset_val;
 
+}
+
+NetworkRunFeatures::NetworkRunFeatures(const NetworkRunFeatures & other)
+    : network_(other.network_->clone()), runs_(other.runs_),
+      runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
+      run_length_(other.run_length_), num_runs_(other.num_runs_),
+      offset_(other.offset_), num_features_(other.num_features_) {
+}
+
+std::shared_ptr<Features> NetworkRunFeatures::clone() const {
+    return std::shared_ptr<Features>(new NetworkRunFeatures(*this));
 }
 
 

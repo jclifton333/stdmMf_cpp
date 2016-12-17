@@ -22,6 +22,10 @@ public:
             const std::vector<double> & coef,
             const uint32_t & max_sweeps);
 
+    SweepAgent(const SweepAgent & other);
+
+    virtual std::shared_ptr<Agent> clone() const;
+
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history);

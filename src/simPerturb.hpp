@@ -29,6 +29,8 @@ public:
             const double & ell,
             const double & min_step_size);
 
+    SimPerturb(const SimPerturb & other) = delete;
+
     Optim::ErrorCode step();
 };
 

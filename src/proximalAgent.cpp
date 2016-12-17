@@ -7,6 +7,14 @@ ProximalAgent::ProximalAgent(const std::shared_ptr<const Network> & network)
     : Agent(network) {
 }
 
+ProximalAgent::ProximalAgent(const ProximalAgent & other)
+    : Agent(other) {
+}
+
+std::shared_ptr<Agent> ProximalAgent::clone() const {
+    return std::shared_ptr<Agent>(new ProximalAgent(*this));
+}
+
 boost::dynamic_bitset<> ProximalAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {

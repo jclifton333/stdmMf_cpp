@@ -30,6 +30,8 @@ public:
             const std::vector<double> & par,
             void * const data);
 
+    Optim(const Optim & other) = delete;
+
     std::vector<double> par() const;
 
 

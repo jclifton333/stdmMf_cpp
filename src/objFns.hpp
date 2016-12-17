@@ -1,5 +1,5 @@
-#ifndef RUNNER_HPP
-#define RUNNER_HPP
+#ifndef OBJ_FNS_HPP
+#define OBJ_FNS_HPP
 
 #include "agent.hpp"
 #include "network.hpp"
@@ -14,4 +14,4 @@ double runner(System * system, Agent * agent, const uint32_t & final_time);
 } // namespace stdmMf
 
 
-#endif // RUNNER_HPP
+#endif // OBJ_FNS_HPP

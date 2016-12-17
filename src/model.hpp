@@ -11,6 +11,8 @@ namespace stdmMf {
 
 class Model {
 public:
+    virtual std::shared_ptr<Model> clone() const = 0;
+
     virtual std::vector<double> par() const = 0;
 
     virtual void par(const std::vector<double> & par) = 0;

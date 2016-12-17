@@ -43,6 +43,10 @@ private:
 public:
     NoCovEdgeModel(const std::shared_ptr<const Network> & network);
 
+    NoCovEdgeModel(const NoCovEdgeModel & other);
+
+    virtual std::shared_ptr<Model> clone() const;
+
     virtual std::vector<double> par() const;
 
     virtual void par(const std::vector<double> & par);

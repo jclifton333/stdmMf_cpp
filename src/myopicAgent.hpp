@@ -16,6 +16,10 @@ public:
     MyopicAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Model> & model);
 
+    MyopicAgent(const MyopicAgent & other);
+
+    virtual std::shared_ptr<Agent> clone() const;
+
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history);

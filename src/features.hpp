@@ -7,6 +7,8 @@ namespace stdmMf {
 
 class Features {
 public:
+    virtual std::shared_ptr<Features> clone() const = 0;
+
     virtual std::vector<double> get_features(
             const boost::dynamic_bitset<> & inf_bits,
             const boost::dynamic_bitset<> & trt_bits) = 0;

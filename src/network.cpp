@@ -5,6 +5,10 @@
 
 namespace stdmMf {
 
+std::shared_ptr<Network> Network::clone() const {
+    return std::shared_ptr<Network>(new Network(*this));
+}
+
 uint32_t Network::size() const {
     return this->num_nodes;
 }

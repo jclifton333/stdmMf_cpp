@@ -7,9 +7,19 @@ namespace stdmMf {
 
 System::System(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model> & model)
-    : RngClass(), network_(network), model_(model),
+    : network_(network), model_(model),
       num_nodes_(this->network_->size()), inf_bits_(this->num_nodes_),
       trt_bits_(this->num_nodes_), time_(0) {
+}
+
+System::System(const System & other)
+    : network_(other.network_->clone()), model_(other.model_->clone()),
+      num_nodes_(other.num_nodes_), inf_bits_(other.inf_bits_),
+      trt_bits_(other.trt_bits_), history_(other.history_), time_(other.time_) {
+}
+
+std::shared_ptr<System> System::clone() const {
+    return std::shared_ptr<System>(new System(*this));
 }
 
 

@@ -30,6 +30,9 @@ public:
     System(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Model> & model);
 
+    System(const System & other);
+
+    std::shared_ptr<System> clone() const;
 
     uint32_t n_inf() const;
 

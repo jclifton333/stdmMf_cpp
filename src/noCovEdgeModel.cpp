@@ -12,6 +12,18 @@ NoCovEdgeModel::NoCovEdgeModel(const std::shared_ptr<const Network> & network)
       network_(network), num_nodes_(this->network_->size()) {
 }
 
+NoCovEdgeModel::NoCovEdgeModel(const NoCovEdgeModel & other)
+    : par_size_(other.par_size_), intcp_inf_latent_(other.intcp_inf_latent_),
+      intcp_inf_(other.intcp_inf_), intcp_rec_(other.intcp_rec_),
+      trt_act_inf_(other.trt_act_inf_), trt_act_rec_(other.trt_act_rec_),
+      trt_pre_inf_(other.trt_pre_inf_), network_(other.network_->clone()),
+      num_nodes_(other.num_nodes_) {
+}
+
+std::shared_ptr<Model> NoCovEdgeModel::clone() const {
+    return std::shared_ptr<Model>(new NoCovEdgeModel(*this));
+}
+
 
 std::vector<double> NoCovEdgeModel::par() const {
     std::vector<double> par;

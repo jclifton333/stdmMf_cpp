@@ -7,7 +7,16 @@ EpsAgent::EpsAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Agent> & agent,
         const std::shared_ptr<Agent> & eps_agent,
         const double & eps)
-    : agent_(agent), eps_agent_(eps_agent), eps_(eps), Agent(network) {
+    : Agent(network), agent_(agent), eps_agent_(eps_agent), eps_(eps) {
+}
+
+EpsAgent::EpsAgent(const EpsAgent & other)
+    : Agent(other), agent_(other.agent_->clone()),
+      eps_agent_(other.eps_agent_->clone()), eps_(other.eps_) {
+}
+
+std::shared_ptr<Agent> EpsAgent::clone() const {
+    return std::shared_ptr<Agent>(new EpsAgent(*this));
 }
 
 boost::dynamic_bitset<> EpsAgent::apply_trt(

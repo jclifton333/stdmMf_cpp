@@ -8,7 +8,7 @@
 #include "randomAgent.hpp"
 #include "proximalAgent.hpp"
 #include "epsAgent.hpp"
-#include "runner.hpp"
+#include "objFns.hpp"
 
 namespace stdmMf {
 
