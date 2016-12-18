@@ -8,7 +8,15 @@
 namespace stdmMf {
 
 
-double runner(System * system, Agent * agent, const uint32_t & final_time);
+double runner(System * system, Agent * agent, const uint32_t & final_time,
+        const double gamma);
+
+double bellman_residual_sq(const std::vector<BitsetPair> & history,
+        Agent * const agent,
+        const double gamma,
+        const std::function<double(const boost::dynamic_bitset<> & inf_bits,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
+
 
 
 } // namespace stdmMf

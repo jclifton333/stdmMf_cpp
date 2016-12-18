@@ -104,7 +104,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
 
     RandomAgent a(n);
 
-    runner(&s, &a, 50);
+    runner(&s, &a, 50, 1.0);
 
     std::vector<BitsetPair> history = s.history();
     history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
@@ -164,7 +164,7 @@ TEST(TestNoCovEdgeModel, EstPar) {
     const std::shared_ptr<RandomAgent> ra(new RandomAgent(n));
     EpsAgent ea(n, pa, ra, 0.1);
 
-    runner(&s, &ea, 100);
+    runner(&s, &ea, 100, 1.0);
 
     std::vector<BitsetPair> history = s.history();
     history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
