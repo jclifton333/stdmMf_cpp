@@ -1,5 +1,6 @@
-find_package(Glog)
+find_package(Glog REQUIRED)
 find_package(Protobuf REQUIRED)
+find_package(Boost REQUIRED system thread)
 
 include(GetGitRevisionDescription)
 git_describe(GIT_DESCRIBE_VAR)
@@ -27,4 +28,10 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   optim.cpp simPerturb.cpp
 
   ## extra
+  pool.cpp experiment.cpp
   ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp")
+
+
+add_executable(run run.cpp)
+
+target_link_libraries(run stdmMf ${Boost_LIBRARIES} ${GLOG_LIBRARIES})
