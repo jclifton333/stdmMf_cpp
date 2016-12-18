@@ -25,10 +25,15 @@ std::shared_ptr<Agent> SweepAgent::clone() const{
     return std::shared_ptr<Agent>(new SweepAgent(*this));
 }
 
-
 boost::dynamic_bitset<> SweepAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
+    return this->apply_trt(inf_bits);
+}
+
+
+boost::dynamic_bitset<> SweepAgent::apply_trt(
+        const boost::dynamic_bitset<> & inf_bits) {
     boost::dynamic_bitset<> trt_bits(this->num_nodes_);
 
     // sets of treated and not treated

@@ -1,4 +1,5 @@
 #include "myopicAgent.hpp"
+#include <glog/logging.h>
 
 #include "proximalAgent.hpp"
 
@@ -17,6 +18,12 @@ MyopicAgent::MyopicAgent(const MyopicAgent & other)
 std::shared_ptr<Agent> MyopicAgent::clone() const {
     return std::shared_ptr<Agent>(new MyopicAgent(*this));
 }
+
+boost::dynamic_bitset<> MyopicAgent::apply_trt(
+        const boost::dynamic_bitset<> & inf_bits) {
+    LOG(FATAL) << "Needs history to apply treatment.";
+}
+
 
 
 boost::dynamic_bitset<> MyopicAgent::apply_trt(

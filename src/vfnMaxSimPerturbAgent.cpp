@@ -38,6 +38,12 @@ std::shared_ptr<Agent> VfnMaxSimPerturbAgent::clone() const {
 }
 
 boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
+        const boost::dynamic_bitset<> & inf_bits) {
+    LOG(FATAL) << "Needs history to apply treatment.";
+}
+
+
+boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
     this->model_->est_par(inf_bits, history);
@@ -55,7 +61,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
             s.erase_history();
             s.inf_bits(inf_bits);
 
-            val += runner(&s, &a, num_points);
+            val += runner(&s, &a, num_points, 1.0);
         }
         val /= this->num_reps_;
 

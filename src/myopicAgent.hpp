@@ -24,6 +24,9 @@ public:
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history);
 
+    virtual boost::dynamic_bitset<> apply_trt(
+            const boost::dynamic_bitset<> & inf_bits);
+
 };
 
 

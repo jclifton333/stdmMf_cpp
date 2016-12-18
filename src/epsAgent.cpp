@@ -20,6 +20,15 @@ std::shared_ptr<Agent> EpsAgent::clone() const {
 }
 
 boost::dynamic_bitset<> EpsAgent::apply_trt(
+        const boost::dynamic_bitset<> & inf_bits) {
+    if (this->rng->runif_01() < this->eps_) {
+        return this->eps_agent_->apply_trt(inf_bits);
+    } else {
+        return this->agent_->apply_trt(inf_bits);
+    }
+}
+
+boost::dynamic_bitset<> EpsAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
     if (this->rng->runif_01() < this->eps_) {

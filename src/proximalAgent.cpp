@@ -18,6 +18,11 @@ std::shared_ptr<Agent> ProximalAgent::clone() const {
 boost::dynamic_bitset<> ProximalAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
+    return this->apply_trt(inf_bits);
+}
+
+boost::dynamic_bitset<> ProximalAgent::apply_trt(
+        const boost::dynamic_bitset<> & inf_bits) {
     std::vector<std::pair<double, uint32_t> > sorted;
 
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {

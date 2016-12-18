@@ -30,6 +30,9 @@ public:
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history);
 
+    virtual boost::dynamic_bitset<> apply_trt(
+            const boost::dynamic_bitset<> & inf_bits);
+
     void set_new_treatment(boost::dynamic_bitset<> & trt_bits,
             std::set<uint32_t> & not_trt,
             std::set<uint32_t> & has_trt,
