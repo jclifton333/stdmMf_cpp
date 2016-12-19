@@ -319,6 +319,28 @@ TEST(TestNetwork, Runs3X3) {
     EXPECT_EQ(runs.size(), 22);
 }
 
+TEST(TestNetwork, RunsSizeAXB) {
+    for (uint32_t dim_x = 0; dim_x < 20; ++dim_x) {
+        for (uint32_t dim_y = 0; dim_y < 20; ++dim_y) {
+            NetworkInit init;
+            init.set_dim_x(dim_x + 1);
+            init.set_dim_y(dim_y + 1);
+            init.set_wrap(false);
+            init.set_type(NetworkInit_NetType_GRID);
+
+            std::shared_ptr<Network> net = Network::gen_network(init);
+
+            std::vector<NetworkRun> runs;
+
+            runs = net->runs_of_len(2);
+
+            EXPECT_EQ(runs.size(), 2 * dim_x * dim_y + dim_x + dim_y)
+                << "Runs of length 2 failed for grid size " << dim_x << "x"
+                << dim_y;
+        }
+    }
+}
+
 
 
 } // namespace coopPE
