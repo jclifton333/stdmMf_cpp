@@ -33,5 +33,5 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
 
 
 add_executable(run run.cpp)
-
-target_link_libraries(run stdmMf ${Boost_LIBRARIES} ${GLOG_LIBRARIES})
+target_link_libraries(run stdmMf ${Boost_LIBRARIES} ${GLOG_LIBRARIES}
+  ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
