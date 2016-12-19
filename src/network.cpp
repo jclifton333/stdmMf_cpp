@@ -60,6 +60,7 @@ std::vector<NetworkRun> Network::runs_of_len_cumu(
 void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
         const std::vector<uint32_t> & curr_run,
         const uint32_t & curr_len, const uint32_t & target_len) const {
+    CHECK_LE(curr_len, target_len);
     if (curr_len == target_len && curr_run.at(0) < curr_run.at(target_len-1)) {
         // create NetworkRun
         NetworkRun nr;
@@ -73,8 +74,7 @@ void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
                 });
 
         runs.push_back(nr);
-
-    } else if (curr_len > 0) {
+    } else if (curr_len > 0 && curr_len < target_len) {
         // get the last node in the list
         const Node & last_node = this->get_node(curr_run.at(curr_len - 1));
         const uint32_t num_neigh = last_node.neigh_size();
@@ -90,7 +90,7 @@ void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
                 runs_of_len_helper(runs, next_run, curr_len + 1, target_len);
             }
         }
-    } else {
+    } else if (curr_len == 0) {
         for (uint32_t i = 0; i < this->size(); ++i) {
             std::vector<uint32_t> next_run;
             next_run.push_back(i);
