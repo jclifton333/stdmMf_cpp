@@ -14,7 +14,8 @@ double runner(System * system, Agent * agent, const uint32_t & final_time,
 
         system->turn_clock();
 
-        value += gamma * static_cast<double>(system->inf_bits().count())
+        // negative of the number of infected nodes
+        value += - gamma * static_cast<double>(system->inf_bits().count())
             / static_cast<double>(system->inf_bits().size());
     }
     return value;
