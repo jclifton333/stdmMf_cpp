@@ -130,39 +130,65 @@ int main(int argc, char *argv[]) {
 
     Pool p(4);
 
-    std::vector<std::shared_ptr<Result<double> > > results;
+    std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
+    std::vector<Experiment::Factor> factors;
+    std::vector<uint32_t> factors_level;
+    std::vector<uint32_t> rep_number;
 
     e.start();
+    uint32_t level_num = 0;
     do {
         const Experiment::Factor f = e.get();
 
-        uint32_t i = 0;
-        CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
-        const int num_reps = f.at(i++).val.int_val;
-        CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
-        const double c = f.at(i++).val.double_val;
-        CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
-        const double t = f.at(i++).val.double_val;
-        CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
-        const double a = f.at(i++).val.double_val;
-        CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
-        const double b = f.at(i++).val.double_val;
-        CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
-        const double ell = f.at(i++).val.double_val;
-        CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
-        const double min_step_size = f.at(i++).val.double_val;
 
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        results.push_back(r);
-        p.service()->post(std::bind(&run_vmax, r, num_reps, c, t, a, b, ell,
-                        min_step_size));
+        for (uint32_t rep = 0; rep < 2; ++rep) {
+            uint32_t i = 0;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
+            const int num_reps = f.at(i++).val.int_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
+            const double c = f.at(i++).val.double_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
+            const double t = f.at(i++).val.double_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
+            const double a = f.at(i++).val.double_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
+            const double b = f.at(i++).val.double_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
+            const double ell = f.at(i++).val.double_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
+            const double min_step_size = f.at(i++).val.double_val;
 
+            std::shared_ptr<Result<std::pair<double, double> > >
+                r(new Result<std::pair<double, double> >);
+            results.push_back(r);
+            factors.push_back(f);
+            rep_number.push_back(rep);
+            factors_level.push_back(level_num);
+            p.service()->post(std::bind(&run_vmax, r, rep, num_reps, c, t, a, b,
+                            ell, min_step_size));
+        }
+
+        ++level_num;
     } while (e.next());
 
     p.join();
 
+    CHECK_EQ(factors.size(), results.size());
+    CHECK_EQ(factors.size(), factors_level.size());
+    CHECK_EQ(factors.size(), rep_number.size());
+    std::ofstream out;
+    out.open("results.txt");
+    out << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
+        << "min_step_size\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
-        std::cout << i << ": " << results.at(i)->get() << std::endl;
+        const std::pair<double, double> result_i = results.at(i)->get();
+        out << factors_level.at(i) << ", " << rep_number.at(i) << ", "
+            << result_i.first << ", " << result_i.second;
+        Experiment::Factor f = factors.at(i);
+        for (uint32_t j = 0; j < f.size(); ++j) {
+            out << ", " << f.at(j);
+        }
+        out << "\n";
     }
 
     return 0;
