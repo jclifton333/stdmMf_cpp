@@ -1,6 +1,7 @@
 #include <memory>
 #include <chrono>
 #include <fstream>
+#include <thread>
 #include "result.hpp"
 #include "pool.hpp"
 #include "system.hpp"
