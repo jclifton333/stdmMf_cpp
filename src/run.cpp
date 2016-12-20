@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
     e.add_factor(ell_list);
     e.add_factor(min_step_size_list);
 
-    Pool p(4);
+    Pool p(std::thread::hardware_concurrency());
 
     std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
     std::vector<Experiment::Factor> factors;
