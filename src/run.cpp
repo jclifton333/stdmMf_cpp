@@ -1,4 +1,6 @@
 #include <memory>
+#include <chrono>
+#include <fstream>
 #include "result.hpp"
 #include "pool.hpp"
 #include "system.hpp"
@@ -13,7 +15,7 @@
 using namespace stdmMf;
 
 
-void run_vmax(const std::shared_ptr<Result<double> > & r,
+void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const uint32_t & seed,
         const int & num_reps,
         const double & c,
@@ -69,9 +71,15 @@ void run_vmax(const std::shared_ptr<Result<double> > & r,
     sp.set_rng(rng);
 
     Optim::ErrorCode ec;
+    const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
+        std::chrono::high_resolution_clock::now();
     do {
         ec = sp.step();
     } while (ec == Optim::ErrorCode::CONTINUE);
+    const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
+        std::chrono::high_resolution_clock::now();
+
+    const std::chrono::duration<double> elapsed = tock - tick;
 
     CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
 
@@ -91,7 +99,10 @@ void run_vmax(const std::shared_ptr<Result<double> > & r,
     }
     val /= 50.;
 
-    r->set(val);
+    r->set(std::pair<double, double>(
+                    std::chrono::duration_cast<std::chrono::seconds>(
+                            elapsed).count(),
+                    val));
 }
 
 
