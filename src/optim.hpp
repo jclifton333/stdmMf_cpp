@@ -21,6 +21,8 @@ protected:
 
     uint32_t completed_steps_;
 
+    bool verbose_;
+
 
 public:
     enum ErrorCode {SUCCESS, CONTINUE, ERROR};
@@ -31,6 +33,8 @@ public:
             void * const data);
 
     Optim(const Optim & other) = delete;
+
+    void verbose(const bool & verbose);
 
     std::vector<double> par() const;
 
