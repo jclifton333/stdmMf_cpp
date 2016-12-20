@@ -110,7 +110,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
 
 int main(int argc, char *argv[]) {
-    const std::vector<int> num_reps_list = {5,10};
+    const std::vector<int> num_reps_list = {2, 5};
     const uint32_t final_t_list = 20;
     const std::vector<double> c_list = {10.0, 15.0};
     const std::vector<double> t_list = {0.1, 0.5};
