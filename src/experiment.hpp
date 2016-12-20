@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <glog/logging.h>
 
 namespace stdmMf {
 
@@ -17,6 +18,18 @@ public:
             int int_val;
             double double_val;
         } val;
+
+        friend std::ostream& operator<<(std::ostream& os,
+                const FactorLevel & c) {
+            if (c.type == is_int) {
+                os << c.val.int_val;
+            } else if (c.type == is_double) {
+                os << c.val.double_val;
+            } else {
+                LOG(FATAL) << "unhandled FactorLevel::Type " << c.type;
+            }
+            return os;
+        }
     };
 
     typedef std::vector<FactorLevel> Factor;
