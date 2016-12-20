@@ -17,6 +17,13 @@ uint32_t Rng::get_seed() const {
     return this->seed;
 }
 
+std::mt19937 & Rng::get_gen() {
+    return this->gen;
+}
+
+void Rng::set_gen(const std::mt19937 & gen) {
+    this->gen = gen;
+}
 
 double Rng::runif_01() {
     return dis_runif_01(gen);

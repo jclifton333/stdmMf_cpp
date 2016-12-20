@@ -24,6 +24,12 @@ public:
     // get the random seed
     uint32_t get_seed() const;
 
+    // get the generator
+    std::mt19937 & get_gen();
+
+    // set the generator
+    void set_gen(const std::mt19937 & gen);
+
     // generate random uniform between [0,1)
     double runif_01();
 
