@@ -139,8 +139,6 @@ bool SweepAgent::sweep_treatments(
 
     bool changed = false;
 
-    bool can_tie_orig = true;
-
     std::set<uint32_t> new_not_trt;
     std::set<uint32_t> new_has_trt;
 
@@ -156,6 +154,9 @@ bool SweepAgent::sweep_treatments(
 
         // see if any non-treated are better
         not_end = not_trt.end();
+
+        bool can_tie_orig = true;
+
         for (not_it = not_trt.begin(); not_it != not_end; ++not_it) {
             CHECK(!trt_bits.test(*not_it)) << "bit is already set";
 
