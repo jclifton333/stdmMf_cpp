@@ -1,5 +1,7 @@
 #include "simPerturb.hpp"
 
+#include <iostream>
+
 namespace stdmMf {
 
 
@@ -51,6 +53,18 @@ Optim::ErrorCode SimPerturb::step() {
     add_b_to_a(this->par_, mult_a_and_b(grad_est, - step_size));
 
     ++this->completed_steps_;
+
+    if (this->verbose_) {
+        // evaluate and print
+        const double val = this->f_(this->par_, this->data_);
+        std::cout << "iter: " << this->completed_steps_ << std::endl;
+        std::cout << "par:";
+        for (uint32_t i = 0; i < this->par_.size(); ++i) {
+            std::cout << " " << this->par_.at(i);
+        }
+        std::cout << "value: " << val << std::endl;
+        std::cout << std::endl;
+    }
 
     if (step_size < this->min_step_size_) {
         return Optim::SUCCESS;
