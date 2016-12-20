@@ -33,6 +33,10 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp")
 
 
-add_executable(run run.cpp)
-target_link_libraries(run stdmMf ${Boost_LIBRARIES} ${GLOG_LIBRARIES}
-  ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
+add_executable(vfnMaxExperiment vfnMaxExperiment.cpp)
+target_link_libraries(vfnMaxExperiment stdmMf ${Boost_LIBRARIES}
+  ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
+
+add_executable(brMinExperiment brMinExperiment.cpp)
+target_link_libraries(brMinExperiment stdmMf ${Boost_LIBRARIES}
+  ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
