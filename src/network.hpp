@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/dynamic_bitset.hpp>
-#include "stdmMf.pb.h"
+#include "network.pb.h"
 
 namespace stdmMf {
 
