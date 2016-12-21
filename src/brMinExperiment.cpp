@@ -46,13 +46,28 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     // system
     System s(net, mod);
+    s.set_rng(rng);
 
     // features
     std::shared_ptr<Features> features(new NetworkRunFeatures(net, 4));
 
     // eps agent
-    EpsAgent ea(net, std::shared_ptr<Agent>(new ProximalAgent(net)),
-            std::shared_ptr<Agent>(new RandomAgent(net)), 0.2);
+    std::shared_ptr<ProximalAgent> pa(new ProximalAgent(net));
+    pa->set_rng(rng);
+    std::shared_ptr<RandomAgent> ra(new RandomAgent(net));
+    ra->set_rng(rng);
+    EpsAgent ea(net, pa, ra, 0.2);
+    ea.set_rng(rng);
+
+
+    // set initial infections
+    boost::dynamic_bitset<> inf_bits_start(net->size());
+    const std::vector<int> inf_bits_start_vec(
+            rng->sample_range(0,net->size(), net->size() * 0.1));
+    for (uint32_t i = 0; i < inf_bits_start_vec.size(); ++i) {
+        inf_bits_start.set(inf_bits_start_vec.at(i));
+    }
+    s.inf_bits(inf_bits_start);
 
     // simulate history
     for (uint32_t i = 0; i < 500; ++i) {
