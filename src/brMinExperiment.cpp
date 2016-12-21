@@ -54,7 +54,6 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     EpsAgent ea(net, std::shared_ptr<Agent>(new ProximalAgent(net)),
             std::shared_ptr<Agent>(new RandomAgent(net)), 0.2);
 
-    std::cout << "simulate" << std::endl;
     // simulate history
     for (uint32_t i = 0; i < 500; ++i) {
         s.turn_clock();
@@ -78,26 +77,19 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         return br;
     };
 
-    std::cout << "optim" << std::endl;
     SimPerturb sp(min_fn, std::vector<double>(
                     features->num_features(), 0.),
             NULL, c, t, a, b, ell, min_step_size);
     sp.set_rng(rng);
-    sp.verbose(true);
 
     Optim::ErrorCode ec;
     const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
         std::chrono::high_resolution_clock::now();
+
     do {
-        const std::chrono::time_point<std::chrono::high_resolution_clock>
-            step_tick = std::chrono::high_resolution_clock::now();
-        std::cout << "step" << std::endl;
         ec = sp.step();
-        const std::chrono::time_point<std::chrono::high_resolution_clock>
-            step_tock = std::chrono::high_resolution_clock::now();
-        const std::chrono::duration<double> elapsed = step_tock - step_tick;
-        std::cout << "elapsed: " << elapsed.count() << std::endl;
     } while (ec == Optim::ErrorCode::CONTINUE);
+
     const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
         std::chrono::high_resolution_clock::now();
 
