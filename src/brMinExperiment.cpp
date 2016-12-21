@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
     CHECK_EQ(factors.size(), factors_level.size());
     CHECK_EQ(factors.size(), rep_number.size());
     std::ofstream out;
-    out.open("vfnMaxExperiment_results.txt");
+    out.open("brMinExperiment_results.txt");
     out << "level_num, rep_num, elapsed, value, c, t, a, b, ell, "
         << "min_step_size\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
