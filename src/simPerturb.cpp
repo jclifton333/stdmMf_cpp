@@ -62,8 +62,8 @@ Optim::ErrorCode SimPerturb::step() {
         for (uint32_t i = 0; i < this->par_.size(); ++i) {
             std::cout << " " << this->par_.at(i);
         }
-        std::cout << "value: " << val << std::endl;
         std::cout << std::endl;
+        std::cout << "value: " << val << std::endl;
     }
 
     if (step_size < this->min_step_size_) {
