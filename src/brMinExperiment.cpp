@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
     const std::vector<double> a_list = {1e-5};
     const std::vector<double> b_list = {1};
     const std::vector<double> ell_list = {0.85};
-    const std::vector<double> min_step_size_list = {1e-6, 4e-7};
+    const std::vector<double> min_step_size_list = {1e-6, 4e-7, 3e-7};
 
     Experiment e;
     e.add_factor(c_list);
