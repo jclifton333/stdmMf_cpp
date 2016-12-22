@@ -6,12 +6,13 @@
 #include "random.hpp"
 #include "network.hpp"
 #include "networkRunFeatures.hpp"
+#include "sweepAgentSlow.hpp"
 #include "sweepAgent.hpp"
 #include "utilities.hpp"
 
 namespace stdmMf {
 
-TEST(TestSweepAgent, ApplyTrt) {
+TEST(TestSweepAgentSlow, ApplyTrt) {
     // generate network
     NetworkInit init;
     init.set_dim_x(5);
@@ -34,7 +35,7 @@ TEST(TestSweepAgent, ApplyTrt) {
             [&rng] (double & x) {
                 x = rng.rnorm_01();
             });
-    SweepAgent sa(n, nrf, coef, 0);
+    SweepAgentSlow sa(n, nrf, coef, 0);
 
 
     for (uint32_t reps = 0; reps < 50; ++reps) {
@@ -81,7 +82,7 @@ TEST(TestSweepAgent, ApplyTrt) {
         }
 
 
-        // get best from SweepAgent
+        // get best from SweepAgentSlow
         double sweep_agent_best_val = 0.0;
         std::string sweep_bits;
         {
@@ -101,8 +102,51 @@ TEST(TestSweepAgent, ApplyTrt) {
     }
 }
 
+TEST(TestSweepAgent, TestEquality) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
 
-TEST(TestSweepAgent, TestBug1) {
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
+
+    std::shared_ptr<Rng> rng(new Rng);
+
+    for (uint32_t i = 0; i < 2; ++i) {
+        std::vector<double> coef(f->num_features(),0.);
+        std::for_each(coef.begin(), coef.end(),
+                [&rng](double & x) {
+                    x = rng->rnorm_01();
+                });
+
+        SweepAgent sa(n, f, coef, 2);
+        SweepAgentSlow sas(n, f, coef, 2);
+
+        for (uint32_t j = 0; j < 5; ++j) {
+            // randomly infect 10 percent
+            const std::vector<int> inf_bits_vec = rng->sample_range(0,
+                    n->size(), n->size()*0.1);
+            boost::dynamic_bitset<> inf_bits(n->size());
+            for (uint32_t k = 0; k < inf_bits_vec.size(); ++k) {
+                inf_bits.set(inf_bits_vec.at(k));
+            }
+
+            // apply trt with both agents
+            const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits);
+            const boost::dynamic_bitset<> trt_bits_slow = sas.apply_trt(
+                    inf_bits);
+
+            CHECK_EQ(trt_bits, trt_bits_slow);
+        }
+    }
+}
+
+
+TEST(TestSweepAgentSlow, TestBug1) {
     // generate network
     NetworkInit init;
     init.set_dim_x(10);
@@ -271,7 +315,7 @@ TEST(TestSweepAgent, TestBug1) {
          -10, 10, -10};
 
 
-    SweepAgent sa(n, f, coef, 2);
+    SweepAgentSlow sa(n, f, coef, 2);
 
     sa.sweep_treatments(trt_bits, best_val, not_trt, has_trt, inf_bits);
 }
