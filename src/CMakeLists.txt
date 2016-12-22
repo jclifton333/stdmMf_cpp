@@ -20,7 +20,8 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
 
   ## agents
   agent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
-  epsAgent.cpp sweepAgent.cpp vfnMaxSimPerturbAgent.cpp brMinSimPerturbAgent.cpp
+  epsAgent.cpp sweepAgent.cpp sweepAgentSlow.cpp
+  vfnMaxSimPerturbAgent.cpp brMinSimPerturbAgent.cpp
 
   ## features
   networkRunFeatures.cpp
@@ -39,4 +40,8 @@ target_link_libraries(vfnMaxExperiment stdmMf ${Boost_LIBRARIES}
 
 add_executable(brMinExperiment brMinExperiment.cpp)
 target_link_libraries(brMinExperiment stdmMf ${Boost_LIBRARIES}
+  ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
+
+add_executable(timeSweepAgent timeSweepAgent.cpp)
+target_link_libraries(timeSweepAgent stdmMf ${Boost_LIBRARIES}
   ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
