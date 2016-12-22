@@ -36,17 +36,19 @@ public:
     void set_new_treatment(boost::dynamic_bitset<> & trt_bits,
             std::set<uint32_t> & not_trt,
             std::set<uint32_t> & has_trt,
-            const boost::dynamic_bitset<> & inf_bits) const;
+            const boost::dynamic_bitset<> & inf_bits,
+            std::vector<double> & feat) const;
 
     bool sweep_treatments(boost::dynamic_bitset<> & trt_bits,
             double & best_val,
             std::set<uint32_t> & not_trt,
             std::set<uint32_t> & has_trt,
-            const boost::dynamic_bitset<> & inf_bits) const;
+            const boost::dynamic_bitset<> & inf_bits,
+            std::vector<double> & feat) const;
 };
 
 
 } // namespace stdmMf
 
 
-#endif // SWEEP_AGENT_HPP
+#endif // SWEEP_AGENT_SLOW_HPP

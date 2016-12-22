@@ -44,19 +44,21 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
         not_trt.insert(i);
     }
 
+    std::vector<double> feat = this->features_->get_features(inf_bits,
+            trt_bits);
+
     // initialize first treatment bits
     for (uint32_t i = 0; i < this->num_trt_; ++i) {
-        this->set_new_treatment(trt_bits, not_trt, has_trt, inf_bits);
+        this->set_new_treatment(trt_bits, not_trt, has_trt, inf_bits, feat);
     }
 
-    std::vector<double> f = this->features_->get_features(inf_bits, trt_bits);
-    double best_val = dot_a_and_b(this->coef_, f);
+    double best_val = dot_a_and_b(this->coef_, feat);
 
     // sweep treatments
     if (this->max_sweeps_ > 0) {
         for (uint32_t i = 0; i < this->max_sweeps_; ++i) {
             const bool changed = this->sweep_treatments(trt_bits, best_val,
-                    not_trt, has_trt, inf_bits);
+                    not_trt, has_trt, inf_bits, feat);
 
             if (!changed)
                 break;
@@ -66,7 +68,7 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
         uint32_t i = 0;
         while (changed) {
             changed = this->sweep_treatments(trt_bits, best_val,
-                    not_trt, has_trt, inf_bits);
+                    not_trt, has_trt, inf_bits, feat);
         }
     }
 
@@ -79,10 +81,13 @@ void SweepAgent::set_new_treatment(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits) const {
+        const boost::dynamic_bitset<> & inf_bits,
+        std::vector<double> & feat) const {
 
     std::set<uint32_t>::const_iterator it, end;
     end = not_trt.end();
+
+    const boost::dynamic_bitset<> trt_bits_old(trt_bits);
 
     double best_val = std::numeric_limits<double>::lowest();
     std::vector<uint32_t> best_nodes;
@@ -90,12 +95,17 @@ void SweepAgent::set_new_treatment(
         CHECK(!trt_bits.test(*it)) << "bit is already set";
         trt_bits.set(*it); // set new bit
 
-        const std::vector<double> f = this->features_->get_features(inf_bits,
-                trt_bits);
+        // update features for treating *it
+        this->features_->update_features(*it, inf_bits, trt_bits,
+                inf_bits, trt_bits_old, feat);
 
-        const double val = dot_a_and_b(this->coef_, f);
+        const double val = dot_a_and_b(this->coef_, feat);
 
-        trt_bits.reset(*it); // reset new bit
+        // update features for removing treatment on *it
+        this->features_->update_features(*it, inf_bits, trt_bits_old,
+                inf_bits, trt_bits, feat);
+
+        trt_bits.reset(*it);
 
         if (val > best_val) {
             best_val = val;
@@ -107,22 +117,31 @@ void SweepAgent::set_new_treatment(
     }
 
     CHECK_GT(best_nodes.size(), 0);
+    uint32_t best_node;
     if (best_nodes.size() == 1) {
         // unique best node
-        const uint32_t best_node = best_nodes.at(0);
-        trt_bits.set(best_node);
-        // update sets
-        not_trt.erase(best_node);
-        has_trt.insert(best_node);
+        best_node = best_nodes.at(0);
     } else {
         // multiple best nodes
         const uint32_t index = this->rng->rint(0, best_nodes.size());
-        const uint32_t best_node = best_nodes.at(index);
+        best_node = best_nodes.at(index);
         trt_bits.set(best_node);
-        // update sets
-        not_trt.erase(best_node);
-        has_trt.insert(best_node);
     }
+
+    // set bit for bet node
+    trt_bits.set(best_node);
+
+    // update sets
+    not_trt.erase(best_node);
+    has_trt.insert(best_node);
+
+    // update sets
+    not_trt.erase(best_node);
+    has_trt.insert(best_node);
+
+    // update features for treating *it
+    this->features_->update_features(*it, inf_bits, trt_bits,
+            inf_bits, trt_bits_old, feat);
 }
 
 
@@ -131,7 +150,8 @@ bool SweepAgent::sweep_treatments(
         double & best_val,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits) const {
+        const boost::dynamic_bitset<> & inf_bits,
+        std::vector<double> & feat) const {
 
 
     std::set<uint32_t>::const_iterator has_it, not_it, has_end, not_end;
@@ -147,7 +167,16 @@ bool SweepAgent::sweep_treatments(
         CHECK_EQ(has_trt.size(), this->num_trt());
         CHECK(trt_bits.test(*has_it)) << "bit is not set";
 
+        boost::dynamic_bitset<> trt_bits_old = trt_bits;
+
         trt_bits.reset(*has_it); // reset
+
+        // update features
+        this->features_->update_features(*has_it, inf_bits, trt_bits,
+                inf_bits, trt_bits_old, feat);
+
+        // set up old to match trt_bits
+        trt_bits_old.reset(*has_it);
 
         std::vector<uint32_t> better_nodes;
         better_nodes.push_back(*has_it);
@@ -162,10 +191,15 @@ bool SweepAgent::sweep_treatments(
 
             trt_bits.set(*not_it);
 
-            const std::vector<double> f = this->features_->get_features(
-                    inf_bits, trt_bits);
+            // update features for setting *not_it
+            this->features_->update_features(*not_it, inf_bits, trt_bits,
+                    inf_bits, trt_bits_old, feat);
 
-            const double val = dot_a_and_b(this->coef_, f);
+            const double val = dot_a_and_b(this->coef_, feat);
+
+            // update features for resetting *not_it
+            this->features_->update_features(*not_it, inf_bits, trt_bits_old,
+                    inf_bits, trt_bits, feat);
 
             trt_bits.reset(*not_it);
 
@@ -180,13 +214,15 @@ bool SweepAgent::sweep_treatments(
         }
 
         const uint32_t num_better = better_nodes.size();
+        uint32_t better_node;
         if (num_better == 1 && can_tie_orig) {
             // original node was best
             CHECK(!trt_bits.test(*has_it));
             trt_bits.set(*has_it);
+            better_node = *has_it;
         } else if (num_better == 1) {
             // unique better node
-            const uint32_t better_node = better_nodes.at(0);
+            better_node = better_nodes.at(0);
             CHECK(!trt_bits.test(better_node));
             trt_bits.set(better_node);
             not_trt.erase(better_node);
@@ -199,7 +235,7 @@ bool SweepAgent::sweep_treatments(
         } else {
             // multiple better nodes
             const uint32_t index = this->rng->rint(0, num_better);
-            const uint32_t better_node = better_nodes.at(index);
+            better_node = better_nodes.at(index);
             CHECK(!trt_bits.test(better_node));
             trt_bits.set(better_node);
             if (better_node != *has_it) { // if it is the original
@@ -212,6 +248,10 @@ bool SweepAgent::sweep_treatments(
                 new_not_trt.insert(*has_it);
             }
         }
+
+        // update features for new treatment
+        this->features_->update_features(better_node, inf_bits, trt_bits,
+                inf_bits, trt_bits_old, feat);
     }
 
     // add new_trt to has_trt
