@@ -34,6 +34,8 @@ TEST(TestSimPerturb, IndependentQuadratic) {
     do {
         ec = sp.step();
     } while(ec == Optim::ErrorCode::CONTINUE);
+    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
+
     const std::vector<double> par = sp.par();
     for (uint32_t i = 0; i < n; ++i) {
         EXPECT_LT(std::abs((par.at(i) - truth.at(i)) / truth.at(i)) , 0.1);
