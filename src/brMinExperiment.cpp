@@ -141,7 +141,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 int main(int argc, char *argv[]) {
     const std::vector<double> c_list = {5e-6, 2.5e-6};
     const std::vector<double> t_list = {0.2};
-    const std::vector<double> a_list = {5e-5, 1e-5, 5e-6, 1e-6};
+    const std::vector<double> a_list = {1e-5, 5e-6, 1e-6};
     const std::vector<double> b_list = {1};
     const std::vector<double> ell_list = {0.85};
     const std::vector<double> min_step_size_list = {3e-7, 3.5e-7};
