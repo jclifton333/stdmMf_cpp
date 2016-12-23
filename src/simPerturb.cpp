@@ -1,6 +1,7 @@
 #include "simPerturb.hpp"
 
 #include <iostream>
+#include <cmath>
 
 namespace stdmMf {
 
@@ -66,7 +67,10 @@ Optim::ErrorCode SimPerturb::step() {
         std::cout << "value: " << val << std::endl;
     }
 
-    if (step_size < this->min_step_size_) {
+    if (std::any_of(this->par_.begin(), this->par_.end(),
+                    [](const double & x) { return !std::isfinite(x);})) {
+        return Optim::NON_FINITE_PARAMETER;
+    } else if (step_size < this->min_step_size_) {
         return Optim::SUCCESS;
     } else {
         return Optim::CONTINUE;
