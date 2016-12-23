@@ -91,6 +91,7 @@ void SweepAgent::set_new_treatment(
 
     double best_val = std::numeric_limits<double>::lowest();
     std::vector<uint32_t> best_nodes;
+    std::stringstream ss;
     CHECK_GT(not_trt.size(), 0);
     for (it = not_trt.begin(); it != end; ++it) {
         CHECK(!trt_bits.test(*it)) << "bit is already set";
@@ -107,6 +108,7 @@ void SweepAgent::set_new_treatment(
                 inf_bits, trt_bits, feat);
 
         trt_bits.reset(*it);
+        ss << val << " ";
 
         if (val > best_val) {
             best_val = val;
@@ -117,7 +119,7 @@ void SweepAgent::set_new_treatment(
         }
     }
 
-    CHECK_GT(best_nodes.size(), 0);
+    CHECK_GT(best_nodes.size(), 0) << ss.str();
     uint32_t best_node;
     if (best_nodes.size() == 1) {
         // unique best node
