@@ -25,7 +25,7 @@ protected:
 
 
 public:
-    enum ErrorCode {SUCCESS, CONTINUE, ERROR};
+    enum ErrorCode {SUCCESS, CONTINUE, ERROR, NON_FINITE_PARAMETER};
 
     Optim(const std::function<double(const std::vector<double> & ,
                     void * const)> & f,
