@@ -91,6 +91,7 @@ void SweepAgent::set_new_treatment(
 
     double best_val = std::numeric_limits<double>::lowest();
     std::vector<uint32_t> best_nodes;
+    CHECK_GT(not_trt.size(), 0);
     for (it = not_trt.begin(); it != end; ++it) {
         CHECK(!trt_bits.test(*it)) << "bit is already set";
         trt_bits.set(*it); // set new bit
