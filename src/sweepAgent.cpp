@@ -119,6 +119,10 @@ void SweepAgent::set_new_treatment(
         }
     }
 
+    ss << "|| ";
+    for (uint32_t i = 0; i < this->coef_.size(); ++i) {
+        ss << this->coef_.at(i) << " ";
+    }
     CHECK_GT(best_nodes.size(), 0) << ss.str();
     uint32_t best_node;
     if (best_nodes.size() == 1) {
