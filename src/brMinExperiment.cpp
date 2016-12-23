@@ -110,7 +110,10 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     const std::chrono::duration<double> elapsed = tock - tick;
 
-    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
+    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS)
+        << "Failed with tuning paramters: c = " << c << ", t = " << t
+        << ", a = " << a << ", b = " << b << ", ell = " << ell
+        << ", min_step_size = " << min_step_size;
 
     const std::vector<double> par = sp.par();
 
