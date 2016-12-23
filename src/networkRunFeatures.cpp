@@ -1,4 +1,5 @@
 #include "networkRunFeatures.hpp"
+#include <glog/logging.h>
 
 namespace stdmMf {
 
@@ -42,23 +43,24 @@ std::vector<double> NetworkRunFeatures::get_features(
         const NetworkRun & nr = this->runs_.at(i);
         const uint32_t run_len = nr.nodes.size();
 
-        boost::dynamic_bitset<> inf_mask(run_len);
-        boost::dynamic_bitset<> trt_mask(run_len);
+        CHECK_LE(run_len, 32);
+        uint32_t inf_mask = 0;
+        uint32_t trt_mask = 0;
         for (uint32_t j = 0; j < run_len; j++) {
             if (inf_bits.test(nr.nodes.at(j))) {
-                inf_mask.set(j);
+                inf_mask |= (1 << j);
             }
 
             if (trt_bits.test(nr.nodes.at(j))) {
-                trt_mask.set(j);
+                trt_mask |= (1 << j);
             }
         }
 
         const uint32_t max_mask = 1 << run_len;
-        if (!inf_mask.all() || !trt_mask.all()) {
+        if (inf_mask < (max_mask - 1) || trt_mask < (max_mask - 1)) {
             const uint32_t index = offset_.at(run_len-1) +
-                inf_mask.to_ulong() * max_mask +
-                trt_mask.to_ulong();
+                inf_mask * max_mask +
+                trt_mask;
 
             feat.at(index) += 1.0;
         }
@@ -83,39 +85,40 @@ void NetworkRunFeatures::update_features(
         const NetworkRun & nr = changed_runs.at(i);
         const uint32_t run_len = nr.nodes.size();
 
-        boost::dynamic_bitset<> inf_mask_new(run_len);
-        boost::dynamic_bitset<> trt_mask_new(run_len);
-        boost::dynamic_bitset<> inf_mask_old(run_len);
-        boost::dynamic_bitset<> trt_mask_old(run_len);
+        CHECK_LE(run_len, 32);
+        uint32_t inf_mask_new = 0;
+        uint32_t inf_mask_old = 0;
+        uint32_t trt_mask_new = 0;
+        uint32_t trt_mask_old = 0;
 
         for (uint32_t j = 0; j < run_len; ++j) {
             const uint32_t & node = nr.nodes.at(j);
             if (inf_bits_new.test(node)) {
-                inf_mask_new.set(j);
+                inf_mask_new |= (1 << j);
             }
             if (trt_bits_new.test(node)) {
-                trt_mask_new.set(j);
+                trt_mask_new |= (1 << j);
             }
             if (inf_bits_old.test(node)) {
-                inf_mask_old.set(j);
+                inf_mask_old |= (1 << j);
             }
             if (trt_bits_old.test(node)) {
-                trt_mask_old.set(j);
+                trt_mask_old |= (1 << j);
             }
         }
 
         const uint32_t max_mask = 1 << run_len;
-        if (!inf_mask_new.all() || !trt_mask_new.all()) {
+        if (inf_mask_new < (max_mask - 1) || trt_mask_new < (max_mask - 1)) {
             const uint32_t index = offset_.at(run_len - 1) +
-                inf_mask_new.to_ulong() * max_mask +
-                trt_mask_new.to_ulong();
+                inf_mask_new * max_mask +
+                trt_mask_new;
             feat.at(index) += 1.0;
         }
 
-        if (!inf_mask_old.all() || !trt_mask_old.all()) {
+        if (inf_mask_old < (max_mask - 1) || trt_mask_old < (max_mask - 1)) {
             const uint32_t index = offset_.at(run_len - 1) +
-                inf_mask_old.to_ulong() * max_mask +
-                trt_mask_old.to_ulong();
+                inf_mask_old * max_mask +
+                trt_mask_old;
             feat.at(index) -= 1.0;
         }
     }
