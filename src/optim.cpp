@@ -19,5 +19,9 @@ std::vector<double> Optim::par() const {
     return this->par_;
 }
 
+uint32_t Optim::completed_steps() const {
+    return this->completed_steps_;
+}
+
 
 } // namespace stdmMf

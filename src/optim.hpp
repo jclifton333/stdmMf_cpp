@@ -38,6 +38,8 @@ public:
 
     std::vector<double> par() const;
 
+    uint32_t completed_steps() const;
+
 
     virtual Optim::ErrorCode step() = 0;
 };
