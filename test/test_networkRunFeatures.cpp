@@ -881,7 +881,8 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
     Rng rng;
     rng.set_seed(seed);
 
-    NetworkRunFeatures nrf(n, 3);
+    NetworkRunFeatures nrf_get(n, 3);
+    NetworkRunFeatures nrf_update(n, 3);
     for (uint32_t reps = 0; reps < 100; ++reps) {
         const uint32_t num_inf = rng.rint(0, n->size());
         const std::vector<int> inf_list =
@@ -904,42 +905,56 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
         boost::to_string(trt_bits, trt_string);
 
 
-        const std::vector<double> f_orig = nrf.get_features(inf_bits, trt_bits);
+        std::vector<double> f_orig;
 
         // flip inf
         boost::dynamic_bitset<> inf_bits_flipped;
         for (uint32_t i = 0; i < n->size(); ++i) {
             inf_bits_flipped = inf_bits;
             inf_bits_flipped.flip(i);
-            const std::vector<double> f_new = nrf.get_features(
+            const std::vector<double> f_new = nrf_get.get_features(
                     inf_bits_flipped, trt_bits);
+
+
+            // get features to reset masks properly
+            f_orig = nrf_update.get_features(inf_bits,
+                    trt_bits);
 
             std::vector<double> f_upd(f_orig);
 
-            nrf.update_features(i, inf_bits_flipped, trt_bits, inf_bits,
+            nrf_update.update_features(i, inf_bits_flipped, trt_bits, inf_bits,
                     trt_bits, f_upd);
 
-            for (uint32_t j = 0; j < nrf.num_features(); ++j) {
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
                 EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
                     << "Flipping inf failed for node " << i <<
                     " and feature " << j << " with seed " << seed << ".";
             }
         }
 
+        // get features again to reset paths properly
+        f_orig = nrf_update.get_features(inf_bits,
+                trt_bits);
+
+
         // flip trt
         boost::dynamic_bitset<> trt_bits_flipped;
         for (uint32_t i = 0; i < n->size(); ++i) {
             trt_bits_flipped = trt_bits;
             trt_bits_flipped.flip(i);
-            const std::vector<double> f_new = nrf.get_features(inf_bits,
+            const std::vector<double> f_new = nrf_get.get_features(inf_bits,
                     trt_bits_flipped);
+
+            // get features to reset masks properly
+            f_orig = nrf_update.get_features(inf_bits,
+                    trt_bits);
 
             std::vector<double> f_upd(f_orig);
 
-            nrf.update_features(i, inf_bits, trt_bits_flipped, inf_bits,
+            nrf_update.update_features(i, inf_bits, trt_bits_flipped, inf_bits,
                     trt_bits, f_upd);
 
-            for (uint32_t j = 0; j < nrf.num_features(); ++j) {
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
                 EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
                     << "Flipping inf failed for node " << i <<
                     " and feature " << j << " with seed " << seed << ".";
@@ -953,15 +968,19 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
 
             trt_bits_flipped = trt_bits;
             trt_bits_flipped.flip(i);
-            const std::vector<double> f_new = nrf.get_features(inf_bits_flipped,
-                    trt_bits_flipped);
+            const std::vector<double> f_new = nrf_get.get_features(
+                    inf_bits_flipped, trt_bits_flipped);
+
+            // get features to reset masks properly
+            f_orig = nrf_update.get_features(inf_bits,
+                    trt_bits);
 
             std::vector<double> f_upd(f_orig);
 
-            nrf.update_features(i, inf_bits_flipped, trt_bits_flipped, inf_bits,
-                    trt_bits, f_upd);
+            nrf_update.update_features(i, inf_bits_flipped, trt_bits_flipped,
+                    inf_bits, trt_bits, f_upd);
 
-            for (uint32_t j = 0; j < nrf.num_features(); ++j) {
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
                 EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
                     << "Flipping inf failed for node " << i <<
                     " and feature " << j << " with seed " << seed << ".";

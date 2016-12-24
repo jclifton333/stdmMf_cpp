@@ -112,6 +112,7 @@ TEST(TestSweepAgent, TestEquality) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
+    std::shared_ptr<Features> f_slow(new NetworkRunFeatures(n, 4));
     std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
 
     std::shared_ptr<Rng> rng(new Rng);
@@ -124,7 +125,7 @@ TEST(TestSweepAgent, TestEquality) {
                 });
 
         SweepAgent sa(n, f, coef, 2);
-        SweepAgentSlow sas(n, f, coef, 2);
+        SweepAgentSlow sas(n, f_slow, coef, 2);
 
         for (uint32_t j = 0; j < 5; ++j) {
             // randomly infect 10 percent
