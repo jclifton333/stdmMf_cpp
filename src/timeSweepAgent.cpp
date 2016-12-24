@@ -55,26 +55,5 @@ int main(int argc, char *argv[]) {
                       tock - tick).count()
               << std::endl;
 
-    std::ofstream out;
-    out.open("coef.txt");
-    if (out.good()) {
-        for (uint32_t i = 0; i < coef.size(); ++i) {
-            out << coef.at(i) << std::endl;
-        }
-        out.close();
-    } else {
-        LOG(FATAL) << "failed to open";
-    }
-
-    // out.open("trt_bits.txt");
-    // if (out.good()) {
-    //     for (uint32_t i = 0; i < trt_bits.size(); ++i) {
-    //         out << trt_bits.at(i).to_ulong() << std::endl;
-    //     }
-    //     out.close();
-    // } else {
-    //     LOG(FATAL) << "failed to open";
-    // }
-
     return 0;
 }
