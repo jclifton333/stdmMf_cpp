@@ -11,7 +11,7 @@
 namespace stdmMf {
 
 
-class VfnMaxSimPerturbAgent : public Agent {
+class VfnMaxSimPerturbAgent : public Agent, public RngClass {
 protected:
     const std::shared_ptr<Features> features_;
     const std::shared_ptr<Model> model_;
