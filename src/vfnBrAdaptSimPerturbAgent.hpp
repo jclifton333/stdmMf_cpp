@@ -61,8 +61,6 @@ public:
 
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits);
-
-    virtual uint32_t num_trt() const;
 };
 
 
