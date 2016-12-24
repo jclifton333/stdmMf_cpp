@@ -141,8 +141,8 @@ void SweepAgent::set_new_treatment(
     not_trt.erase(best_node);
     has_trt.insert(best_node);
 
-    // update features for treating *it
-    this->features_->update_features(*it, inf_bits, trt_bits,
+    // update features for treating best_node
+    this->features_->update_features(best_node, inf_bits, trt_bits,
             inf_bits, trt_bits_old, feat);
 }
 
