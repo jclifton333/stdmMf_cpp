@@ -19,6 +19,23 @@ NetworkRunFeatures::NetworkRunFeatures(
     }
     this->num_features_ = curr_offset_val;
 
+    // set up path trt mask
+    this->masks_by_node_.resize(this->network_->size());
+    for (uint32_t i = 0; i < this->num_runs_; ++i) {
+        const NetworkRun & nr = this->runs_.at(i);
+        const uint32_t run_len = nr.nodes.size();
+        CHECK_LT(run_len, 32);
+
+        const std::shared_ptr<std::pair<uint32_t, uint32_t> >
+            mask(new std::pair<uint32_t, uint32_t>(0, 0));
+
+        this->masks_.push_back(mask);
+
+        // filter by node
+        for (uint32_t j = 0; j < run_len; ++j) {
+            this->masks_by_node_.at(nr.nodes.at(j)).push_back(mask);
+        }
+    }
 }
 
 NetworkRunFeatures::NetworkRunFeatures(const NetworkRunFeatures & other)
@@ -43,7 +60,6 @@ std::vector<double> NetworkRunFeatures::get_features(
         const NetworkRun & nr = this->runs_.at(i);
         const uint32_t run_len = nr.nodes.size();
 
-        CHECK_LE(run_len, 32);
         uint32_t inf_mask = 0;
         uint32_t trt_mask = 0;
         for (uint32_t j = 0; j < run_len; j++) {
@@ -55,6 +71,9 @@ std::vector<double> NetworkRunFeatures::get_features(
                 trt_mask |= (1 << j);
             }
         }
+
+        this->masks_.at(i)->first = inf_mask;
+        this->masks_.at(i)->second = trt_mask;
 
         const uint32_t max_mask = 1 << run_len;
         if (inf_mask < (max_mask - 1) || trt_mask < (max_mask - 1)) {
@@ -82,46 +101,52 @@ void NetworkRunFeatures::update_features(
             runs_by_node_.at(changed_node));
     const uint32_t num_changed = changed_runs.size();
 
+    const std::vector<std::shared_ptr<std::pair<uint32_t, uint32_t> > > &
+        changed_masks = this->masks_by_node_.at(changed_node);
+
+    const bool inf_changed =
+        inf_bits_new.test(changed_node) != inf_bits_old.test(changed_node);
+    const bool trt_changed =
+        trt_bits_new.test(changed_node) != trt_bits_old.test(changed_node);
+
     for (uint32_t i = 0; i < num_changed; ++i) {
         const NetworkRun & nr = changed_runs.at(i);
         const uint32_t run_len = nr.nodes.size();
+        const std::shared_ptr<std::pair<uint32_t, uint32_t> > & cm =
+            changed_masks.at(i);
 
-        CHECK_LE(run_len, 32);
-        uint32_t inf_mask_new = 0;
-        uint32_t inf_mask_old = 0;
-        uint32_t trt_mask_new = 0;
-        uint32_t trt_mask_old = 0;
+        const uint32_t max_mask = 1 << run_len;
 
+        // update features for old masks
+        if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
+            const uint32_t index = offset_.at(run_len - 1) +
+                cm->first * max_mask +
+                cm->second;
+            feat.at(index) -= 1.0;
+        }
+
+        // update masks
         for (uint32_t j = 0; j < run_len; ++j) {
             const uint32_t & node = nr.nodes.at(j);
-            if (inf_bits_new.test(node)) {
-                inf_mask_new |= (1 << j);
-            }
-            if (trt_bits_new.test(node)) {
-                trt_mask_new |= (1 << j);
-            }
-            if (inf_bits_old.test(node)) {
-                inf_mask_old |= (1 << j);
-            }
-            if (trt_bits_old.test(node)) {
-                trt_mask_old |= (1 << j);
+            if (node == changed_node) {
+                if (inf_changed) {
+                    cm->first ^= (1 << j);
+                }
+                if (trt_changed) {
+                    cm->second ^= (1 << j);
+                }
+                break;
             }
         }
 
-        const uint32_t max_mask = 1 << run_len;
-        if (inf_mask_new < (max_mask - 1) || trt_mask_new < (max_mask - 1)) {
+        // update features for new masks
+        if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
             const uint32_t index = offset_.at(run_len - 1) +
-                inf_mask_new * max_mask +
-                trt_mask_new;
+                cm->first * max_mask +
+                cm->second;
             feat.at(index) += 1.0;
         }
 
-        if (inf_mask_old < (max_mask - 1) || trt_mask_old < (max_mask - 1)) {
-            const uint32_t index = offset_.at(run_len - 1) +
-                inf_mask_old * max_mask +
-                trt_mask_old;
-            feat.at(index) -= 1.0;
-        }
     }
 }
 

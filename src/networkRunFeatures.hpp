@@ -21,6 +21,10 @@ private:
     std::vector<uint32_t> offset_;
     uint32_t num_features_;
 
+    std::vector<std::shared_ptr<std::pair<uint32_t, uint32_t> > > masks_;
+    std::vector<std::vector<std::shared_ptr<std::pair<uint32_t, uint32_t>
+                                            > > > masks_by_node_;
+
 public:
     NetworkRunFeatures(const std::shared_ptr<const Network> & network,
             const uint32_t & run_length);
