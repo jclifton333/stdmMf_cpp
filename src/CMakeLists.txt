@@ -22,6 +22,7 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   agent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
   epsAgent.cpp sweepAgent.cpp sweepAgentSlow.cpp
   vfnMaxSimPerturbAgent.cpp brMinSimPerturbAgent.cpp
+  vfnBrAdaptSimPerturbAgent.cpp
 
   ## features
   networkRunFeatures.cpp
