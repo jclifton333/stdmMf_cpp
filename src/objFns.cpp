@@ -1,4 +1,5 @@
 #include "objFns.hpp"
+#include <glog/logging.h>
 
 namespace stdmMf {
 
@@ -26,9 +27,26 @@ double bellman_residual_sq(const std::vector<BitsetPair> & history,
         const double gamma,
         const std::function<double(const boost::dynamic_bitset<> & inf_bits,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
+    const std::vector<std::pair<double, double> > parts =
+        bellman_residual_parts(history, agent, gamma, q_fn);
+
+    const double br_sq = std::accumulate(parts.begin(), parts.end(), 0.0,
+            [](const double & x, const std::pair<double, double> & a) {
+                return x + (a.first + a.second) * (a.first + a.second);
+            });
+    return br_sq / static_cast<double>(history.size() - 1);
+}
+
+std::vector<std::pair<double, double> > bellman_residual_parts(
+        const std::vector<BitsetPair> & history, Agent * const agent,
+        const double gamma, const std::function<double(
+                const boost::dynamic_bitset<> & inf_bits,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
     const uint32_t size = history.size();
 
-    double avg_br_sq = 0.0;
+    CHECK_GT(size, 1) << "need at least 2 points";
+
+    std::vector<std::pair<double, double> > parts;
     for (uint32_t i = 0; i < (size - 1); ++i) {
         const BitsetPair & bp_curr = history.at(i);
         const BitsetPair & bp_next = history.at(i+1);
@@ -44,10 +62,9 @@ double bellman_residual_sq(const std::vector<BitsetPair> & history,
 
 
         const double br = r + gamma * q_next - q_curr;
-
-        avg_br_sq += br * br / static_cast<double>(size - 1);
+        parts.push_back(std::pair<double,double>(r, gamma * q_next - q_curr));
     }
-    return avg_br_sq;
+    return parts;
 }
 
 
