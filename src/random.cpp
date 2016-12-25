@@ -83,6 +83,10 @@ void RngClass::set_rng(std::shared_ptr<Rng> rng) {
     this->rng = rng;
 }
 
+std::shared_ptr<Rng> RngClass::get_rng() {
+    return this->rng;
+}
+
 void RngClass::set_seed(const uint32_t seed) {
     this->rng->set_seed(seed);
 }

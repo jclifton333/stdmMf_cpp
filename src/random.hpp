@@ -58,6 +58,7 @@ protected:
 
 public:
     void set_rng(std::shared_ptr<Rng> rng);
+    std::shared_ptr<Rng> get_rng();
     void set_seed(uint32_t seed);
     uint32_t get_seed() const;
 };
