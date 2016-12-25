@@ -157,6 +157,56 @@ int main(int argc, char *argv[]) {
     }
 
 
+    pool.join();
+
+    std::cout << "random: "
+              << std::accumulate(random.begin(), random.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                return x + r->get()/static_cast<double>(num_reps);
+            })
+              << std::endl;
+
+    std::cout << "proximal: "
+              << std::accumulate(proximal.begin(), proximal.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                          return x + r->get()/static_cast<double>(num_reps);
+            })
+              << std::endl;
+
+    std::cout << "myopic: "
+              << std::accumulate(myopic.begin(), myopic.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                          return x + r->get()/static_cast<double>(num_reps);
+                      })
+              << std::endl;
+
+    std::cout << "vfn: "
+              << std::accumulate(vfn.begin(), vfn.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                          return x + r->get()/static_cast<double>(num_reps);
+                      })
+              << std::endl;
+
+    std::cout << "br: "
+              << std::accumulate(br.begin(), br.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                          return x + r->get()/static_cast<double>(num_reps);
+                      })
+              << std::endl;
+
+    std::cout << "adapt: "
+              << std::accumulate(adapt.begin(), adapt.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                          return x + r->get()/static_cast<double>(num_reps);
+                      })
+              << std::endl;
+
 
 
     return 0;
