@@ -146,10 +146,14 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
                         return x + a.second * a.second;
                     });
 
-            CHECK_GE(numer, 0.0) << "minimum is negative";
-
             // scale the par to minimize BR
-            mult_b_to_a(optim_par, numer / denom);
+            if (numer > 0) {
+                // if scalor is positive
+                mult_b_to_a(optim_par, numer / denom);
+            } else {
+                // other wise just make it norm one
+                mult_b_to_a(optim_par, l2_norm(optim_par));
+            }
         }
 
 
