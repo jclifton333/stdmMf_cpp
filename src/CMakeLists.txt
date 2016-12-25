@@ -46,3 +46,7 @@ target_link_libraries(brMinExperiment stdmMf ${Boost_LIBRARIES}
 add_executable(timeSweepAgent timeSweepAgent.cpp)
 target_link_libraries(timeSweepAgent stdmMf ${Boost_LIBRARIES}
   ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
+
+add_executable(run run.cpp)
+target_link_libraries(run stdmMf ${Boost_LIBRARIES}
+  ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES})
