@@ -33,8 +33,8 @@ int main(int argc, char *argv[]) {
 
         pool.service()->post([&]() {
                     NetworkInit init;
-                    init.set_dim_x(50);
-                    init.set_dim_y(50);
+                    init.set_dim_x(10);
+                    init.set_dim_y(10);
                     init.set_wrap(false);
                     init.set_type(NetworkInit_NetType_GRID);
 
@@ -60,8 +60,8 @@ int main(int argc, char *argv[]) {
 
         pool.service()->post([&]() {
                     NetworkInit init;
-                    init.set_dim_x(50);
-                    init.set_dim_y(50);
+                    init.set_dim_x(10);
+                    init.set_dim_y(10);
                     init.set_wrap(false);
                     init.set_type(NetworkInit_NetType_GRID);
 
@@ -87,8 +87,8 @@ int main(int argc, char *argv[]) {
 
         pool.service()->post([&]() {
                     NetworkInit init;
-                    init.set_dim_x(50);
-                    init.set_dim_y(50);
+                    init.set_dim_x(10);
+                    init.set_dim_y(10);
                     init.set_wrap(false);
                     init.set_type(NetworkInit_NetType_GRID);
 
@@ -115,8 +115,8 @@ int main(int argc, char *argv[]) {
 
         pool.service()->post([&]() {
                     NetworkInit init;
-                    init.set_dim_x(50);
-                    init.set_dim_y(50);
+                    init.set_dim_x(10);
+                    init.set_dim_y(10);
                     init.set_wrap(false);
                     init.set_type(NetworkInit_NetType_GRID);
 
@@ -147,8 +147,8 @@ int main(int argc, char *argv[]) {
 
         pool.service()->post([&]() {
                     NetworkInit init;
-                    init.set_dim_x(50);
-                    init.set_dim_y(50);
+                    init.set_dim_x(10);
+                    init.set_dim_y(10);
                     init.set_wrap(false);
                     init.set_type(NetworkInit_NetType_GRID);
 
@@ -178,8 +178,8 @@ int main(int argc, char *argv[]) {
 
         pool.service()->post([&]() {
                     NetworkInit init;
-                    init.set_dim_x(50);
-                    init.set_dim_y(50);
+                    init.set_dim_x(10);
+                    init.set_dim_y(10);
                     init.set_wrap(false);
                     init.set_type(NetworkInit_NetType_GRID);
 
