@@ -5,6 +5,8 @@
 #include "objFns.hpp"
 #include "simPerturb.hpp"
 
+#include "proximalAgent.hpp"
+
 #include <glog/logging.h>
 
 namespace stdmMf {
@@ -48,6 +50,11 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
+    if (history.size() <= 1) {
+        ProximalAgent a(this->network_);
+        return a.apply_trt(inf_bits, history);
+    }
+
     this->model_->est_par(inf_bits, history);
 
     std::vector<BitsetPair> all_history = history;
@@ -55,6 +62,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 
     auto f = [&](const std::vector<double> & par, void * const data) {
         SweepAgent a(this->network_, this->features_, par, 2);
+        a.set_rng(this->get_rng());
 
         auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
                 const boost::dynamic_bitset<> & trt_bits) {
@@ -68,6 +76,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
     SimPerturb sp(f, std::vector<double>(this->features_->num_features(), 0.),
             NULL, this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_);
+    sp.set_rng(this->get_rng());
 
     Optim::ErrorCode ec;
     do {
@@ -77,6 +86,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
     CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
 
     SweepAgent a(this->network_, this->features_, sp.par(), 2);
+    a.set_rng(this->get_rng());
     return a.apply_trt(inf_bits, history);
 }
 
