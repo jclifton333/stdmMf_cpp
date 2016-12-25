@@ -92,7 +92,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
                 s.erase_history();
                 s.inf_bits(inf_bits);
 
-                val += runner(&s, &a, num_points, 1.0);
+                val += runner(&s, &a, num_points, 0.9);
             }
             val /= this->vfn_num_reps_;
 
@@ -121,17 +121,49 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         std::vector<BitsetPair> all_history = history;
         all_history.push_back(BitsetPair(inf_bits, boost::dynamic_bitset<>()));
 
+        // find minimizing scalar for parameters
+        {
+            SweepAgent a(this->network_, this->features_, optim_par, 2);
+
+            auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
+                    const boost::dynamic_bitset<> & trt_bits_t) {
+                return dot_a_and_b(optim_par,
+                        this->features_->get_features(inf_bits_t, trt_bits_t));
+            };
+
+            const std::vector<std::pair<double, double> > parts =
+                bellman_residual_parts(history, &a, 0.9, q_fn);
+
+            const double numer = std::accumulate(parts.begin(), parts.end(),
+                    0.0, [](const double & x,
+                            const std::pair<double,double> & a) {
+                        return x - a.first * a.second;
+                    });
+
+            const double denom = std::accumulate(parts.begin(), parts.end(),
+                    0.0, [](const double & x,
+                            const std::pair<double,double> & a) {
+                        return x + a.second * a.second;
+                    });
+
+            CHECK_GE(numer, 0.0) << "minimum is negative";
+
+            // scale the par to minimize BR
+            mult_b_to_a(optim_par, numer / denom);
+        }
+
+
         auto f = [&](const std::vector<double> & par, void * const data) {
             SweepAgent a(this->network_, this->features_, par, 2);
             a.set_rng(this->get_rng());
 
-            auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
-                    const boost::dynamic_bitset<> & trt_bits) {
+            auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
+                    const boost::dynamic_bitset<> & trt_bits_t) {
                 return dot_a_and_b(par,
-                        this->features_->get_features(inf_bits, trt_bits));
+                        this->features_->get_features(inf_bits_t, trt_bits_t));
             };
 
-            return bellman_residual_sq(all_history, &a, 1.0, q_fn);
+            return bellman_residual_sq(all_history, &a, 0.9, q_fn);
         };
 
         SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_, this->br_a_,
