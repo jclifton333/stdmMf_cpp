@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
                                     new NetworkRunFeatures(net, 4)),
                             std::shared_ptr<Model>(
                                     new NoCovEdgeModel(net)),
-                            2, 20, 1e-05, 0.2, 5e-06, 1, 0.5, 3e-7);
+                            2, 20, 1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
                     a.set_seed(i);
 
                     r->set(runner(&s, &a, 20, 0.9));
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
                             std::shared_ptr<Model>(
                                     new NoCovEdgeModel(net)),
                             2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3,
-                            1e-05, 0.2, 5e-06, 1, 0.5, 3e-7);
+                            1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
                     a.set_seed(i);
 
                     r->set(runner(&s, &a, 20, 0.9));
