@@ -32,10 +32,10 @@ VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
 
       vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
       vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
-      vfn_min_step_size_(vfn_min_step_size_),
+      vfn_min_step_size_(vfn_min_step_size),
 
       br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
-      br_min_step_size_(br_min_step_size_) {
+      br_min_step_size_(br_min_step_size) {
 }
 
 VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(

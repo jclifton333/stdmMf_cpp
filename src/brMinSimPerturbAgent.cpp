@@ -26,7 +26,7 @@ BrMinSimPerturbAgent::BrMinSimPerturbAgent(
         const double & min_step_size)
     : Agent(network), features_(features), model_(model), num_reps_(num_reps),
       final_t_(final_t), c_(c), t_(t), a_(a), b_(b), ell_(ell),
-      min_step_size_(min_step_size_) {
+      min_step_size_(min_step_size) {
 }
 
 BrMinSimPerturbAgent::BrMinSimPerturbAgent(
