@@ -64,10 +64,10 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         SweepAgent a(this->network_, this->features_, par, 2);
         a.set_rng(this->get_rng());
 
-        auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
-                const boost::dynamic_bitset<> & trt_bits) {
+        auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
+                const boost::dynamic_bitset<> & trt_bits_t) {
             return dot_a_and_b(par,
-                    this->features_->get_features(inf_bits, trt_bits));
+                    this->features_->get_features(inf_bits_t, trt_bits_t));
         };
 
         return bellman_residual_sq(all_history, &a, 1.0, q_fn);
