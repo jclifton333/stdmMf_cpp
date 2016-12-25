@@ -70,7 +70,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
             s.erase_history();
             s.inf_bits(inf_bits);
 
-            val += runner(&s, &a, num_points, 1.0);
+            val += runner(&s, &a, num_points, 0.9);
         }
         val /= this->num_reps_;
 

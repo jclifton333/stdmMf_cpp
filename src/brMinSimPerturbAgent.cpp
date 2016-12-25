@@ -70,7 +70,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
                     this->features_->get_features(inf_bits_t, trt_bits_t));
         };
 
-        return bellman_residual_sq(all_history, &a, 1.0, q_fn);
+        return bellman_residual_sq(all_history, &a, 0.9, q_fn);
     };
 
     SimPerturb sp(f, std::vector<double>(this->features_->num_features(), 0.),
