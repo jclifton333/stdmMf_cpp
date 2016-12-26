@@ -102,7 +102,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // intercept
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 2);
+    EXPECT_EQ(f.at(1), 2 / 2.);
     EXPECT_EQ(f.at(2), 0);
     EXPECT_EQ(f.at(3), 0);
     // len 2
@@ -134,8 +134,8 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // intercept
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 1);
-    EXPECT_EQ(f.at(2), 1);
+    EXPECT_EQ(f.at(1), 1 / 2.);
+    EXPECT_EQ(f.at(2), 1 / 2.);
     EXPECT_EQ(f.at(3), 0);
     // len 2
     EXPECT_EQ(f.at(4), 0);
@@ -165,8 +165,8 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // intercept
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 1);
-    EXPECT_EQ(f.at(2), 1);
+    EXPECT_EQ(f.at(1), 1 / 2.);
+    EXPECT_EQ(f.at(2), 1 / 2.);
     EXPECT_EQ(f.at(3), 0);
     // len 2
     EXPECT_EQ(f.at(4), 0);
@@ -198,7 +198,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     EXPECT_EQ(f.at(0), 1);
     // len 1
     EXPECT_EQ(f.at(1), 0);
-    EXPECT_EQ(f.at(2), 2);
+    EXPECT_EQ(f.at(2), 2 / 2.);
     EXPECT_EQ(f.at(3), 0);
     // len 2
     EXPECT_EQ(f.at(4), 0);
@@ -229,9 +229,9 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // intercept
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 1);
+    EXPECT_EQ(f.at(1), 1 / 2.);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_EQ(f.at(3), 1 / 2.);
     // len 2
     EXPECT_EQ(f.at(4), 0);
     EXPECT_EQ(f.at(5), 0);
@@ -262,7 +262,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // intercept
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 1);
+    EXPECT_EQ(f.at(1), 1 / 2.);
     EXPECT_EQ(f.at(2), 0);
     EXPECT_EQ(f.at(3), 0);
     // len 2
@@ -296,8 +296,8 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     EXPECT_EQ(f.at(0), 1);
     // len 1
     EXPECT_EQ(f.at(1), 0);
-    EXPECT_EQ(f.at(2), 1);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_EQ(f.at(2), 1 / 2.);
+    EXPECT_EQ(f.at(3), 1 / 2.);
     // len 2
     EXPECT_EQ(f.at(4), 0);
     EXPECT_EQ(f.at(5), 0);
@@ -330,7 +330,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     EXPECT_EQ(f.at(0), 1);
     // len 1
     EXPECT_EQ(f.at(1), 0);
-    EXPECT_EQ(f.at(2), 1);
+    EXPECT_EQ(f.at(2), 1 / 2.);
     EXPECT_EQ(f.at(3), 0);
     // len 2
     EXPECT_EQ(f.at(4), 0);
@@ -362,9 +362,9 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // intercept
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 1);
+    EXPECT_EQ(f.at(1), 1 / 2.);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_EQ(f.at(3), 1 / 2.);
     // len 2
     EXPECT_EQ(f.at(4), 0);
     EXPECT_EQ(f.at(5), 0);
@@ -396,8 +396,8 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     EXPECT_EQ(f.at(0), 1);
     // len 1
     EXPECT_EQ(f.at(1), 0);
-    EXPECT_EQ(f.at(2), 1);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_EQ(f.at(2), 1 / 2.);
+    EXPECT_EQ(f.at(3), 1 / 2.);
     // len 2
     EXPECT_EQ(f.at(4), 0);
     EXPECT_EQ(f.at(5), 0);
@@ -428,7 +428,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // intercept
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 1);
+    EXPECT_EQ(f.at(1), 1 / 2.);
     EXPECT_EQ(f.at(2), 0);
     EXPECT_EQ(f.at(3), 0);
     // len 2
@@ -462,7 +462,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     EXPECT_EQ(f.at(0), 1);
     // len 1
     EXPECT_EQ(f.at(1), 0);
-    EXPECT_EQ(f.at(2), 1);
+    EXPECT_EQ(f.at(2), 1 / 2.);
     EXPECT_EQ(f.at(3), 0);
     // len 2
     EXPECT_EQ(f.at(4), 0);
@@ -495,7 +495,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // len 1
     EXPECT_EQ(f.at(1), 0);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 2);
+    EXPECT_EQ(f.at(3), 2 / 2.);
     // len 2
     EXPECT_EQ(f.at(4), 0);
     EXPECT_EQ(f.at(5), 0);
@@ -529,7 +529,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // len 1
     EXPECT_EQ(f.at(1), 0);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_EQ(f.at(3), 1 / 2.);
     // len 2
     EXPECT_EQ(f.at(4), 0);
     EXPECT_EQ(f.at(5), 0);
@@ -562,7 +562,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
     // len 1
     EXPECT_EQ(f.at(1), 0);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_EQ(f.at(3), 1 / 2.);
     // len 2
     EXPECT_EQ(f.at(4), 0);
     EXPECT_EQ(f.at(5), 0);
@@ -636,7 +636,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen1) {
     f = nrf.get_features(inf_bits, trt_bits);
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
-    EXPECT_EQ(f.at(1), 9);
+    EXPECT_NEAR(f.at(1), 9 / 9., 1e-12);
     EXPECT_EQ(f.at(2), 0);
     EXPECT_EQ(f.at(3), 0);
 
@@ -645,27 +645,27 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen1) {
     f = nrf.get_features(inf_bits, trt_bits);
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
-    EXPECT_EQ(f.at(1), 8);
+    EXPECT_NEAR(f.at(1), 8 / 9., 1e-12);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_NEAR(f.at(3), 1 / 9., 1e-12);
 
     trt_bits.set(1);
 
     f = nrf.get_features(inf_bits, trt_bits);
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
-    EXPECT_EQ(f.at(1), 7);
-    EXPECT_EQ(f.at(2), 1);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_NEAR(f.at(1), 7 / 9., 1e-12);
+    EXPECT_NEAR(f.at(2), 1 / 9., 1e-12);
+    EXPECT_NEAR(f.at(3), 1 / 9., 1e-12);
 
     inf_bits.set(1);
 
     f = nrf.get_features(inf_bits, trt_bits);
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
-    EXPECT_EQ(f.at(1), 7);
+    EXPECT_NEAR(f.at(1), 7 / 9., 1e-12);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_NEAR(f.at(3), 1 / 9., 1e-12);
 
     inf_bits.set();
     trt_bits.set();
@@ -700,11 +700,11 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 9);
+    EXPECT_NEAR(f.at(1), 9 / 9., 1e-12);
     EXPECT_EQ(f.at(2), 0);
     EXPECT_EQ(f.at(3), 0);
     // len 2
-    EXPECT_EQ(f.at(4), 12);
+    EXPECT_NEAR(f.at(4), 12 / 12., 1e-12);
     EXPECT_EQ(f.at(5), 0);
     EXPECT_EQ(f.at(6), 0);
     EXPECT_EQ(f.at(7), 0);
@@ -728,15 +728,15 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 8);
+    EXPECT_NEAR(f.at(1), 8 / 9., 1e-12);
     EXPECT_EQ(f.at(2), 0);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_NEAR(f.at(3), 1 / 9., 1e-12);
     // len 2
-    EXPECT_EQ(f.at(4), 10);
+    EXPECT_NEAR(f.at(4), 10 / 12., 1e-12);
     EXPECT_EQ(f.at(5), 0);
     EXPECT_EQ(f.at(6), 0);
     EXPECT_EQ(f.at(7), 0);
-    EXPECT_EQ(f.at(8), 2);
+    EXPECT_NEAR(f.at(8), 2 / 12., 12e-12);
     EXPECT_EQ(f.at(9), 0);
     EXPECT_EQ(f.at(10), 0);
     EXPECT_EQ(f.at(11), 0);
@@ -756,12 +756,12 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 8);
-    EXPECT_EQ(f.at(2), 1);
+    EXPECT_NEAR(f.at(1), 8 / 9., 1e-12);
+    EXPECT_NEAR(f.at(2), 1 / 9., 1e-12);
     EXPECT_EQ(f.at(3), 0);
     // len 2
-    EXPECT_EQ(f.at(4), 10);
-    EXPECT_EQ(f.at(5), 2);
+    EXPECT_NEAR(f.at(4), 10 / 12., 1e-12);
+    EXPECT_NEAR(f.at(5), 2 / 12., 1e-12);
     EXPECT_EQ(f.at(6), 0);
     EXPECT_EQ(f.at(7), 0);
     EXPECT_EQ(f.at(8), 0);
@@ -785,16 +785,16 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 8);
+    EXPECT_NEAR(f.at(1), 8 / 9., 1e-12);
     EXPECT_EQ(f.at(2), 0);
     EXPECT_EQ(f.at(3), 0);
     // len 2
-    EXPECT_EQ(f.at(4), 10);
+    EXPECT_NEAR(f.at(4), 10 / 12., 1e-12);
     EXPECT_EQ(f.at(5), 0);
     EXPECT_EQ(f.at(6), 0);
     EXPECT_EQ(f.at(7), 0);
     EXPECT_EQ(f.at(8), 0);
-    EXPECT_EQ(f.at(9), 2);
+    EXPECT_NEAR(f.at(9), 2 / 12., 1e-12);
     EXPECT_EQ(f.at(10), 0);
     EXPECT_EQ(f.at(11), 0);
     EXPECT_EQ(f.at(12), 0);
@@ -814,17 +814,17 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 7);
-    EXPECT_EQ(f.at(2), 1);
-    EXPECT_EQ(f.at(3), 1);
+    EXPECT_NEAR(f.at(1), 7 / 9., 1e-12);
+    EXPECT_NEAR(f.at(2), 1 / 9., 1e-12);
+    EXPECT_NEAR(f.at(3), 1 / 9., 1e-12);
     // len 2
-    EXPECT_EQ(f.at(4), 8);
-    EXPECT_EQ(f.at(5), 2);
+    EXPECT_NEAR(f.at(4), 8 / 12., 1e-12);
+    EXPECT_NEAR(f.at(5), 2 / 12., 1e-12);
     EXPECT_EQ(f.at(6), 0);
     EXPECT_EQ(f.at(7), 0);
-    EXPECT_EQ(f.at(8), 1);
+    EXPECT_NEAR(f.at(8), 1 / 12., 1e-12);
     EXPECT_EQ(f.at(9), 0);
-    EXPECT_EQ(f.at(10), 1);
+    EXPECT_NEAR(f.at(10), 1 / 12., 1e-12);
     EXPECT_EQ(f.at(11), 0);
     EXPECT_EQ(f.at(12), 0);
     EXPECT_EQ(f.at(13), 0);
@@ -844,18 +844,18 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
     ASSERT_EQ(f.size(), nrf.num_features());
     EXPECT_EQ(f.at(0), 1);
     // len 1
-    EXPECT_EQ(f.at(1), 7);
-    EXPECT_EQ(f.at(2), 1);
+    EXPECT_NEAR(f.at(1), 7 / 9., 1e-12);
+    EXPECT_NEAR(f.at(2), 1 / 9., 1e-12);
     EXPECT_EQ(f.at(3), 0);
     // len 2
-    EXPECT_EQ(f.at(4), 8);
-    EXPECT_EQ(f.at(5), 2);
+    EXPECT_NEAR(f.at(4), 8 / 12., 1e-12);
+    EXPECT_NEAR(f.at(5), 2 / 12., 1e-12);
     EXPECT_EQ(f.at(6), 0);
     EXPECT_EQ(f.at(7), 0);
     EXPECT_EQ(f.at(8), 0);
-    EXPECT_EQ(f.at(9), 1);
+    EXPECT_NEAR(f.at(9), 1 / 12., 1e-12);
     EXPECT_EQ(f.at(10), 0);
-    EXPECT_EQ(f.at(11), 1);
+    EXPECT_NEAR(f.at(11), 1 / 12., 1e-12);
     EXPECT_EQ(f.at(12), 0);
     EXPECT_EQ(f.at(13), 0);
     EXPECT_EQ(f.at(14), 0);
