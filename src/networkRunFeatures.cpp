@@ -120,10 +120,12 @@ void NetworkRunFeatures::update_features(
 
         // update features for old masks
         // if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
-        const uint32_t index = offset_.at(run_len - 1) +
-            cm->first * max_mask +
-            cm->second;
-        feat.at(index) -= 1.0;
+        {
+            const uint32_t index = offset_.at(run_len - 1) +
+                cm->first * max_mask +
+                cm->second;
+            feat.at(index) -= 1.0;
+        }
         // }
 
         // update masks
@@ -142,10 +144,12 @@ void NetworkRunFeatures::update_features(
 
         // update features for new masks
         // if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
-        const uint32_t index = offset_.at(run_len - 1) +
-            cm->first * max_mask +
-            cm->second;
-        feat.at(index) += 1.0;
+        {
+            const uint32_t index = offset_.at(run_len - 1) +
+                cm->first * max_mask +
+                cm->second;
+            feat.at(index) += 1.0;
+        }
         // }
 
     }
