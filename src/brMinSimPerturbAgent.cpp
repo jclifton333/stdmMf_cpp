@@ -16,24 +16,22 @@ BrMinSimPerturbAgent::BrMinSimPerturbAgent(
         const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Features> & features,
         const std::shared_ptr<Model> & model,
-        const uint32_t & num_reps,
-        const uint32_t & final_t,
         const double & c,
         const double & t,
         const double & a,
         const double & b,
         const double & ell,
         const double & min_step_size)
-    : Agent(network), features_(features), model_(model), num_reps_(num_reps),
-      final_t_(final_t), c_(c), t_(t), a_(a), b_(b), ell_(ell),
+    : Agent(network), features_(features), model_(model),
+      c_(c), t_(t), a_(a), b_(b), ell_(ell),
       min_step_size_(min_step_size) {
 }
 
 BrMinSimPerturbAgent::BrMinSimPerturbAgent(
         const BrMinSimPerturbAgent & other)
     : Agent(other), features_(other.features_->clone()),
-      model_(other.model_->clone()), num_reps_(other.num_reps_),
-      final_t_(other.final_t_), c_(other.c_), t_(other.t_), a_(other.a_),
+      model_(other.model_->clone()),
+      c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_){
 }
 

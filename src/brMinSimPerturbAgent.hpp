@@ -13,8 +13,6 @@ class BrMinSimPerturbAgent : public Agent, public RngClass {
     const std::shared_ptr<Features> features_;
     const std::shared_ptr<Model> model_;
 
-    const uint32_t num_reps_;
-    const uint32_t final_t_;
     const double c_;
     const double t_;
     const double a_;
@@ -26,8 +24,6 @@ public:
     BrMinSimPerturbAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features> & features,
             const std::shared_ptr<Model> & model,
-            const uint32_t & num_reps,
-            const uint32_t & final_t,
             const double & c,
             const double & t,
             const double & a,
