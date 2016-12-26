@@ -11,6 +11,8 @@ double runner(System * system, Agent * agent, const uint32_t & final_time,
         const boost::dynamic_bitset<> trt_bits = agent->apply_trt(
                 system->inf_bits(), system->history());
 
+        CHECK_EQ(trt_bits.count(), agent->num_trt());
+
         system->trt_bits(trt_bits);
 
         system->turn_clock();
