@@ -15,7 +15,8 @@ NetworkRunFeatures::NetworkRunFeatures(
     uint32_t curr_offset_val = 1;
     for (uint32_t i = 0; i < run_length; ++i) {
         this->offset_.at(i) = curr_offset_val;
-        curr_offset_val += (1 << (2*(i+1))) - 1;
+        // curr_offset_val += (1 << (2*(i+1))) - 1;
+        curr_offset_val += (1 << (2*(i+1)));
     }
     this->num_features_ = curr_offset_val;
 
@@ -76,13 +77,13 @@ std::vector<double> NetworkRunFeatures::get_features(
         this->masks_.at(i)->second = trt_mask;
 
         const uint32_t max_mask = 1 << run_len;
-        if (inf_mask < (max_mask - 1) || trt_mask < (max_mask - 1)) {
-            const uint32_t index = offset_.at(run_len-1) +
-                inf_mask * max_mask +
-                trt_mask;
+        // if (inf_mask < (max_mask - 1) || trt_mask < (max_mask - 1)) {
+        const uint32_t index = offset_.at(run_len-1) +
+            inf_mask * max_mask +
+            trt_mask;
 
-            feat.at(index) += 1.0;
-        }
+        feat.at(index) += 1.0;
+        // }
     }
 
     return feat;
@@ -118,12 +119,12 @@ void NetworkRunFeatures::update_features(
         const uint32_t max_mask = 1 << run_len;
 
         // update features for old masks
-        if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
-            const uint32_t index = offset_.at(run_len - 1) +
-                cm->first * max_mask +
-                cm->second;
-            feat.at(index) -= 1.0;
-        }
+        // if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
+        const uint32_t index = offset_.at(run_len - 1) +
+            cm->first * max_mask +
+            cm->second;
+        feat.at(index) -= 1.0;
+        // }
 
         // update masks
         for (uint32_t j = 0; j < run_len; ++j) {
@@ -140,12 +141,12 @@ void NetworkRunFeatures::update_features(
         }
 
         // update features for new masks
-        if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
-            const uint32_t index = offset_.at(run_len - 1) +
-                cm->first * max_mask +
-                cm->second;
-            feat.at(index) += 1.0;
-        }
+        // if (cm->first < (max_mask - 1) || cm->second < (max_mask - 1)) {
+        const uint32_t index = offset_.at(run_len - 1) +
+            cm->first * max_mask +
+            cm->second;
+        feat.at(index) += 1.0;
+        // }
 
     }
 }
