@@ -117,7 +117,7 @@ TEST(TestSweepAgent, TestEquality) {
 
     std::shared_ptr<Rng> rng(new Rng);
 
-    for (uint32_t i = 0; i < 2; ++i) {
+    for (uint32_t i = 0; i < 5; ++i) {
         std::vector<double> coef(f->num_features(),0.);
         std::for_each(coef.begin(), coef.end(),
                 [&rng](double & x) {
