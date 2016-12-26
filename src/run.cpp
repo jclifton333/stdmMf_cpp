@@ -49,6 +49,8 @@ int main(int argc, char *argv[]) {
                     RandomAgent a(net->clone());
                     a.set_seed(i);
 
+                    s.start();
+
                     r->set(runner(&s, &a, 20, 0.9));
                 });
     }
@@ -65,6 +67,8 @@ int main(int argc, char *argv[]) {
                     s.set_seed(i);
                     ProximalAgent a(net->clone());
                     a.set_seed(i);
+
+                    s.start();
 
                     r->set(runner(&s, &a, 20, 0.9));
                 });
@@ -83,6 +87,8 @@ int main(int argc, char *argv[]) {
                     MyopicAgent a(net->clone(), std::shared_ptr<Model>(
                                     new NoCovEdgeModel(net->clone())));
                     a.set_seed(i);
+
+                    s.start();
 
                     r->set(runner(&s, &a, 20, 0.9));
                 });
@@ -106,6 +112,8 @@ int main(int argc, char *argv[]) {
                             2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3);
                     a.set_seed(i);
 
+                    s.start();
+
                     r->set(runner(&s, &a, 20, 0.9));
                 });
     }
@@ -128,6 +136,8 @@ int main(int argc, char *argv[]) {
     //                         2, 20, 1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
     //                 a.set_seed(i);
 
+    //                 s.start();
+
     //                 r->set(runner(&s, &a, 20, 0.9));
     //             });
     // }
@@ -149,6 +159,8 @@ int main(int argc, char *argv[]) {
     //                         2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3,
     //                         1e-07, 0.2, 1e-07, 1, 0.5, 3e-7);
     //                 a.set_seed(i);
+
+    //                 s.start();
 
     //                 r->set(runner(&s, &a, 20, 0.9));
     //             });
