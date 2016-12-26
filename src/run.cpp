@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 0.9));
+                    r->set(runner(&s, &a, 20, 1.0));
                 });
     }
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 0.9));
+                    r->set(runner(&s, &a, 20, 1.0));
                 });
     }
 
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 0.9));
+                    r->set(runner(&s, &a, 20, 1.0));
                 });
     }
 
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 0.9));
+                    r->set(runner(&s, &a, 20, 1.0));
                 });
     }
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 
     //                 s.start();
 
-    //                 r->set(runner(&s, &a, 20, 0.9));
+    //                 r->set(runner(&s, &a, 20, 1.0));
     //             });
     // }
 
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
 
     //                 s.start();
 
-    //                 r->set(runner(&s, &a, 20, 0.9));
+    //                 r->set(runner(&s, &a, 20, 1.0));
     //             });
     // }
 
