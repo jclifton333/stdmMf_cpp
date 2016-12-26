@@ -59,7 +59,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
 
 
     auto f = [&](const std::vector<double> & par, void * const data) {
-        SweepAgent a(this->network_, this->features_, par, 3);
+        SweepAgent a(this->network_, this->features_, par, 2);
         a.set_rng(this->get_rng());
         System s(this->network_, this->model_);
         s.set_rng(this->get_rng());
@@ -90,7 +90,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
 
     CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
 
-    SweepAgent a(this->network_, this->features_, sp.par(), 3);;
+    SweepAgent a(this->network_, this->features_, sp.par(), 2);
     a.set_rng(this->get_rng());
     return a.apply_trt(inf_bits, history);
 }
