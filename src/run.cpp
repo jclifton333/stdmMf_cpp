@@ -125,9 +125,8 @@ int main(int argc, char *argv[]) {
                     VfnMaxSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunFeatures(net->clone(), 4)),
-                            // std::shared_ptr<Model>(
-                            //         new NoCovEdgeModel(net->clone())
-                            mod->clone(),
+                            std::shared_ptr<Model>(
+                                    new NoCovEdgeModel(net->clone())),
                             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
                     a.set_seed(i);
 
