@@ -6,6 +6,7 @@
 #include "objFns.hpp"
 
 #include "proximalAgent.hpp"
+#include "myopicAgent.hpp"
 
 namespace stdmMf {
 
