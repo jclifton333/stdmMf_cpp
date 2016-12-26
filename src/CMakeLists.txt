@@ -19,7 +19,7 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   noCovEdgeModel.cpp model.cpp objFns.cpp
 
   ## agents
-  agent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
+  agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
   epsAgent.cpp sweepAgent.cpp sweepAgentSlow.cpp
   vfnMaxSimPerturbAgent.cpp brMinSimPerturbAgent.cpp
   vfnBrAdaptSimPerturbAgent.cpp
