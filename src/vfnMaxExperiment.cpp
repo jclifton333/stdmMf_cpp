@@ -113,12 +113,12 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
 int main(int argc, char *argv[]) {
     const std::vector<int> num_reps_list = {2};
-    const std::vector<double> c_list = {10.0, 20.0};
+    const std::vector<double> c_list = {10.0};
     const std::vector<double> t_list = {0.1};
-    const std::vector<double> a_list = {1, 5, 10};
+    const std::vector<double> a_list = {5, 10};
     const std::vector<double> b_list = {1};
     const std::vector<double> ell_list = {0.4};
-    const std::vector<double> min_step_size_list = {0.3};
+    const std::vector<double> min_step_size_list = {0.3, 0.7, 1.0};
 
     Experiment e;
     e.add_factor(num_reps_list);
