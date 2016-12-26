@@ -41,22 +41,36 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
                 trt_bits);
 
         // set up sorting
-        std::vector<std::pair<double, uint32_t> > sorted;
+        std::vector<std::pair<double, uint32_t> > sorted_inf;
+        std::vector<std::pair<double, uint32_t> > sorted_not;
         for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-            // negative probability because of ascending order
             if (inf_bits.test(i)) {
-                sorted.push_back(std::pair<double, uint32_t>(
-                                1.0 - probs.at(i), i));
+                // add negative since sorting is ascending order
+                sorted_inf.push_back(std::pair<double, uint32_t>(- probs.at(i),
+                                i));
             } else {
-                sorted.push_back(std::pair<double, uint32_t>(probs.at(i), i));
+                sorted_not.push_back(std::pair<double, uint32_t>(probs.at(i),
+                                i));
             }
         }
 
-        std::sort(sorted.begin(), sorted.end());
+        std::sort(sorted_inf.begin(), sorted_inf.end());
+        std::sort(sorted_not.begin(), sorted_not.end());
+
+        uint32_t num_trt_inf = std::min(uint32_t(this->num_trt_ / 2. + 1),
+                uint32_t(inf_bits.count()));
+        uint32_t num_trt_not = this->num_trt_ - num_trt_inf;
+
+        CHECK_LE(num_trt_inf, inf_bits.count());
+        CHECK_LE(num_trt_not, this->num_nodes_ - inf_bits.count());
+        CHECK_EQ(num_trt_inf + num_trt_not, this->num_trt_);
 
         trt_bits.reset();
-        for (uint32_t i = 0; i < this->num_trt_; ++i) {
-            trt_bits.set(sorted.at(i).second);
+        for (uint32_t i = 0; i < num_trt_inf; ++i) {
+            trt_bits.set(sorted_inf.at(i).second);
+        }
+        for (uint32_t i = 0; i < num_trt_not; ++i) {
+            trt_bits.set(sorted_not.at(i).second);
         }
     } else {
         // not enough data to estimate a model
