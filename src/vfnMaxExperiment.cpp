@@ -96,6 +96,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         s.cleanse();
         s.wipe_trt();
         s.erase_history();
+        s.start();
 
         val += runner(&s, &agent, 20, 1.0);
     }
