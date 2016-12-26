@@ -183,7 +183,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         do {
             ec = sp.step();
         } while (ec == Optim::ErrorCode::CONTINUE
-                && sp.completed_steps() < num_steps);
+                && sp.completed_steps() < num_steps * 3);
 
         CHECK(ec == Optim::ErrorCode::SUCCESS
                 || (ec == Optim::ErrorCode::CONTINUE
