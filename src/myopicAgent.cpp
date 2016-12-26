@@ -44,7 +44,12 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
         std::vector<std::pair<double, uint32_t> > sorted;
         for (uint32_t i = 0; i < this->num_nodes_; ++i) {
             // negative probability because of ascending order
-            sorted.push_back(std::pair<double, uint32_t>(- probs.at(i), i));
+            if (inf_bits.test(i)) {
+                sorted.push_back(std::pair<double, uint32_t>(
+                                1.0 - probs.at(i), i));
+            } else {
+                sorted.push_back(std::pair<double, uint32_t>(probs.at(i)), i));
+            }
         }
 
         std::sort(sorted.begin(), sorted.end());
