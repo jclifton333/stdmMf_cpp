@@ -30,7 +30,7 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
     boost::dynamic_bitset<> trt_bits(this->network_->size());
-    if (history.size() > 0) {
+    if (history.size() > 1) {
         // add current infections to history for model fitting
         std::vector<BitsetPair> all_history = history;
         all_history.push_back(BitsetPair(inf_bits, trt_bits));
