@@ -1,5 +1,6 @@
 #include "system.hpp"
 #include "noCovEdgeModel.hpp"
+#include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
 #include "myopicAgent.hpp"
