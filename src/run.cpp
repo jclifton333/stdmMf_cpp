@@ -170,37 +170,37 @@ int main(int argc, char *argv[]) {
     //             });
     // }
 
-    // vr max br min adapt
-    std::vector<std::shared_ptr<Result<double> > > adapt;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        adapt.push_back(r);
+    // // vr max br min adapt
+    // std::vector<std::shared_ptr<Result<double> > > adapt;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     std::shared_ptr<Result<double> > r(new Result<double>);
+    //     adapt.push_back(r);
 
-        pool.service()->post([&]() {
-                    NetworkInit init;
-                    init.set_dim_x(10);
-                    init.set_dim_y(10);
-                    init.set_wrap(false);
-                    init.set_type(NetworkInit_NetType_GRID);
+    //     pool.service()->post([&]() {
+    //                 NetworkInit init;
+    //                 init.set_dim_x(10);
+    //                 init.set_dim_y(10);
+    //                 init.set_wrap(false);
+    //                 init.set_type(NetworkInit_NetType_GRID);
 
-                    const std::shared_ptr<Network> net =
-                        Network::gen_network(init);
+    //                 const std::shared_ptr<Network> net =
+    //                     Network::gen_network(init);
 
-                    System s(net, std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)));
-                    s.set_seed(i);
-                    VfnBrAdaptSimPerturbAgent a(net,
-                            std::shared_ptr<Features>(
-                                    new NetworkRunFeatures(net, 4)),
-                            std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)),
-                            2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3,
-                            1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
-                    a.set_seed(i);
+    //                 System s(net, std::shared_ptr<Model>(
+    //                                 new NoCovEdgeModel(net)));
+    //                 s.set_seed(i);
+    //                 VfnBrAdaptSimPerturbAgent a(net,
+    //                         std::shared_ptr<Features>(
+    //                                 new NetworkRunFeatures(net, 4)),
+    //                         std::shared_ptr<Model>(
+    //                                 new NoCovEdgeModel(net)),
+    //                         2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3,
+    //                         1e-07, 0.2, 1e-07, 1, 0.5, 3e-7);
+    //                 a.set_seed(i);
 
-                    r->set(runner(&s, &a, 20, 0.9));
-                });
-    }
+    //                 r->set(runner(&s, &a, 20, 0.9));
+    //             });
+    // }
 
 
     pool.join();
@@ -245,13 +245,13 @@ int main(int argc, char *argv[]) {
     //                   })
     //           << std::endl;
 
-    std::cout << "adapt: "
-              << std::accumulate(adapt.begin(), adapt.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                          return x + r->get()/static_cast<double>(num_reps);
-                      })
-              << std::endl;
+    // std::cout << "adapt: "
+    //           << std::accumulate(adapt.begin(), adapt.end(), 0.,
+    //                   [](const double & x,
+    //                           const std::shared_ptr<Result<double> > & r) {
+    //                       return x + r->get()/static_cast<double>(num_reps);
+    //                   })
+    //           << std::endl;
 
 
 
