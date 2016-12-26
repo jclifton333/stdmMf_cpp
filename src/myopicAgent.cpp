@@ -41,16 +41,23 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
                 trt_bits);
 
         // set up sorting
+        std::vector<uint32_t> shuffled_nodes;
+        for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+            shuffled_nodes.push_back(i);
+        }
+        this->rng->shuffle(shuffled_nodes);
+
         std::vector<std::pair<double, uint32_t> > sorted_inf;
         std::vector<std::pair<double, uint32_t> > sorted_not;
         for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-            if (inf_bits.test(i)) {
+            const uint32_t & node = shuffled_nodes.at(i);
+            if (inf_bits.test(node)) {
                 // add negative since sorting is ascending order
-                sorted_inf.push_back(std::pair<double, uint32_t>(- probs.at(i),
-                                i));
+                sorted_inf.push_back(std::pair<double, uint32_t>(
+                                - probs.at(node), node));
             } else {
-                sorted_not.push_back(std::pair<double, uint32_t>(probs.at(i),
-                                i));
+                sorted_not.push_back(std::pair<double, uint32_t>(probs.at(node),
+                                node));
             }
         }
 
