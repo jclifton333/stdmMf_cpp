@@ -102,8 +102,9 @@ int main(int argc, char *argv[]) {
         pool.service()->post([=]() {
                     System s(net->clone(), mod->clone());
                     s.set_seed(i);
-                    MyopicAgent a(net->clone(), std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net->clone())));
+                    MyopicAgent a(net->clone(), // std::shared_ptr<Model>(
+                                    // new NoCovEdgeModel(net->clone()))
+                            mod->clone());
                     a.set_seed(i);
 
                     s.start();
