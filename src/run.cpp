@@ -25,26 +25,28 @@ int main(int argc, char *argv[]) {
 
     const uint32_t num_reps = 50;
 
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    const std::shared_ptr<Network> net(Network::gen_network(init));
+
+    const std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
+    mod->par({-4.0, -4.0, -1.5, -8.0, 2.0, -8.0});
+
+
     // random
     std::vector<std::shared_ptr<Result<double> > > random;
     for (uint32_t i = 0; i < num_reps; ++i) {
         std::shared_ptr<Result<double> > r(new Result<double>);
         random.push_back(r);
 
-        pool.service()->post([=]() {
-                    NetworkInit init;
-                    init.set_dim_x(10);
-                    init.set_dim_y(10);
-                    init.set_wrap(false);
-                    init.set_type(NetworkInit_NetType_GRID);
-
-                    const std::shared_ptr<Network> net =
-                        Network::gen_network(init);
-
-                    System s(net, std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)));
+        pool.service()->post([=](){
+                    System s(net->clone(), mod->clone());
                     s.set_seed(i);
-                    RandomAgent a(net);
+                    RandomAgent a(net->clone());
                     a.set_seed(i);
 
                     r->set(runner(&s, &a, 20, 0.9));
@@ -59,19 +61,9 @@ int main(int argc, char *argv[]) {
         proximal.push_back(r);
 
         pool.service()->post([=]() {
-                    NetworkInit init;
-                    init.set_dim_x(10);
-                    init.set_dim_y(10);
-                    init.set_wrap(false);
-                    init.set_type(NetworkInit_NetType_GRID);
-
-                    const std::shared_ptr<Network> net =
-                        Network::gen_network(init);
-
-                    System s(net, std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)));
+                    System s(net->clone(), mod->clone());
                     s.set_seed(i);
-                    ProximalAgent a(net);
+                    ProximalAgent a(net->clone());
                     a.set_seed(i);
 
                     r->set(runner(&s, &a, 20, 0.9));
@@ -86,20 +78,10 @@ int main(int argc, char *argv[]) {
         myopic.push_back(r);
 
         pool.service()->post([=]() {
-                    NetworkInit init;
-                    init.set_dim_x(10);
-                    init.set_dim_y(10);
-                    init.set_wrap(false);
-                    init.set_type(NetworkInit_NetType_GRID);
-
-                    const std::shared_ptr<Network> net =
-                        Network::gen_network(init);
-
-                    System s(net, std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)));
+                    System s(net->clone(), mode->clone());
                     s.set_seed(i);
-                    MyopicAgent a(net, std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)));
+                    MyopicAgent a(net->clone(), std::shared_ptr<Model>(
+                                    new NoCovEdgeModel(net->clone())));
                     a.set_seed(i);
 
                     r->set(runner(&s, &a, 20, 0.9));
@@ -114,23 +96,13 @@ int main(int argc, char *argv[]) {
         vfn.push_back(r);
 
         pool.service()->post([=]() {
-                    NetworkInit init;
-                    init.set_dim_x(10);
-                    init.set_dim_y(10);
-                    init.set_wrap(false);
-                    init.set_type(NetworkInit_NetType_GRID);
-
-                    const std::shared_ptr<Network> net =
-                        Network::gen_network(init);
-
-                    System s(net, std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)));
+                    System s(net->clone(), mod->clone());
                     s.set_seed(i);
-                    VfnMaxSimPerturbAgent a(net,
+                    VfnMaxSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunFeatures(net, 4)),
+                                    new NetworkRunFeatures(net->clone(), 4)),
                             std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net)),
+                                    new NoCovEdgeModel(net->clone())),
                             2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3);
                     a.set_seed(i);
 
@@ -146,23 +118,13 @@ int main(int argc, char *argv[]) {
     //     br.push_back(r);
 
     //     pool.service()->post([=]() {
-    //                 NetworkInit init;
-    //                 init.set_dim_x(10);
-    //                 init.set_dim_y(10);
-    //                 init.set_wrap(false);
-    //                 init.set_type(NetworkInit_NetType_GRID);
-
-    //                 const std::shared_ptr<Network> net =
-    //                     Network::gen_network(init);
-
-    //                 System s(net, std::shared_ptr<Model>(
-    //                                 new NoCovEdgeModel(net)));
+    //                 System s(net->clone(), mod->clone());
     //                 s.set_seed(i);
-    //                 BrMinSimPerturbAgent a(net,
+    //                 BrMinSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunFeatures(net, 4)),
+    //                                 new NetworkRunFeatures(net->clone(), 4)),
     //                         std::shared_ptr<Model>(
-    //                                 new NoCovEdgeModel(net)),
+    //                                 new NoCovEdgeModel(net->clone())),
     //                         2, 20, 1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
     //                 a.set_seed(i);
 
@@ -177,23 +139,13 @@ int main(int argc, char *argv[]) {
     //     adapt.push_back(r);
 
     //     pool.service()->post([=]() {
-    //                 NetworkInit init;
-    //                 init.set_dim_x(10);
-    //                 init.set_dim_y(10);
-    //                 init.set_wrap(false);
-    //                 init.set_type(NetworkInit_NetType_GRID);
-
-    //                 const std::shared_ptr<Network> net =
-    //                     Network::gen_network(init);
-
-    //                 System s(net, std::shared_ptr<Model>(
-    //                                 new NoCovEdgeModel(net)));
+    //                 System s(net->clone(), mod->clone());
     //                 s.set_seed(i);
-    //                 VfnBrAdaptSimPerturbAgent a(net,
+    //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunFeatures(net, 4)),
+    //                                 new NetworkRunFeatures(net->clone(), 4)),
     //                         std::shared_ptr<Model>(
-    //                                 new NoCovEdgeModel(net)),
+    //                                 new NoCovEdgeModel(net->clone())),
     //                         2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3,
     //                         1e-07, 0.2, 1e-07, 1, 0.5, 3e-7);
     //                 a.set_seed(i);
