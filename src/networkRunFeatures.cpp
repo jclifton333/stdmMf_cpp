@@ -19,6 +19,13 @@ NetworkRunFeatures::NetworkRunFeatures(
     }
     this->num_features_ = curr_offset_val;
 
+    // count runs
+    this->num_runs_by_len_.resize(this->run_length_,0);
+    for (uint32_t i = 0; i < this->num_runs_; ++i) {
+        const uint32_t run_len  = this->runs_.at(i).nodes.size();
+        ++this->num_runs_by_len_.at(run_len - 1);
+    }
+
     // set up path trt mask
     this->masks_by_node_.resize(this->network_->size());
     for (uint32_t i = 0; i < this->num_runs_; ++i) {
@@ -81,7 +88,7 @@ std::vector<double> NetworkRunFeatures::get_features(
                 inf_mask * max_mask +
                 trt_mask;
 
-            feat.at(index) += 1.0;
+            feat.at(index) += 1.0 / this->num_runs_by_len_.at(run_len - 1);
         }
     }
 
@@ -122,7 +129,7 @@ void NetworkRunFeatures::update_features(
             const uint32_t index = offset_.at(run_len - 1) +
                 cm->first * max_mask +
                 cm->second;
-            feat.at(index) -= 1.0;
+            feat.at(index) -= 1.0 / this->num_runs_by_len_.at(run_len - 1);
         }
 
         // update masks
@@ -144,7 +151,7 @@ void NetworkRunFeatures::update_features(
             const uint32_t index = offset_.at(run_len - 1) +
                 cm->first * max_mask +
                 cm->second;
-            feat.at(index) += 1.0;
+            feat.at(index) += 1.0 / this->num_runs_by_len_.at(run_len - 1);
         }
 
     }
