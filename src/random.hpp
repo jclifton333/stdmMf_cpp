@@ -47,6 +47,9 @@ public:
 
     // random sample from range without replacement
     std::vector<int> sample_range(const int a, const int b, const int n);
+
+    // shuffle
+    void shuffle(std::vector<uint32_t> & x);
 };
 
 

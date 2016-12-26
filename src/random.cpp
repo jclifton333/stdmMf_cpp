@@ -1,5 +1,6 @@
 #include <glog/logging.h>
 #include "random.hpp"
+#include <algorithm>
 
 namespace stdmMf {
 
@@ -72,6 +73,10 @@ std::vector<int> Rng::sample_range(const int a, const int b, const int n) {
     }
 
     return values;
+}
+
+void Rng::shuffle(std::vector<uint32_t> & x) {
+    std::shuffle(x.begin(), x.end(), this->gen);
 }
 
 
