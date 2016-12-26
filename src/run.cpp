@@ -137,28 +137,28 @@ int main(int argc, char *argv[]) {
     }
 
 
-    // // br min
-    // std::vector<std::shared_ptr<Result<double> > > br;
-    // for (uint32_t i = 0; i < num_reps; ++i) {
-    //     std::shared_ptr<Result<double> > r(new Result<double>);
-    //     br.push_back(r);
+    // br min
+    std::vector<std::shared_ptr<Result<double> > > br;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        std::shared_ptr<Result<double> > r(new Result<double>);
+        br.push_back(r);
 
-    //     pool.service()->post([=]() {
-    //                 System s(net->clone(), mod->clone());
-    //                 s.set_seed(i);
-    //                 BrMinSimPerturbAgent a(net->clone(),
-    //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunFeatures(net->clone(), 4)),
-    //                         std::shared_ptr<Model>(
-    //                                 new NoCovEdgeModel(net->clone())),
-    //                         2, 20, 1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
-    //                 a.set_seed(i);
+        pool.service()->post([=]() {
+                    System s(net->clone(), mod->clone());
+                    s.set_seed(i);
+                    BrMinSimPerturbAgent a(net->clone(),
+                            std::shared_ptr<Features>(
+                                    new NetworkRunFeatures(net->clone(), 4)),
+                            std::shared_ptr<Model>(
+                                    new NoCovEdgeModel(net->clone())),
+                            1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
+                    a.set_seed(i);
 
-    //                 s.start();
+                    s.start();
 
-    //                 r->set(runner(&s, &a, 20, 1.0));
-    //             });
-    // }
+                    r->set(runner(&s, &a, 20, 1.0));
+                });
+    }
 
     // vr max br min adapt
     std::vector<std::shared_ptr<Result<double> > > adapt;
@@ -227,13 +227,13 @@ int main(int argc, char *argv[]) {
                       })
               << std::endl;
 
-    // std::cout << "br: "
-    //           << std::accumulate(br.begin(), br.end(), 0.,
-    //                   [](const double & x,
-    //                           const std::shared_ptr<Result<double> > & r) {
-    //                       return x + r->get()/static_cast<double>(num_reps);
-    //                   })
-    //           << std::endl;
+    std::cout << "br: "
+              << std::accumulate(br.begin(), br.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                          return x + r->get()/static_cast<double>(num_reps);
+                      })
+              << std::endl;
 
     std::cout << "adapt: "
               << std::accumulate(adapt.begin(), adapt.end(), 0.,
