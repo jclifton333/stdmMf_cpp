@@ -179,11 +179,11 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         sp.set_rng(this->get_rng());
 
         Optim::ErrorCode ec;
-        const uint32_t num_steps = history.size();
+        const uint32_t num_steps = history.size() * 3;
         do {
             ec = sp.step();
         } while (ec == Optim::ErrorCode::CONTINUE
-                && sp.completed_steps() < num_steps * 2);
+                && sp.completed_steps() < num_steps);
 
         CHECK(ec == Optim::ErrorCode::SUCCESS
                 || (ec == Optim::ErrorCode::CONTINUE
