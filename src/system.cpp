@@ -77,7 +77,7 @@ void System::start() {
     this->erase_history();
 
     const uint32_t num_starts =
-        static_cast<uint32_t>(ceil(this->num_nodes_ * 0.1));
+        static_cast<uint32_t>(ceil(this->num_nodes_ * 0.25));
     const std::vector<int> infs = this->rng->sample_range(
             0, this->num_nodes_, num_starts);
 
