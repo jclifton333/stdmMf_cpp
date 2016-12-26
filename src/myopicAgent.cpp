@@ -48,7 +48,7 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
                 sorted.push_back(std::pair<double, uint32_t>(
                                 1.0 - probs.at(i), i));
             } else {
-                sorted.push_back(std::pair<double, uint32_t>(probs.at(i)), i));
+                sorted.push_back(std::pair<double, uint32_t>(probs.at(i), i));
             }
         }
 
