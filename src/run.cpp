@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<Result<double> > r(new Result<double>);
         random.push_back(r);
 
-        pool.service()->post([&]() {
+        pool.service()->post([=]() {
                     NetworkInit init;
                     init.set_dim_x(10);
                     init.set_dim_y(10);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<Result<double> > r(new Result<double>);
         proximal.push_back(r);
 
-        pool.service()->post([&]() {
+        pool.service()->post([=]() {
                     NetworkInit init;
                     init.set_dim_x(10);
                     init.set_dim_y(10);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<Result<double> > r(new Result<double>);
         myopic.push_back(r);
 
-        pool.service()->post([&]() {
+        pool.service()->post([=]() {
                     NetworkInit init;
                     init.set_dim_x(10);
                     init.set_dim_y(10);
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<Result<double> > r(new Result<double>);
         vfn.push_back(r);
 
-        pool.service()->post([&]() {
+        pool.service()->post([=]() {
                     NetworkInit init;
                     init.set_dim_x(10);
                     init.set_dim_y(10);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     //     std::shared_ptr<Result<double> > r(new Result<double>);
     //     br.push_back(r);
 
-    //     pool.service()->post([&]() {
+    //     pool.service()->post([=]() {
     //                 NetworkInit init;
     //                 init.set_dim_x(10);
     //                 init.set_dim_y(10);
@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
     //     std::shared_ptr<Result<double> > r(new Result<double>);
     //     adapt.push_back(r);
 
-    //     pool.service()->post([&]() {
+    //     pool.service()->post([=]() {
     //                 NetworkInit init;
     //                 init.set_dim_x(10);
     //                 init.set_dim_y(10);
