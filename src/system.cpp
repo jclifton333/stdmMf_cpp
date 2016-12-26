@@ -78,7 +78,7 @@ void System::start() {
 
     const uint32_t num_starts =
         static_cast<uint32_t>(ceil(this->num_nodes_ * 0.1));
-    std::vector<int> infs = this->rng->sample_range(
+    const std::vector<int> infs = this->rng->sample_range(
             0, this->num_nodes_, num_starts);
 
     for (uint32_t i = 0; i < num_starts; ++i) {
