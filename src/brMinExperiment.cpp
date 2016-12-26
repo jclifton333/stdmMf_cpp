@@ -61,14 +61,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
 
     // set initial infections
-    boost::dynamic_bitset<> inf_bits_start(net->size());
-    const std::vector<int> inf_bits_start_vec(
-            rng->sample_range(0,net->size(), net->size() * 0.1));
-    for (uint32_t i = 0; i < inf_bits_start_vec.size(); ++i) {
-        inf_bits_start.set(inf_bits_start_vec.at(i));
-    }
-    s.inf_bits(inf_bits_start);
-
+    s.start();
     // simulate history
     for (uint32_t i = 0; i < 500; ++i) {
         s.turn_clock();
