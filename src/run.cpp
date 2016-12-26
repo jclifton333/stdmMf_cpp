@@ -37,6 +37,23 @@ int main(int argc, char *argv[]) {
     mod->par({-4.0, -4.0, -1.5, -8.0, 2.0, -8.0});
 
 
+    // none
+    std::vector<std::shared_ptr<Result<double> > > none;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        std::shared_ptr<Result<double> > r(new Result<double>);
+        none.push_back(r);
+
+        pool.service()->post([=](){
+                    System s(net->clone(), mod->clone());
+                    s.set_seed(i);
+                    NoTrtAgent a(net->clone());
+
+                    s.start();
+
+                    r->set(runner(&s, &a, 20, 1.0));
+                });
+    }
+
     // random
     std::vector<std::shared_ptr<Result<double> > > random;
     for (uint32_t i = 0; i < num_reps; ++i) {
@@ -169,12 +186,20 @@ int main(int argc, char *argv[]) {
 
     pool.join();
 
-    std::cout << "random: "
-              << std::accumulate(random.begin(), random.end(), 0.,
+    std::cout << "none: "
+              << std::accumulate(none.begin(), none.end(), 0.,
                       [](const double & x,
                               const std::shared_ptr<Result<double> > & r) {
                 return x + r->get()/static_cast<double>(num_reps);
             })
+              << std::endl;
+
+    std::cout << "random: "
+              << std::accumulate(random.begin(), random.end(), 0.,
+                      [](const double & x,
+                              const std::shared_ptr<Result<double> > & r) {
+                          return x + r->get()/static_cast<double>(num_reps);
+                      })
               << std::endl;
 
     std::cout << "proximal: "
