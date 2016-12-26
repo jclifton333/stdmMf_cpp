@@ -30,12 +30,11 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
     boost::dynamic_bitset<> trt_bits(this->network_->size());
-    // if (history.size() < 1) {
-    //     // not enough data to estimate a model
-    //     ProximalAgent pa(this->network_);
-    //     trt_bits = pa.apply_trt(inf_bits, history);
-    // } else {
-    {
+    if (history.size() < 1) {
+        // not enough data to estimate a model
+        ProximalAgent pa(this->network_);
+        trt_bits = pa.apply_trt(inf_bits, history);
+    } else {
         // get probabilities
         // this->model_->est_par(inf_bits, history);
         const std::vector<double> probs = this->model_->probs(inf_bits,
