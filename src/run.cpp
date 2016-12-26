@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
         myopic.push_back(r);
 
         pool.service()->post([=]() {
-                    System s(net->clone(), mode->clone());
+                    System s(net->clone(), mod->clone());
                     s.set_seed(i);
                     MyopicAgent a(net->clone(), std::shared_ptr<Model>(
                                     new NoCovEdgeModel(net->clone())));
