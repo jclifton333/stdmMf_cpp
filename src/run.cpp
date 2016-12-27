@@ -113,28 +113,28 @@ int main(int argc, char *argv[]) {
     }
 
 
-    // // vfn max
-    // std::vector<std::shared_ptr<Result<double> > > vfn;
-    // for (uint32_t i = 0; i < num_reps; ++i) {
-    //     std::shared_ptr<Result<double> > r(new Result<double>);
-    //     vfn.push_back(r);
+    // vfn max
+    std::vector<std::shared_ptr<Result<double> > > vfn;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        std::shared_ptr<Result<double> > r(new Result<double>);
+        vfn.push_back(r);
 
-    //     pool.service()->post([=]() {
-    //                 System s(net->clone(), mod->clone());
-    //                 s.set_seed(i);
-    //                 VfnMaxSimPerturbAgent a(net->clone(),
-    //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunFeatures(net->clone(), 4)),
-    //                         std::shared_ptr<Model>(
-    //                                 new NoCovEdgeModel(net->clone())),
-    //                         2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    //                 a.set_seed(i);
+        pool.service()->post([=]() {
+                    System s(net->clone(), mod->clone());
+                    s.set_seed(i);
+                    VfnMaxSimPerturbAgent a(net->clone(),
+                            std::shared_ptr<Features>(
+                                    new NetworkRunFeatures(net->clone(), 4)),
+                            std::shared_ptr<Model>(
+                                    new NoCovEdgeModel(net->clone())),
+                            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    a.set_seed(i);
 
-    //                 s.start();
+                    s.start();
 
-    //                 r->set(runner(&s, &a, 20, 1.0));
-    //             });
-    // }
+                    r->set(runner(&s, &a, 20, 1.0));
+                });
+    }
 
 
     // br min
@@ -158,29 +158,29 @@ int main(int argc, char *argv[]) {
                 });
     }
 
-    // // vr max br min adapt
-    // std::vector<std::shared_ptr<Result<double> > > adapt;
-    // for (uint32_t i = 0; i < num_reps; ++i) {
-    //     std::shared_ptr<Result<double> > r(new Result<double>);
-    //     adapt.push_back(r);
+    // vr max br min adapt
+    std::vector<std::shared_ptr<Result<double> > > adapt;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        std::shared_ptr<Result<double> > r(new Result<double>);
+        adapt.push_back(r);
 
-    //     pool.service()->post([=]() {
-    //                 System s(net->clone(), mod->clone());
-    //                 s.set_seed(i);
-    //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
-    //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunFeatures(net->clone(), 4)),
-    //                         std::shared_ptr<Model>(
-    //                                 new NoCovEdgeModel(net->clone())),
-    //                         2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3,
-    //                         1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
-    //                 a.set_seed(i);
+        pool.service()->post([=]() {
+                    System s(net->clone(), mod->clone());
+                    s.set_seed(i);
+                    VfnBrAdaptSimPerturbAgent a(net->clone(),
+                            std::shared_ptr<Features>(
+                                    new NetworkRunFeatures(net->clone(), 4)),
+                            std::shared_ptr<Model>(
+                                    new NoCovEdgeModel(net->clone())),
+                            2, 20, 10.0, 1.0, 1, 1, 0.4, 0.3,
+                            1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
+                    a.set_seed(i);
 
-    //                 s.start();
+                    s.start();
 
-    //                 r->set(runner(&s, &a, 20, 1.0));
-    //             });
-    // }
+                    r->set(runner(&s, &a, 20, 1.0));
+                });
+    }
 
 
     pool.join();
@@ -213,12 +213,12 @@ int main(int argc, char *argv[]) {
               << " (" << std::sqrt(myopic_stats.second / num_reps) << ")"
               << std::endl;
 
-    // const std::pair<double, double> vfn_stats = mean_and_var(
-    //         result_to_vec(vfn));
-    // std::cout << "vfn: "
-    //           << vfn_stats.first
-    //           << " (" << std::sqrt(vfn_stats.second / num_reps) << ")"
-    //           << std::endl;
+    const std::pair<double, double> vfn_stats = mean_and_var(
+            result_to_vec(vfn));
+    std::cout << "vfn: "
+              << vfn_stats.first
+              << " (" << std::sqrt(vfn_stats.second / num_reps) << ")"
+              << std::endl;
 
     const std::pair<double, double> br_stats = mean_and_var(
             result_to_vec(br));
@@ -227,12 +227,12 @@ int main(int argc, char *argv[]) {
               << " (" << std::sqrt(br_stats.second / num_reps) << ")"
               << std::endl;
 
-    // const std::pair<double, double> adapt_stats = mean_and_var(
-    //         result_to_vec(adapt));
-    // std::cout << "adapt: "
-    //           << adapt_stats.first
-    //           << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
-    //           << std::endl;
+    const std::pair<double, double> adapt_stats = mean_and_var(
+            result_to_vec(adapt));
+    std::cout << "adapt: "
+              << adapt_stats.first
+              << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
+              << std::endl;
 
 
     return 0;
