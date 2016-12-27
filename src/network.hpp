@@ -53,12 +53,13 @@ public:
     std::vector<std::vector<NetworkRun> > split_by_node(
             const std::vector<NetworkRun> & runs) const;
 
+    // generate a network from NetworkInit data
+    static std::shared_ptr<Network> gen_network(const NetworkInit & init);
+
     // generate a grid type network
     static std::shared_ptr<Network> gen_grid(
             const uint32_t dim_x, const uint32_t dim_y, const bool wrap);
 
-    // generate a network from NetworkInit data
-    static std::shared_ptr<Network> gen_network(const NetworkInit & init);
     // generate a barabasi type network
     static std::shared_ptr<Network> gen_barabasi(const uint32_t size);
 };
