@@ -48,10 +48,14 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<BitsetPair> & history) {
-    if (history.size() <= 1) {
+    if (history.size() < 1) {
         ProximalAgent a(this->network_);
         return a.apply_trt(inf_bits, history);
+    } else if (history.size() < 2) {
+        MyopicAgent ma(this->network_, this->model_->clone());
+        return ma.apply_trt(inf_bits, history);
     }
+
 
     this->model_->est_par(inf_bits, history);
 
