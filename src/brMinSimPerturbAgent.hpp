@@ -11,7 +11,6 @@ namespace stdmMf {
 
 class BrMinSimPerturbAgent : public Agent, public RngClass {
     const std::shared_ptr<Features> features_;
-    const std::shared_ptr<Model> model_;
 
     const double c_;
     const double t_;
@@ -23,7 +22,6 @@ class BrMinSimPerturbAgent : public Agent, public RngClass {
 public:
     BrMinSimPerturbAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features> & features,
-            const std::shared_ptr<Model> & model,
             const double & c,
             const double & t,
             const double & a,
