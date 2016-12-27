@@ -125,11 +125,11 @@ std::shared_ptr<Network> Network::gen_network(
     // call appropriate initializer
     switch (init.type()) {
     case NetworkInit_NetType_GRID: {
-        CHECK(init.has_dim_x());
-        CHECK(init.has_dim_y());
-        CHECK(init.has_wrap());
+        CHECK(init.has_dim_x()) << "grid requires x dimension";
+        CHECK(init.has_dim_y()) << "grid requires y dimension";
+        CHECK(init.has_wrap()) << "grid requires a wrap specification";
 
-        return gen_grid(init.dim_x(),init.dim_y(),init.wrap());
+        return Network::gen_grid(init.dim_x(),init.dim_y(),init.wrap());
         break;
     }
     default:
