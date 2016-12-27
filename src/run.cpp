@@ -149,8 +149,6 @@ int main(int argc, char *argv[]) {
                     BrMinSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunFeatures(net->clone(), 4)),
-                            std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net->clone())),
                             1e-06, 0.2, 5e-06, 1, 0.5, 3e-7);
                     a.set_seed(i);
 
