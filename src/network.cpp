@@ -228,5 +228,62 @@ std::shared_ptr<Network> Network::gen_grid(
 }
 
 
+std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
+    std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
+
+    CHECK_GE(size, 2);
+
+    // init adjacency matrix
+    network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
+            network->num_nodes, network->num_nodes);
+
+    // add the first two nodes
+    {
+        Node * const n0 = network->node_list.add_nodes();
+        Node * const n1 = network->node_list.add_nodes();
+        n0->set_index(0);
+        n1->set_index(1);
+
+        n0->add_neigh(1);
+        n1->add_neigh(0);
+
+        network->adj(0,0) = 1;
+        network->adj(1,1) = 1;
+        network->adj(0,1) = 1;
+        network->adj(1,0) = 1;
+    }
+
+    Rng rng;
+
+    std::vector<uint32_t> edge_deg(2, 1);
+
+    for (uint32_t i = 2; i < size; ++i) {
+        Node * const n = network->node_list.add_nodes();
+        n->set_index(i);
+        network->adj(i, i) = 1;
+
+        const uint32_t total_deg = std::accumulate(edge_deg.begin(),
+                edge_deg.end(), 0);
+
+        uint32_t connect_to = 0;
+        uint32_t current_tot = edge_deg.at(0);
+        const uint32_t draw = rng.rint(0, total_deg);
+        while (draw > current_tot) {
+            current_tot += edge_deg.at(++connect_to);
+        }
+        network->adj(i, connect_to);
+        network->adj(connect_to, i);
+
+        n->add_neigh(connect_to);
+
+        network->node_list.mutable_nodes(connect_to)->add_neigh(i);
+
+        ++edge_deg.at(connect_to);
+        edge_deg.push_back(1);
+    }
+
+    return network;
+}
+
 
 } // namespace stdmMf

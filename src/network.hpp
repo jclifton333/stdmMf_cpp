@@ -59,6 +59,8 @@ public:
 
     // generate a network from NetworkInit data
     static std::shared_ptr<Network> gen_network(const NetworkInit & init);
+    // generate a barabasi type network
+    static std::shared_ptr<Network> gen_barabasi(const uint32_t size);
 };
 
 } // namespace stdmMf
