@@ -1,7 +1,7 @@
 #include "network.hpp"
 #include <algorithm>
 #include <glog/logging.h>
-
+#include "random.hpp"
 
 namespace stdmMf {
 
