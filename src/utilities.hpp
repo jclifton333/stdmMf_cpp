@@ -47,6 +47,9 @@ void recip(std::vector<double> & a);
 
 std::vector<double> recip_of(const std::vector<double> & a);
 
+
+std::pair<double, double> mean_and_se(const std::vector<double> & vec);
+
 } // namespace stdmMf
 
 
