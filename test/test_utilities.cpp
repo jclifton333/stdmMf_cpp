@@ -364,7 +364,12 @@ TEST(TestUtilities, ScalarAddBToA) {
     ++index;
 }
 
-TEST(TestUtilities, MultAAndB) {
+
+TEST(TestUtilities, TestMeanAndVar) {
+    const std::vector<double> x = {-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    const std::pair<double, double> stats = mean_and_var(x);
+    EXPECT_NEAR(stats.first, 2.0, 1e-12);
+    EXPECT_NEAR(stats.second, 4.666666666666, 1e-12);
 }
 
 
