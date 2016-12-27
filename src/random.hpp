@@ -42,7 +42,7 @@ public:
     // generate random uniform between [a,b)
     double runif(const double a, const double b);
 
-    // generate random uniform integer between [a,b) inclusive
+    // generate random uniform integer between [a,b)
     int rint(const int a, const int b);
 
     // random sample from range without replacement
