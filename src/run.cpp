@@ -187,62 +187,54 @@ int main(int argc, char *argv[]) {
 
     pool.join();
 
+    const std::pair<double, double> none_stats = mean_and_var(
+            result_to_vec(none));
     std::cout << "none: "
-              << std::accumulate(none.begin(), none.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                return x + r->get()/static_cast<double>(num_reps);
-            })
+              << none_stats.first
+              << " (" << std::sqrt(none_stats.second / num_reps) << ")"
               << std::endl;
 
+    const std::pair<double, double> random_stats = mean_and_var(
+            result_to_vec(random));
     std::cout << "random: "
-              << std::accumulate(random.begin(), random.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                          return x + r->get()/static_cast<double>(num_reps);
-                      })
+              << random_stats.first
+              << " (" << std::sqrt(random_stats.second / num_reps) << ")"
               << std::endl;
 
+    const std::pair<double, double> proximal_stats = mean_and_var(
+            result_to_vec(proximal));
     std::cout << "proximal: "
-              << std::accumulate(proximal.begin(), proximal.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                          return x + r->get()/static_cast<double>(num_reps);
-            })
+              << proximal_stats.first
+              << " (" << std::sqrt(proximal_stats.second / num_reps) << ")"
               << std::endl;
 
+    const std::pair<double, double> myopic_stats = mean_and_var(
+            result_to_vec(myopic));
     std::cout << "myopic: "
-              << std::accumulate(myopic.begin(), myopic.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                          return x + r->get()/static_cast<double>(num_reps);
-                      })
+              << myopic_stats.first
+              << " (" << std::sqrt(myopic_stats.second / num_reps) << ")"
               << std::endl;
 
+    const std::pair<double, double> vfn_stats = mean_and_var(
+            result_to_vec(vfn));
     std::cout << "vfn: "
-              << std::accumulate(vfn.begin(), vfn.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                          return x + r->get()/static_cast<double>(num_reps);
-                      })
+              << vfn_stats.first
+              << " (" << std::sqrt(vfn_stats.second / num_reps) << ")"
               << std::endl;
 
+    const std::pair<double, double> br_stats = mean_and_var(
+            result_to_vec(br));
     std::cout << "br: "
-              << std::accumulate(br.begin(), br.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                          return x + r->get()/static_cast<double>(num_reps);
-                      })
+              << br_stats.first
+              << " (" << std::sqrt(br_stats.second / num_reps) << ")"
               << std::endl;
 
+    const std::pair<double, double> adapt_stats = mean_and_var(
+            result_to_vec(adapt));
     std::cout << "adapt: "
-              << std::accumulate(adapt.begin(), adapt.end(), 0.,
-                      [](const double & x,
-                              const std::shared_ptr<Result<double> > & r) {
-                          return x + r->get()/static_cast<double>(num_reps);
-                      })
+              << adapt_stats.first
+              << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
               << std::endl;
-
 
 
     return 0;
