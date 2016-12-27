@@ -213,12 +213,12 @@ int main(int argc, char *argv[]) {
               << " (" << std::sqrt(myopic_stats.second / num_reps) << ")"
               << std::endl;
 
-    const std::pair<double, double> vfn_stats = mean_and_var(
-            result_to_vec(vfn));
-    std::cout << "vfn: "
-              << vfn_stats.first
-              << " (" << std::sqrt(vfn_stats.second / num_reps) << ")"
-              << std::endl;
+    // const std::pair<double, double> vfn_stats = mean_and_var(
+    //         result_to_vec(vfn));
+    // std::cout << "vfn: "
+    //           << vfn_stats.first
+    //           << " (" << std::sqrt(vfn_stats.second / num_reps) << ")"
+    //           << std::endl;
 
     const std::pair<double, double> br_stats = mean_and_var(
             result_to_vec(br));
@@ -227,12 +227,12 @@ int main(int argc, char *argv[]) {
               << " (" << std::sqrt(br_stats.second / num_reps) << ")"
               << std::endl;
 
-    const std::pair<double, double> adapt_stats = mean_and_var(
-            result_to_vec(adapt));
-    std::cout << "adapt: "
-              << adapt_stats.first
-              << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
-              << std::endl;
+    // const std::pair<double, double> adapt_stats = mean_and_var(
+    //         result_to_vec(adapt));
+    // std::cout << "adapt: "
+    //           << adapt_stats.first
+    //           << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
+    //           << std::endl;
 
 
     return 0;
