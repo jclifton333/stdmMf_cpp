@@ -132,8 +132,13 @@ std::shared_ptr<Network> Network::gen_network(
         return Network::gen_grid(init.dim_x(),init.dim_y(),init.wrap());
         break;
     }
+    case NetworkInit_NetType_BARABASI: {
+        CHECK(init.has_size()) << "barbasi requires a size";
+
+        return Network::gen_barabasi(init.size());
+    }
     default:
-        LOG(ERROR) << "Don't know how to initialize grid of type "
+        LOG(ERROR) << "Don't know how to initialize network of type "
                    << init.type() << ".";
         break;
     }

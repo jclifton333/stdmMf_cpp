@@ -26,6 +26,7 @@ message NetworkInit {
   // Only a grid network so far
   enum NetType {
     GRID = 0;
+    BARABASI = 1;
   }
 
   optional NetType type = 1;
@@ -34,4 +35,6 @@ message NetworkInit {
   optional uint32 dim_x = 2;
   optional uint32 dim_y = 3;
   optional bool wrap = 4 [default = false];
+
+  optional uint32 size = 5;
 }
