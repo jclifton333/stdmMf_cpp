@@ -114,17 +114,28 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     SweepAgent agent(net, features, par, 2);
     agent.set_rng(rng);
 
-    // q function
-    auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) {
-        return dot_a_and_b(par,features->get_features(inf_bits, trt_bits));
-    };
-    const double br = bellman_residual_sq(history, &agent, 0.9, q_fn);
+    double val = 0.0;
+    for (uint32_t i = 0; i < 50; ++i) {
+        s.cleanse();
+        s.wipe_trt();
+        s.erase_history();
+        s.start();
+
+        val += runner(&s, &agent, 20, 1.0);
+    }
+    val /= 50.;
+
+    // // q function
+    // auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
+    //         const boost::dynamic_bitset<> & trt_bits) {
+    //     return dot_a_and_b(par,features->get_features(inf_bits, trt_bits));
+    // };
+    // const double br = bellman_residual_sq(history, &agent, 0.9, q_fn);
 
     r->set(std::pair<double, double>(
                     std::chrono::duration_cast<std::chrono::seconds>(
                             elapsed).count(),
-                    br));
+                    val));
 }
 
 
