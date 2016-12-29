@@ -22,7 +22,7 @@ using namespace stdmMf;
 
 int main(int argc, char *argv[]) {
 
-    Pool pool(50);//std::thread::hardware_concurrency());
+    Pool pool(std::thread::hardware_concurrency());
 
     const uint32_t num_reps = 50;
 
