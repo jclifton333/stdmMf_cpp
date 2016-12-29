@@ -36,7 +36,7 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
         trt_bits = pa.apply_trt(inf_bits, history);
     } else {
         // get probabilities
-        // this->model_->est_par(inf_bits, history);
+        this->model_->est_par(inf_bits, history);
         const std::vector<double> probs = this->model_->probs(inf_bits,
                 trt_bits);
 
