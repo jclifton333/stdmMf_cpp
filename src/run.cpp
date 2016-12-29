@@ -39,10 +39,13 @@ int main(int argc, char *argv[]) {
 
 
     // none
-    std::vector<std::shared_ptr<Result<double> > > none;
+    std::vector<std::shared_ptr<Result<double> > > none_val;
+    std::vector<std::shared_ptr<Result<double> > > none_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        none.push_back(r);
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        none_val.push_back(r_val);
+        none_time.push_back(r_time);
 
         pool.service()->post([=](){
                     System s(net->clone(), mod->clone());
@@ -51,15 +54,26 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+                    r_val->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
                 });
     }
 
     // random
-    std::vector<std::shared_ptr<Result<double> > > random;
+    std::vector<std::shared_ptr<Result<double> > > random_val;
+    std::vector<std::shared_ptr<Result<double> > > random_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        random.push_back(r);
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        random_val.push_back(r_val);
+        random_time.push_back(r_time);
 
         pool.service()->post([=](){
                     System s(net->clone(), mod->clone());
@@ -69,16 +83,27 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+                    r_val->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
                 });
     }
 
 
     // proximal
-    std::vector<std::shared_ptr<Result<double> > > proximal;
+    std::vector<std::shared_ptr<Result<double> > > proximal_val;
+    std::vector<std::shared_ptr<Result<double> > > proximal_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        proximal.push_back(r);
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        proximal_val.push_back(r_val);
+        proximal_time.push_back(r_time);
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod->clone());
@@ -88,16 +113,27 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+                    r_val->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
                 });
     }
 
 
     // myopic
-    std::vector<std::shared_ptr<Result<double> > > myopic;
+    std::vector<std::shared_ptr<Result<double> > > myopic_val;
+    std::vector<std::shared_ptr<Result<double> > > myopic_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        myopic.push_back(r);
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        myopic_val.push_back(r_val);
+        myopic_time.push_back(r_time);
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod->clone());
@@ -108,16 +144,27 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+                    r_val->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
                 });
     }
 
 
     // vfn max
-    std::vector<std::shared_ptr<Result<double> > > vfn;
+    std::vector<std::shared_ptr<Result<double> > > vfn_val;
+    std::vector<std::shared_ptr<Result<double> > > vfn_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        vfn.push_back(r);
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        vfn_val.push_back(r_val);
+        vfn_time.push_back(r_time);
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod->clone());
@@ -132,16 +179,27 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+                    r_val->set(runner(&s, &a, 20, 1.0));
+                        std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
                 });
     }
 
 
     // br min
-    std::vector<std::shared_ptr<Result<double> > > br;
+    std::vector<std::shared_ptr<Result<double> > > br_val;
+    std::vector<std::shared_ptr<Result<double> > > br_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        br.push_back(r);
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        br_val.push_back(r_val);
+        br_time.push_back(r_time);
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod->clone());
@@ -154,15 +212,26 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+                    r_val->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
                 });
     }
 
     // vr max br min adapt
-    std::vector<std::shared_ptr<Result<double> > > adapt;
+    std::vector<std::shared_ptr<Result<double> > > adapt_val;
+    std::vector<std::shared_ptr<Result<double> > > adapt_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r(new Result<double>);
-        adapt.push_back(r);
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        adapt_val.push_back(r_val);
+        adapt_time.push_back(r_time);
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod->clone());
@@ -178,7 +247,15 @@ int main(int argc, char *argv[]) {
 
                     s.start();
 
-                    r->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+                    r_val->set(runner(&s, &a, 20, 1.0));
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
                 });
     }
 
@@ -186,52 +263,66 @@ int main(int argc, char *argv[]) {
     pool.join();
 
     const std::pair<double, double> none_stats = mean_and_var(
-            result_to_vec(none));
+            result_to_vec(none_val));
     std::cout << "none: "
               << none_stats.first
               << " (" << std::sqrt(none_stats.second / num_reps) << ")"
+              << " in " << mean_and_var(result_to_vec(none_time)).first
+              << " seconds"
               << std::endl;
 
     const std::pair<double, double> random_stats = mean_and_var(
-            result_to_vec(random));
+            result_to_vec(random_val));
     std::cout << "random: "
               << random_stats.first
               << " (" << std::sqrt(random_stats.second / num_reps) << ")"
+              << " in " << mean_and_var(result_to_vec(random_time)).first
+              << " seconds"
               << std::endl;
 
     const std::pair<double, double> proximal_stats = mean_and_var(
-            result_to_vec(proximal));
+            result_to_vec(proximal_val));
     std::cout << "proximal: "
               << proximal_stats.first
               << " (" << std::sqrt(proximal_stats.second / num_reps) << ")"
+              << " in " << mean_and_var(result_to_vec(proximal_time)).first
+              << " seconds"
               << std::endl;
 
     const std::pair<double, double> myopic_stats = mean_and_var(
-            result_to_vec(myopic));
+            result_to_vec(myopic_val));
     std::cout << "myopic: "
               << myopic_stats.first
               << " (" << std::sqrt(myopic_stats.second / num_reps) << ")"
+              << " in " << mean_and_var(result_to_vec(myopic_time)).first
+              << " seconds"
               << std::endl;
 
     const std::pair<double, double> vfn_stats = mean_and_var(
-            result_to_vec(vfn));
+            result_to_vec(vfn_val));
     std::cout << "vfn: "
               << vfn_stats.first
               << " (" << std::sqrt(vfn_stats.second / num_reps) << ")"
+              << " in " << mean_and_var(result_to_vec(vfn_time)).first
+              << " seconds"
               << std::endl;
 
     const std::pair<double, double> br_stats = mean_and_var(
-            result_to_vec(br));
+            result_to_vec(br_val));
     std::cout << "br: "
               << br_stats.first
               << " (" << std::sqrt(br_stats.second / num_reps) << ")"
+              << " in " << mean_and_var(result_to_vec(br_time)).first
+              << " seconds"
               << std::endl;
 
     const std::pair<double, double> adapt_stats = mean_and_var(
-            result_to_vec(adapt));
+            result_to_vec(adapt_val));
     std::cout << "adapt: "
               << adapt_stats.first
               << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
+              << " in " << mean_and_var(result_to_vec(adapt_time)).first
+              << " seconds"
               << std::endl;
 
 
