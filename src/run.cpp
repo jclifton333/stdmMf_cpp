@@ -57,10 +57,13 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
+
                     r_val->set(runner(&s, &a, 20, 1.0));
+
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
+                    )
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
@@ -86,10 +89,13 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
+
                     r_val->set(runner(&s, &a, 20, 1.0));
+
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
+
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
@@ -116,10 +122,13 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
+
                     r_val->set(runner(&s, &a, 20, 1.0));
+
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
+
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
@@ -147,10 +156,13 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
+
                     r_val->set(runner(&s, &a, 20, 1.0));
+
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
+
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
@@ -182,10 +194,13 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
+
                     r_val->set(runner(&s, &a, 20, 1.0));
+
                         std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
+
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
@@ -215,10 +230,13 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
+
                     r_val->set(runner(&s, &a, 20, 1.0));
+
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
+
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
@@ -250,10 +268,13 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
+
                     r_val->set(runner(&s, &a, 20, 1.0));
+
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
+
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
