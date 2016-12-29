@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
-                    )
+
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
                 });
