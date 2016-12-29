@@ -34,22 +34,42 @@ public:
 
     typedef std::vector<FactorLevel> Factor;
 
-protected:
-    std::vector<Factor> factors_;
-    std::vector<uint32_t> n_levels_;
-    uint32_t n_factors_;
+    class FactorGroup {
+    private:
+        std::vector<Factor> factors_;
+        std::vector<uint32_t> n_levels_;
+        uint32_t n_factors_;
 
-    std::vector<uint32_t> levels_;
+        std::vector<uint32_t> levels_;
+
+    public:
+        FactorGroup();
+
+        void start();
+
+        bool next();
+
+        Factor get() const;
+
+        void add_factor(const std::vector<int> & factor);
+
+        void add_factor(const std::vector<double> & factor);
+    };
+
+protected:
+    std::vector<FactorGroup> groups_;
+
+    uint32_t num_groups_;
+    uint32_t group_num_;
+
 public:
     Experiment();
+
+    FactorGroup * add_group();
 
     void start();
 
     bool next();
-
-    void add_factor(const std::vector<int> & factor);
-
-    void add_factor(const std::vector<double> & factor);
 
     Factor get() const;
 };
