@@ -159,6 +159,14 @@ int main(int argc, char *argv[]) {
     g0->add_factor(ell_list);
     g0->add_factor(min_step_size_list);
 
+    Experiment::FactorGroup * g1 = e.add_group();
+    g1->add_factor(std::vector<double>({1e-6}));
+    g1->add_factor(std::vector<double>({0.2}));
+    g1->add_factor(std::vector<double>({5e-6}));
+    g1->add_factor(std::vector<double>({1}));
+    g1->add_factor(std::vector<double>({0.5}));
+    g1->add_factor(std::vector<double>({3e-7}));
+
     Pool p(std::thread::hardware_concurrency());
 
     std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
