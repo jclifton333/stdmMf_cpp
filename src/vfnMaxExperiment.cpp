@@ -122,13 +122,14 @@ int main(int argc, char *argv[]) {
     const std::vector<double> min_step_size_list = {0.3, 0.7, 1.0};
 
     Experiment e;
-    e.add_factor(num_reps_list);
-    e.add_factor(c_list);
-    e.add_factor(t_list);
-    e.add_factor(a_list);
-    e.add_factor(b_list);
-    e.add_factor(ell_list);
-    e.add_factor(min_step_size_list);
+    Experiment::FactorGroup * g0 = e.add_group();
+    g0->add_factor(num_reps_list);
+    g0->add_factor(c_list);
+    g0->add_factor(t_list);
+    g0->add_factor(a_list);
+    g0->add_factor(b_list);
+    g0->add_factor(ell_list);
+    g0->add_factor(min_step_size_list);
 
     Pool p(std::thread::hardware_concurrency());
 
