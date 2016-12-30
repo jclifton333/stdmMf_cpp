@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
         const Experiment::Factor f = e.get();
 
 
-        for (uint32_t rep = 0; rep < 25 ++rep) {
+        for (uint32_t rep = 0; rep < 25; ++rep) {
             uint32_t i = 0;
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
             const double c = f.at(i++).val.double_val;
