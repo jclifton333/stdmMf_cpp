@@ -153,21 +153,38 @@ int main(int argc, char *argv[]) {
     g_best->add_factor(std::vector<double>({1e-5}));
 
     {
-        const std::vector<double> c_list = {2e-1, 1e-1, 9e-2};
-        const std::vector<double> t_list = {0.75, 1.0, 1.25};
+        const std::vector<double> c_list = {2e-1};
+        const std::vector<double> t_list = {0.75, 0.875, 1.0};
         const std::vector<double> a_list = {1e-3};
         const std::vector<double> b_list = {1};
-        const std::vector<double> ell_list = {1.15, 1.0, 0.85};
-        const std::vector<double> min_step_size_list = {3.53e-5, 1.98e-5,
-                                                        9.13e-6};
+        const std::vector<double> ell_list = {1.0, 0.95, 0.85};
+        const std::vector<double> min_step_size_list = {9.13e-6, 6.473e-6,
+                                                        5.072e-6};
 
-        Experiment::FactorGroup * g0 = e.add_group();
-        g0->add_factor(c_list);
-        g0->add_factor(t_list);
-        g0->add_factor(a_list);
-        g0->add_factor(b_list);
-        g0->add_factor(ell_list);
-        g0->add_factor(min_step_size_list);
+        Experiment::FactorGroup * g = e.add_group();
+        g->add_factor(c_list);
+        g->add_factor(t_list);
+        g->add_factor(a_list);
+        g->add_factor(b_list);
+        g->add_factor(ell_list);
+        g->add_factor(min_step_size_list);
+    }
+
+    {
+        const std::vector<double> c_list = {2e-1};
+        const std::vector<double> t_list = {0.75, 0.875, 1.0};
+        const std::vector<double> a_list = {1e-3, 1.41e-3, 1.8e-3};
+        const std::vector<double> b_list = {1};
+        const std::vector<double> ell_list = {1.0, 0.95, 0.85};
+        const std::vector<double> min_step_size_list = {9.13e-6};
+
+        Experiment::FactorGroup * g = e.add_group();
+        g->add_factor(c_list);
+        g->add_factor(t_list);
+        g->add_factor(a_list);
+        g->add_factor(b_list);
+        g->add_factor(ell_list);
+        g->add_factor(min_step_size_list);
     }
 
     Pool p(std::thread::hardware_concurrency());
@@ -183,7 +200,7 @@ int main(int argc, char *argv[]) {
         const Experiment::Factor f = e.get();
 
 
-        for (uint32_t rep = 0; rep < 25; ++rep) {
+        for (uint32_t rep = 0; rep < 50; ++rep) {
             uint32_t i = 0;
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
             const double c = f.at(i++).val.double_val;
