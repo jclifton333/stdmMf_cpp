@@ -1,4 +1,5 @@
 #include "model.hpp"
+#include "utilities.hpp"
 #include <glog/logging.h>
 #include <iostream>
 
@@ -74,6 +75,42 @@ void Model::est_par(const std::vector<BitsetPair> & history) {
     gsl_multimin_fdfminimizer_free(s);
     gsl_vector_free(x);
 }
+
+
+double Model::ll(const std::vector<BitsetPair> & history) const {
+    double ll_value = 0.0;
+    const uint32_t history_size = history.size();
+    for (uint32_t i = 0; i < (history_size - 1); ++i) {
+        const BitsetPair & curr_history = history.at(i);
+        const boost::dynamic_bitset<> & curr_inf = curr_history.first;
+        const boost::dynamic_bitset<> & curr_trt = curr_history.second;
+        // infection probabilities
+        const std::vector<double> probs = this->probs(curr_inf, curr_trt);
+
+        const boost::dynamic_bitset<> & next_inf = history.at(i + 1).first;
+
+        // get bits for changes in infection
+        const boost::dynamic_bitset<> & change_inf = curr_inf ^ next_inf;
+
+        // convert bits to sets of indices
+        const auto change_both_sets = both_sets(change_inf);
+        const std::vector<uint32_t> changed = change_both_sets.first;
+        const uint32_t num_changed = changed.size();
+        const std::vector<uint32_t> unchanged = change_both_sets.second;
+        const uint32_t num_unchanged = unchanged.size();
+
+        for (uint32_t j = 0; j < num_changed; ++j) {
+            const double p = probs.at(changed.at(j));
+            ll_value += std::log(std::max(1e-14, p)); // for stability
+        }
+        for (uint32_t j = 0; j < num_unchanged; ++j) {
+            const double p = 1.0 - probs.at(unchanged.at(j));
+            ll_value += std::log(std::max(1e-14, p));
+        }
+    }
+    return ll_value / (history_size - 1);
+}
+
 
 ModelFit::ModelFit(Model * const model, const std::vector<BitsetPair> & history)
     : model_(model), history_(history) {
