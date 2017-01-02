@@ -32,6 +32,9 @@ public:
 
     virtual std::vector<double> ll_grad(
             const std::vector<BitsetPair> & history) const = 0;
+
+    virtual std::vector<double> ll_hess(
+            const std::vector<BitsetPair> & history) const = 0;
 };
 
 class ModelFit {
