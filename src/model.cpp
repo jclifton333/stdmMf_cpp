@@ -117,7 +117,6 @@ void ModelFit::obj_fn_grad(const gsl_vector * x, void * params, gsl_vector * g){
 
 void ModelFit::obj_fn_both(const gsl_vector * x, void * params, double * f,
         gsl_vector * g){
-    // njm::timer.start("objFnBoth");
     ModelFit * mf = static_cast<ModelFit*>(params);
     std::vector<double> par;
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
@@ -142,7 +141,6 @@ void ModelFit::obj_fn_both(const gsl_vector * x, void * params, double * f,
             << pi;
         gsl_vector_set(g, pi, -ll_grad.at(pi));
     }
-    // njm::timer.stop("objFnBoth");
 }
 
 
