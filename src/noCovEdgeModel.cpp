@@ -193,6 +193,13 @@ std::vector<double> NoCovEdgeModel::ll_grad(
 }
 
 
+std::vector<double> NoCovEdgeModel::ll_hess(
+        const std::vector<BitsetPair> & history) const {
+    LOG(FATAL) << "not implemented yet";
+    return std::vector<double>();
+}
+
+
 double NoCovEdgeModel::inf_b(const uint32_t & b_node,
         const bool & b_trt) const {
     const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;

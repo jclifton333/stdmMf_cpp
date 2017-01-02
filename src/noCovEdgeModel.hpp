@@ -59,6 +59,9 @@ public:
 
     virtual std::vector<double> ll_grad(
             const std::vector<BitsetPair> & history) const;
+
+    virtual std::vector<double> ll_hess(
+            const std::vector<BitsetPair> & history) const;
 };
 
 
