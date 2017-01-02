@@ -57,8 +57,6 @@ public:
             const boost::dynamic_bitset<> & inf_status,
             const boost::dynamic_bitset<> & trt_status) const;
 
-    virtual double ll(const std::vector<BitsetPair> & history) const;
-
     virtual std::vector<double> ll_grad(
             const std::vector<BitsetPair> & history) const;
 };
