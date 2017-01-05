@@ -13,19 +13,17 @@
 namespace stdmMf {
 
 
-template <typename T>
 class GradientChecker {
 public:
-    T * m;
+    Model * m;
     int gradient_var;
     std::vector<BitsetPair> * history;
     std::vector<double> par;
 };
 
-template <typename T>
 class HessianChecker {
 public:
-    T * m;
+    Model * m;
     int gradient_var;
     int hessian_var;
     std::vector<BitsetPair> * history;
@@ -34,22 +32,20 @@ public:
 
 const double eps = 1e-6;
 
-template <typename T>
 double f (double x, void * params) {
-    GradientChecker<T> * gc = static_cast<GradientChecker<T>*>(params);
+    GradientChecker * gc = static_cast<GradientChecker *>(params);
     std::vector<double> par = gc->par;
     par.at(gc->gradient_var) = x;
     gc->m->par(par);
     return gc->m->ll(*gc->history);
 }
 
-template <typename T>
-double fGrad (double x, void * params) {
-    HessianChecker<T> * hc = static_cast<HessianChecker<T>*>(params);
-    std::vector<double> par = hc->par();
+double f_grad (double x, void * params) {
+    HessianChecker * hc = static_cast<HessianChecker *>(params);
+    std::vector<double> par = hc->m->par();
     par.at(hc->hessian_var) = x;
     hc->m->par(par);
-    return hc->m->ll_grad(*hc->history);
+    return hc->m->ll_grad(*hc->history).at(hc->gradient_var);
 }
 
 TEST(TestNoCovEdgeModel, TestPar) {
@@ -120,14 +116,14 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
         m->ll_grad(history);
 
     for (uint32_t i = 0; i < par.size(); ++i) {
-        GradientChecker<NoCovEdgeModel> gc;
+        GradientChecker gc;
         gc.m = m.get();
         gc.gradient_var = i;
         gc.history = &history;
         gc.par = par;
 
         gsl_function F;
-        F.function = &f<NoCovEdgeModel>;
+        F.function = &f;
         F.params = &gc;
 
         double result;
@@ -138,6 +134,72 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
             << "gradient failed for parameter " << i;
     }
 }
+
+
+TEST(TestNoCovEdgeModel,TestLLHessian) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    // init model
+    const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
+
+    // set par
+    Rng rng;
+    std::vector<double> par(m->par());
+    std::for_each(par.begin(),par.end(),
+            [&rng](double & x) {
+                x = rng.rnorm_01();
+            });
+    m->par(par);
+
+    System s(n,m);
+
+    RandomAgent a(n);
+
+    runner(&s, &a, 50, 1.0);
+
+    std::vector<BitsetPair> history = s.history();
+    history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
+
+
+    // generate new parameters so gradient is not zero
+    std::for_each(par.begin(),par.end(),
+            [&rng](double & x) {
+                x = rng.rnorm_01();
+            });
+    m->par(par);
+    const std::vector<double> hess_val =
+        m->ll_hess(history);
+
+    for (uint32_t i = 0; i < par.size(); ++i) {
+        for (uint32_t j = 0; j < par.size(); ++j) {
+            HessianChecker hc;
+            hc.m = m.get();
+            hc.hessian_var = i;
+            hc.gradient_var = j;
+            hc.history = &history;
+            hc.par = par;
+
+            gsl_function F;
+            F.function = &f_grad;
+            F.params = &hc;
+
+            double result;
+            double abserr;
+            gsl_deriv_central(&F, par.at(i), 1e-3, &result, &abserr);
+
+            EXPECT_NEAR(hess_val.at(i * par.size() + j), result, eps)
+                << "hessian failed for parameters " << i << " and " << j;
+        }
+    }
+}
+
 
 TEST(TestNoCovEdgeModel, EstPar) {
     NetworkInit init;
