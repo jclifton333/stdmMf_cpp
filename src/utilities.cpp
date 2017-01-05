@@ -164,6 +164,20 @@ double dot_a_and_b(const std::vector<double> & a,
     return dot;
 }
 
+std::vector<double> outer_a_and_b(const std::vector<double> & a,
+        const std::vector<double> & b) {
+    std::vector<double> outer;
+    const uint32_t a_size = a.size();
+    const uint32_t b_size = b.size();
+    outer.reserve(a_size * b_size);
+    for (uint32_t i = 0; i < a_size; ++i) {
+        for (uint32_t j = 0; j < b_size; ++j) {
+            outer.push_back(a.at(i) * b.at(j));
+        }
+    }
+    return outer;
+}
+
 double l2_norm_sq(const std::vector<double> & a) {
     const uint32_t size = a.size();
 

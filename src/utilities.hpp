@@ -39,6 +39,9 @@ void mult_b_to_a(std::vector<double> & a, const double & b);
 double dot_a_and_b(const std::vector<double> & a,
         const std::vector<double> & b);
 
+std::vector<double> outer_a_and_b(const std::vector<double> & a,
+        const std::vector<double> & b);
+
 double l2_norm_sq(const std::vector<double> & a);
 
 double l2_norm(const std::vector<double> & a);
