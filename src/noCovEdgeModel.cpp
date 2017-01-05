@@ -195,8 +195,91 @@ std::vector<double> NoCovEdgeModel::ll_grad(
 
 std::vector<double> NoCovEdgeModel::ll_hess(
         const std::vector<BitsetPair> & history) const {
-    LOG(FATAL) << "not implemented yet";
-    return std::vector<double>();
+    std::vector<double> hess_val(this->par_size_ * this->par_size_, 0.);
+
+    const uint32_t history_size = history.size();
+    for (uint32_t i = 0; i < (history_size - 1); ++i) {
+        // current infection and treatments
+        const BitsetPair & curr_history = history.at(i);
+        const boost::dynamic_bitset<> curr_inf = curr_history.first;
+        const boost::dynamic_bitset<> curr_trt = curr_history.second;
+        const std::vector<uint32_t> inf_and_trt =
+            combine_sets(curr_inf, curr_trt);
+
+        // infection probabilities
+        const std::vector<double> probs = this->probs(curr_inf, curr_trt);
+
+        const boost::dynamic_bitset<> next_inf = history.at(i + 1).first;
+
+        // get bits for changes in infection
+        const boost::dynamic_bitset<> change_inf = curr_inf ^ next_inf;
+
+        // convert bits to sets of indices
+        const std::vector<uint32_t> inf_and_change =
+            combine_sets(curr_inf, change_inf);
+
+        for (uint32_t j = 0; j < this->num_nodes_; ++j) {
+            const uint32_t status_j = inf_and_trt.at(j);
+            const uint32_t change_j = inf_and_change.at(j);
+
+            const bool trt_j = status_j % 2 == 1;
+            const double prob_j = probs.at(j);
+
+            if (status_j < 2) {
+                // was uninfected
+
+                if (prob_j > 0.0 && prob_j < 1.0) {
+                    // latent prob
+                    std::vector<double> hess_j = this->inf_b_hess(j, trt_j);
+                    std::vector<double> grad_j = this->inf_b_grad(j, trt_j);
+
+                    // neighbor probs
+                    const Node & node_j = this->network_->get_node(j);
+                    const uint32_t num_neigh = node_j.neigh_size();
+                    for (uint32_t k = 0; k < num_neigh; ++k) {
+                        const uint32_t neigh = node_j.neigh(k);
+                        const bool trt_neigh = inf_and_trt.at(neigh) % 2 == 1;
+                        // add
+                        add_b_to_a(hess_j, this->a_inf_b_hess(neigh, j,
+                                        trt_neigh, trt_j));
+                        add_b_to_a(grad_j, this->a_inf_b_grad(neigh, j,
+                                        trt_neigh, trt_j));
+                    }
+
+                    mult_b_to_a(hess_j, (1.0 - (change_j % 2) / prob_j));
+
+                    std::vector<double> outer_grad_j(outer_a_and_b(grad_j,
+                                    grad_j));
+                    mult_b_to_a(outer_grad_j, - (change_j % 2) * (1 - prob_j) /
+                            (prob_j * prob_j));
+
+
+                    add_b_to_a(hess_val, hess_j);
+                    add_b_to_a(hess_val, outer_grad_j);
+                }
+            } else {
+                // was infected
+                if (prob_j > 0.0 && prob_j < 1.0) {
+                    const std::vector<double> hess_j(mult_a_and_b(
+                                    this->rec_b_hess(j, trt_j),
+                                    1 - (1 - (status_j % 2)) / prob_j));
+
+                    const std::vector<double> grad_j(this->rec_b_grad(j,
+                                    trt_j));
+                    const std::vector<double> outer_grad_j(mult_a_and_b(
+                                    outer_a_and_b(grad_j, grad_j),
+                                    - (1 - (status_j % 2)) * (1 - prob_j) /
+                                    (prob_j * prob_j)));
+
+                    add_b_to_a(hess_val, hess_j);
+                    add_b_to_a(hess_val, outer_grad_j);
+                }
+            }
+        }
+    }
+
+    mult_b_to_a(hess_val, 1.0 / (history_size - 1));
+    return hess_val;
 }
 
 
