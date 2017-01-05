@@ -230,49 +230,78 @@ std::vector<double> NoCovEdgeModel::ll_hess(
 
                 if (prob_j > 0.0 && prob_j < 1.0) {
                     // latent prob
-                    std::vector<double> hess_j = this->inf_b_hess(j, trt_j);
-                    std::vector<double> grad_j = this->inf_b_grad(j, trt_j);
+                    const double prob_j0 = this->inf_b(j, trt_j);
+                    std::vector<double> grad_j(this->inf_b_grad(j, trt_j));
+                    std::vector<double> hess_j(this->inf_b_hess(j, trt_j));
+                    mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j0));
+                    mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j0));
+                    add_b_to_a(hess_j, mult_a_and_b(
+                                    outer_a_and_b(grad_j, grad_j), - 1));
+
 
                     // neighbor probs
                     const Node & node_j = this->network_->get_node(j);
                     const uint32_t num_neigh = node_j.neigh_size();
                     for (uint32_t k = 0; k < num_neigh; ++k) {
                         const uint32_t neigh = node_j.neigh(k);
-                        const bool trt_neigh = inf_and_trt.at(neigh) % 2 == 1;
-                        // add
-                        add_b_to_a(hess_j, this->a_inf_b_hess(neigh, j,
-                                        trt_neigh, trt_j));
-                        add_b_to_a(grad_j, this->a_inf_b_grad(neigh, j,
-                                        trt_neigh, trt_j));
+                        if (inf_and_trt.at(neigh) >= 2) {
+                            const bool trt_neigh =
+                                inf_and_trt.at(neigh) % 2 == 1;
+                            const double prob_ineigh = this->a_inf_b(neigh, j,
+                                    trt_neigh, trt_j);
+                            // add
+                            std::vector<double> add_to_grad(
+                                    this->a_inf_b_grad(neigh, j, trt_neigh,
+                                            trt_j));
+                            mult_b_to_a(add_to_grad,
+                                    - 1.0 / (1.0 - prob_ineigh));
+                            add_b_to_a(grad_j, add_to_grad);
+
+                            std::vector<double> add_to_hess(
+                                    this->a_inf_b_hess(neigh, j, trt_neigh,
+                                            trt_j));
+                            mult_b_to_a(add_to_hess,
+                                    - 1.0 / (1.0 - prob_ineigh));
+                            add_b_to_a(add_to_hess,
+                                    mult_a_and_b(outer_a_and_b(
+                                                    add_to_grad, add_to_grad),
+                                            -1));
+                            add_b_to_a(hess_j, add_to_hess);
+                        }
                     }
 
-                    mult_b_to_a(hess_j, (1.0 - (change_j % 2) / prob_j));
+                    mult_b_to_a(hess_j, (1.0 - ((change_j % 2) / prob_j)));
 
                     std::vector<double> outer_grad_j(outer_a_and_b(grad_j,
                                     grad_j));
-                    mult_b_to_a(outer_grad_j, - (change_j % 2) * (1 - prob_j) /
-                            (prob_j * prob_j));
-
+                    const double scale = std::exp(std::log(1.0 - prob_j)
+                            - 2.0 * std::log(prob_j));
+                    mult_b_to_a(outer_grad_j, - ((change_j % 2) * scale));
 
                     add_b_to_a(hess_val, hess_j);
                     add_b_to_a(hess_val, outer_grad_j);
                 }
             } else {
                 // was infected
-                if (prob_j > 0.0 && prob_j < 1.0) {
-                    const std::vector<double> hess_j(mult_a_and_b(
-                                    this->rec_b_hess(j, trt_j),
-                                    1 - (1 - (status_j % 2)) / prob_j));
 
-                    const std::vector<double> grad_j(this->rec_b_grad(j,
-                                    trt_j));
-                    const std::vector<double> outer_grad_j(mult_a_and_b(
-                                    outer_a_and_b(grad_j, grad_j),
-                                    - (1 - (status_j % 2)) * (1 - prob_j) /
-                                    (prob_j * prob_j)));
+                if (prob_j > 0.0 && prob_j < 1.0) {
+                    std::vector<double> grad_j(this->rec_b_grad(j, trt_j));
+                    mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j));
+
+                    const std::vector<double> outer_grad_j(
+                            outer_a_and_b(grad_j, grad_j));
+
+                    std::vector<double> hess_j(this->rec_b_hess(j, trt_j));
+                    mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j));
+                    add_b_to_a(hess_j, mult_a_and_b(outer_grad_j, -1.0));
+                    mult_b_to_a(hess_j, 1.0 - ((change_j % 2) / prob_j));
 
                     add_b_to_a(hess_val, hess_j);
-                    add_b_to_a(hess_val, outer_grad_j);
+
+                    const double scale = std::exp(std::log(1.0 - prob_j)
+                            - 2.0 * std::log(prob_j));
+                    add_b_to_a(hess_val, mult_a_and_b(outer_grad_j,
+                                    - ((change_j % 2) * scale)));
                 }
             }
         }
@@ -363,19 +392,18 @@ std::vector<double> NoCovEdgeModel::inf_b_hess(const uint32_t & b_node,
 
     const double expBase = std::exp(std::min(100.0, base));
 
-    const double val_a = std::exp(base - 2 * std::log(1.0 + expBase));
-    const double val_b = 2 * std::exp(2 * base - 3 * std::log(1.0 + expBase));
+    const double expitBase = 1.0 - 1.0 / (1.0 + expBase);
+    const double val = expitBase * (1.0 - expitBase) * (1.0 - 2.0 * expitBase);
 
     std::vector<double> hess_val;
     hess_val.reserve(this->par_size_ * this->par_size_);
     for (uint32_t i = 0; i < this->par_size_; ++i) {
         for (uint32_t j = 0; j < this->par_size_; ++j) {
-            hess_val.push_back((val_a - val_b) * inner_grad.at(i) *
+            hess_val.push_back(val * inner_grad.at(i) *
                     inner_grad.at(j));
         }
     }
     CHECK_EQ(hess_val.size(), this->par_size_ * this->par_size_);
-
     return hess_val;
 }
 
@@ -391,14 +419,14 @@ std::vector<double> NoCovEdgeModel::a_inf_b_hess(
 
     const double expBase = std::exp(std::min(100.0, base));
 
-    const double val_a = std::exp(base - 2 * std::log(1.0 + expBase));
-    const double val_b = 2 * std::exp(2 * base - 3 * std::log(1.0 + expBase));
+    const double expitBase = 1.0 - 1.0 / (1.0 + expBase);
+    const double val = expitBase * (1.0 - expitBase) * (1.0 - 2.0 * expitBase);
 
     std::vector<double> hess_val;
     hess_val.reserve(this->par_size_ * this->par_size_);
     for (uint32_t i = 0; i < this->par_size_; ++i) {
         for (uint32_t j = 0; j < this->par_size_; ++j) {
-            hess_val.push_back((val_a - val_b) * inner_grad.at(i) *
+            hess_val.push_back(val * inner_grad.at(i) *
                     inner_grad.at(j));
         }
     }
@@ -417,14 +445,14 @@ std::vector<double> NoCovEdgeModel::rec_b_hess(
 
     const double expBase = std::exp(std::min(100.0, base));
 
-    const double val_a = std::exp(base - 2 * std::log(1.0 + expBase));
-    const double val_b = 2 * std::exp(2 * base - 3 * std::log(1.0 + expBase));
+    const double expitBase = 1.0 - 1.0 / (1.0 + expBase);
+    const double val = expitBase * (1.0 - expitBase) * (1.0 - 2.0 * expitBase);
 
     std::vector<double> hess_val;
     hess_val.reserve(this->par_size_ * this->par_size_);
     for (uint32_t i = 0; i < this->par_size_; ++i) {
         for (uint32_t j = 0; j < this->par_size_; ++j) {
-            hess_val.push_back((val_a - val_b) * inner_grad.at(i) *
+            hess_val.push_back(val * inner_grad.at(i) *
                     inner_grad.at(j));
         }
     }
