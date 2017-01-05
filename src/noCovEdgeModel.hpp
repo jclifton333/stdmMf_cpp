@@ -40,6 +40,17 @@ private:
             const uint32_t & b_node, const bool & b_trt) const;
 
 
+    std::vector<double> inf_b_hess(const uint32_t & b_node,
+            const bool & b_trt) const;
+
+    std::vector<double> a_inf_b_hess(
+            const uint32_t & a_node, const uint32_t & b_node,
+            const bool & a_trt, const bool & b_trt) const;
+
+    std::vector<double> rec_b_hess(
+            const uint32_t & b_node, const bool & b_trt) const;
+
+
 public:
     NoCovEdgeModel(const std::shared_ptr<const Network> & network);
 

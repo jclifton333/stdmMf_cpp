@@ -270,5 +270,86 @@ std::vector<double> NoCovEdgeModel::rec_b_grad(
 }
 
 
+std::vector<double> NoCovEdgeModel::inf_b_hess(const uint32_t & b_node,
+        const bool & b_trt) const {
+    const std::vector<double> inner_grad({1, 0, 0, 0, 0,
+                    static_cast<double>(b_trt)});
+
+    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
+    LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
+
+    const double expBase = std::exp(std::min(100.0, base));
+
+    const double val_a = std::exp(base - 2 * std::log(1.0 + expBase));
+    const double val_b = 2 * std::exp(2 * base - 3 * std::log(1.0 + expBase));
+
+    std::vector<double> hess_val;
+    hess_val.reserve(this->par_size_ * this->par_size_);
+    for (uint32_t i = 0; i < this->par_size_; ++i) {
+        for (uint32_t j = 0; j < this->par_size_; ++j) {
+            hess_val.push_back((val_a - val_b) * inner_grad.at(i) *
+                    inner_grad.at(j));
+        }
+    }
+    CHECK_EQ(hess_val.size(), this->par_size_ * this->par_size_);
+
+    return hess_val;
+}
+
+std::vector<double> NoCovEdgeModel::a_inf_b_hess(
+        const uint32_t & a_node, const uint32_t & b_node,
+        const bool & a_trt, const bool & b_trt) const {
+    const std::vector<double> inner_grad({0, 1, 0, static_cast<double>(a_trt),
+                    0, static_cast<double>(b_trt)});
+
+    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt
+        + this->trt_pre_inf_ * b_trt;
+    LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
+
+    const double expBase = std::exp(std::min(100.0, base));
+
+    const double val_a = std::exp(base - 2 * std::log(1.0 + expBase));
+    const double val_b = 2 * std::exp(2 * base - 3 * std::log(1.0 + expBase));
+
+    std::vector<double> hess_val;
+    hess_val.reserve(this->par_size_ * this->par_size_);
+    for (uint32_t i = 0; i < this->par_size_; ++i) {
+        for (uint32_t j = 0; j < this->par_size_; ++j) {
+            hess_val.push_back((val_a - val_b) * inner_grad.at(i) *
+                    inner_grad.at(j));
+        }
+    }
+    CHECK_EQ(hess_val.size(), this->par_size_ * this->par_size_);
+
+    return hess_val;
+}
+
+std::vector<double> NoCovEdgeModel::rec_b_hess(
+        const uint32_t & b_node, const bool & b_trt) const {
+    const std::vector<double> inner_grad({0, 0, 1, 0,
+                    static_cast<double>(b_trt), 0});
+
+    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
+    LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
+
+    const double expBase = std::exp(std::min(100.0, base));
+
+    const double val_a = std::exp(base - 2 * std::log(1.0 + expBase));
+    const double val_b = 2 * std::exp(2 * base - 3 * std::log(1.0 + expBase));
+
+    std::vector<double> hess_val;
+    hess_val.reserve(this->par_size_ * this->par_size_);
+    for (uint32_t i = 0; i < this->par_size_; ++i) {
+        for (uint32_t j = 0; j < this->par_size_; ++j) {
+            hess_val.push_back((val_a - val_b) * inner_grad.at(i) *
+                    inner_grad.at(j));
+        }
+    }
+    CHECK_EQ(hess_val.size(), this->par_size_ * this->par_size_);
+
+    return hess_val;
+}
+
+
 
 } // namespace stdmMf
