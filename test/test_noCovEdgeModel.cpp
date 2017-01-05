@@ -16,7 +16,7 @@ namespace stdmMf {
 class GradientChecker {
 public:
     Model * m;
-    int gradient_var;
+    int wiggle_var;
     std::vector<BitsetPair> * history;
     std::vector<double> par;
 };
@@ -24,8 +24,8 @@ public:
 class HessianChecker {
 public:
     Model * m;
+    int wiggle_var;
     int gradient_var;
-    int hessian_var;
     std::vector<BitsetPair> * history;
     std::vector<double> par;
 };
@@ -35,7 +35,7 @@ const double eps = 1e-6;
 double f (double x, void * params) {
     GradientChecker * gc = static_cast<GradientChecker *>(params);
     std::vector<double> par = gc->par;
-    par.at(gc->gradient_var) = x;
+    par.at(gc->wiggle_var) = x;
     gc->m->par(par);
     return gc->m->ll(*gc->history);
 }
@@ -43,7 +43,7 @@ double f (double x, void * params) {
 double f_grad (double x, void * params) {
     HessianChecker * hc = static_cast<HessianChecker *>(params);
     std::vector<double> par = hc->m->par();
-    par.at(hc->hessian_var) = x;
+    par.at(hc->wiggle_var) = x;
     hc->m->par(par);
     return hc->m->ll_grad(*hc->history).at(hc->gradient_var);
 }
@@ -118,7 +118,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
     for (uint32_t i = 0; i < par.size(); ++i) {
         GradientChecker gc;
         gc.m = m.get();
-        gc.gradient_var = i;
+        gc.wiggle_var = i;
         gc.history = &history;
         gc.par = par;
 
@@ -181,7 +181,7 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
         for (uint32_t j = 0; j < par.size(); ++j) {
             HessianChecker hc;
             hc.m = m.get();
-            hc.hessian_var = i;
+            hc.wiggle_var = i;
             hc.gradient_var = j;
             hc.history = &history;
             hc.par = par;
