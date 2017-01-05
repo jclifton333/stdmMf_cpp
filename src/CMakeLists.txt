@@ -2,6 +2,7 @@ find_package(Glog REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Boost REQUIRED system thread)
 find_package(GSL REQUIRED)
+find_package(Armadillo REQUIRED)
 
 include(GetGitRevisionDescription)
 git_describe(GIT_DESCRIBE_VAR)
