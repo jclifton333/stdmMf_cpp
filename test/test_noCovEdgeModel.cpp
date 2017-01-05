@@ -30,7 +30,7 @@ public:
     std::vector<double> par;
 };
 
-const double eps = 1e-6;
+const double eps = 1e-4;
 
 double f (double x, void * params) {
     GradientChecker * gc = static_cast<GradientChecker *>(params);
