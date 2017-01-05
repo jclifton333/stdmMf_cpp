@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 
     NetworkInit init;
     init.set_dim_x(25);
-    init.set_dim_y(40);
+    init.set_dim_y(20);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
