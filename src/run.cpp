@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps = 50;
 
     NetworkInit init;
-    init.set_dim_x(10);
-    init.set_dim_y(10);
+    init.set_dim_x(25);
+    init.set_dim_y(40);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
