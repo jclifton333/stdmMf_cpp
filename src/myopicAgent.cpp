@@ -52,32 +52,37 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
         for (uint32_t i = 0; i < this->num_nodes_; ++i) {
             const uint32_t & node = shuffled_nodes.at(i);
             if (inf_bits.test(node)) {
-                // add negative since sorting is ascending order
+                // use raw probability.  sorting is ascending.  want
+                // to treat infected node with smallest probability of
+                // recovery
                 sorted_inf.push_back(std::pair<double, uint32_t>(
-                                - probs.at(node), node));
+                                probs.at(node), node));
             } else {
-                sorted_not.push_back(std::pair<double, uint32_t>(probs.at(node),
-                                node));
+                // add negative since sorting is ascending order. want
+                // to treat uninfected node with largest probability
+                // of infection
+                sorted_not.push_back(std::pair<double, uint32_t>(
+                                -probs.at(node), node));
             }
         }
 
         std::sort(sorted_inf.begin(), sorted_inf.end());
         std::sort(sorted_not.begin(), sorted_not.end());
 
-        uint32_t num_trt_inf = std::min(uint32_t(this->num_trt_ / 2. + 1),
-                uint32_t(inf_bits.count()));
-        uint32_t num_trt_not = this->num_trt_ - num_trt_inf;
+        uint32_t num_trt_not = std::min(uint32_t(this->num_trt_ / 2. + 1),
+                uint32_t(this->network_->size() - inf_bits.count()));
+        uint32_t num_trt_inf = this->num_trt_ - num_trt_not;
 
-        CHECK_LE(num_trt_inf, inf_bits.count());
         CHECK_LE(num_trt_not, this->num_nodes_ - inf_bits.count());
-        CHECK_EQ(num_trt_inf + num_trt_not, this->num_trt_);
+        CHECK_LE(num_trt_inf, inf_bits.count());
+        CHECK_EQ(num_trt_not + num_trt_inf, this->num_trt_);
 
         trt_bits.reset();
-        for (uint32_t i = 0; i < num_trt_inf; ++i) {
-            trt_bits.set(sorted_inf.at(i).second);
-        }
         for (uint32_t i = 0; i < num_trt_not; ++i) {
             trt_bits.set(sorted_not.at(i).second);
+        }
+        for (uint32_t i = 0; i < num_trt_inf; ++i) {
+            trt_bits.set(sorted_inf.at(i).second);
         }
     }
     return trt_bits;
