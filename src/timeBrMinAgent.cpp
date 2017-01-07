@@ -22,8 +22,6 @@ using namespace stdmMf;
 
 int main(int argc, char *argv[]) {
 
-    const uint32_t num_reps = 50;
-
     NetworkInit init;
     init.set_dim_x(25);
     init.set_dim_y(20);
