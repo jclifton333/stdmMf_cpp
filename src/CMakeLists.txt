@@ -40,6 +40,7 @@ SET(bin_file_names
   vfnMaxExperiment
   brMinExperiment
   timeSweepAgent
+  timeBrMinAgent
   run
   sandbox)
 
