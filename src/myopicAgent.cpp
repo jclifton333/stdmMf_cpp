@@ -69,11 +69,8 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
         std::sort(sorted_inf.begin(), sorted_inf.end());
         std::sort(sorted_not.begin(), sorted_not.end());
 
-        // uint32_t num_trt_not = this->num_trt_ / 2 + 1;
-        // uint32_t num_trt_inf = this->num_trt_ - num_trt_not;
-
-        uint32_t num_trt_not = 0;
-        uint32_t num_trt_inf = this->num_trt_;
+        uint32_t num_trt_not = this->num_trt_ / 2 + 1;
+        uint32_t num_trt_inf = this->num_trt_ - num_trt_not;
 
         if (num_trt_not > (this->num_nodes_ - inf_bits.count())) {
             const uint32_t diff = num_trt_not -
