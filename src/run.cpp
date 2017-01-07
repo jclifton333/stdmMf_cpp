@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     const std::shared_ptr<Network> net(Network::gen_network(init));
 
     const std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
-    mod->par({-4.0, -4.0, -1.5, -8.0, 2.0, -8.0});
+    mod->par({-4.0, -4.0, -1.5, -2.0, 2.0, -4.0});
 
 
     // none
