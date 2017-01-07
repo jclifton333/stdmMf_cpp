@@ -365,6 +365,13 @@ TEST(TestUtilities, ScalarAddBToA) {
 }
 
 
+TEST(TestUtilities, TestDotAAndB) {
+    const std::vector<double> x({1, 2, 3, 4, 5});
+    const std::vector<double> y({1, -2, 3, -4, 5});
+    EXPECT_NEAR(dot_a_and_b(x, y), 15.0, 1e-12);
+}
+
+
 TEST(TestUtilities, TestMeanAndVar) {
     const std::vector<double> x = {-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
     const std::pair<double, double> stats = mean_and_var(x);
