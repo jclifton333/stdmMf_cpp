@@ -239,6 +239,7 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
     CHECK_GE(size, 2);
 
     // init adjacency matrix
+    network->num_nodes = size;
     network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
             network->num_nodes, network->num_nodes);
 
