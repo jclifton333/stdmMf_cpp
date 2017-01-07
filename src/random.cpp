@@ -52,7 +52,7 @@ int Rng::rint(const int a, const int b) {
 
 
 std::vector<int> Rng::sample_range(const int a, const int b, const int n) {
-    CHECK_LT(a, b);
+    CHECK_LT(a, b) << "a = " << a << ", b = " << b;
     const uint32_t num_vals = b - a;
     CHECK_LT(n, num_vals); // can't sample more than what's there
     std::vector<int> choices;
