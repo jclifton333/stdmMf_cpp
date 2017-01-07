@@ -3,6 +3,7 @@ find_package(Protobuf REQUIRED)
 find_package(Boost REQUIRED system thread)
 find_package(GSL REQUIRED)
 find_package(Armadillo REQUIRED)
+find_package(BLAS REQUIRED)
 
 include(GetGitRevisionDescription)
 git_describe(GIT_DESCRIBE_VAR)
@@ -48,5 +49,5 @@ foreach(bin_file ${bin_file_names})
   add_executable(${bin_file} ${bin_file}.cpp)
   target_link_libraries(${bin_file} stdmMf ${Boost_LIBRARIES}
     ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES}
-    ${ARMADILLO_LIBRARIES})
+    ${ARMADILLO_LIBRARIES} ${BLAS_LIBRARIES})
 endforeach(bin_file)
