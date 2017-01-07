@@ -1,6 +1,7 @@
 #include "utilities.hpp"
 #include <glog/logging.h>
 
+#include <cblas.h>
 
 namespace stdmMf {
 
@@ -156,12 +157,7 @@ double dot_a_and_b(const std::vector<double> & a,
     const uint32_t size = a.size();
     CHECK_EQ(size, b.size());
 
-    double dot = 0.0;
-    for (uint32_t i = 0; i < size; ++i) {
-        dot += a.at(i) * b.at(i);
-    }
-
-    return dot;
+    return cblas_ddot(size, a.data(), 1, b.data(), 1);
 }
 
 std::vector<double> outer_a_and_b(const std::vector<double> & a,
