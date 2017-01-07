@@ -243,43 +243,43 @@ int main(int argc, char *argv[]) {
                 });
     }
 
-    // vr max br min adapt
-    std::vector<std::shared_ptr<Result<double> > > adapt_val;
-    std::vector<std::shared_ptr<Result<double> > > adapt_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        adapt_val.push_back(r_val);
-        adapt_time.push_back(r_time);
+    // // vr max br min adapt
+    // std::vector<std::shared_ptr<Result<double> > > adapt_val;
+    // std::vector<std::shared_ptr<Result<double> > > adapt_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     std::shared_ptr<Result<double> > r_val(new Result<double>);
+    //     std::shared_ptr<Result<double> > r_time(new Result<double>);
+    //     adapt_val.push_back(r_val);
+    //     adapt_time.push_back(r_time);
 
-        pool.service()->post([=]() {
-                    System s(net->clone(), mod->clone());
-                    s.set_seed(i);
-                    VfnBrAdaptSimPerturbAgent a(net->clone(),
-                            std::shared_ptr<Features>(
-                                    new NetworkRunFeatures(net->clone(), 1)),
-                            std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net->clone())),
-                            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
-                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
-                    a.set_seed(i);
+    //     pool.service()->post([=]() {
+    //                 System s(net->clone(), mod->clone());
+    //                 s.set_seed(i);
+    //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
+    //                         std::shared_ptr<Features>(
+    //                                 new NetworkRunFeatures(net->clone(), 1)),
+    //                         std::shared_ptr<Model>(
+    //                                 new NoCovEdgeModel(net->clone())),
+    //                         2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
+    //                         1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
+    //                 a.set_seed(i);
 
-                    s.start();
+    //                 s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+    //                 std::chrono::time_point<
+    //                     std::chrono::high_resolution_clock> tick =
+    //                     std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+    //                 r_val->set(runner(&s, &a, 20, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+    //                 std::chrono::time_point<
+    //                     std::chrono::high_resolution_clock> tock =
+    //                     std::chrono::high_resolution_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
-                });
-    }
+    //                 r_time->set(std::chrono::duration_cast<
+    //                         std::chrono::seconds>(tock - tick).count());
+    //             });
+    // }
 
 
     pool.join();
@@ -338,14 +338,14 @@ int main(int argc, char *argv[]) {
               << " seconds"
               << std::endl;
 
-    const std::pair<double, double> adapt_stats = mean_and_var(
-            result_to_vec(adapt_val));
-    std::cout << "adapt: "
-              << adapt_stats.first
-              << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
-              << " in " << mean_and_var(result_to_vec(adapt_time)).first
-              << " seconds"
-              << std::endl;
+    // const std::pair<double, double> adapt_stats = mean_and_var(
+    //         result_to_vec(adapt_val));
+    // std::cout << "adapt: "
+    //           << adapt_stats.first
+    //           << " (" << std::sqrt(adapt_stats.second / num_reps) << ")"
+    //           << " in " << mean_and_var(result_to_vec(adapt_time)).first
+    //           << " seconds"
+    //           << std::endl;
 
 
     return 0;
