@@ -28,8 +28,12 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps = 50;
 
     NetworkInit init;
-    init.set_size(100);
-    init.set_type(NetworkInit_NetType_BARABASI);
+    // init.set_size(100);
+    // init.set_type(NetworkInit_NetType_BARABASI);
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
 
     const std::shared_ptr<Network> net(Network::gen_network(init));
 
