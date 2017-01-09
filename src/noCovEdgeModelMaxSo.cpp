@@ -359,7 +359,7 @@ double NoCovEdgeModelMaxSo::a_inf_b(const uint32_t & a_node,
         const uint32_t num_neigh = a.neigh_size();
         for (uint32_t i = 0; i < num_neigh; i++) {
             const uint32_t neigh = a.neigh(i);
-            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+            if (inf_bits.test(neigh) && trt_bits.test(neigh)) {
                 a_trt_so = true;
                 break;
             }
@@ -400,7 +400,7 @@ double NoCovEdgeModelMaxSo::rec_b(const uint32_t & b_node,
         const uint32_t num_neigh = b.neigh_size();
         for (uint32_t i = 0; i < num_neigh; i++) {
             const uint32_t neigh = b.neigh(i);
-            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+            if (inf_bits.test(neigh) && trt_bits.test(neigh)) {
                 b_trt_so = true;
                 break;
             }
@@ -457,7 +457,7 @@ std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_grad(
         const uint32_t num_neigh = a.neigh_size();
         for (uint32_t i = 0; i < num_neigh; i++) {
             const uint32_t neigh = a.neigh(i);
-            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+            if (inf_bits.test(neigh) && trt_bits.test(neigh)) {
                 a_trt_so = true;
                 break;
             }
@@ -505,7 +505,7 @@ std::vector<double> NoCovEdgeModelMaxSo::rec_b_grad(
         const uint32_t num_neigh = b.neigh_size();
         for (uint32_t i = 0; i < num_neigh; i++) {
             const uint32_t neigh = b.neigh(i);
-            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+            if (inf_bits.test(neigh) && trt_bits.test(neigh)) {
                 b_trt_so = true;
                 break;
             }
@@ -580,7 +580,7 @@ std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_hess(
         const uint32_t num_neigh = a.neigh_size();
         for (uint32_t i = 0; i < num_neigh; i++) {
             const uint32_t neigh = a.neigh(i);
-            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+            if (inf_bits.test(neigh) && trt_bits.test(neigh)) {
                 a_trt_so = true;
                 break;
             }
@@ -640,7 +640,7 @@ std::vector<double> NoCovEdgeModelMaxSo::rec_b_hess(
         const uint32_t num_neigh = b.neigh_size();
         for (uint32_t i = 0; i < num_neigh; i++) {
             const uint32_t neigh = b.neigh(i);
-            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+            if (inf_bits.test(neigh) && trt_bits.test(neigh)) {
                 b_trt_so = true;
                 break;
             }
