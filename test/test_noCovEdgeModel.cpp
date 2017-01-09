@@ -139,8 +139,8 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
 TEST(TestNoCovEdgeModel,TestLLHessian) {
     // generate network
     NetworkInit init;
-    init.set_dim_x(10);
-    init.set_dim_y(10);
+    init.set_dim_x(3);
+    init.set_dim_y(3);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
@@ -162,7 +162,7 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
 
     RandomAgent a(n);
 
-    runner(&s, &a, 50, 1.0);
+    runner(&s, &a, 3, 1.0);
 
     std::vector<BitsetPair> history = s.history();
     history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
