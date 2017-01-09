@@ -68,7 +68,8 @@ std::vector<double> NoCovEdgeModelMaxSo::probs(
             const Node & node = this->network_->get_node(i);
             const uint32_t num_neigh = node.neigh_size();
 
-            double prob = 1.0 - this->inf_b(i, trt_i); // latent prob
+            double prob = 1.0 - this->inf_b(i, trt_i, inf_status,
+                    trt_status); // latent prob
 
             // factor in neighbors
             for (uint32_t j = 0; j < num_neigh; ++j) {
@@ -77,13 +78,14 @@ std::vector<double> NoCovEdgeModelMaxSo::probs(
                 if (status_neigh >= 2) {
                     // if neighbor is infected
                     const bool trt_neigh = status_neigh % 2 == 1;
-                    prob *= 1.0 - this->a_inf_b(neigh, i, trt_neigh, trt_i);
+                    prob *= 1.0 - this->a_inf_b(neigh, i, trt_neigh, trt_i,
+                            inf_status, trt_status);
                 }
             }
             probs.push_back(1.0 - prob);
         } else {
             // infected -> recovery probability
-            const double prob = this->rec_b(i, trt_i);
+            const double prob = this->rec_b(i, trt_i, inf_status, trt_status);
             probs.push_back(prob);
         }
     }
@@ -134,9 +136,10 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_grad(
                         // if neighbor is infected
                         const bool trt_neigh = inf_and_trt.at(neigh) % 2 == 1;
                         const double prob_jneigh = this->a_inf_b(
-                                neigh, j, trt_neigh, trt_j);
+                                neigh, j, trt_neigh, trt_j, curr_inf, curr_trt);
                         std::vector<double> grad_jneigh = this->a_inf_b_grad(
-                                neigh, j , trt_neigh, trt_j);
+                                neigh, j , trt_neigh, trt_j, curr_inf,
+                                curr_trt);
 
                         if (prob_jneigh < 1.0) {
                             mult_b_to_a(grad_jneigh,
@@ -149,9 +152,10 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_grad(
 
                 // latent effect
                 {
-                    const double prob_j_latent = this->inf_b(j, trt_j);
+                    const double prob_j_latent = this->inf_b(j, trt_j, curr_inf,
+                            curr_trt);
                     std::vector<double> grad_j_latent = this->inf_b_grad(
-                            j, trt_j);
+                            j, trt_j, curr_inf, curr_trt);
                     if (prob_j_latent < 1.0) {
                         mult_b_to_a(grad_j_latent,
                                 - 1.0 / (1.0 - prob_j_latent));
@@ -172,7 +176,8 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_grad(
                 }
             } else {
                 // was infected
-                std::vector<double> grad = this->rec_b_grad(j, trt_j);
+                std::vector<double> grad = this->rec_b_grad(j, trt_j, curr_inf,
+                        curr_trt);
                 if (change_j % 2 == 1) {
                     // becomes uninfected
                     if (prob_j > 0.0) {
@@ -231,9 +236,12 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_hess(
 
                 if (prob_j > 0.0 && prob_j < 1.0) {
                     // latent prob
-                    const double prob_j0 = this->inf_b(j, trt_j);
-                    std::vector<double> grad_j(this->inf_b_grad(j, trt_j));
-                    std::vector<double> hess_j(this->inf_b_hess(j, trt_j));
+                    const double prob_j0 = this->inf_b(j, trt_j, curr_inf,
+                            curr_trt);
+                    std::vector<double> grad_j(this->inf_b_grad(j, trt_j,
+                                    curr_inf, curr_trt));
+                    std::vector<double> hess_j(this->inf_b_hess(j, trt_j,
+                                    curr_inf, curr_trt));
                     mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j0));
                     mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j0));
                     add_b_to_a(hess_j, mult_a_and_b(
@@ -249,18 +257,18 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_hess(
                             const bool trt_neigh =
                                 inf_and_trt.at(neigh) % 2 == 1;
                             const double prob_ineigh = this->a_inf_b(neigh, j,
-                                    trt_neigh, trt_j);
+                                    trt_neigh, trt_j, curr_inf, curr_trt);
                             // add
                             std::vector<double> add_to_grad(
                                     this->a_inf_b_grad(neigh, j, trt_neigh,
-                                            trt_j));
+                                            trt_j, curr_inf, curr_trt));
                             mult_b_to_a(add_to_grad,
                                     - 1.0 / (1.0 - prob_ineigh));
                             add_b_to_a(grad_j, add_to_grad);
 
                             std::vector<double> add_to_hess(
                                     this->a_inf_b_hess(neigh, j, trt_neigh,
-                                            trt_j));
+                                            trt_j, curr_inf, curr_trt));
                             mult_b_to_a(add_to_hess,
                                     - 1.0 / (1.0 - prob_ineigh));
                             add_b_to_a(add_to_hess,
@@ -286,13 +294,15 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_hess(
                 // was infected
 
                 if (prob_j > 0.0 && prob_j < 1.0) {
-                    std::vector<double> grad_j(this->rec_b_grad(j, trt_j));
+                    std::vector<double> grad_j(this->rec_b_grad(j, trt_j,
+                                    curr_inf, curr_trt));
                     mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j));
 
                     const std::vector<double> outer_grad_j(
                             outer_a_and_b(grad_j, grad_j));
 
-                    std::vector<double> hess_j(this->rec_b_hess(j, trt_j));
+                    std::vector<double> hess_j(this->rec_b_hess(j, trt_j,
+                                    curr_inf, curr_trt));
                     mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j));
                     add_b_to_a(hess_j, mult_a_and_b(outer_grad_j, -1.0));
                     mult_b_to_a(hess_j, 1.0 - ((change_j % 2) / prob_j));
@@ -317,7 +327,22 @@ double NoCovEdgeModelMaxSo::inf_b(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
 }
@@ -326,8 +351,38 @@ double NoCovEdgeModelMaxSo::a_inf_b(const uint32_t & a_node,
         const uint32_t & b_node, const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt
-        + this->trt_pre_inf_ * b_trt;
+    bool a_trt_so = false;
+    if (a_trt) {
+        a_trt_so = true;
+    } else {
+        const Node & a = this->network_->get_node(a_node);
+        const uint32_t num_neigh = a.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = a.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                a_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt_so
+        + this->trt_pre_inf_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
@@ -337,7 +392,22 @@ double NoCovEdgeModelMaxSo::rec_b(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
@@ -347,7 +417,22 @@ std::vector<double> NoCovEdgeModelMaxSo::inf_b_grad(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     const double expBase = std::exp(std::min(100.0, base));
@@ -355,7 +440,7 @@ std::vector<double> NoCovEdgeModelMaxSo::inf_b_grad(const uint32_t & b_node,
 
     std::vector<double> grad_val(this->par_size_, 0.0);
     grad_val.at(0) = val;
-    grad_val.at(5) = b_trt * val;
+    grad_val.at(5) = b_trt_so * val;
     return grad_val;
 }
 
@@ -364,8 +449,38 @@ std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_grad(
         const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt
-        + this->trt_pre_inf_ * b_trt;
+    bool a_trt_so = false;
+    if (a_trt) {
+        a_trt_so = true;
+    } else {
+        const Node & a = this->network_->get_node(a_node);
+        const uint32_t num_neigh = a.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = a.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                a_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt_so
+        + this->trt_pre_inf_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     const double expBase = std::exp(std::min(100.0, base));
@@ -373,8 +488,8 @@ std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_grad(
 
     std::vector<double> grad_val(this->par_size_, 0.0);
     grad_val.at(1) = val;
-    grad_val.at(3) = a_trt * val;
-    grad_val.at(5) = b_trt * val;
+    grad_val.at(3) = a_trt_so * val;
+    grad_val.at(5) = b_trt_so * val;
     return grad_val;
 }
 
@@ -382,7 +497,22 @@ std::vector<double> NoCovEdgeModelMaxSo::rec_b_grad(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     const double expBase = std::exp(std::min(100.0, base));
@@ -390,7 +520,7 @@ std::vector<double> NoCovEdgeModelMaxSo::rec_b_grad(
 
     std::vector<double> grad_val(this->par_size_, 0.0);
     grad_val.at(2) = val;
-    grad_val.at(4) = b_trt * val;
+    grad_val.at(4) = b_trt_so * val;
     return grad_val;
 }
 
@@ -399,10 +529,25 @@ std::vector<double> NoCovEdgeModelMaxSo::inf_b_hess(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const std::vector<double> inner_grad({1, 0, 0, 0, 0,
-                    static_cast<double>(b_trt)});
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
 
-    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
+    const std::vector<double> inner_grad({1, 0, 0, 0, 0,
+                    static_cast<double>(b_trt_so)});
+
+    const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     const double expBase = std::exp(std::min(100.0, base));
@@ -427,11 +572,42 @@ std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_hess(
         const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const std::vector<double> inner_grad({0, 1, 0, static_cast<double>(a_trt),
-                    0, static_cast<double>(b_trt)});
+    bool a_trt_so = false;
+    if (a_trt) {
+        a_trt_so = true;
+    } else {
+        const Node & a = this->network_->get_node(a_node);
+        const uint32_t num_neigh = a.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = a.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                a_trt_so = true;
+                break;
+            }
+        }
+    }
 
-    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt
-        + this->trt_pre_inf_ * b_trt;
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
+
+    const std::vector<double> inner_grad({0, 1, 0,
+                    static_cast<double>(a_trt_so), 0,
+                    static_cast<double>(b_trt_so)});
+
+    const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt_so
+        + this->trt_pre_inf_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     const double expBase = std::exp(std::min(100.0, base));
@@ -456,10 +632,25 @@ std::vector<double> NoCovEdgeModelMaxSo::rec_b_hess(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const std::vector<double> inner_grad({0, 0, 1, 0,
-                    static_cast<double>(b_trt), 0});
+    bool b_trt_so = false;
+    if (b_trt) {
+        b_trt_so = true;
+    } else {
+        const Node & b = this->network_->get_node(b_node);
+        const uint32_t num_neigh = b.neigh_size();
+        for (uint32_t i = 0; i < num_neigh; i++) {
+            const uint32_t neigh = b.neigh(i);
+            if (!inf_bits.test(neigh) && trt_bits.test(neigh)) {
+                b_trt_so = true;
+                break;
+            }
+        }
+    }
 
-    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
+    const std::vector<double> inner_grad({0, 0, 1, 0,
+                    static_cast<double>(b_trt_so), 0});
+
+    const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt_so;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
     const double expBase = std::exp(std::min(100.0, base));
