@@ -1,5 +1,6 @@
 #include "system.hpp"
 #include "noCovEdgeModel.hpp"
+#include "noCovEdgeModelMaxSo.hpp"
 #include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
@@ -23,7 +24,7 @@ using namespace stdmMf;
 int main(int argc, char *argv[]) {
 
     // Pool pool(std::thread::hardware_concurrency());
-    Pool pool(50);
+    Pool pool(std::min(50u, std::thread::hardware_concurrency()));
 
     const uint32_t num_reps = 50;
 
@@ -37,7 +38,7 @@ int main(int argc, char *argv[]) {
 
     const std::shared_ptr<Network> net(Network::gen_network(init));
 
-    const std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
+    const std::shared_ptr<Model> mod(new NoCovEdgeModelMaxSo(net));
     mod->par({-4.0, -2.0, -1.5, -0.25, 0.25, -4.0});
 
 
