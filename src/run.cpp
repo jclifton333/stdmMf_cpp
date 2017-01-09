@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
                     s.set_seed(i);
                     VfnMaxSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunFeatures(net->clone(), 2)),
+                                    new NetworkRunFeatures(net->clone(), 3)),
                             std::shared_ptr<Model>(
                                     new NoCovEdgeModel(net->clone())),
                             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
                     s.set_seed(i);
                     BrMinSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunFeatures(net->clone(), 2)),
+                                    new NetworkRunFeatures(net->clone(), 3)),
                             1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
                     a.set_seed(i);
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
                     s.set_seed(i);
                     VfnBrAdaptSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunFeatures(net->clone(), 2)),
+                                    new NetworkRunFeatures(net->clone(), 3)),
                             std::shared_ptr<Model>(
                                     new NoCovEdgeModel(net->clone())),
                             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
