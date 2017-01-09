@@ -18,7 +18,9 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
-  noCovEdgeModel.cpp model.cpp objFns.cpp
+
+  ## models
+  model.cpp noCovEdgeModel.cpp noCovEdgeModelMaxSo.cpp
 
   ## agents
   agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
@@ -30,7 +32,7 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   networkRunFeatures.cpp
 
   ## optimization
-  optim.cpp simPerturb.cpp
+  optim.cpp simPerturb.cpp objFns.cpp
 
   ## extra
   pool.cpp experiment.cpp
