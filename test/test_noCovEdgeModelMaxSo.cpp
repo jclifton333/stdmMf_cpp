@@ -250,6 +250,83 @@ TEST(TestNoCovEdgeModelMaxSo, EstPar) {
 }
 
 
+TEST(TestNoCovEdgeModelMaxSo, Spillover) {
+    NetworkInit init;
+    init.set_dim_x(5);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    const std::shared_ptr<Network> n = Network::gen_network(init);
+
+    const std::shared_ptr<NoCovEdgeModelMaxSo> m(new NoCovEdgeModelMaxSo(n));
+
+    Rng rng;
+    std::vector<double> par;
+    for (uint32_t i = 0; i < m->par_size(); ++i) {
+        par.push_back(rng.rnorm(-2.0, 1.0));
+    }
+
+    m->par(par);
+    for (uint32_t i = 0; i < n->size(); ++i) {
+        CHECK_LT(n->size(), 20); // make sure no overflow in next line
+        const boost::dynamic_bitset<> inf_bits(n->size(),
+                rng.rint(0, 1 << n->size()));
+
+        boost::dynamic_bitset<> trt_bits(n->size());
+
+        if (i == 14) {
+            // check latent infection
+            trt_bits.reset();
+            const double prob_not = m->probs(inf_bits, trt_bits).at(i);
+            trt_bits.reset();
+            trt_bits.set(i);
+            const double prob_trt = m->probs(inf_bits, trt_bits).at(i);
+
+            EXPECT_NE(prob_trt, prob_not);
+
+            const Node & node_i = n->get_node(i);
+            const uint32_t num_neigh = node_i.neigh_size();
+            for (uint32_t j = 0; j < num_neigh; ++j) {
+                const uint32_t neigh = node_i.neigh(j);
+
+                {
+                    // set both
+                    trt_bits.reset();
+                    trt_bits.set(i);
+                    trt_bits.set(neigh);
+
+                    double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+
+                    if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                        EXPECT_EQ(prob_trt, prob_neigh_trt);
+                    } else if (!inf_bits.test(i)) {
+                        EXPECT_NE(prob_trt, prob_neigh_trt);
+                    } else {
+                        EXPECT_EQ(prob_trt, prob_neigh_trt);
+                    }
+                }
+                {
+                    // set only neigh
+                    trt_bits.reset();
+                    trt_bits.set(neigh);
+
+                    double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+
+                    if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                        EXPECT_EQ(prob_trt, prob_neigh_trt);
+                    } else if (!inf_bits.test(i)) {
+                        EXPECT_NE(prob_trt, prob_neigh_trt);
+                    } else {
+                        EXPECT_EQ(prob_not, prob_neigh_trt);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 } // namespace coopPE
 
