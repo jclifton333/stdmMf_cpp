@@ -2,6 +2,8 @@
 
 #include <glog/logging.h>
 
+#include <armadillo>
+
 #include "system.hpp"
 #include "objFns.hpp"
 
@@ -77,6 +79,41 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
     // estimate model
     this->model_->est_par(inf_bits, history);
+
+
+    // get information matrix and take inverse sqrt
+    std::vector<BitsetPair> all_history(history);
+    all_history.push_back(BitsetPair(inf_bits,
+                    boost::dynamic_bitset<>(this->network_->size())));
+    std::vector<double> hess = this->model_->ll_hess(all_history);
+    mult_b_to_a(hess, -1.0 * (all_history.size() - 1));
+
+    const arma::mat hess_mat(hess.data(), this->model_->par_size(),
+            this->model_->par_size());
+    arma::mat eigvec;
+    arma::vec eigval;
+    arma::eig_sym(eigval, eigvec, hess_mat);
+    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
+        if (eigval(i) > 0.0)
+            eigval(i) = std::sqrt(1.0 / eigval(i));
+        else
+            eigval(i) = 0.0;
+    }
+    const arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
+
+    // sample new parameters
+    arma::vec std_norm(this->model_->par_size());
+    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
+        std_norm(i) = this->rng->rnorm_01();
+    }
+    const std::vector<double> par_samp(
+            add_a_and_b(this->model_->par(),
+                    arma::conv_to<std::vector<double> >::from(
+                            var_sqrt * std_norm)));
+
+    // set new parameters
+    this->model_->par(par_samp);
+
 
     std::vector<double> optim_par(this->features_->num_features(), 0.);
 
