@@ -423,7 +423,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::ofstream ofs;
-    ofs.open("run_results.txt", std::ios::out);
+    ofs.open("run_results.txt", std::ios_base::out);
     ofs << "network,model,mean,agent,mean,se,time" << std::endl;
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
@@ -436,8 +436,10 @@ int main(int argc, char *argv[]) {
             std::vector<std::pair<std::string, std::vector<double> > >
                 results = run(net, mod, mod, 50);
 
-            ofs.open("run_results.txt", std::ios::app);
-            CHECK(ofs.good());
+            ofs.open("run_results.txt", std::ios_base::app);
+            if (!ofs.good()) {
+                LOG(FATAL) << "could not open file";
+            }
 
             std::cout << "====================================="
                       << "results for network " << net->kind()
@@ -466,8 +468,10 @@ int main(int argc, char *argv[]) {
 
             results = run(net, mod, mod_agents, 50);
 
-            ofs.open("run_results.txt", std::ios::app);
-            CHECK(ofs.good());
+            ofs.open("run_results.txt", std::ios_base::app);
+            if (!ofs.good()) {
+                LOG(FATAL) << "could not open file";
+            }
 
             std::cout << "====================================="
                       << "results for network " << net->kind()
