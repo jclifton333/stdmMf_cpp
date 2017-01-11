@@ -25,11 +25,12 @@ using namespace stdmMf;
 
 
 std::vector<std::pair<std::string, std::vector<double> > >
-run(const std::shared_ptr<Model> & mod,
-        const std::shared_ptr<Network> & net,
+run(const std::shared_ptr<Network> & net,
+        const std::shared_ptr<Model> & mod_system,
+        const std::shared_ptr<Model> & mod_agents,
         const uint32_t & num_reps) {
-    Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
 
+    Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
 
     // none
     std::vector<std::shared_ptr<Result<double> > > none_val;
@@ -41,7 +42,7 @@ run(const std::shared_ptr<Model> & mod,
         none_time.push_back(r_time);
 
         pool.service()->post([=](){
-                    System s(net->clone(), mod->clone());
+                    System s(net->clone(), mod_system->clone());
                     s.set_seed(i);
                     NoTrtAgent a(net->clone());
 
@@ -72,7 +73,7 @@ run(const std::shared_ptr<Model> & mod,
         random_time.push_back(r_time);
 
         pool.service()->post([=](){
-                    System s(net->clone(), mod->clone());
+                    System s(net->clone(), mod_system->clone());
                     s.set_seed(i);
                     RandomAgent a(net->clone());
                     a.set_seed(i);
@@ -105,7 +106,7 @@ run(const std::shared_ptr<Model> & mod,
         proximal_time.push_back(r_time);
 
         pool.service()->post([=]() {
-                    System s(net->clone(), mod->clone());
+                    System s(net->clone(), mod_system->clone());
                     s.set_seed(i);
                     ProximalAgent a(net->clone());
                     a.set_seed(i);
@@ -138,10 +139,9 @@ run(const std::shared_ptr<Model> & mod,
         myopic_time.push_back(r_time);
 
         pool.service()->post([=]() {
-                    System s(net->clone(), mod->clone());
+                    System s(net->clone(), mod_system->clone());
                     s.set_seed(i);
-                    MyopicAgent a(net->clone(), std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net->clone())));
+                    MyopicAgent a(net->clone(), mod_agents->clone());
                     a.set_seed(i);
 
                     s.start();
@@ -172,13 +172,12 @@ run(const std::shared_ptr<Model> & mod,
         vfn_time.push_back(r_time);
 
         pool.service()->post([=]() {
-                    System s(net->clone(), mod->clone());
+                    System s(net->clone(), mod_system->clone());
                     s.set_seed(i);
                     VfnMaxSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunFeatures(net->clone(), 3)),
-                            std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net->clone())),
+                            mod_agents->clone(),
                             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
                     a.set_seed(i);
 
@@ -210,7 +209,7 @@ run(const std::shared_ptr<Model> & mod,
         br_time.push_back(r_time);
 
         pool.service()->post([=]() {
-                    System s(net->clone(), mod->clone());
+                    System s(net->clone(), mod_system->clone());
                     s.set_seed(i);
                     BrMinSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
@@ -245,13 +244,12 @@ run(const std::shared_ptr<Model> & mod,
         adapt_time.push_back(r_time);
 
         pool.service()->post([=]() {
-                    System s(net->clone(), mod->clone());
+                    System s(net->clone(), mod_system->clone());
                     s.set_seed(i);
                     VfnBrAdaptSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunFeatures(net->clone(), 3)),
-                            std::shared_ptr<Model>(
-                                    new NoCovEdgeModel(net->clone())),
+                            mod_agents->clone(),
                             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
                             1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
                     a.set_seed(i);
@@ -429,20 +427,21 @@ int main(int argc, char *argv[]) {
     ofs << "network,model,mean,agent,mean,se,time" << std::endl;
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
+        const std::shared_ptr<Network> & net = networks.at(i);
+
         for (uint32_t j = 0; j < pars.size(); ++j) {
-            const std::shared_ptr<Network> & net = networks.at(i);
             const std::shared_ptr<Model> mod(new NoCovEdgeModelMaxSo(net));
             mod->par(pars.at(j));
 
-            const std::vector<std::pair<std::string, std::vector<double> > >
-                results = run(mod, net, 50);
+            std::vector<std::pair<std::string, std::vector<double> > >
+                results = run(net, mod, mod, 50);
 
             ofs.open("run_results.txt", std::ios::app);
             CHECK(ofs.good());
 
             std::cout << "====================================="
-                      << "results for network " << net->kind() << " and model "
-                      << j << std::endl;
+                      << "results for network " << net->kind()
+                      << " and correct model " << j << std::endl;
 
             for (uint32_t k = 0; k < results.size(); ++k) {
                 ofs << net->kind() << ","
@@ -460,7 +459,37 @@ int main(int argc, char *argv[]) {
             }
 
             ofs.close();
-        }
+
+
+            const std::shared_ptr<Model> mod_agents(new NoCovEdgeModel(net));
+            mod->par(pars.at(j));
+
+            results = run(net, mod, mod_agents, 50);
+
+            ofs.open("run_results.txt", std::ios::app);
+            CHECK(ofs.good());
+
+            std::cout << "====================================="
+                      << "results for network " << net->kind()
+                      << " and misspecified model " << j << std::endl;
+
+            for (uint32_t k = 0; k < results.size(); ++k) {
+                ofs << net->kind() << ","
+                   << j << ","
+                   << results.at(k).first << ","
+                   << results.at(k).second.at(0) << ","
+                   << results.at(k).second.at(1) << ","
+                   << results.at(k).second.at(2) << std::endl;
+
+                std::cout << results.at(k).first << ": "
+                          << results.at(k).second.at(0) << " ("
+                          << results.at(k).second.at(1) << ")  ["
+                          << results.at(k).second.at(2) << "]"
+                          << std::endl;
+            }
+
+            ofs.close();
+}
     }
 
     return 0;
