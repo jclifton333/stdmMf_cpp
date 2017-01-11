@@ -17,6 +17,8 @@ struct NetworkRun
 
 class Network {
 private:
+    std::string kind_;
+
     // number of nodes
     uint32_t num_nodes;
     // list of nodes
@@ -30,9 +32,11 @@ private:
             const std::vector<uint32_t> & curr_run,
             const uint32_t & curr_len, const uint32_t & target_len) const;
 
-
 public:
     std::shared_ptr<Network> clone() const;
+
+    // a string name for the type of network
+    std::string kind() const;
 
     // number of nodes
     uint32_t size() const;

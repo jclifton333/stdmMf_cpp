@@ -9,6 +9,10 @@ std::shared_ptr<Network> Network::clone() const {
     return std::shared_ptr<Network>(new Network(*this));
 }
 
+std::string Network::kind() const {
+    return this->kind_;
+}
+
 uint32_t Network::size() const {
     return this->num_nodes;
 }
@@ -150,6 +154,8 @@ std::shared_ptr<Network> Network::gen_grid(
     std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
 
     // iterate through grid column first
+    network->kind_ = "grid_" + std::to_string(dim_x) + "x"
+        + std::to_string(dim_y);
     network->num_nodes = dim_x * dim_y;
     network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
             network->num_nodes,network->num_nodes);
@@ -239,6 +245,7 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
     CHECK_GE(size, 2);
 
     // init adjacency matrix
+    network->kind_ = "barbasi_" + std::to_string(size);
     network->num_nodes = size;
     network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
             network->num_nodes, network->num_nodes);
