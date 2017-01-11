@@ -442,7 +442,7 @@ int main(int argc, char *argv[]) {
                 LOG(FATAL) << "could not open file";
             }
 
-            std::cout << "====================================="
+            std::cout << "=====================================" << std::endl
                       << "results for network " << net->kind()
                       << " and correct model " << j << std::endl;
 
