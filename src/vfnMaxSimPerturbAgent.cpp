@@ -66,7 +66,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
     all_history.push_back(BitsetPair(inf_bits,
                     boost::dynamic_bitset<>(this->network_->size())));
     std::vector<double> hess = this->model_->ll_hess(all_history);
-    mult_b_to_a(hess, -1.0);
+    mult_b_to_a(hess, -1.0 * (all_history.size() - 1));
 
     const arma::mat hess_mat(hess.data(), this->model_->par_size(),
             this->model_->par_size());
