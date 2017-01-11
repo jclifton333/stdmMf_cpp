@@ -425,6 +425,7 @@ int main(int argc, char *argv[]) {
     std::ofstream ofs;
     ofs.open("run_results.txt", std::ios_base::out);
     ofs << "network,model,mean,agent,mean,se,time" << std::endl;
+    ofs.close();
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
