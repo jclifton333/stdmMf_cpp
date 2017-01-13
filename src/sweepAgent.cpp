@@ -65,13 +65,6 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
             if (!changed)
                 break;
         }
-    } else {
-        bool changed = true;
-        uint32_t i = 0;
-        while (changed) {
-            changed = this->sweep_treatments(trt_bits, best_val,
-                    not_trt, has_trt, inf_bits, feat);
-        }
     }
 
     CHECK_EQ(trt_bits.count(), this->num_trt_);
