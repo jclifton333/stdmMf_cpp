@@ -122,7 +122,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         const uint32_t num_points = this->vfn_final_t_ - history.size();
 
         auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent a(this->network_, this->features_, par, 2);
+            SweepAgent a(this->network_, this->features_, par, 2, false);
             a.set_rng(this->get_rng());
             System s(this->network_, this->model_);
             s.set_rng(this->get_rng());
@@ -164,7 +164,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
         // find minimizing scalar for parameters
         {
-            SweepAgent a(this->network_, this->features_, optim_par, 2);
+            SweepAgent a(this->network_, this->features_, optim_par, 2, false);
 
             auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
@@ -199,7 +199,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
 
         auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent a(this->network_, this->features_, par, 2);
+            SweepAgent a(this->network_, this->features_, par, 2, false);
             a.set_rng(this->get_rng());
 
             auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
@@ -229,7 +229,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         optim_par = sp.par();
     }
 
-    SweepAgent a(this->network_, this->features_, optim_par, 2);
+    SweepAgent a(this->network_, this->features_, optim_par, 2, false);
     a.set_rng(this->get_rng());
     return a.apply_trt(inf_bits, history);
 }

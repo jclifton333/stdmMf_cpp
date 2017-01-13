@@ -124,7 +124,7 @@ TEST(TestSweepAgent, TestEquality) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent sa(n, f, coef, 2);
+        SweepAgent sa(n, f, coef, 2, true);
         SweepAgentSlow sas(n, f_slow, coef, 2);
 
         for (uint32_t j = 0; j < 5; ++j) {
@@ -176,7 +176,7 @@ TEST(TestSweepAgent, TestScaling) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent sa(n, f, coef, 2);
+        SweepAgent sa(n, f, coef, 2, true);
 
         const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits);
 
@@ -187,7 +187,7 @@ TEST(TestSweepAgent, TestScaling) {
                     x *= scalar;
                 });
 
-        SweepAgent sa_scaled(n, f, coef, 2);
+        SweepAgent sa_scaled(n, f, coef, 2, true);
 
         const boost::dynamic_bitset<> trt_bits_scaled = sa_scaled.apply_trt(
                 inf_bits);

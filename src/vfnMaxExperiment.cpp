@@ -48,7 +48,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     auto min_fn = [&](const std::vector<double> & par,
             void * const data) {
-        SweepAgent agent(net, features, par, 2);
+        SweepAgent agent(net, features, par, 2, true);
         agent.set_rng(rng);
         System s(net, mod);
         s.set_rng(rng);
@@ -87,7 +87,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     const std::vector<double> par = sp.par();
 
-    SweepAgent agent(net, features, par, 2);
+    SweepAgent agent(net, features, par, 2, true);
     agent.set_rng(rng);
     System s(net, mod);
     s.set_rng(rng);

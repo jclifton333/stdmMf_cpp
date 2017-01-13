@@ -55,7 +55,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
     all_history.push_back(BitsetPair(inf_bits, boost::dynamic_bitset<>()));
 
     auto f = [&](const std::vector<double> & par, void * const data) {
-        SweepAgent a(this->network_, this->features_, par, 2);
+        SweepAgent a(this->network_, this->features_, par, 2, false);
         a.set_rng(this->get_rng());
 
         auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
@@ -79,7 +79,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 
     CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
 
-    SweepAgent a(this->network_, this->features_, sp.par(), 2);
+    SweepAgent a(this->network_, this->features_, sp.par(), 2, false);
     a.set_rng(this->get_rng());
     return a.apply_trt(inf_bits, history);
 }
