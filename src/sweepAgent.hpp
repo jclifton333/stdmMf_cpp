@@ -16,11 +16,14 @@ protected:
 
     const uint32_t max_sweeps_;
 
+    const bool do_sweep_;
+
 public:
     SweepAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features> & features,
             const std::vector<double> & coef,
-            const uint32_t & max_sweeps);
+            const uint32_t & max_sweeps,
+            const bool & do_sweep);
 
     SweepAgent(const SweepAgent & other);
 

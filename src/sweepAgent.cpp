@@ -10,15 +10,17 @@ namespace stdmMf {
 SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Features> & features,
         const std::vector<double> & coef,
-        const uint32_t & max_sweeps)
-    : Agent(network), features_(features), max_sweeps_(max_sweeps),
-      coef_(coef) {
+        const uint32_t & max_sweeps,
+        const bool & do_sweep)
+    : Agent(network), features_(features), coef_(coef), max_sweeps_(max_sweeps),
+      do_sweep_(do_sweep) {
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
 
 SweepAgent::SweepAgent(const SweepAgent & other)
     : Agent(other), features_(other.features_->clone()),
-      max_sweeps_(other.max_sweeps_), coef_(other.coef_) {
+      max_sweeps_(other.max_sweeps_), do_sweep_(other.do_sweep_),
+      coef_(other.coef_) {
 }
 
 std::shared_ptr<Agent> SweepAgent::clone() const{
@@ -55,7 +57,7 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
     double best_val = dot_a_and_b(this->coef_, feat);
 
     // sweep treatments
-    if (this->max_sweeps_ > 0) {
+    if (this->do_sweep_) {
         for (uint32_t i = 0; i < this->max_sweeps_; ++i) {
             const bool changed = this->sweep_treatments(trt_bits, best_val,
                     not_trt, has_trt, inf_bits, feat);
