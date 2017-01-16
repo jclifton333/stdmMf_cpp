@@ -20,6 +20,8 @@ public:
     void set(const T & value) { this->value_ = value; this->has_value_ = true;};
 
     const T & get() const {CHECK(this->has_value_); return this->value_;};
+
+    bool has_value() const {return this->has_value_};
 };
 
 template<class T>
