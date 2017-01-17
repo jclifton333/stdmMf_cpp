@@ -158,6 +158,62 @@ void NetworkRunFeatures::update_features(
 }
 
 
+void NetworkRunFeatures::update_features_async(
+        const uint32_t & changed_node,
+        const boost::dynamic_bitset<> & inf_bits_new,
+        const boost::dynamic_bitset<> & trt_bits_new,
+        const boost::dynamic_bitset<> & inf_bits_old,
+        const boost::dynamic_bitset<> & trt_bits_old,
+        std::vector<double> & feat) {
+
+    const std::vector<NetworkRun> & changed_runs(
+            runs_by_node_.at(changed_node));
+    const uint32_t num_changed = changed_runs.size();
+
+    for (uint32_t i = 0; i < num_changed; ++i) {
+        const NetworkRun & nr = changed_runs.at(i);
+        const uint32_t run_len = nr.nodes.size();
+
+        CHECK_LE(run_len, 32);
+        uint32_t inf_mask_new = 0;
+        uint32_t inf_mask_old = 0;
+        uint32_t trt_mask_new = 0;
+        uint32_t trt_mask_old = 0;
+
+        for (uint32_t j = 0; j < run_len; ++j) {
+            const uint32_t & node = nr.nodes.at(j);
+            if (inf_bits_new.test(node)) {
+                inf_mask_new |= (1 << j);
+            }
+            if (trt_bits_new.test(node)) {
+                trt_mask_new |= (1 << j);
+            }
+            if (inf_bits_old.test(node)) {
+                inf_mask_old |= (1 << j);
+            }
+            if (trt_bits_old.test(node)) {
+                trt_mask_old |= (1 << j);
+            }
+        }
+
+        const uint32_t max_mask = 1 << run_len;
+        if (inf_mask_new < (max_mask - 1) || trt_mask_new < (max_mask - 1)) {
+            const uint32_t index = offset_.at(run_len - 1) +
+                inf_mask_new * max_mask +
+                trt_mask_new;
+            feat.at(index) += 1.0;
+        }
+
+        if (inf_mask_old < (max_mask - 1) || trt_mask_old < (max_mask - 1)) {
+            const uint32_t index = offset_.at(run_len - 1) +
+                inf_mask_old * max_mask +
+                trt_mask_old;
+            feat.at(index) -= 1.0;
+        }
+    }
+}
+
+
 uint32_t NetworkRunFeatures::num_features() const {
     return this->num_features_;
 }

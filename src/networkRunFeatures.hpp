@@ -46,6 +46,14 @@ public:
             const boost::dynamic_bitset<> & trt_bits_old,
             std::vector<double> & feat);
 
+    virtual void update_features_async(
+            const uint32_t & changed_node,
+            const boost::dynamic_bitset<> & inf_bits_new,
+            const boost::dynamic_bitset<> & trt_bits_new,
+            const boost::dynamic_bitset<> & inf_bits_old,
+            const boost::dynamic_bitset<> & trt_bits_old,
+            std::vector<double> & feat);
+
     virtual uint32_t num_features() const;
 };
 
