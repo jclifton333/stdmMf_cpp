@@ -164,7 +164,7 @@ void NetworkRunFeatures::update_features_async(
         const boost::dynamic_bitset<> & trt_bits_new,
         const boost::dynamic_bitset<> & inf_bits_old,
         const boost::dynamic_bitset<> & trt_bits_old,
-        std::vector<double> & feat) {
+        std::vector<double> & feat) const {
 
     const std::vector<NetworkRun> & changed_runs(
             runs_by_node_.at(changed_node));

@@ -52,7 +52,7 @@ public:
             const boost::dynamic_bitset<> & trt_bits_new,
             const boost::dynamic_bitset<> & inf_bits_old,
             const boost::dynamic_bitset<> & trt_bits_old,
-            std::vector<double> & feat);
+            std::vector<double> & feat) const;
 
     virtual uint32_t num_features() const;
 };
