@@ -21,7 +21,7 @@ public:
 
     const T & get() const {CHECK(this->has_value_); return this->value_;};
 
-    bool has_value() const {return this->has_value_};
+    bool has_value() const {return this->has_value_;};
 };
 
 template<class T>
