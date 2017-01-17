@@ -201,14 +201,14 @@ void NetworkRunFeatures::update_features_async(
             const uint32_t index = offset_.at(run_len - 1) +
                 inf_mask_new * max_mask +
                 trt_mask_new;
-            feat.at(index) += 1.0;
+            feat.at(index) += 1.0 / this->num_runs_by_len_.at(run_len - 1);
         }
 
         if (inf_mask_old < (max_mask - 1) || trt_mask_old < (max_mask - 1)) {
             const uint32_t index = offset_.at(run_len - 1) +
                 inf_mask_old * max_mask +
                 trt_mask_old;
-            feat.at(index) -= 1.0;
+            feat.at(index) -= 1.0 / this->num_runs_by_len_.at(run_len - 1);
         }
     }
 }
