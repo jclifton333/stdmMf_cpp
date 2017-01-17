@@ -921,6 +921,10 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
                     trt_bits);
 
             std::vector<double> f_upd(f_orig);
+            std::vector<double> f_upd_async(f_orig);
+
+            nrf_update.update_features_async(i, inf_bits_flipped, trt_bits,
+                    inf_bits, trt_bits, f_upd_async);
 
             nrf_update.update_features(i, inf_bits_flipped, trt_bits, inf_bits,
                     trt_bits, f_upd);
@@ -928,6 +932,12 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
             for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
                 EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
                     << "Flipping inf failed for node " << i <<
+                    " and feature " << j << " with seed " << seed << ".";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd_async.at(j), f_new.at(j), 1e-14)
+                    << "Async flipping inf failed for node " << i <<
                     " and feature " << j << " with seed " << seed << ".";
             }
         }
@@ -950,6 +960,10 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
                     trt_bits);
 
             std::vector<double> f_upd(f_orig);
+            std::vector<double> f_upd_async(f_orig);
+
+            nrf_update.update_features_async(i, inf_bits, trt_bits_flipped,
+                    inf_bits, trt_bits, f_upd_async);
 
             nrf_update.update_features(i, inf_bits, trt_bits_flipped, inf_bits,
                     trt_bits, f_upd);
@@ -957,6 +971,12 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
             for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
                 EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
                     << "Flipping inf failed for node " << i <<
+                    " and feature " << j << " with seed " << seed << ".";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd_async.at(j), f_new.at(j), 1e-14)
+                    << "Async flipping inf failed for node " << i <<
                     " and feature " << j << " with seed " << seed << ".";
             }
         }
@@ -976,6 +996,10 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
                     trt_bits);
 
             std::vector<double> f_upd(f_orig);
+            std::vector<double> f_upd_async(f_orig);
+
+            nrf_update.update_features_async(i, inf_bits_flipped,
+                    trt_bits_flipped, inf_bits, trt_bits, f_upd_async);
 
             nrf_update.update_features(i, inf_bits_flipped, trt_bits_flipped,
                     inf_bits, trt_bits, f_upd);
@@ -983,6 +1007,12 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
             for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
                 EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
                     << "Flipping inf failed for node " << i <<
+                    " and feature " << j << " with seed " << seed << ".";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd_async.at(j), f_new.at(j), 1e-14)
+                    << "Async flipping inf failed for node " << i <<
                     " and feature " << j << " with seed " << seed << ".";
             }
         }
