@@ -17,6 +17,11 @@ Pool::Pool(const uint32_t & num_threads)
 }
 
 
+Pool::Pool(const Pool & other)
+    : Pool(other.num_threads_) {
+}
+
+
 const boost::shared_ptr<boost::asio::io_service> Pool::service() const {
     return this->service_;
 }

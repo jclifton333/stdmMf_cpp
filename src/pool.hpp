@@ -24,6 +24,8 @@ protected:
 public:
     Pool(const uint32_t & num_threads);
 
+    Pool(const Pool & other);
+
     const boost::shared_ptr<boost::asio::io_service> service() const;
 
     void join();
