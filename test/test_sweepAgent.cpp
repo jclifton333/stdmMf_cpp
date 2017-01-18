@@ -141,7 +141,7 @@ TEST(TestSweepAgent, TestEquality) {
             const boost::dynamic_bitset<> trt_bits_slow = sas.apply_trt(
                     inf_bits);
 
-            CHECK_EQ(trt_bits, trt_bits_slow);
+            EXPECT_EQ(trt_bits, trt_bits_slow);
         }
     }
 }
@@ -192,7 +192,51 @@ TEST(TestSweepAgent, TestScaling) {
         const boost::dynamic_bitset<> trt_bits_scaled = sa_scaled.apply_trt(
                 inf_bits);
 
-        CHECK_EQ(trt_bits_scaled, trt_bits);
+        EXPECT_EQ(trt_bits_scaled, trt_bits);
+    }
+}
+
+
+TEST(TestSweepAgent, TestParallel) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);;
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
+
+    std::shared_ptr<Rng> rng(new Rng);
+
+    for (uint32_t i = 0; i < 25; ++i) {
+        // randomly infect 10 percent
+        const std::vector<int> inf_bits_vec = rng->sample_range(0,
+                n->size(), n->size()*0.1);
+        boost::dynamic_bitset<> inf_bits(n->size());
+        for (uint32_t k = 0; k < inf_bits_vec.size(); ++k) {
+            inf_bits.set(inf_bits_vec.at(k));
+        }
+
+        std::vector<double> coef(f->num_features(),0.);
+        std::for_each(coef.begin(), coef.end(),
+                [&rng](double & x) {
+                    x = rng->rnorm_01();
+                });
+
+        SweepAgent sa(n, f, coef, 0, false);
+
+        const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits);
+
+        SweepAgent sa_parallel(n, f, coef, 0, false);
+        sa_parallel.set_parallel(true, 1);
+
+        const boost::dynamic_bitset<> trt_bits_parallel = sa_parallel.apply_trt(
+                inf_bits);
+
+        CHECK_EQ(trt_bits_parallel, trt_bits);
     }
 }
 
