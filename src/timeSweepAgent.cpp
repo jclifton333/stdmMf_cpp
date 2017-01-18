@@ -11,8 +11,8 @@ using namespace stdmMf;
 int main(int argc, char *argv[]) {
     // setup network
     NetworkInit init;
-    init.set_dim_x(10);
-    init.set_dim_y(10);
+    init.set_dim_x(100);
+    init.set_dim_y(100);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
@@ -41,10 +41,12 @@ int main(int argc, char *argv[]) {
     inf_bits.set(23);
     inf_bits.set(19);
 
+    const uint32_t num_reps = 10;
+
     std::vector<boost::dynamic_bitset<> > trt_bits;
     const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
         std::chrono::high_resolution_clock::now();
-    for (uint32_t i = 0; i < 100; ++i) {
+    for (uint32_t i = 0; i < num_reps; ++i) {
         trt_bits.push_back(sa.apply_trt(inf_bits));
     }
     const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
@@ -54,6 +56,25 @@ int main(int argc, char *argv[]) {
               << std::chrono::duration_cast<std::chrono::milliseconds>(
                       tock - tick).count()
               << std::endl;
+
+    for (uint32_t num_threads = 2; num_threads <= 10; ++num_threads) {
+        sa.set_parallel(true, num_threads);
+
+        std::vector<boost::dynamic_bitset<> > trt_bits;
+        const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
+            std::chrono::high_resolution_clock::now();
+        for (uint32_t i = 0; i < num_reps; ++i) {
+            trt_bits.push_back(sa.apply_trt(inf_bits));
+        }
+        const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
+            std::chrono::high_resolution_clock::now();
+
+        std::cout << "elapsed (" << num_threads << "): "
+                  << std::chrono::duration_cast<std::chrono::milliseconds>(
+                          tock - tick).count()
+                  << std::endl;
+
+    }
 
     return 0;
 }
