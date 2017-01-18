@@ -1,6 +1,10 @@
 #include <glog/logging.h>
 #include <set>
 #include <limits>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 #include "sweepAgent.hpp"
 #include "utilities.hpp"
 
@@ -13,19 +17,34 @@ SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
         const uint32_t & max_sweeps,
         const bool & do_sweep)
     : Agent(network), features_(features), coef_(coef), max_sweeps_(max_sweeps),
-      do_sweep_(do_sweep) {
+      do_sweep_(do_sweep), do_parallel_(false) {
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
 
+
 SweepAgent::SweepAgent(const SweepAgent & other)
     : Agent(other), features_(other.features_->clone()),
-      max_sweeps_(other.max_sweeps_), do_sweep_(other.do_sweep_),
-      coef_(other.coef_) {
+      coef_(other.coef_), max_sweeps_(other.max_sweeps_),
+      do_sweep_(other.do_sweep_), do_parallel_(other.do_parallel_),
+      pool_(new Pool(*other.pool_)) {
 }
+
 
 std::shared_ptr<Agent> SweepAgent::clone() const{
     return std::shared_ptr<Agent>(new SweepAgent(*this));
 }
+
+
+void SweepAgent::set_parallel(const bool & do_parallel,
+        const uint32_t & num_threads) {
+    this->do_parallel_ = do_parallel;
+    if (do_parallel) {
+        this->pool_ = std::shared_ptr<Pool>(new Pool(num_threads));
+    } else {
+        this->pool_.reset();
+    }
+}
+
 
 boost::dynamic_bitset<> SweepAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
@@ -72,7 +91,22 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
     return trt_bits;
 }
 
+
 void SweepAgent::set_new_treatment(
+        boost::dynamic_bitset<> & trt_bits,
+        std::set<uint32_t> & not_trt,
+        std::set<uint32_t> & has_trt,
+        const boost::dynamic_bitset<> & inf_bits,
+        std::vector<double> & feat) const {
+    if (this->do_parallel_) {
+        set_new_treatment_parallel(trt_bits, not_trt, has_trt, inf_bits, feat);
+    } else {
+        set_new_treatment_serial(trt_bits, not_trt, has_trt, inf_bits, feat);
+    }
+}
+
+
+void SweepAgent::set_new_treatment_serial(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
@@ -112,6 +146,110 @@ void SweepAgent::set_new_treatment(
             best_nodes.push_back(*it);
         }
     }
+
+    CHECK_GT(best_nodes.size(), 0);
+    uint32_t best_node;
+    if (best_nodes.size() == 1) {
+        // unique best node
+        best_node = best_nodes.at(0);
+    } else {
+        // multiple best nodes
+        const uint32_t index = this->rng->rint(0, best_nodes.size());
+        best_node = best_nodes.at(index);
+        trt_bits.set(best_node);
+    }
+
+    // set bit for bet node
+    trt_bits.set(best_node);
+
+    // update sets
+    not_trt.erase(best_node);
+    has_trt.insert(best_node);
+
+    // update sets
+    not_trt.erase(best_node);
+    has_trt.insert(best_node);
+
+    // update features for treating best_node
+    this->features_->update_features(best_node, inf_bits, trt_bits,
+            inf_bits, trt_bits_old, feat);
+}
+
+
+void SweepAgent::set_new_treatment_parallel(
+        boost::dynamic_bitset<> & trt_bits,
+        std::set<uint32_t> & not_trt,
+        std::set<uint32_t> & has_trt,
+        const boost::dynamic_bitset<> & inf_bits,
+        std::vector<double> & feat) const {
+
+    std::set<uint32_t>::const_iterator it, end;
+    end = not_trt.end();
+
+    const boost::dynamic_bitset<> trt_bits_old(trt_bits);
+
+    double best_val = std::numeric_limits<double>::lowest();
+    std::vector<uint32_t> best_nodes;
+
+    std::atomic<uint32_t> num_left(not_trt.size());
+    std::mutex finish_mtx;
+    std::condition_variable cv;
+
+    auto fn = [this, &feat, &inf_bits, &trt_bits, &trt_bits_old, &best_val,
+            &best_nodes, &num_left, &finish_mtx, &cv](
+                    const uint32_t & new_trt,
+                    const std::shared_ptr<Result<std::pair<double, uint32_t> > >
+                    & res) {
+
+        // copy as part of each job
+        auto trt_bits_cpy(trt_bits);
+        auto feat_cpy(feat);
+
+        trt_bits_cpy.set(new_trt); // set new bit
+
+        // update features for treating *it
+        this->features_->update_features_async(new_trt, inf_bits, trt_bits_cpy,
+                inf_bits, trt_bits_old, feat_cpy);
+
+        const double val = dot_a_and_b(this->coef_, feat_cpy);
+
+        res->set(std::pair<double, uint32_t>(val, new_trt));
+
+        // notify main thread
+        std::lock_guard<std::mutex> lk(finish_mtx);
+        --num_left;
+        cv.notify_one();
+    };
+
+    std::vector<std::shared_ptr<Result<std::pair<double, uint32_t> > > >
+        all_res;
+
+    CHECK_GT(not_trt.size(), 0);
+    for (it = not_trt.begin(); it != end; ++it) {
+        CHECK(!trt_bits.test(*it)) << "bit is already set";
+
+
+        all_res.emplace_back(new Result<std::pair<double, uint32_t> >);
+        this->pool_->service()->post(boost::bind<void>(fn, *it,
+                        all_res.at(all_res.size() - 1)));
+    }
+
+
+    // wait for jobs to finish
+    std::unique_lock<std::mutex> finish_lock(finish_mtx);
+    cv.wait(finish_lock, [&num_left]{return num_left == 0;});
+
+    for (uint32_t i = 0; i < all_res.size(); ++i) {
+        const std::pair<double, uint32_t> & p = all_res.at(i)->get();
+        if (p.first > best_val) {
+            best_val = p.first;
+            best_nodes.clear();
+            best_nodes.push_back(p.second);
+        } else if (p.first == best_val) {
+            best_nodes.push_back(p.second);
+        }
+    }
+
 
     CHECK_GT(best_nodes.size(), 0);
     uint32_t best_node;

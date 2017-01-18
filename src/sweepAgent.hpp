@@ -5,6 +5,8 @@
 #include "agent.hpp"
 #include "features.hpp"
 
+#include "pool.hpp"
+
 
 namespace stdmMf {
 
@@ -18,6 +20,10 @@ protected:
 
     const bool do_sweep_;
 
+    bool do_parallel_;
+
+    std::shared_ptr<Pool> pool_;
+
 public:
     SweepAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features> & features,
@@ -29,6 +35,9 @@ public:
 
     virtual std::shared_ptr<Agent> clone() const;
 
+    void set_parallel(const bool & do_parallel,
+            const uint32_t & num_threads);
+
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits,
             const std::vector<BitsetPair> & history);
@@ -37,6 +46,18 @@ public:
             const boost::dynamic_bitset<> & inf_bits);
 
     void set_new_treatment(boost::dynamic_bitset<> & trt_bits,
+            std::set<uint32_t> & not_trt,
+            std::set<uint32_t> & has_trt,
+            const boost::dynamic_bitset<> & inf_bits,
+            std::vector<double> & feat) const;
+
+    void set_new_treatment_serial(boost::dynamic_bitset<> & trt_bits,
+            std::set<uint32_t> & not_trt,
+            std::set<uint32_t> & has_trt,
+            const boost::dynamic_bitset<> & inf_bits,
+            std::vector<double> & feat) const;
+
+    void set_new_treatment_parallel(boost::dynamic_bitset<> & trt_bits,
             std::set<uint32_t> & not_trt,
             std::set<uint32_t> & has_trt,
             const boost::dynamic_bitset<> & inf_bits,
