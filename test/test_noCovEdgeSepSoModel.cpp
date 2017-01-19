@@ -280,59 +280,58 @@ TEST(TestNoCovEdgeSepSoModel, Spillover) {
 
         boost::dynamic_bitset<> trt_bits(n->size());
 
-        if (i == 14) {
-            // check latent infection
-            trt_bits.reset();
-            const double prob_not = m->probs(inf_bits, trt_bits).at(i);
-            trt_bits.reset();
-            trt_bits.set(i);
-            const double prob_trt = m->probs(inf_bits, trt_bits).at(i);
+        // check latent infection
+        trt_bits.reset();
+        const double prob_not = m->probs(inf_bits, trt_bits).at(i);
+        trt_bits.reset();
+        trt_bits.set(i);
+        const double prob_trt = m->probs(inf_bits, trt_bits).at(i);
 
-            EXPECT_NE(prob_trt, prob_not);
+        EXPECT_NE(prob_trt, prob_not) << i << ", " << inf_bits.test(i);
+        break;
 
-            const Node & node_i = n->get_node(i);
-            const uint32_t num_neigh = node_i.neigh_size();
-            for (uint32_t j = 0; j < num_neigh; ++j) {
-                const uint32_t neigh = node_i.neigh(j);
+        const Node & node_i = n->get_node(i);
+        const uint32_t num_neigh = node_i.neigh_size();
+        for (uint32_t j = 0; j < num_neigh; ++j) {
+            const uint32_t neigh = node_i.neigh(j);
 
-                {
-                    // set both
-                    trt_bits.reset();
-                    trt_bits.set(i);
-                    trt_bits.set(neigh);
+            {
+                // set both
+                trt_bits.reset();
+                trt_bits.set(i);
+                trt_bits.set(neigh);
 
-                    double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+                double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
 
-                    if (inf_bits.test(i) == inf_bits.test(neigh)) {
-                        EXPECT_NEAR(prob_not, prob_neigh_trt, 1e-10);
-                    } else if (!inf_bits.test(i)) {
-                        if (par.at(3) > 0) {
-                            EXPECT_GT(prob_trt, prob_neigh_trt);
-                        } else {
-                            EXPECT_LE(prob_trt, prob_neigh_trt);
-                        }
+                if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                    EXPECT_NEAR(prob_not, prob_neigh_trt, 1e-10);
+                } else if (!inf_bits.test(i)) {
+                    if (par.at(3) > 0) {
+                        EXPECT_GT(prob_trt, prob_neigh_trt);
                     } else {
-                        EXPECT_EQ(prob_trt, prob_neigh_trt);
+                        EXPECT_LE(prob_trt, prob_neigh_trt);
                     }
+                } else {
+                    EXPECT_EQ(prob_trt, prob_neigh_trt);
                 }
-                {
-                    // set only neigh
-                    trt_bits.reset();
-                    trt_bits.set(neigh);
+            }
+            {
+                // set only neigh
+                trt_bits.reset();
+                trt_bits.set(neigh);
 
-                    double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+                double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
 
-                    if (inf_bits.test(i) == inf_bits.test(neigh)) {
-                        EXPECT_NEAR(prob_not, prob_neigh_trt, 1e-10);
-                    } else if (!inf_bits.test(i)) {
-                        if (par.at(7) > 0) {
-                            EXPECT_GT(prob_trt, prob_neigh_trt);
-                        } else {
-                            EXPECT_LE(prob_trt, prob_neigh_trt);
-                        }
+                if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                    EXPECT_NEAR(prob_not, prob_neigh_trt, 1e-10);
+                } else if (!inf_bits.test(i)) {
+                    if (par.at(7) > 0) {
+                        EXPECT_GT(prob_trt, prob_neigh_trt);
                     } else {
-                        EXPECT_EQ(prob_not, prob_neigh_trt);
+                        EXPECT_LE(prob_trt, prob_neigh_trt);
                     }
+                } else {
+                    EXPECT_EQ(prob_not, prob_neigh_trt);
                 }
             }
         }
