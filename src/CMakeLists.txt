@@ -20,7 +20,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
 
   ## models
-  model.cpp noCovEdgeModel.cpp noCovEdgeOrSoModel.cpp noCovEdgeSepSoModel.cpp
+  model.cpp noCovEdgeModel.cpp noCovEdgeOrSoModel.cpp noCovEdgeXorSoModel.cpp
+  noCovEdgeSepSoModel.cpp
 
   ## agents
   agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp

@@ -15,6 +15,7 @@ SET(test_src
   test_network
   test_noCovEdgeModel
   test_noCovEdgeOrSoModel
+  test_noCovEdgeXorSoModel
   test_noCovEdgeSepSoModel
   test_utilities
   test_networkRunFeatures
