@@ -32,7 +32,8 @@ run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod_agents,
         const uint32_t & num_reps) {
 
-    Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
+    // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
+    Pool pool(std::thread::hardware_concurrency());
 
     // none
     std::vector<std::shared_ptr<Result<double> > > none_val;
