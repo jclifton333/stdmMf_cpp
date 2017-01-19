@@ -177,9 +177,6 @@ std::shared_ptr<Network> Network::gen_grid(
                 n->set_y(0.0);
             }
 
-            // nothing action
-            network->adj(i,i) = 1;
-
             // up
             if (y > 0) {
                 const uint32_t neigh = i-1;
@@ -189,8 +186,6 @@ std::shared_ptr<Network> Network::gen_grid(
                 const uint32_t neigh = i + dim_y - 1;
                 n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
-            } else {
-                n->add_neigh(i);
             }
 
             // down
@@ -202,8 +197,6 @@ std::shared_ptr<Network> Network::gen_grid(
                 const uint32_t neigh = i - dim_y + 1;
                 n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
-            } else {
-                n->add_neigh(i);
             }
 
             // left
@@ -215,8 +208,6 @@ std::shared_ptr<Network> Network::gen_grid(
                 const uint32_t neigh = network->num_nodes - dim_y + y;
                 n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
-            } else {
-                n->add_neigh(i);
             }
 
             // right
@@ -228,8 +219,6 @@ std::shared_ptr<Network> Network::gen_grid(
                 const uint32_t neigh = y;
                 n->add_neigh(neigh);
                 network->adj(i,neigh) = 1;
-            } else {
-                n->add_neigh(i);
             }
         }
 
@@ -260,8 +249,6 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
         n0->add_neigh(1);
         n1->add_neigh(0);
 
-        network->adj(0,0) = 1;
-        network->adj(1,1) = 1;
         network->adj(0,1) = 1;
         network->adj(1,0) = 1;
     }
@@ -273,7 +260,6 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
     for (uint32_t i = 2; i < size; ++i) {
         Node * const n = network->node_list.add_nodes();
         n->set_index(i);
-        network->adj(i, i) = 1;
 
         const uint32_t total_deg = std::accumulate(edge_deg.begin(),
                 edge_deg.end(), 0);
