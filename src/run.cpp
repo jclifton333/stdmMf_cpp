@@ -236,14 +236,14 @@ run(const std::shared_ptr<Network> & net,
                 });
     }
 
-    // vr max br min adapt
-    std::vector<std::shared_ptr<Result<double> > > adapt_val;
-    std::vector<std::shared_ptr<Result<double> > > adapt_time;
+    // vr max br min adapt step mult 1
+    std::vector<std::shared_ptr<Result<double> > > adapt_1_val;
+    std::vector<std::shared_ptr<Result<double> > > adapt_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
-        adapt_val.push_back(r_val);
-        adapt_time.push_back(r_time);
+        adapt_1_val.push_back(r_val);
+        adapt_1_time.push_back(r_time);
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod_system->clone());
@@ -253,7 +253,84 @@ run(const std::shared_ptr<Network> & net,
                                     new NetworkRunFeatures(net->clone(), 3)),
                             mod_agents->clone(),
                             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
-                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
+                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
+                            1);
+                    a.set_seed(i);
+
+                    s.start();
+
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+
+                    r_val->set(runner(&s, &a, 20, 1.0));
+
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
+                });
+    }
+
+    // vr max br min adapt step mult 2
+    std::vector<std::shared_ptr<Result<double> > > adapt_2_val;
+    std::vector<std::shared_ptr<Result<double> > > adapt_2_time;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        adapt_2_val.push_back(r_val);
+        adapt_2_time.push_back(r_time);
+
+        pool.service()->post([=]() {
+                    System s(net->clone(), mod_system->clone());
+                    s.set_seed(i);
+                    VfnBrAdaptSimPerturbAgent a(net->clone(),
+                            std::shared_ptr<Features>(
+                                    new NetworkRunFeatures(net->clone(), 3)),
+                            mod_agents->clone(),
+                            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
+                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
+                            2);
+                    a.set_seed(i);
+
+                    s.start();
+
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+
+                    r_val->set(runner(&s, &a, 20, 1.0));
+
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
+                });
+    }
+
+    // vr max br min adapt step mult 5
+    std::vector<std::shared_ptr<Result<double> > > adapt_5_val;
+    std::vector<std::shared_ptr<Result<double> > > adapt_5_time;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        adapt_5_val.push_back(r_val);
+        adapt_5_time.push_back(r_time);
+
+        pool.service()->post([=]() {
+                    System s(net->clone(), mod_system->clone());
+                    s.set_seed(i);
+                    VfnBrAdaptSimPerturbAgent a(net->clone(),
+                            std::shared_ptr<Features>(
+                                    new NetworkRunFeatures(net->clone(), 3)),
+                            mod_agents->clone(),
+                            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
+                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
+                            5);
                     a.set_seed(i);
 
                     s.start();
@@ -352,13 +429,37 @@ run(const std::shared_ptr<Network> & net,
     }
 
     {
-        const std::string agent_name = "adapt";
-        const std::pair<double, double> adapt_stats = mean_and_var(
-                result_to_vec(adapt_val));
+        const std::string agent_name = "adapt_1";
+        const std::pair<double, double> adapt_1_stats = mean_and_var(
+                result_to_vec(adapt_1_val));
         const std::vector<double> agent_res =
-            {adapt_stats.first,
-             std::sqrt(adapt_stats.second / num_reps),
-             mean_and_var(result_to_vec(adapt_time)).first};
+            {adapt_1_stats.first,
+             std::sqrt(adapt_1_stats.second / num_reps),
+             mean_and_var(result_to_vec(adapt_1_time)).first};
+        all_results.push_back(std::pair<std::string, std::vector<double> >
+                (agent_name, agent_res));
+    }
+
+    {
+        const std::string agent_name = "adapt_2";
+        const std::pair<double, double> adapt_2_stats = mean_and_var(
+                result_to_vec(adapt_2_val));
+        const std::vector<double> agent_res =
+            {adapt_2_stats.first,
+             std::sqrt(adapt_2_stats.second / num_reps),
+             mean_and_var(result_to_vec(adapt_2_time)).first};
+        all_results.push_back(std::pair<std::string, std::vector<double> >
+                (agent_name, agent_res));
+    }
+
+    {
+        const std::string agent_name = "adapt_5";
+        const std::pair<double, double> adapt_5_stats = mean_and_var(
+                result_to_vec(adapt_5_val));
+        const std::vector<double> agent_res =
+            {adapt_5_stats.first,
+             std::sqrt(adapt_5_stats.second / num_reps),
+             mean_and_var(result_to_vec(adapt_5_time)).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
