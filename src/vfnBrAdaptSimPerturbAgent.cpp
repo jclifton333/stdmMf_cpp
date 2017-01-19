@@ -105,6 +105,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
     arma::vec std_norm(this->model_->par_size());
     for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
         std_norm(i) = this->rng->rnorm_01();
+        LOG_IF(FATAL, !std::isfinite(std_norm(i)));
     }
     const std::vector<double> par_samp(
             add_a_and_b(this->model_->par(),
