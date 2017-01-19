@@ -1,6 +1,7 @@
 #include "system.hpp"
 #include "noCovEdgeModel.hpp"
 #include "noCovEdgeMaxSoModel.hpp"
+#include "noCovEdgeSepSoModel.hpp"
 #include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
@@ -189,7 +190,7 @@ run(const std::shared_ptr<Network> & net,
 
                     r_val->set(runner(&s, &a, 20, 1.0));
 
-                        std::chrono::time_point<
+                    std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
                         std::chrono::high_resolution_clock::now();
 
@@ -366,8 +367,41 @@ run(const std::shared_ptr<Network> & net,
 
 
 int main(int argc, char *argv[]) {
+    // setup networks
     std::vector<std::shared_ptr<Network> > networks;
-    {
+    { // network 1
+        NetworkInit init;
+        init.set_dim_x(10);
+        init.set_dim_y(10);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
+
+    { // network 2
+        NetworkInit init;
+        init.set_size(100);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
+
+    { // network 3
+        NetworkInit init;
+        init.set_dim_x(25);
+        init.set_dim_y(20);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
+
+    { // network 4
+        NetworkInit init;
+        init.set_size(500);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
+
+    { // network 5
         NetworkInit init;
         init.set_dim_x(25);
         init.set_dim_y(40);
@@ -376,15 +410,18 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
-    {
+    { // network 6
         NetworkInit init;
         init.set_size(1000);
         init.set_type(NetworkInit_NetType_BARABASI);
         networks.push_back(Network::gen_network(init));
     }
 
-    std::vector<std::vector<double> > pars;
-    {
+    // double vector since model depends on network
+    typedef std::pair<std::shared_ptr<Model>,
+                      std::shared_ptr<Model> > ModelPair;
+    std::vector<std::vector<ModelPair> > models;
+    { // models
         // latent infections
         const double prob_inf_latent = 0.01;
         const double intcp_inf_latent =
@@ -419,7 +456,106 @@ int main(int argc, char *argv[]) {
              trt_act_rec,
              trt_pre_inf};
 
-        pars.push_back(par);
+        std::vector<double> par_sep =
+            {intcp_inf_latent,
+             intcp_inf,
+             intcp_rec,
+             trt_act_inf,
+             -trt_act_inf,
+             trt_act_rec,
+             -trt_act_rec,
+             trt_pre_inf,
+             -trt_pre_inf};
+
+        { // Correct: No So,  Postulated: No So
+            std::vector<ModelPair> models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeModel(
+                                        networks.at(i))));
+                mp.first->par(par);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
+        { // Correct: MaxSo,  Postulated: MaxSo
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                                        networks.at(i))));
+                mp.first->par(par);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
+        { // Correct: SepSo,  Postulated: SepSo
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
+                                        networks.at(i))));
+                mp.first->par(par_sep);
+                mp.second->par(par_sep);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
+        { // Correct: SepSo,  Postulated: MaxSo
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                                        networks.at(i))));
+                mp.first->par(par_sep);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
+        { // Correct: SepSo,  Postulated: No So
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeModel(
+                                        networks.at(i))));
+                mp.first->par(par_sep);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
+        { // Correct: MaxSo,  Postulated: No So
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeModel(
+                                        networks.at(i))));
+                mp.first->par(par);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
     }
 
     std::ofstream ofs;
@@ -430,12 +566,11 @@ int main(int argc, char *argv[]) {
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
 
-        for (uint32_t j = 0; j < pars.size(); ++j) {
-            const std::shared_ptr<Model> mod(new NoCovEdgeMaxSoModel(net));
-            mod->par(pars.at(j));
+        for (uint32_t j = 0; j < models.size(); ++j) {
+            ModelPair & mp(models.at(j).at(i));
 
             std::vector<std::pair<std::string, std::vector<double> > >
-                results = run(net, mod, mod, 50);
+                results = run(net, mp.first, mp.second, 50);
 
             ofs.open("run_results.txt", std::ios_base::app);
             if (!ofs.good()) {
@@ -444,15 +579,15 @@ int main(int argc, char *argv[]) {
 
             std::cout << "=====================================" << std::endl
                       << "results for network " << net->kind()
-                      << " and correct model " << j << std::endl;
+                      << " and model pair " << j << std::endl;
 
             for (uint32_t k = 0; k < results.size(); ++k) {
                 ofs << net->kind() << ","
-                   << j << ","
-                   << results.at(k).first << ","
-                   << results.at(k).second.at(0) << ","
-                   << results.at(k).second.at(1) << ","
-                   << results.at(k).second.at(2) << std::endl;
+                    << j << ","
+                    << results.at(k).first << ","
+                    << results.at(k).second.at(0) << ","
+                    << results.at(k).second.at(1) << ","
+                    << results.at(k).second.at(2) << std::endl;
 
                 std::cout << results.at(k).first << ": "
                           << results.at(k).second.at(0) << " ("
@@ -462,39 +597,7 @@ int main(int argc, char *argv[]) {
             }
 
             ofs.close();
-
-
-            const std::shared_ptr<Model> mod_agents(new NoCovEdgeModel(net));
-            mod->par(pars.at(j));
-
-            results = run(net, mod, mod_agents, 50);
-
-            ofs.open("run_results.txt", std::ios_base::app);
-            if (!ofs.good()) {
-                LOG(FATAL) << "could not open file";
-            }
-
-            std::cout << "=====================================" << std::endl
-                      << "results for network " << net->kind()
-                      << " and misspecified model " << j << std::endl;
-
-            for (uint32_t k = 0; k < results.size(); ++k) {
-                ofs << net->kind() << ","
-                   << j << ","
-                   << results.at(k).first << ","
-                   << results.at(k).second.at(0) << ","
-                   << results.at(k).second.at(1) << ","
-                   << results.at(k).second.at(2) << std::endl;
-
-                std::cout << results.at(k).first << ": "
-                          << results.at(k).second.at(0) << " ("
-                          << results.at(k).second.at(1) << ")  ["
-                          << results.at(k).second.at(2) << "]"
-                          << std::endl;
-            }
-
-            ofs.close();
-}
+        }
     }
 
     return 0;
