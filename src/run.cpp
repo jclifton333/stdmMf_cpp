@@ -1,6 +1,7 @@
 #include "system.hpp"
 #include "noCovEdgeModel.hpp"
 #include "noCovEdgeOrSoModel.hpp"
+#include "noCovEdgeXorSoModel.hpp"
 #include "noCovEdgeSepSoModel.hpp"
 #include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
@@ -497,6 +498,21 @@ int main(int argc, char *argv[]) {
             models.push_back(models_add);
         }
 
+        { // Correct: XorSo,  Postulated: XorSo
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
+                                        networks.at(i))));
+                mp.first->par(par);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
         { // Correct: SepSo,  Postulated: SepSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
@@ -527,10 +543,55 @@ int main(int argc, char *argv[]) {
             models.push_back(models_add);
         }
 
+        { // Correct: SepSo,  Postulated: XorSo
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
+                                        networks.at(i))));
+                mp.first->par(par_sep);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
         { // Correct: SepSo,  Postulated: No So
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
                 ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeModel(
+                                        networks.at(i))));
+                mp.first->par(par_sep);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
+        { // Correct: XorSo,  Postulated: OrSo
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
+                                        networks.at(i))));
+                mp.first->par(par_sep);
+                mp.second->par(par);
+
+                models_add.push_back(mp);
+            }
+            models.push_back(models_add);
+        }
+
+        { // Correct: XorSo,  Postulated: No So
+            std::vector<ModelPair > models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
                                         networks.at(i))),
                         std::shared_ptr<Model>(new NoCovEdgeModel(
                                         networks.at(i))));
