@@ -32,6 +32,8 @@ protected:
     const double br_ell_;
     const double br_min_step_size_;
 
+    const uint32_t step_cap_mult_;
+
 public:
     VfnBrAdaptSimPerturbAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features> & features,
@@ -49,7 +51,8 @@ public:
             const double & br_a,
             const double & br_b,
             const double & br_ell,
-            const double & br_min_step_size);
+            const double & br_min_step_size,
+            const uint32_t & step_cap_mult);
 
     VfnBrAdaptSimPerturbAgent(const VfnBrAdaptSimPerturbAgent & other);
 

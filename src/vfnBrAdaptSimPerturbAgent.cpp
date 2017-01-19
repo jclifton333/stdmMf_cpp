@@ -30,7 +30,8 @@ VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
         const double & br_a,
         const double & br_b,
         const double & br_ell,
-        const double & br_min_step_size)
+        const double & br_min_step_size,
+        const uint32_t & step_cap_mult)
     : Agent(network), features_(features), model_(model),
 
       vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
@@ -38,7 +39,9 @@ VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
       vfn_min_step_size_(vfn_min_step_size),
 
       br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
-      br_min_step_size_(br_min_step_size) {
+      br_min_step_size_(br_min_step_size),
+
+      step_cap_mult_(step_cap_mult) {
 }
 
 VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
@@ -53,7 +56,9 @@ VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
 
       br_c_(other.br_c_), br_t_(other.br_t_), br_a_(other.br_a_),
       br_b_(other.br_b_), br_ell_(other.br_ell_),
-      br_min_step_size_(other.br_min_step_size_){
+      br_min_step_size_(other.br_min_step_size_),
+
+      step_cap_mult_(other.step_cap_mult_) {
 }
 
 std::shared_ptr<Agent> VfnBrAdaptSimPerturbAgent::clone() const {
@@ -217,7 +222,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         sp.set_rng(this->get_rng());
 
         Optim::ErrorCode ec;
-        const uint32_t num_steps = history.size() * 1;
+        const uint32_t num_steps = history.size() * this->step_cap_mult_;
         do {
             ec = sp.step();
         } while (ec == Optim::ErrorCode::CONTINUE
