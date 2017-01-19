@@ -62,14 +62,14 @@ TEST(TestNoCovEdgeMaxSoModel, TestPar) {
 
     std::vector<double> par (m.par());
     for (uint32_t i = 0; i < par.size(); ++i) {
-        CHECK_EQ(par.at(i), 0.);
+        EXPECT_EQ(par.at(i), 0.);
         par.at(i) = i;
     }
 
     m.par(par);
     par = m.par();
     for (uint32_t i = 0; i < par.size(); ++i) {
-        CHECK_EQ(par.at(i), static_cast<double>(i));
+        EXPECT_EQ(par.at(i), static_cast<double>(i));
     }
 }
 
@@ -269,57 +269,55 @@ TEST(TestNoCovEdgeMaxSoModel, Spillover) {
 
     m->par(par);
     for (uint32_t i = 0; i < n->size(); ++i) {
-        CHECK_LT(n->size(), 20); // make sure no overflow in next line
+        EXPECT_LT(n->size(), 20); // make sure no overflow in next line
         const boost::dynamic_bitset<> inf_bits(n->size(),
                 rng.rint(0, 1 << n->size()));
 
         boost::dynamic_bitset<> trt_bits(n->size());
 
-        if (i == 14) {
-            // check latent infection
-            trt_bits.reset();
-            const double prob_not = m->probs(inf_bits, trt_bits).at(i);
-            trt_bits.reset();
-            trt_bits.set(i);
-            const double prob_trt = m->probs(inf_bits, trt_bits).at(i);
+        // check latent infection
+        trt_bits.reset();
+        const double prob_not = m->probs(inf_bits, trt_bits).at(i);
+        trt_bits.reset();
+        trt_bits.set(i);
+        const double prob_trt = m->probs(inf_bits, trt_bits).at(i);
 
-            EXPECT_NE(prob_trt, prob_not);
+        EXPECT_NE(prob_trt, prob_not);
 
-            const Node & node_i = n->get_node(i);
-            const uint32_t num_neigh = node_i.neigh_size();
-            for (uint32_t j = 0; j < num_neigh; ++j) {
-                const uint32_t neigh = node_i.neigh(j);
+        const Node & node_i = n->get_node(i);
+        const uint32_t num_neigh = node_i.neigh_size();
+        for (uint32_t j = 0; j < num_neigh; ++j) {
+            const uint32_t neigh = node_i.neigh(j);
 
-                {
-                    // set both
-                    trt_bits.reset();
-                    trt_bits.set(i);
-                    trt_bits.set(neigh);
+            {
+                // set both
+                trt_bits.reset();
+                trt_bits.set(i);
+                trt_bits.set(neigh);
 
-                    double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+                double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
 
-                    if (inf_bits.test(i) == inf_bits.test(neigh)) {
-                        EXPECT_EQ(prob_trt, prob_neigh_trt);
-                    } else if (!inf_bits.test(i)) {
-                        EXPECT_NE(prob_trt, prob_neigh_trt);
-                    } else {
-                        EXPECT_EQ(prob_trt, prob_neigh_trt);
-                    }
+                if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                    EXPECT_EQ(prob_trt, prob_neigh_trt);
+                } else if (!inf_bits.test(i)) {
+                    EXPECT_NE(prob_trt, prob_neigh_trt);
+                } else {
+                    EXPECT_EQ(prob_trt, prob_neigh_trt);
                 }
-                {
-                    // set only neigh
-                    trt_bits.reset();
-                    trt_bits.set(neigh);
+            }
+            {
+                // set only neigh
+                trt_bits.reset();
+                trt_bits.set(neigh);
 
-                    double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+                double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
 
-                    if (inf_bits.test(i) == inf_bits.test(neigh)) {
-                        EXPECT_EQ(prob_trt, prob_neigh_trt);
-                    } else if (!inf_bits.test(i)) {
-                        EXPECT_NE(prob_trt, prob_neigh_trt);
-                    } else {
-                        EXPECT_EQ(prob_not, prob_neigh_trt);
-                    }
+                if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                    EXPECT_EQ(prob_trt, prob_neigh_trt);
+                } else if (!inf_bits.test(i)) {
+                    EXPECT_NE(prob_trt, prob_neigh_trt);
+                } else {
+                    EXPECT_EQ(prob_not, prob_neigh_trt);
                 }
             }
         }
