@@ -681,7 +681,7 @@ int main(int argc, char *argv[]) {
                                         networks.at(i))),
                         std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
                                         networks.at(i))));
-                mp.first->par(par_sep);
+                mp.first->par(par);
                 mp.second->par(par);
 
                 models_add.push_back(mp);
@@ -696,7 +696,7 @@ int main(int argc, char *argv[]) {
                                         networks.at(i))),
                         std::shared_ptr<Model>(new NoCovEdgeModel(
                                         networks.at(i))));
-                mp.first->par(par_sep);
+                mp.first->par(par);
                 mp.second->par(par);
 
                 models_add.push_back(mp);
