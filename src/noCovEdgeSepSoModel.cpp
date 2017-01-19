@@ -9,15 +9,18 @@ namespace stdmMf {
 NoCovEdgeSepSoModel::NoCovEdgeSepSoModel(
         const std::shared_ptr<const Network> & network)
     : par_size_(9), intcp_inf_latent_(0.0), intcp_inf_(0.0), intcp_rec_(0.0),
-      trt_act_inf_(0.0), trt_act_rec_(0.0), trt_pre_inf_(0.0),
+      trt_act_inf_(0.0), trt_act_inf_so_(0.0), trt_act_rec_(0.0),
+      trt_act_rec_so_(0.0), trt_pre_inf_(0.0), trt_pre_inf_so_(0.0),
       network_(network), num_nodes_(this->network_->size()) {
 }
 
 NoCovEdgeSepSoModel::NoCovEdgeSepSoModel(const NoCovEdgeSepSoModel & other)
     : par_size_(other.par_size_), intcp_inf_latent_(other.intcp_inf_latent_),
       intcp_inf_(other.intcp_inf_), intcp_rec_(other.intcp_rec_),
-      trt_act_inf_(other.trt_act_inf_), trt_act_rec_(other.trt_act_rec_),
-      trt_pre_inf_(other.trt_pre_inf_), network_(other.network_->clone()),
+      trt_act_inf_(other.trt_act_inf_), trt_act_inf_so_(other.trt_act_inf_so_),
+      trt_act_rec_(other.trt_act_rec_), trt_act_rec_so_(other.trt_act_rec_so_),
+      trt_pre_inf_(other.trt_pre_inf_), trt_pre_inf_so_(other.trt_pre_inf_so_),
+      network_(other.network_->clone()),
       num_nodes_(other.num_nodes_) {
 }
 
