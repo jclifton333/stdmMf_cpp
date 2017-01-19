@@ -1,5 +1,5 @@
-#ifndef NO_COV_EDGE_MAX_SO_MODEL_HPP
-#define NO_COV_EDGE_MAX_SO_MODEL_HPP
+#ifndef NO_COV_EDGE_OR_SO_MODEL_HPP
+#define NO_COV_EDGE_OR_SO_MODEL_HPP
 
 #include "types.hpp"
 #include "model.hpp"
@@ -8,7 +8,7 @@
 namespace stdmMf {
 
 
-class NoCovEdgeMaxSoModel : public Model {
+class NoCovEdgeOrSoModel : public Model {
 private:
     const uint32_t par_size_;
 
@@ -70,9 +70,9 @@ private:
 
 
 public:
-    NoCovEdgeMaxSoModel(const std::shared_ptr<const Network> & network);
+    NoCovEdgeOrSoModel(const std::shared_ptr<const Network> & network);
 
-    NoCovEdgeMaxSoModel(const NoCovEdgeMaxSoModel & other);
+    NoCovEdgeOrSoModel(const NoCovEdgeOrSoModel & other);
 
     virtual std::shared_ptr<Model> clone() const;
 
@@ -97,4 +97,4 @@ public:
 } // namespace stdmMf
 
 
-#endif // NO_COV_EDGE_MAX_SO_MODEL_HPP
+#endif // NO_COV_EDGE_OR_SO_MODEL_HPP

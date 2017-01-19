@@ -14,7 +14,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/src)
 SET(test_src
   test_network
   test_noCovEdgeModel
-  test_noCovEdgeMaxSoModel
+  test_noCovEdgeOrSoModel
   test_noCovEdgeSepSoModel
   test_utilities
   test_networkRunFeatures

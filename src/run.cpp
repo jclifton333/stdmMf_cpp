@@ -1,6 +1,6 @@
 #include "system.hpp"
 #include "noCovEdgeModel.hpp"
-#include "noCovEdgeMaxSoModel.hpp"
+#include "noCovEdgeOrSoModel.hpp"
 #include "noCovEdgeSepSoModel.hpp"
 #include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
@@ -482,12 +482,12 @@ int main(int argc, char *argv[]) {
             models.push_back(models_add);
         }
 
-        { // Correct: MaxSo,  Postulated: MaxSo
+        { // Correct: OrSo,  Postulated: OrSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
                                         networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                        std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
                                         networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
@@ -512,12 +512,12 @@ int main(int argc, char *argv[]) {
             models.push_back(models_add);
         }
 
-        { // Correct: SepSo,  Postulated: MaxSo
+        { // Correct: SepSo,  Postulated: OrSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
                 ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
                                         networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                        std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
                                         networks.at(i))));
                 mp.first->par(par_sep);
                 mp.second->par(par);
@@ -542,10 +542,10 @@ int main(int argc, char *argv[]) {
             models.push_back(models_add);
         }
 
-        { // Correct: MaxSo,  Postulated: No So
+        { // Correct: OrSo,  Postulated: No So
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(
+                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
                                         networks.at(i))),
                         std::shared_ptr<Model>(new NoCovEdgeModel(
                                         networks.at(i))));
