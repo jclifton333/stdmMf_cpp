@@ -1,6 +1,6 @@
 #include "system.hpp"
 #include "noCovEdgeModel.hpp"
-#include "noCovEdgeModelMaxSo.hpp"
+#include "noCovEdgeMaxSoModel.hpp"
 #include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
@@ -431,7 +431,7 @@ int main(int argc, char *argv[]) {
         const std::shared_ptr<Network> & net = networks.at(i);
 
         for (uint32_t j = 0; j < pars.size(); ++j) {
-            const std::shared_ptr<Model> mod(new NoCovEdgeModelMaxSo(net));
+            const std::shared_ptr<Model> mod(new NoCovEdgeMaxSoModel(net));
             mod->par(pars.at(j));
 
             std::vector<std::pair<std::string, std::vector<double> > >

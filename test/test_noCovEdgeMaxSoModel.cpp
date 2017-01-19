@@ -2,7 +2,7 @@
 #include <glog/logging.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_deriv.h>
-#include "noCovEdgeModelMaxSo.hpp"
+#include "noCovEdgeMaxSoModel.hpp"
 #include "random.hpp"
 #include "system.hpp"
 #include "randomAgent.hpp"
@@ -48,7 +48,7 @@ double f_grad (double x, void * params) {
     return hc->m->ll_grad(*hc->history).at(hc->gradient_var);
 }
 
-TEST(TestNoCovEdgeModelMaxSo, TestPar) {
+TEST(TestNoCovEdgeMaxSoModel, TestPar) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -58,7 +58,7 @@ TEST(TestNoCovEdgeModelMaxSo, TestPar) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NoCovEdgeModelMaxSo m(n);
+    NoCovEdgeMaxSoModel m(n);
 
     std::vector<double> par (m.par());
     for (uint32_t i = 0; i < par.size(); ++i) {
@@ -74,7 +74,7 @@ TEST(TestNoCovEdgeModelMaxSo, TestPar) {
 }
 
 
-TEST(TestNoCovEdgeModelMaxSo,TestLLGradient) {
+TEST(TestNoCovEdgeMaxSoModel,TestLLGradient) {
     // generate network
     NetworkInit init;
     init.set_dim_x(10);
@@ -85,7 +85,7 @@ TEST(TestNoCovEdgeModelMaxSo,TestLLGradient) {
     std::shared_ptr<Network> n = Network::gen_network(init);
 
     // init model
-    const std::shared_ptr<NoCovEdgeModelMaxSo> m(new NoCovEdgeModelMaxSo(n));
+    const std::shared_ptr<NoCovEdgeMaxSoModel> m(new NoCovEdgeMaxSoModel(n));
 
     // set par
     Rng rng;
@@ -136,7 +136,7 @@ TEST(TestNoCovEdgeModelMaxSo,TestLLGradient) {
 }
 
 
-TEST(TestNoCovEdgeModelMaxSo,TestLLHessian) {
+TEST(TestNoCovEdgeMaxSoModel,TestLLHessian) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -147,7 +147,7 @@ TEST(TestNoCovEdgeModelMaxSo,TestLLHessian) {
     std::shared_ptr<Network> n = Network::gen_network(init);
 
     // init model
-    const std::shared_ptr<NoCovEdgeModelMaxSo> m(new NoCovEdgeModelMaxSo(n));
+    const std::shared_ptr<NoCovEdgeMaxSoModel> m(new NoCovEdgeMaxSoModel(n));
 
     // set par
     Rng rng;
@@ -201,7 +201,7 @@ TEST(TestNoCovEdgeModelMaxSo,TestLLHessian) {
 }
 
 
-TEST(TestNoCovEdgeModelMaxSo, EstPar) {
+TEST(TestNoCovEdgeMaxSoModel, EstPar) {
     NetworkInit init;
     init.set_dim_x(10);
     init.set_dim_y(10);
@@ -210,7 +210,7 @@ TEST(TestNoCovEdgeModelMaxSo, EstPar) {
 
     const std::shared_ptr<Network> n = Network::gen_network(init);
 
-    const std::shared_ptr<NoCovEdgeModelMaxSo> m(new NoCovEdgeModelMaxSo(n));
+    const std::shared_ptr<NoCovEdgeMaxSoModel> m(new NoCovEdgeMaxSoModel(n));
 
     Rng rng;
     std::vector<double> par;
@@ -250,7 +250,7 @@ TEST(TestNoCovEdgeModelMaxSo, EstPar) {
 }
 
 
-TEST(TestNoCovEdgeModelMaxSo, Spillover) {
+TEST(TestNoCovEdgeMaxSoModel, Spillover) {
     NetworkInit init;
     init.set_dim_x(5);
     init.set_dim_y(3);
@@ -259,7 +259,7 @@ TEST(TestNoCovEdgeModelMaxSo, Spillover) {
 
     const std::shared_ptr<Network> n = Network::gen_network(init);
 
-    const std::shared_ptr<NoCovEdgeModelMaxSo> m(new NoCovEdgeModelMaxSo(n));
+    const std::shared_ptr<NoCovEdgeMaxSoModel> m(new NoCovEdgeMaxSoModel(n));
 
     Rng rng;
     std::vector<double> par;

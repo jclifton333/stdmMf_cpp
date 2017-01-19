@@ -1,4 +1,4 @@
-#include "noCovEdgeModelMaxSo.hpp"
+#include "noCovEdgeMaxSoModel.hpp"
 #include "utilities.hpp"
 #include <glog/logging.h>
 
@@ -6,14 +6,14 @@
 namespace stdmMf {
 
 
-NoCovEdgeModelMaxSo::NoCovEdgeModelMaxSo(
+NoCovEdgeMaxSoModel::NoCovEdgeMaxSoModel(
         const std::shared_ptr<const Network> & network)
     : par_size_(6), intcp_inf_latent_(0.0), intcp_inf_(0.0), intcp_rec_(0.0),
       trt_act_inf_(0.0), trt_act_rec_(0.0), trt_pre_inf_(0.0),
       network_(network), num_nodes_(this->network_->size()) {
 }
 
-NoCovEdgeModelMaxSo::NoCovEdgeModelMaxSo(const NoCovEdgeModelMaxSo & other)
+NoCovEdgeMaxSoModel::NoCovEdgeMaxSoModel(const NoCovEdgeMaxSoModel & other)
     : par_size_(other.par_size_), intcp_inf_latent_(other.intcp_inf_latent_),
       intcp_inf_(other.intcp_inf_), intcp_rec_(other.intcp_rec_),
       trt_act_inf_(other.trt_act_inf_), trt_act_rec_(other.trt_act_rec_),
@@ -21,12 +21,12 @@ NoCovEdgeModelMaxSo::NoCovEdgeModelMaxSo(const NoCovEdgeModelMaxSo & other)
       num_nodes_(other.num_nodes_) {
 }
 
-std::shared_ptr<Model> NoCovEdgeModelMaxSo::clone() const {
-    return std::shared_ptr<Model>(new NoCovEdgeModelMaxSo(*this));
+std::shared_ptr<Model> NoCovEdgeMaxSoModel::clone() const {
+    return std::shared_ptr<Model>(new NoCovEdgeMaxSoModel(*this));
 }
 
 
-std::vector<double> NoCovEdgeModelMaxSo::par() const {
+std::vector<double> NoCovEdgeMaxSoModel::par() const {
     std::vector<double> par;
     par.push_back(this->intcp_inf_latent_);
     par.push_back(this->intcp_inf_);
@@ -38,7 +38,7 @@ std::vector<double> NoCovEdgeModelMaxSo::par() const {
 }
 
 
-void NoCovEdgeModelMaxSo::par(const std::vector<double> & par) {
+void NoCovEdgeMaxSoModel::par(const std::vector<double> & par) {
     CHECK_EQ(par.size(), this->par_size_);
     std::vector<double>::const_iterator it = par.begin();
     this->intcp_inf_latent_ = *it++;
@@ -50,12 +50,12 @@ void NoCovEdgeModelMaxSo::par(const std::vector<double> & par) {
 }
 
 
-uint32_t NoCovEdgeModelMaxSo::par_size() const {
+uint32_t NoCovEdgeMaxSoModel::par_size() const {
     return this->par_size_;
 }
 
 
-std::vector<double> NoCovEdgeModelMaxSo::probs(
+std::vector<double> NoCovEdgeMaxSoModel::probs(
         const boost::dynamic_bitset<> & inf_status,
         const boost::dynamic_bitset<> & trt_status) const {
     std::vector<double> probs;
@@ -93,7 +93,7 @@ std::vector<double> NoCovEdgeModelMaxSo::probs(
 }
 
 
-std::vector<double> NoCovEdgeModelMaxSo::ll_grad(
+std::vector<double> NoCovEdgeMaxSoModel::ll_grad(
         const std::vector<BitsetPair> & history) const {
     std::vector<double> grad_value (this->par_size_, 0.0);
     const uint32_t history_size = history.size();
@@ -199,7 +199,7 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_grad(
 }
 
 
-std::vector<double> NoCovEdgeModelMaxSo::ll_hess(
+std::vector<double> NoCovEdgeMaxSoModel::ll_hess(
         const std::vector<BitsetPair> & history) const {
     std::vector<double> hess_val(this->par_size_ * this->par_size_, 0.);
 
@@ -323,7 +323,7 @@ std::vector<double> NoCovEdgeModelMaxSo::ll_hess(
 }
 
 
-double NoCovEdgeModelMaxSo::inf_b(const uint32_t & b_node,
+double NoCovEdgeMaxSoModel::inf_b(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
@@ -347,7 +347,7 @@ double NoCovEdgeModelMaxSo::inf_b(const uint32_t & b_node,
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
 }
 
-double NoCovEdgeModelMaxSo::a_inf_b(const uint32_t & a_node,
+double NoCovEdgeMaxSoModel::a_inf_b(const uint32_t & a_node,
         const uint32_t & b_node, const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
@@ -388,7 +388,7 @@ double NoCovEdgeModelMaxSo::a_inf_b(const uint32_t & a_node,
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
 }
 
-double NoCovEdgeModelMaxSo::rec_b(const uint32_t & b_node,
+double NoCovEdgeMaxSoModel::rec_b(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
@@ -413,7 +413,7 @@ double NoCovEdgeModelMaxSo::rec_b(const uint32_t & b_node,
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
 }
 
-std::vector<double> NoCovEdgeModelMaxSo::inf_b_grad(const uint32_t & b_node,
+std::vector<double> NoCovEdgeMaxSoModel::inf_b_grad(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
@@ -444,7 +444,7 @@ std::vector<double> NoCovEdgeModelMaxSo::inf_b_grad(const uint32_t & b_node,
     return grad_val;
 }
 
-std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_grad(
+std::vector<double> NoCovEdgeMaxSoModel::a_inf_b_grad(
         const uint32_t & a_node, const uint32_t & b_node,
         const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
@@ -493,7 +493,7 @@ std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_grad(
     return grad_val;
 }
 
-std::vector<double> NoCovEdgeModelMaxSo::rec_b_grad(
+std::vector<double> NoCovEdgeMaxSoModel::rec_b_grad(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
@@ -525,7 +525,7 @@ std::vector<double> NoCovEdgeModelMaxSo::rec_b_grad(
 }
 
 
-std::vector<double> NoCovEdgeModelMaxSo::inf_b_hess(const uint32_t & b_node,
+std::vector<double> NoCovEdgeMaxSoModel::inf_b_hess(const uint32_t & b_node,
         const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
@@ -567,7 +567,7 @@ std::vector<double> NoCovEdgeModelMaxSo::inf_b_hess(const uint32_t & b_node,
     return hess_val;
 }
 
-std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_hess(
+std::vector<double> NoCovEdgeMaxSoModel::a_inf_b_hess(
         const uint32_t & a_node, const uint32_t & b_node,
         const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
@@ -628,7 +628,7 @@ std::vector<double> NoCovEdgeModelMaxSo::a_inf_b_hess(
     return hess_val;
 }
 
-std::vector<double> NoCovEdgeModelMaxSo::rec_b_hess(
+std::vector<double> NoCovEdgeMaxSoModel::rec_b_hess(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
