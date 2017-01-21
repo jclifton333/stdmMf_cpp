@@ -30,7 +30,7 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   vfnBrAdaptSimPerturbAgent.cpp
 
   ## features
-  networkRunFeatures.cpp
+  networkRunFeatures.cpp networkRunSymFeatures.cpp
 
   ## optimization
   optim.cpp simPerturb.cpp objFns.cpp
