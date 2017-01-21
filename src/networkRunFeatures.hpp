@@ -22,9 +22,8 @@ private:
     uint32_t num_features_;
 
     std::vector<uint32_t> num_runs_by_len_;
-    std::vector<std::pair<uint32_t, uint32_t> *> masks_;
-    std::vector<std::vector<std::pair<uint32_t, uint32_t> *
-                            > > masks_by_node_;
+    std::vector<uint32_t *> masks_;
+    std::vector<std::vector<uint32_t *> > masks_by_node_;
 
 public:
     NetworkRunFeatures(const std::shared_ptr<const Network> & network,
