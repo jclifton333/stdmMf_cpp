@@ -65,7 +65,8 @@ std::vector<double> NetworkRunFeatures::get_features(
 
     for (uint32_t i = 0; i < this->num_runs_; ++i) {
         const NetworkRun & nr = this->runs_.at(i);
-        const uint32_t run_len = nr.nodes.size();
+        const uint32_t & run_len = nr.len;
+
         uint32_t & inf_mask(this->masks_.at(i)->first);
         uint32_t & trt_mask(this->masks_.at(i)->second);
 
@@ -117,7 +118,7 @@ void NetworkRunFeatures::update_features(
 
     for (uint32_t i = 0; i < num_changed; ++i) {
         const NetworkRun & nr = changed_runs.at(i);
-        const uint32_t run_len = nr.nodes.size();
+        const uint32_t & run_len = nr.len;
         std::pair<uint32_t, uint32_t> & cm = *changed_masks.at(i);
 
         const uint32_t max_mask = 1 << run_len;
