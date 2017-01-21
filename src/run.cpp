@@ -772,10 +772,16 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    std::ofstream ofs;
-    ofs.open("run_results.txt", std::ios_base::out);
-    ofs << "network,model,mean,agent,mean,se,time" << std::endl;
-    ofs.close();
+    std::ofstream ofs_raw;
+    ofs_raw.open("run_results_raw.txt", std::ios_base::out);
+    CHECK(ofs_raw.good()) << "could not open file";
+    ofs_raw << "network,model,agent,mean,se,time" << std::endl;
+    ofs_raw.close();
+
+    std::ofstream ofs_read;
+    ofs_read.open("run_results_read.txt", std::ios_base::out);
+    CHECK(ofs_read.good()) << "could not open file";
+    ofs_read.close();
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
@@ -786,31 +792,43 @@ int main(int argc, char *argv[]) {
             std::vector<std::pair<std::string, std::vector<double> > >
                 results = run(net, mp.first, mp.second, 50);
 
-            ofs.open("run_results.txt", std::ios_base::app);
-            if (!ofs.good()) {
-                LOG(FATAL) << "could not open file";
-            }
+            ofs_raw.open("run_results_raw.txt", std::ios_base::app);
+            CHECK(ofs_raw.good()) << "could not open file";
+
+            ofs_read.open("run_results.txt", std::ios_base::app);
+            CHECK(ofs_read.good()) << "could not open file";
 
             std::cout << "=====================================" << std::endl
                       << "results for network " << net->kind()
                       << " and model pair " << j << std::endl;
 
+            ofs_read << "=====================================" << std::endl
+                << "results for network " << net->kind()
+                << " and model pair " << j << std::endl;
+
             for (uint32_t k = 0; k < results.size(); ++k) {
-                ofs << net->kind() << ","
-                    << j << ","
-                    << results.at(k).first << ","
-                    << results.at(k).second.at(0) << ","
-                    << results.at(k).second.at(1) << ","
-                    << results.at(k).second.at(2) << std::endl;
+                ofs_raw << net->kind() << ","
+                        << j << ","
+                        << results.at(k).first << ","
+                        << results.at(k).second.at(0) << ","
+                        << results.at(k).second.at(1) << ","
+                        << results.at(k).second.at(2) << std::endl;
 
                 std::cout << results.at(k).first << ": "
                           << results.at(k).second.at(0) << " ("
                           << results.at(k).second.at(1) << ")  ["
                           << results.at(k).second.at(2) << "]"
                           << std::endl;
+
+                ofs_read << results.at(k).first << ": "
+                         << results.at(k).second.at(0) << " ("
+                         << results.at(k).second.at(1) << ")  ["
+                         << results.at(k).second.at(2) << "]"
+                         << std::endl;
             }
 
-            ofs.close();
+            ofs_raw.close();
+            ofs_read.close();
         }
     }
 
