@@ -33,7 +33,7 @@ NetworkRunFeatures::NetworkRunFeatures(
         const uint32_t run_len = nr.nodes.size();
         CHECK_LT(run_len, 32);
 
-        const std::shared_ptr<std::pair<uint32_t, uint32_t> >
+        std::pair<uint32_t, uint32_t> * const
             mask(new std::pair<uint32_t, uint32_t>(0, 0));
 
         this->masks_.push_back(mask);
@@ -50,6 +50,15 @@ NetworkRunFeatures::NetworkRunFeatures(const NetworkRunFeatures & other)
       runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
       run_length_(other.run_length_), num_runs_(other.num_runs_),
       offset_(other.offset_), num_features_(other.num_features_) {
+}
+
+NetworkRunFeatures::~NetworkRunFeatures() {
+    // Only need to delete masks. Masks by node are referencing the
+    // same memory.
+    std::for_each(masks_.begin(), masks_.end(),
+            [](std::pair<uint32_t, uint32_t> * const p) {
+                delete p;
+            });
 }
 
 std::shared_ptr<Features> NetworkRunFeatures::clone() const {
@@ -108,7 +117,7 @@ void NetworkRunFeatures::update_features(
             runs_by_node_.at(changed_node));
     const uint32_t num_changed = changed_runs.size();
 
-    const std::vector<std::shared_ptr<std::pair<uint32_t, uint32_t> > > &
+    const std::vector<std::pair<uint32_t, uint32_t> *> &
         changed_masks = this->masks_by_node_.at(changed_node);
 
     const bool inf_changed =
