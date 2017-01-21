@@ -32,6 +32,7 @@ NetworkRunFeatures::NetworkRunFeatures(
         const NetworkRun & nr = this->runs_.at(i);
         const uint32_t run_len = nr.nodes.size();
         CHECK_LT(run_len, 10);
+        CHECK_LE(run_len, this->run_length_);
 
         std::pair<uint32_t, uint32_t> * const
             mask(new std::pair<uint32_t, uint32_t>(0, 0));
