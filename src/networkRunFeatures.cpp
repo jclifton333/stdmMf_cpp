@@ -180,7 +180,7 @@ void NetworkRunFeatures::update_features_async(
 
     for (uint32_t i = 0; i < num_changed; ++i) {
         const NetworkRun & nr = changed_runs.at(i);
-        const uint32_t run_len = nr.nodes.size();
+        const uint32_t & run_len = nr.len;
 
         CHECK_LE(run_len, 32);
         uint32_t inf_mask_new = 0;
