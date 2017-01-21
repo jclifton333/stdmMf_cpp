@@ -13,6 +13,7 @@ struct NetworkRun
 {
     std::vector<uint32_t> nodes;
     boost::dynamic_bitset<> mask;
+    uint32_t len;
 };
 
 class Network {

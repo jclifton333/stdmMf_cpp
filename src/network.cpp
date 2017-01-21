@@ -39,6 +39,7 @@ std::vector<NetworkRun> Network::runs_of_len(
             nr.nodes.push_back(i);
             nr.mask.resize(this->size());
             nr.mask.set(i);
+            nr.len = 1;
             runs.push_back(nr);
         }
     } else {
@@ -76,7 +77,7 @@ void Network::runs_of_len_helper(std::vector<NetworkRun> & runs,
                 [&nr] (const uint32_t & node) {
                     nr.mask.set(node);
                 });
-
+        nr.len = target_len;
         runs.push_back(nr);
     } else if (curr_len > 0 && curr_len < target_len) {
         // get the last node in the list
