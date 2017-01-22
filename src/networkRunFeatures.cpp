@@ -49,7 +49,26 @@ NetworkRunFeatures::NetworkRunFeatures(const NetworkRunFeatures & other)
     : network_(other.network_->clone()), runs_(other.runs_),
       runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
       run_length_(other.run_length_), num_runs_(other.num_runs_),
-      offset_(other.offset_), num_features_(other.num_features_) {
+      offset_(other.offset_), num_features_(other.num_features_),
+      num_runs_by_len_(other.num_runs_by_len_) {
+
+    // set up path trt mask
+    this->masks_by_node_.resize(this->network_->size());
+    for (uint32_t i = 0; i < this->num_runs_; ++i) {
+        const NetworkRun & nr = this->runs_.at(i);
+        const uint32_t run_len = nr.nodes.size();
+        CHECK_LT(run_len, 10);
+        CHECK_LE(run_len, this->run_length_);
+
+        uint32_t * const mask(new uint32_t(*other.masks_.at(i)));
+
+        this->masks_.push_back(mask);
+
+        // filter by node
+        for (uint32_t j = 0; j < run_len; ++j) {
+            this->masks_by_node_.at(nr.nodes.at(j)).push_back(mask);
+        }
+    }
 }
 
 NetworkRunFeatures::~NetworkRunFeatures() {
