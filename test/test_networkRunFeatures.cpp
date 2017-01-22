@@ -1021,6 +1021,224 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
 
 
 
+
+TEST(TestNetworkRunFeatures, Copy) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(3);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    std::random_device device;
+    const uint32_t seed = device();
+    Rng rng;
+    rng.set_seed(seed);
+
+    NetworkRunFeatures nrf_get(n, 3);
+    NetworkRunFeatures nrf_update(n, 3);
+
+    NetworkRunFeatures nrf_get_cpy(nrf_get);
+    NetworkRunFeatures nrf_update_cpy(nrf_update);
+
+    EXPECT_EQ(nrf_get.num_features(), nrf_get_cpy.num_features());
+    EXPECT_EQ(nrf_update.num_features(),
+            nrf_update_cpy.num_features());
+
+    for (uint32_t reps = 0; reps < 100; ++reps) {
+        const uint32_t num_inf = rng.rint(0, n->size());
+        const std::vector<int> inf_list =
+            rng.sample_range(0, n->size(), num_inf);
+
+        const uint32_t num_trt = rng.rint(0, n->size());
+        const std::vector<int> trt_list =
+            rng.sample_range(0, n->size(), num_trt);
+
+        boost::dynamic_bitset<> inf_bits(n->size()), trt_bits(n->size());
+        for (uint32_t i = 0; i < num_inf; ++i) {
+            inf_bits.set(inf_list.at(i));
+        }
+        for (uint32_t i = 0; i < num_trt; ++i) {
+            trt_bits.set(trt_list.at(i));
+        }
+
+        std::string inf_string, trt_string;
+        boost::to_string(inf_bits, inf_string);
+        boost::to_string(trt_bits, trt_string);
+
+
+        std::vector<double> f_orig;
+        std::vector<double> f_orig_cpy;
+
+        // flip inf
+        boost::dynamic_bitset<> inf_bits_flipped;
+        for (uint32_t i = 0; i < n->size(); ++i) {
+            inf_bits_flipped = inf_bits;
+            inf_bits_flipped.flip(i);
+            const std::vector<double> f_new = nrf_get.get_features(
+                    inf_bits_flipped, trt_bits);
+            const std::vector<double> f_new_cpy = nrf_get_cpy.get_features(
+                    inf_bits_flipped, trt_bits);
+
+
+            // get features to reset masks properly
+            f_orig = nrf_update.get_features(inf_bits,
+                    trt_bits);
+            f_orig_cpy = nrf_update_cpy.get_features(inf_bits,
+                    trt_bits);
+
+            std::vector<double> f_upd(f_orig);
+            std::vector<double> f_upd_async(f_orig);
+            std::vector<double> f_upd_cpy(f_orig_cpy);
+            std::vector<double> f_upd_async_cpy(f_orig_cpy);
+
+            nrf_update.update_features_async(i, inf_bits_flipped, trt_bits,
+                    inf_bits, trt_bits, f_upd_async);
+
+            nrf_update.update_features(i, inf_bits_flipped, trt_bits, inf_bits,
+                    trt_bits, f_upd);
+
+            nrf_update_cpy.update_features_async(i, inf_bits_flipped, trt_bits,
+                    inf_bits, trt_bits, f_upd_async_cpy);
+
+            nrf_update_cpy.update_features(i, inf_bits_flipped, trt_bits,
+                    inf_bits, trt_bits, f_upd_cpy);
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_new.at(j), f_new_cpy.at(j), 1e-14)
+                    << "Copy failed for new";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd.at(j), f_upd_cpy.at(j), 1e-14)
+                    << "Copy failed for synchronous update";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd_async.at(j), f_upd_async_cpy.at(j), 1e-14)
+                    << "Copy failed for synchronous update";
+            }
+        }
+
+        // get features again to reset paths properly
+        f_orig = nrf_update.get_features(inf_bits,
+                trt_bits);
+
+        f_orig_cpy = nrf_update_cpy.get_features(inf_bits,
+                trt_bits);
+
+
+        // flip trt
+        boost::dynamic_bitset<> trt_bits_flipped;
+        for (uint32_t i = 0; i < n->size(); ++i) {
+            trt_bits_flipped = trt_bits;
+            trt_bits_flipped.flip(i);
+            const std::vector<double> f_new = nrf_get.get_features(inf_bits,
+                    trt_bits_flipped);
+
+            const std::vector<double> f_new_cpy = nrf_get_cpy.get_features(
+                    inf_bits, trt_bits_flipped);
+
+            // get features to reset masks properly
+            f_orig = nrf_update.get_features(inf_bits,
+                    trt_bits);
+            f_orig_cpy = nrf_update_cpy.get_features(inf_bits,
+                    trt_bits);
+
+            std::vector<double> f_upd(f_orig);
+            std::vector<double> f_upd_async(f_orig);
+
+            std::vector<double> f_upd_cpy(f_orig_cpy);
+            std::vector<double> f_upd_async_cpy(f_orig_cpy);
+
+            nrf_update.update_features_async(i, inf_bits, trt_bits_flipped,
+                    inf_bits, trt_bits, f_upd_async);
+
+            nrf_update.update_features(i, inf_bits, trt_bits_flipped, inf_bits,
+                    trt_bits, f_upd);
+
+            nrf_update_cpy.update_features_async(i, inf_bits, trt_bits_flipped,
+                    inf_bits, trt_bits, f_upd_async_cpy);
+
+            nrf_update_cpy.update_features(i, inf_bits, trt_bits_flipped,
+                    inf_bits, trt_bits, f_upd_cpy);
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_new.at(j), f_new_cpy.at(j), 1e-14)
+                    << "Copy failed for new";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd.at(j), f_upd_cpy.at(j), 1e-14)
+                    << "Copy failed for synchronous update";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd_async.at(j), f_upd_async_cpy.at(j), 1e-14)
+                    << "Copy failed for synchronous update";
+            }
+        }
+
+        // flip both
+        for (uint32_t i = 0; i < n->size(); ++i) {
+            inf_bits_flipped = inf_bits;
+            inf_bits_flipped.flip(i);
+
+            trt_bits_flipped = trt_bits;
+            trt_bits_flipped.flip(i);
+            const std::vector<double> f_new = nrf_get.get_features(
+                    inf_bits_flipped, trt_bits_flipped);
+
+            const std::vector<double> f_new_cpy = nrf_get_cpy.get_features(
+                    inf_bits_flipped, trt_bits_flipped);
+
+            // get features to reset masks properly
+            f_orig = nrf_update.get_features(inf_bits,
+                    trt_bits);
+
+            f_orig_cpy = nrf_update_cpy.get_features(inf_bits,
+                    trt_bits);
+
+            std::vector<double> f_upd(f_orig);
+            std::vector<double> f_upd_async(f_orig);
+
+            std::vector<double> f_upd_cpy(f_orig_cpy);
+            std::vector<double> f_upd_async_cpy(f_orig_cpy);
+
+            nrf_update.update_features_async(i, inf_bits_flipped,
+                    trt_bits_flipped, inf_bits, trt_bits, f_upd_async);
+
+            nrf_update.update_features(i, inf_bits_flipped, trt_bits_flipped,
+                    inf_bits, trt_bits, f_upd);
+
+            nrf_update_cpy.update_features_async(i, inf_bits_flipped,
+                    trt_bits_flipped, inf_bits, trt_bits, f_upd_async_cpy);
+
+            nrf_update_cpy.update_features(i, inf_bits_flipped,
+                    trt_bits_flipped, inf_bits, trt_bits, f_upd_cpy);
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_new.at(j), f_new_cpy.at(j), 1e-14)
+                    << "Copy failed for new";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd.at(j), f_upd_cpy.at(j), 1e-14)
+                    << "Copy failed for synchronous update";
+            }
+
+            for (uint32_t j = 0; j < nrf_get.num_features(); ++j) {
+                EXPECT_NEAR(f_upd_async.at(j), f_upd_async_cpy.at(j), 1e-14)
+                    << "Copy failed for synchronous update";
+            }
+        }
+    }
+}
+
+
+
 } // namespace stdmMf
 
 
