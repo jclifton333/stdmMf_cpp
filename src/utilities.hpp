@@ -53,6 +53,8 @@ std::vector<double> recip_of(const std::vector<double> & a);
 
 std::pair<double, double> mean_and_var(const std::vector<double> & vec);
 
+uint32_t reverse_bits(const uint32_t & x);
+
 } // namespace stdmMf
 
 

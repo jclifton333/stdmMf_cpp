@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <glog/logging.h>
 #include "utilities.hpp"
+#include "random.hpp"
 
 namespace stdmMf {
 
@@ -377,6 +378,27 @@ TEST(TestUtilities, TestMeanAndVar) {
     const std::pair<double, double> stats = mean_and_var(x);
     EXPECT_NEAR(stats.first, 2.0, 1e-12);
     EXPECT_NEAR(stats.second, 4.666666666666, 1e-12);
+}
+
+TEST(TestUtilities, TestReverseBits) {
+    uint32_t i = 0;
+
+    Rng rng;
+    for (uint32_t i = 0; i < 1e6; ++i) {
+        uint32_t num = rng.rint(0, 1 << 16);
+        uint32_t num_rev = reverse_bits(num);
+
+        boost::dynamic_bitset<> num_bs(32,num);
+        boost::dynamic_bitset<> num_rev_bs(32,num_rev);
+
+        std::string num_str;
+        boost::to_string(num_bs, num_str);
+        std::string num_rev_str;
+        boost::to_string(num_rev_bs, num_rev_str);
+        std::reverse(num_rev_str.begin(), num_rev_str.end());
+
+        EXPECT_EQ(num_str, num_rev_str);
+    }
 }
 
 
