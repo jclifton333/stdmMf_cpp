@@ -795,7 +795,7 @@ int main(int argc, char *argv[]) {
             ofs_raw.open("run_results_raw.txt", std::ios_base::app);
             CHECK(ofs_raw.good()) << "could not open file";
 
-            ofs_read.open("run_results.txt", std::ios_base::app);
+            ofs_read.open("run_results_read.txt", std::ios_base::app);
             CHECK(ofs_read.good()) << "could not open file";
 
             std::cout << "=====================================" << std::endl
