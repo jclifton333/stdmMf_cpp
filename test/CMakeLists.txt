@@ -19,6 +19,7 @@ SET(test_src
   test_noCovEdgeSepSoModel
   test_utilities
   test_networkRunFeatures
+  test_networkRunSymFeatures
   test_sweepAgent
   test_simPerturb
   test_pool
