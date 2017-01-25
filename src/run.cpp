@@ -539,21 +539,21 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
-    { // network 3
-        NetworkInit init;
-        init.set_dim_x(25);
-        init.set_dim_y(20);
-        init.set_wrap(false);
-        init.set_type(NetworkInit_NetType_GRID);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // network 3
+    //     NetworkInit init;
+    //     init.set_dim_x(25);
+    //     init.set_dim_y(20);
+    //     init.set_wrap(false);
+    //     init.set_type(NetworkInit_NetType_GRID);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
-    { // network 4
-        NetworkInit init;
-        init.set_size(500);
-        init.set_type(NetworkInit_NetType_BARABASI);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // network 4
+    //     NetworkInit init;
+    //     init.set_size(500);
+    //     init.set_type(NetworkInit_NetType_BARABASI);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     // { // network 5
     //     NetworkInit init;
