@@ -77,9 +77,9 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
     if (history.size() < 1) {
         ProximalAgent a(this->network_);
         return a.apply_trt(inf_bits, history);
-    } else if (history.size() < 2) {
-        MyopicAgent ma(this->network_, this->model_->clone());
-        return ma.apply_trt(inf_bits, history);
+    // } else if (history.size() < 2) {
+    //     MyopicAgent ma(this->network_, this->model_->clone());
+    //     return ma.apply_trt(inf_bits, history);
     }
 
     // estimate model
