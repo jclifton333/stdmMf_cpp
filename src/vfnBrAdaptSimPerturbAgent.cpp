@@ -82,14 +82,16 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
     //     return ma.apply_trt(inf_bits, history);
     }
 
-    // estimate model
-    this->model_->est_par(inf_bits, history);
 
-
-    // get information matrix and take inverse sqrt
     std::vector<BitsetPair> all_history(history);
     all_history.push_back(BitsetPair(inf_bits,
                     boost::dynamic_bitset<>(this->network_->size())));
+
+    // estimate model
+    this->model_->est_par(all_history);
+
+
+    // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(all_history);
     mult_b_to_a(hess, -1.0 * (all_history.size() - 1));
 
@@ -165,8 +167,6 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
     // minimize bellman residual
     {
-        std::vector<BitsetPair> all_history = history;
-        all_history.push_back(BitsetPair(inf_bits, boost::dynamic_bitset<>()));
 
         // find minimizing scalar for parameters
         {
@@ -179,7 +179,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
             };
 
             const std::vector<std::pair<double, double> > parts =
-                bellman_residual_parts(history, &a, 0.9, q_fn);
+                bellman_residual_parts(all_history, &a, 0.9, q_fn);
 
             const double numer = std::accumulate(parts.begin(), parts.end(),
                     0.0, [](const double & x,
