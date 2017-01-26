@@ -62,12 +62,13 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
     //     return ma.apply_trt(inf_bits, history);
     }
 
-    this->model_->est_par(inf_bits, history);
-
-    // get information matrix and take inverse sqrt
     std::vector<BitsetPair> all_history(history);
     all_history.push_back(BitsetPair(inf_bits,
                     boost::dynamic_bitset<>(this->network_->size())));
+
+    this->model_->est_par(all_history);
+
+    // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(all_history);
     mult_b_to_a(hess, -1.0 * (all_history.size() - 1));
 
