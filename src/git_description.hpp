@@ -6,7 +6,7 @@
 namespace stdmMf {
 
 
-extern const std::string git_description;
+extern const std::string git_sha1;
 
 
 } // namespace stdmMf
