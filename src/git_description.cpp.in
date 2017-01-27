@@ -1,3 +1,9 @@
 #include "git_description.hpp"
 
+namespace stdmMf {
+
+
 const std::string git_sha1 = "@GIT_DESCRIBE_VAR@";
+
+
+} // namespace stdmMf
