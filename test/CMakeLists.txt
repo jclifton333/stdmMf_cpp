@@ -8,7 +8,7 @@ find_package(GSL REQUIRED)
 find_package(Boost REQUIRED system thread filesystem)
 
 include_directories(${GTEST_INCLUDE_DIRS}
-  ${CMAKE_SOURCE_DIR}/src)
+  ${CMAKE_SOURCE_DIR}/src/main)
 include_directories(${CMAKE_SOURCE_DIR}/build/src)
 
 SET(test_src

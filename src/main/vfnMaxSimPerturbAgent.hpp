@@ -15,6 +15,7 @@ class VfnMaxSimPerturbAgent : public Agent, public RngClass {
 protected:
     const std::shared_ptr<Features> features_;
     const std::shared_ptr<Model> model_;
+    std::vector<double> coef_;
 
     const uint32_t num_reps_;
     const uint32_t final_t_;
@@ -48,6 +49,8 @@ public:
 
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits);
+
+    std::vector<double> coef() const;
 };
 
 
