@@ -5,7 +5,7 @@ find_package(GTest REQUIRED)
 find_package(Glog REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(GSL REQUIRED)
-find_package(Boost REQUIRED system thread)
+find_package(Boost REQUIRED system thread filesystem)
 
 include_directories(${GTEST_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/src)
@@ -23,7 +23,8 @@ SET(test_src
   test_sweepAgent
   test_simPerturb
   test_pool
-  test_experiment)
+  test_experiment
+  test_trapperKeeper)
 
 foreach(test_name ${test_src})
   add_executable(${test_name} ${test_name}.cpp)

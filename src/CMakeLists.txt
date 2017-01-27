@@ -1,6 +1,6 @@
 find_package(Glog REQUIRED)
 find_package(Protobuf REQUIRED)
-find_package(Boost REQUIRED system thread)
+find_package(Boost REQUIRED system thread filesystem)
 find_package(GSL REQUIRED)
 find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
@@ -36,7 +36,7 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
   optim.cpp simPerturb.cpp objFns.cpp
 
   ## extra
-  pool.cpp experiment.cpp
+  pool.cpp experiment.cpp trapperKeeper.cpp
   ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp")
 
 
