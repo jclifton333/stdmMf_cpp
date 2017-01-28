@@ -55,6 +55,9 @@ class TrapperKeeper {
 public:
     TrapperKeeper(const std::string & name,
             const boost::filesystem::path & root);
+    ~TrapperKeeper();
+
+    void finished();
 
     const boost::filesystem::path & root() const;
 

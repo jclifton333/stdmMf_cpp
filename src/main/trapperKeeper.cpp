@@ -74,6 +74,9 @@ TrapperKeeper::TrapperKeeper(const std::string & name,
            << "name: " << name << "\n";
 }
 
+TrapperKeeper::~TrapperKeeper() {
+    this->finished();
+}
 
 void TrapperKeeper::finished() {
     std::lock_guard<std::mutex> lock(this->filesystem_mutex_);
