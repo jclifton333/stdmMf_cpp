@@ -46,9 +46,9 @@ void Entry::wipe() {
 Entry::Entry() {
 }
 
+
 Entry::Entry(const Entry & other) {
     // protect writing data
-    std::lock_guard<std::mutex> lock(this->mutex_);
     *this << other.content_.str();
 }
 
@@ -156,7 +156,6 @@ void TrapperKeeper::flush() {
 
     CHECK(!this->wiped_);
     for (auto & pair : this->entries_) {
-        std::lock_guard<std::mutex> lock(pair.second.mutex());
         // write to file and wipe the record
         std::ofstream ofs;
         ofs.open(pair.first.string().c_str(), std::ios_base::app);
