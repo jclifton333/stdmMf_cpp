@@ -42,6 +42,8 @@ Entry::Entry() {
 }
 
 Entry::Entry(const Entry & other) {
+    // protect writing data
+    std::lock_guard<std::mutex> lock(this->stream_mutex_);
     *this << other.content_.str();
 }
 
@@ -53,7 +55,8 @@ TrapperKeeper::TrapperKeeper(const std::string & name,
       temp_(boost::filesystem::temp_directory_path()
               / boost::filesystem::unique_path()),
       date_(time_stamp()),
-      wiped_(false) {
+      wiped_(false),
+      finished_(false) {
 
     char hostname[HOST_NAME_MAX];
     int host_not_found = gethostname(hostname, HOST_NAME_MAX);
@@ -73,7 +76,8 @@ TrapperKeeper::TrapperKeeper(const std::string & name,
 
 
 void TrapperKeeper::finished() {
-    if (!this->wiped_) {
+    std::lock_guard<std::mutex> lock(this->filesystem_mutex_);
+    if (!this->wiped_ && !this->finished_) {
         this->flush();
 
         // create root if doesn't exists
@@ -101,6 +105,8 @@ void TrapperKeeper::finished() {
 
             boost::filesystem::rename(this->temp_, new_path);
         }
+
+        this->finished_ = true;
     }
 }
 
