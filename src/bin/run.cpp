@@ -10,6 +10,7 @@
 #include "vfnMaxSimPerturbAgent.hpp"
 #include "brMinSimPerturbAgent.hpp"
 #include "vfnBrAdaptSimPerturbAgent.hpp"
+#include "vfnBrStartSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
 
@@ -182,6 +183,44 @@ run(const std::shared_ptr<Network> & net,
                                     new NetworkRunSymFeatures(net->clone(), 3)),
                             mod_agents->clone(),
                             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    a.set_seed(i);
+
+                    s.start();
+
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tick =
+                        std::chrono::high_resolution_clock::now();
+
+                    r_val->set(runner(&s, &a, 20, 1.0));
+
+                    std::chrono::time_point<
+                        std::chrono::high_resolution_clock> tock =
+                        std::chrono::high_resolution_clock::now();
+
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
+                });
+    }
+
+
+    // vfnBrStart max
+    std::vector<std::shared_ptr<Result<double> > > vfnBrStart_val;
+    std::vector<std::shared_ptr<Result<double> > > vfnBrStart_time;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        vfnBrStart_val.push_back(r_val);
+        vfnBrStart_time.push_back(r_time);
+
+        pool.service()->post([=]() {
+                    System s(net->clone(), mod_system->clone());
+                    s.set_seed(i);
+                    VfnBrStartSimPerturbAgent a(net->clone(),
+                            std::shared_ptr<Features>(
+                                    new NetworkRunSymFeatures(net->clone(), 3)),
+                            mod_agents->clone(),
+                            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7,
+                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
                     a.set_seed(i);
 
                     s.start();
@@ -452,6 +491,18 @@ run(const std::shared_ptr<Network> & net,
             {vfn_stats.first,
              std::sqrt(vfn_stats.second / num_reps),
              mean_and_var(result_to_vec(vfn_time)).first};
+        all_results.push_back(std::pair<std::string, std::vector<double> >
+                (agent_name, agent_res));
+    }
+
+    {
+        const std::string agent_name = "vfnBrStart";
+        const std::pair<double, double> vfnBrStart_stats = mean_and_var(
+                result_to_vec(vfnBrStart_val));
+        const std::vector<double> agent_res =
+            {vfnBrStart_stats.first,
+             std::sqrt(vfnBrStart_stats.second / num_reps),
+             mean_and_var(result_to_vec(vfnBrStart_time)).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
