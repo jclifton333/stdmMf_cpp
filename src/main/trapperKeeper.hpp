@@ -21,15 +21,23 @@ class Entry {
 protected:
     friend class TrapperKeeper;
 
+    boost::filesystem::path path_;
+
     std::stringstream content_;
+
+    mutable std::mutex mutex_;
 
     friend std::ostream & operator<<(std::ostream & os, const Entry & r);
 
     void wipe();
 
+    std::string retrieve_and_wipe();
+
 public:
-    Entry();
+    Entry(const boost::filesystem::path & path);
     Entry(const Entry & other);
+
+    boost::filesystem::path path();
 
     template<class T>
     Entry& operator<<(const T & new_content) {
@@ -41,7 +49,7 @@ public:
 
 class TrapperKeeper {
 protected:
-    std::list<std::pair<boost::filesystem::path, Entry> > entries_;
+    std::list<Entry> entries_;
     const boost::filesystem::path root_;
     const boost::filesystem::path temp_;
     const boost::filesystem::path date_;

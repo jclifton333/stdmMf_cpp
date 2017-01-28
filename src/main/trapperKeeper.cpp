@@ -28,23 +28,46 @@ std::string time_stamp() {
 }
 
 std::ostream & operator<<(std::ostream & os, const Entry & r) {
+    std::lock_guard<std::mutex> lock(r.mutex_);
+
     os << r.content_.str();
 }
 
 
 void Entry::wipe() {
+    std::lock_guard<std::mutex> lock(this->mutex_);
+
     this->content_.str("");
     this->content_.clear();
 }
 
+std::string Entry::retrieve_and_wipe() {
+    std::lock_guard<std::mutex> lock(this->mutex_);
 
-Entry::Entry() {
+    std::string str = this->content_.str();
+    this->content_.str("");
+    this->content_.clear();
+
+    return str;
 }
 
 
-Entry::Entry(const Entry & other) {
+Entry::Entry(const boost::filesystem::path & path)
+    : path_(path) {
+}
+
+
+Entry::Entry(const Entry & other)
+    : path_(other.path_) {
     // protect writing data
-    *this << other.content_.str();
+    std::lock(this->mutex_, other.mutex_);
+    std::lock_guard<std::mutex> this_lock(this->mutex_, std::adopt_lock);
+    std::lock_guard<std::mutex> other_lock(other.mutex_, std::adopt_lock);
+    this->content_ << other.content_.str();
+}
+
+boost::filesystem::path Entry::path() {
+    return this->path_;
 }
 
 
@@ -138,8 +161,8 @@ Entry & TrapperKeeper::entry(const boost::filesystem::path & entry_path) {
     CHECK(!this->wiped_);
     // return reference if exists, if not then create and return
     // reference
-    this->entries_.emplace_front(this->temp_ / entry_path, Entry());
-    return this->entries_.begin()->second;
+    this->entries_.emplace_back(Entry(this->temp_ / entry_path));
+    return this->entries_.back();
 }
 
 void TrapperKeeper::flush() {
@@ -154,14 +177,13 @@ void TrapperKeeper::flush_no_lock() {
     }
 
     CHECK(!this->wiped_);
-    for (auto & pair : this->entries_) {
+    for (auto & entry : this->entries_) {
         // write to file and wipe the record
         std::ofstream ofs;
-        ofs.open(pair.first.string().c_str(), std::ios_base::app);
-        CHECK(ofs.good()) << pair.first;
-        ofs << pair.second;
+        ofs.open(entry.path().string().c_str(), std::ios_base::app);
+        CHECK(ofs.good()) << entry.path().string();
+        ofs << entry.retrieve_and_wipe();
         ofs.close();
-        pair.second.wipe();
     }
     this->entries_.clear();
 }
