@@ -24,13 +24,21 @@ TEST(TestTrapperKeeper, FlushAndFinish) {
         << temp / "README.txt";
 
     // test two files
-    tk.entry("file1.txt") << "hello" << "\n" << "world";
-    tk.entry("file2.txt") << "goodbye" << "\n" << "world";
+    const boost::filesystem::path file1 = "file1.txt";
+    const boost::filesystem::path file2 = "dir2/file2.txt";
+    const boost::filesystem::path file3 = "dir2/dir3/file3.txt";
+
+    tk.entry(file1) << "hello" << "\n" << "world";
+    tk.entry(file2) << "goodbye" << "\n" << "world";
+    tk.entry(file3) << "hello" << "\n" << "again";
     tk.flush();
-    EXPECT_TRUE(boost::filesystem::exists(temp / "file1.txt"))
-        << temp / "file1.txt";
-    EXPECT_TRUE(boost::filesystem::exists(temp / "file2.txt"))
-        << temp / "file2.txt";
+
+    EXPECT_TRUE(boost::filesystem::exists(temp / file1))
+        << temp / file1;
+    EXPECT_TRUE(boost::filesystem::exists(temp / file2))
+        << temp / file2;
+    EXPECT_TRUE(boost::filesystem::exists(temp / file3))
+        << temp / file3;
 
     // test finished
     tk.finished();
@@ -38,10 +46,12 @@ TEST(TestTrapperKeeper, FlushAndFinish) {
     EXPECT_FALSE(boost::filesystem::exists(temp)) << temp;
     EXPECT_TRUE(boost::filesystem::exists(root / tk.date() / "README.txt"))
         << root / tk.date() / "README.txt";
-    EXPECT_TRUE(boost::filesystem::exists(root / tk.date() / "file1.txt"))
-        << root / tk.date() / "file1.txt";
-    EXPECT_TRUE(boost::filesystem::exists(root / tk.date() / "file2.txt"))
-        << root / tk.date() / "file2.txt";
+    EXPECT_TRUE(boost::filesystem::exists(root / tk.date() / file1))
+        << root / tk.date() / file1;
+    EXPECT_TRUE(boost::filesystem::exists(root / tk.date() / file2))
+        << root / tk.date() / file2;
+    EXPECT_TRUE(boost::filesystem::exists(root / tk.date() / file3))
+        << root / tk.date() / file3;
 }
 
 
@@ -70,10 +80,12 @@ TEST(TestTrapperKeeper, Existing001) {
     tk.finished();
     boost::filesystem::path date001 = tk.date();
     date001 += "_001";
-    EXPECT_TRUE(boost::filesystem::exists(root / date001));
-    EXPECT_TRUE(boost::filesystem::exists(root / date001 / "README.txt"));
-    EXPECT_FALSE(boost::filesystem::exists(root / tk.date() / "README.txt"));
-
+    EXPECT_TRUE(boost::filesystem::exists(root / date001)) << root / date001;
+    EXPECT_TRUE(boost::filesystem::exists(root / date001 / "README.txt"))
+        << root / date001 / "README.txt";
+    EXPECT_FALSE(boost::filesystem::exists(root / tk.date() / "README.txt"))
+        << root / tk.date() / "README.txt";
+    EXPECT_FALSE(boost::filesystem::exists(temp)) << temp;
 }
 
 
