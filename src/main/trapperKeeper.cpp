@@ -62,7 +62,7 @@ TrapperKeeper::TrapperKeeper(const std::string & name,
     int host_not_found = gethostname(hostname, HOST_NAME_MAX);
 
     // create readme entry
-    Entry& readme = this->stream("README.txt");
+    Entry& readme = this->entry("README.txt");
     readme << "date: " << date_ << "\n";
     if (host_not_found) {
         readme << "host: " << "anonymous" << "\n";
@@ -133,7 +133,7 @@ void TrapperKeeper::wipe() {
 }
 
 
-Entry & TrapperKeeper::stream(const boost::filesystem::path & entry_path) {
+Entry & TrapperKeeper::entry(const boost::filesystem::path & entry_path) {
     CHECK(!this->wiped_);
     // return reference if exists, if not then create and return
     // reference

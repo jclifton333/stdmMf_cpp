@@ -65,11 +65,9 @@ public:
 
     const boost::filesystem::path & date() const;
 
-    void finished();
-
     void wipe();
 
-    Entry& stream(const boost::filesystem::path & entry_path);
+    Entry& entry(const boost::filesystem::path & entry_path);
 
     void flush();
 };
