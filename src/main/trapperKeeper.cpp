@@ -138,8 +138,8 @@ Entry & TrapperKeeper::entry(const boost::filesystem::path & entry_path) {
     CHECK(!this->wiped_);
     // return reference if exists, if not then create and return
     // reference
-    this->entries_.emplace_back(this->temp_ / entry_path, Entry());
-    return this->entries_.at(this->entries_.size() - 1).second;
+    this->entries_.emplace_front(this->temp_ / entry_path, Entry());
+    return this->entries_.begin()->second;
 }
 
 void TrapperKeeper::flush() {

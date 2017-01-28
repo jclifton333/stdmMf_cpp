@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <map>
+#include <list>
 #include <boost/filesystem.hpp>
 #include <mutex>
 
@@ -41,7 +41,7 @@ public:
 
 class TrapperKeeper {
 protected:
-    std::vector<std::pair<boost::filesystem::path, Entry> > entries_;
+    std::list<std::pair<boost::filesystem::path, Entry> > entries_;
     const boost::filesystem::path root_;
     const boost::filesystem::path temp_;
     const boost::filesystem::path date_;
