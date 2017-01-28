@@ -32,11 +32,6 @@ std::ostream & operator<<(std::ostream & os, const Entry & r) {
 }
 
 
-std::mutex& Entry::mutex() {
-    return this->mutex_;
-}
-
-
 void Entry::wipe() {
     this->content_.str("");
     this->content_.clear();
@@ -143,7 +138,8 @@ Entry & TrapperKeeper::entry(const boost::filesystem::path & entry_path) {
     CHECK(!this->wiped_);
     // return reference if exists, if not then create and return
     // reference
-    return this->entries_[this->temp_ / entry_path];
+    this->entries_.emplace_back(this->temp_ / entry_path, Entry());
+    return this->entries_.at(this->entries_.size() - 1).second;
 }
 
 
@@ -164,6 +160,7 @@ void TrapperKeeper::flush() {
         ofs.close();
         pair.second.wipe();
     }
+    this->entries_.clear();
 }
 
 

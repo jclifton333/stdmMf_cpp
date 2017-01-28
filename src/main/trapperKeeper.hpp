@@ -25,11 +25,7 @@ protected:
 
     friend std::ostream & operator<<(std::ostream & os, const Entry & r);
 
-    std::mutex& mutex();
-
     void wipe();
-
-    std::mutex mutex_;
 
 public:
     Entry();
@@ -44,7 +40,7 @@ public:
 
 
 class TrapperKeeper {
-    std::map<boost::filesystem::path, Entry> entries_;
+    std::vector<std::pair<boost::filesystem::path, Entry> > entries_;
     const boost::filesystem::path root_;
     const boost::filesystem::path temp_;
     const boost::filesystem::path date_;
@@ -57,6 +53,7 @@ class TrapperKeeper {
 public:
     TrapperKeeper(const std::string & name,
             const boost::filesystem::path & root);
+    TrapperKeeper(const TrapperKeeper & other) = delete;
     ~TrapperKeeper();
 
     void finished();
