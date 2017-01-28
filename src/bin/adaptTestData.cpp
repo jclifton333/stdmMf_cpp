@@ -1,4 +1,5 @@
 #include "system.hpp"
+#include "network.hpp"
 #include "noCovEdgeModel.hpp"
 #include "noCovEdgeOrSoModel.hpp"
 #include "noCovEdgeXorSoModel.hpp"
@@ -11,7 +12,13 @@
 
 #include "pool.hpp"
 
+#include <thread>
+
 #include "trapperKeeper.hpp"
+
+#include "projectInfo.hpp"
+
+using namespace stdmMf;
 
 
 void run(const std::shared_ptr<Network> & net,
@@ -68,14 +75,15 @@ void run(const std::shared_ptr<Network> & net,
         }
 
         // estimate from history
-        mod_agents->est_par(s_orig.inf_bits(), s_orig.history());
+        std::shared_ptr<Model> mod_agents_est(mod_agents->clone());
+        mod_agents_est->est_par(s_orig.inf_bits(), s_orig.history());
 
         // retreive last coefficients
         const std::vector<double> coef = vmax_agent.coef();
 
-        for (uint32_t sample = 0; sample < sum_samples; ++sample) {
+        for (uint32_t sample = 0; sample < num_samples; ++sample) {
             // use agents model for simulating
-            System s_sim(net->clone(), mod_agents->clone());
+            System s_sim(net->clone(), mod_agents_est->clone());
 
             // construct sweep agent
             SweepAgent sweep_agent(net->clone(), features->clone(),
@@ -93,7 +101,7 @@ void run(const std::shared_ptr<Network> & net,
                 boost::to_string(s_sim.inf_bits(), bits_str);
                 entry << bits_str << ",";
 
-                const boost::dynamic_bitset<> trt_bits = sweep_agent->apply_trt(
+                const boost::dynamic_bitset<> trt_bits = sweep_agent.apply_trt(
                         s_sim.inf_bits(), s_sim.history());
 
                 // treatment
@@ -112,6 +120,7 @@ void run(const std::shared_ptr<Network> & net,
         }
     }
 }
+
 
 
 int main(int argc, char *argv[]) {
@@ -135,7 +144,8 @@ int main(int argc, char *argv[]) {
     // double vector since model depends on network
     typedef std::pair<std::shared_ptr<Model>,
                       std::shared_ptr<Model> > ModelPair;
-    std::vector<std::vector<ModelPair> > models;
+    std::vector<std::pair<std::string,
+                          std::vector<ModelPair> > > models;
     { // models
         // latent infections
         const double prob_inf_latent = 0.01;
@@ -194,7 +204,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_no_no", models_add));
         }
 
         { // Correct: OrSo,  Postulated: OrSo
@@ -209,7 +220,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_or_or", models_add));
         }
 
         { // Correct: XorSo,  Postulated: XorSo
@@ -224,7 +236,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_xor_xor", models_add));
         }
 
         { // Correct: SepSo,  Postulated: SepSo
@@ -239,7 +252,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_sep", models_add));
         }
 
         { // Correct: SepSo,  Postulated: OrSo
@@ -254,7 +268,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_or", models_add));
         }
 
         { // Correct: SepSo,  Postulated: XorSo
@@ -269,7 +284,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_xor", models_add));
         }
 
         { // Correct: SepSo,  Postulated: No So
@@ -284,7 +300,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_no", models_add));
         }
 
         { // Correct: XorSo,  Postulated: OrSo
@@ -299,7 +316,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_xor_or", models_add));
         }
 
         { // Correct: XorSo,  Postulated: No So
@@ -314,7 +332,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_xor_no", models_add));
         }
 
         { // Correct: OrSo,  Postulated: No So
@@ -329,13 +348,37 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_or_no", models_add));
         }
     }
 
+    Pool pool(std::thread::hardware_concurrency());
 
+    TrapperKeeper tp(argv[0], PROJECT_ROOT_DIR);
 
+    const uint32_t num_reps = 500;
+    const uint32_t num_samples = 500;
+    const uint32_t num_points = 10;
 
+    for (uint32_t i = 0; i < networks.size(); ++i) {
+        const std::shared_ptr<Network> & net = networks.at(i);
+        const std::string net_name = net->kind();
+
+        for (uint32_t j = 0; j < models.size(); ++j) {
+            ModelPair & mp(models.at(j).second.at(i));
+            const std::string mod_name = models.at(j).first;
+
+            std::string entry_name = net_name + "_" + mod_name + ".txt";
+
+            pool.service()->post([&](){
+                        run(net, mp.first, mp.second, num_reps, num_samples,
+                                num_points, tp.entry(entry_name));
+                    });
+        }
+    }
+
+    tp.finished();
 
     return 0;
 }

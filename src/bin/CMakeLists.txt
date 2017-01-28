@@ -14,6 +14,7 @@ SET(bin_file_names
   timeSweepAgent
   timeBrMinAgent
   run
+  adaptTestData
   sandbox)
 
 foreach(bin_file ${bin_file_names})
