@@ -40,6 +40,7 @@ public:
 
 
 class TrapperKeeper {
+protected:
     std::vector<std::pair<boost::filesystem::path, Entry> > entries_;
     const boost::filesystem::path root_;
     const boost::filesystem::path temp_;
@@ -49,6 +50,8 @@ class TrapperKeeper {
     bool finished_;
 
     std::mutex mutex_;
+
+    void flush_no_lock();
 
 public:
     TrapperKeeper(const std::string & name,

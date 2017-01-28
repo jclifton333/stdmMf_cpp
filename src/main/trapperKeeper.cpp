@@ -81,7 +81,7 @@ TrapperKeeper::~TrapperKeeper() {
 void TrapperKeeper::finished() {
     std::lock_guard<std::mutex> lock(this->mutex_);
     if (!this->wiped_ && !this->finished_) {
-        this->flush();
+        this->flush_no_lock();
 
         // create root if doesn't exists
         if (!boost::filesystem::is_directory(this->root_)) {
@@ -142,9 +142,12 @@ Entry & TrapperKeeper::entry(const boost::filesystem::path & entry_path) {
     return this->entries_.at(this->entries_.size() - 1).second;
 }
 
-
 void TrapperKeeper::flush() {
     std::lock_guard<std::mutex> lock(this->mutex_);
+    this->flush_no_lock();
+}
+
+void TrapperKeeper::flush_no_lock() {
     // check to make sure temp directory exists
     if (!boost::filesystem::is_directory(this->temp_)) {
         boost::filesystem::create_directory(this->temp_);
