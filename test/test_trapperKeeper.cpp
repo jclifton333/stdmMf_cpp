@@ -24,8 +24,8 @@ TEST(TestTrapperKeeper, FlushAndFinish) {
         << temp / "README.txt";
 
     // test two files
-    tk.stream("file1.txt") << "hello" << "\n" << "world";
-    tk.stream("file2.txt") << "goodbye" << "\n" << "world";
+    tk.entry("file1.txt") << "hello" << "\n" << "world";
+    tk.entry("file2.txt") << "goodbye" << "\n" << "world";
     tk.flush();
     EXPECT_TRUE(boost::filesystem::exists(temp / "file1.txt"))
         << temp / "file1.txt";
