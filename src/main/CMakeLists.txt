@@ -6,7 +6,7 @@ find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
 
 include(GetGitRevisionDescription)
-git_describe(GIT_DESCRIBE_VAR)
+git_describe(GIT_SHA1_VAR)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/projectInfo.cpp.in"
   "${CMAKE_CURRENT_BINARY_DIR}/projectInfo.cpp" @ONLY)
