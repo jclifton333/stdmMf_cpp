@@ -24,99 +24,99 @@ using namespace stdmMf;
 void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod_system,
         const std::shared_ptr<Model> & mod_agents,
-        const uint32_t & num_reps,
+        const uint32_t & rep,
+        const uint32_t & seed,
         const uint32_t & num_samples,
         const uint32_t & num_points,
         Entry & entry) {
-
     // header
     entry << "rep,sample,time,inf,trt,next_inf" << "\n";
 
     std::shared_ptr<Features> features(
             new NetworkRunSymFeatures(net->clone(), 3));
 
-    for (uint32_t rep = 0; rep < num_reps; ++rep) {
-        System s_orig(net->clone(), mod_system->clone());
+    System s_orig(net->clone(), mod_system->clone());
 
-        s_orig.set_seed(rep);
-        VfnMaxSimPerturbAgent vmax_agent(net->clone(),
-                features->clone(),
-                mod_agents->clone(),
-                2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
-        vmax_agent.set_seed(rep);
+    s_orig.set_seed(seed);
+    VfnMaxSimPerturbAgent vmax_agent(net->clone(),
+            features->clone(),
+            mod_agents->clone(),
+            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    vmax_agent.set_seed(seed);
 
-        s_orig.start();
+    s_orig.start();
+
+    for (uint32_t t = 0; t < num_points; ++t) {
+        // rep, sample, time
+        entry << rep << "," << -1 << "," << t << ",";
+
+        // starting infection
+        std::string bits_str;
+        boost::to_string(s_orig.inf_bits(), bits_str);
+        entry << bits_str << ",";
+
+        const boost::dynamic_bitset<> trt_bits = vmax_agent.apply_trt(
+                s_orig.inf_bits(), s_orig.history());
+
+        // treatment
+        boost::to_string(trt_bits, bits_str);
+        entry << bits_str << ",";
+
+        CHECK_EQ(trt_bits.count(), vmax_agent.num_trt());
+
+        s_orig.trt_bits(trt_bits);
+
+        s_orig.turn_clock();
+
+        // final infection
+        boost::to_string(s_orig.inf_bits(), bits_str);
+        entry << bits_str << "\n";
+    }
+
+    // estimate from history
+    std::shared_ptr<Model> mod_agents_est(mod_agents->clone());
+    mod_agents_est->est_par(s_orig.inf_bits(), s_orig.history());
+
+    // retreive last coefficients
+    const std::vector<double> coef = vmax_agent.coef();
+
+    for (uint32_t sample = 0; sample < num_samples; ++sample) {
+        // use agents model for simulating
+        System s_sim(net->clone(), mod_agents_est->clone());
+        s_sim.set_seed(seed + sample + 1);
+
+        // construct sweep agent
+        SweepAgent sweep_agent(net->clone(), features->clone(),
+                coef, 0, false);
+        sweep_agent.set_seed(seed + sample + 1);
 
         for (uint32_t t = 0; t < num_points; ++t) {
             // rep, sample, time
-            entry << rep << "," << -1 << "," << t << ",";
+            entry << rep << "," << sample << "," << t << ",";
+
+            // set infection to observed value
+            s_sim.inf_bits(s_orig.history().at(t).first);
 
             // starting infection
             std::string bits_str;
-            boost::to_string(s_orig.inf_bits(), bits_str);
+            boost::to_string(s_sim.inf_bits(), bits_str);
             entry << bits_str << ",";
 
-            const boost::dynamic_bitset<> trt_bits = vmax_agent.apply_trt(
-                    s_orig.inf_bits(), s_orig.history());
+            const boost::dynamic_bitset<> trt_bits = sweep_agent.apply_trt(
+                    s_sim.inf_bits(), s_sim.history());
 
             // treatment
             boost::to_string(trt_bits, bits_str);
             entry << bits_str << ",";
 
-            CHECK_EQ(trt_bits.count(), vmax_agent.num_trt());
+            CHECK_EQ(trt_bits.count(), sweep_agent.num_trt());
 
-            s_orig.trt_bits(trt_bits);
+            s_sim.trt_bits(trt_bits);
 
-            s_orig.turn_clock();
+            s_sim.turn_clock();
 
             // final infection
-            boost::to_string(s_orig.inf_bits(), bits_str);
             entry << bits_str << "\n";
-        }
-
-        // estimate from history
-        std::shared_ptr<Model> mod_agents_est(mod_agents->clone());
-        mod_agents_est->est_par(s_orig.inf_bits(), s_orig.history());
-
-        // retreive last coefficients
-        const std::vector<double> coef = vmax_agent.coef();
-
-        for (uint32_t sample = 0; sample < num_samples; ++sample) {
-            // use agents model for simulating
-            System s_sim(net->clone(), mod_agents_est->clone());
-
-            // construct sweep agent
-            SweepAgent sweep_agent(net->clone(), features->clone(),
-                    coef, 0, false);
-
-            for (uint32_t t = 0; t < num_points; ++t) {
-                // rep, sample, time
-                entry << rep << "," << sample << "," << t << ",";
-
-                // set infection to observed value
-                s_sim.inf_bits(s_orig.history().at(t).first);
-
-                // starting infection
-                std::string bits_str;
-                boost::to_string(s_sim.inf_bits(), bits_str);
-                entry << bits_str << ",";
-
-                const boost::dynamic_bitset<> trt_bits = sweep_agent.apply_trt(
-                        s_sim.inf_bits(), s_sim.history());
-
-                // treatment
-                boost::to_string(trt_bits, bits_str);
-                entry << bits_str << ",";
-
-                CHECK_EQ(trt_bits.count(), sweep_agent.num_trt());
-
-                s_sim.trt_bits(trt_bits);
-
-                s_sim.turn_clock();
-
-                // final infection
-                entry << bits_str << "\n";
-            }
         }
     }
 }
@@ -372,10 +372,13 @@ int main(int argc, char *argv[]) {
 
             std::string entry_name = net_name + "_" + mod_name + ".txt";
 
-            pool.service()->post([=](){
-                        run(net, mp.first, mp.second, num_reps, num_samples,
-                                num_points, tp->entry(entry_name));
-                    });
+            for (uint32_t rep = 0; rep < num_reps; ++rep) {
+                pool.service()->post([=](){
+                            run(net, mp.first, mp.second, rep,
+                                    rep * (num_samples + 1), num_samples,
+                                    num_points, tp->entry(entry_name));
+                        });
+            }
         }
     }
 
