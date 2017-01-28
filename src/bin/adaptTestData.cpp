@@ -379,6 +379,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    pool.join();
+
     tp->finished();
 
     return 0;
