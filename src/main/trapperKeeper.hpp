@@ -25,9 +25,11 @@ protected:
 
     friend std::ostream & operator<<(std::ostream & os, const Entry & r);
 
+    std::mutex& mutex();
+
     void wipe();
 
-    std::mutex stream_mutex_;
+    std::mutex mutex_;
 
 public:
     Entry();
@@ -50,7 +52,7 @@ class TrapperKeeper {
     bool wiped_;
     bool finished_;
 
-    std::mutex filesystem_mutex_;
+    std::mutex mutex_;
 
 public:
     TrapperKeeper(const std::string & name,

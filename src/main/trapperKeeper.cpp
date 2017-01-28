@@ -32,6 +32,11 @@ std::ostream & operator<<(std::ostream & os, const Entry & r) {
 }
 
 
+std::mutex& Entry::mutex() {
+    return this->mutex_;
+}
+
+
 void Entry::wipe() {
     this->content_.str("");
     this->content_.clear();
@@ -43,7 +48,7 @@ Entry::Entry() {
 
 Entry::Entry(const Entry & other) {
     // protect writing data
-    std::lock_guard<std::mutex> lock(this->stream_mutex_);
+    std::lock_guard<std::mutex> lock(this->mutex_);
     *this << other.content_.str();
 }
 
@@ -79,7 +84,7 @@ TrapperKeeper::~TrapperKeeper() {
 }
 
 void TrapperKeeper::finished() {
-    std::lock_guard<std::mutex> lock(this->filesystem_mutex_);
+    std::lock_guard<std::mutex> lock(this->mutex_);
     if (!this->wiped_ && !this->finished_) {
         this->flush();
 
@@ -134,6 +139,7 @@ void TrapperKeeper::wipe() {
 
 
 Entry & TrapperKeeper::entry(const boost::filesystem::path & entry_path) {
+    std::lock_guard<std::mutex> lock(this->mutex_);
     CHECK(!this->wiped_);
     // return reference if exists, if not then create and return
     // reference
@@ -142,6 +148,7 @@ Entry & TrapperKeeper::entry(const boost::filesystem::path & entry_path) {
 
 
 void TrapperKeeper::flush() {
+    std::lock_guard<std::mutex> lock(this->mutex_);
     // check to make sure temp directory exists
     if (!boost::filesystem::is_directory(this->temp_)) {
         boost::filesystem::create_directory(this->temp_);
@@ -149,6 +156,7 @@ void TrapperKeeper::flush() {
 
     CHECK(!this->wiped_);
     for (auto & pair : this->entries_) {
+        std::lock_guard<std::mutex> lock(pair.second.mutex());
         // write to file and wipe the record
         std::ofstream ofs;
         ofs.open(pair.first.string().c_str(), std::ios_base::app);
