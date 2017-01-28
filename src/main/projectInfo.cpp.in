@@ -1,0 +1,11 @@
+#include "projectInfo.hpp"
+
+namespace stdmMf {
+
+
+const std::string GIT_SHA1 = "@GIT_SHA1_VAR";
+
+const std::string PROJECT_ROOT_DIR = "@PROJECT_ROOT_DIR_VAR";
+
+
+} // namespace stdmMf
