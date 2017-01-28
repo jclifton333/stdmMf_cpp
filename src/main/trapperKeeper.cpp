@@ -70,7 +70,7 @@ TrapperKeeper::TrapperKeeper(const std::string & name,
         readme << "host: " << hostname << "\n";
     }
     readme << "host: " << hostname << "\n"
-           << "git-SHA-1: " << git_sha1 << "\n"
+           << "git-SHA-1: " << GIT_SHA1 << "\n"
            << "name: " << name << "\n";
 }
 
