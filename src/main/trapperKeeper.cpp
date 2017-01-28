@@ -113,7 +113,7 @@ void TrapperKeeper::finished() {
 
         if (!boost::filesystem::is_directory(this->root_ / this->date_)) {
             // use date as directory name if it doesn't already exists
-            boost::filesystem::rename(this->temp_, this->root_ / this->date_);
+            this->copy_contents(this->temp_, this->root_ / this->date_);
         } else {
             // add a counter to date for a new directory name
             uint32_t counter = 1;
@@ -129,12 +129,33 @@ void TrapperKeeper::finished() {
                 new_path += ss.str();
             }
 
-            boost::filesystem::rename(this->temp_, new_path);
+            this->copy_contents(this->temp_, new_path);
         }
 
         this->finished_ = true;
+        this->wipe_no_lock();
     }
 }
+
+
+void TrapperKeeper::copy_contents(const boost::filesystem::path & source,
+        const boost::filesystem::path & dest) {
+    if (!boost::filesystem::is_directory(dest)) {
+        boost::filesystem::create_directory(dest);
+    }
+
+    boost::filesystem::directory_iterator it(source), end;
+    for (; it != end; ++it) {
+        boost::filesystem::path current(it->path());
+        // copy directory
+        if (boost::filesystem::is_directory(current)) {
+            this->copy_contents(current, dest / current.filename());
+        } else {
+            boost::filesystem::copy_file(current, dest / current.filename());
+        }
+    }
+}
+
 
 const boost::filesystem::path & TrapperKeeper::root() const {
     return this->root_;
@@ -150,6 +171,12 @@ const boost::filesystem::path & TrapperKeeper::date() const {
 
 
 void TrapperKeeper::wipe() {
+    std::lock_guard<std::mutex> lock(this->mutex_);
+    this->wipe_no_lock();
+}
+
+
+void TrapperKeeper::wipe_no_lock() {
     this->wiped_ = true;
     // remove temporary directory
     boost::filesystem::remove_all(this->temp_);
@@ -178,6 +205,11 @@ void TrapperKeeper::flush_no_lock() {
 
     CHECK(!this->wiped_);
     for (auto & entry : this->entries_) {
+        // create directories
+        if (!boost::filesystem::is_directory(entry.path().parent_path())) {
+            boost::filesystem::create_directories(entry.path().parent_path());
+        }
+
         // write to file and wipe the record
         std::ofstream ofs;
         ofs.open(entry.path().string().c_str(), std::ios_base::app);

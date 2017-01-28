@@ -61,6 +61,11 @@ protected:
 
     void flush_no_lock();
 
+    void wipe_no_lock();
+
+    void copy_contents(const boost::filesystem::path & source,
+            const boost::filesystem::path & dest);
+
 public:
     TrapperKeeper(const std::string & name,
             const boost::filesystem::path & root);
