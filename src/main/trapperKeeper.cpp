@@ -1,6 +1,6 @@
 #include "trapperKeeper.hpp"
 
-#include "git_description.hpp"
+#include "projectInfo.hpp"
 
 #include <glog/logging.h>
 #include <unistd.h>
