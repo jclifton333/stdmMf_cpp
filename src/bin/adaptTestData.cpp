@@ -23,7 +23,7 @@ void run(const std::shared_ptr<Network> & net,
         Entry & entry) {
 
     // header
-    entry << "rep,time,sample,inf,trt,next_inf" << "\n";
+    entry << "rep,sample,time,inf,trt,next_inf" << "\n";
 
     std::shared_ptr<Features> features(
             new NetworkRunSymFeatures(net->clone(), 3));
@@ -42,7 +42,7 @@ void run(const std::shared_ptr<Network> & net,
 
         for (uint32_t t = 0; t < num_points; ++t) {
             // rep, sample, time
-            entry << rep << "," << t << "," << -1 << ",";
+            entry << rep << "," << -1 << "," << t << ",";
 
             // starting infection
             std::string bits_str;
@@ -82,19 +82,33 @@ void run(const std::shared_ptr<Network> & net,
                     coef, 0, false);
 
             for (uint32_t t = 0; t < num_points; ++t) {
+                // rep, sample, time
+                entry << rep << "," << sample << "," << t << ",";
+
                 // set infection to observed value
                 s_sim.inf_bits(s_orig.history().at(t).first);
 
+                // starting infection
+                std::string bits_str;
+                boost::to_string(s_sim.inf_bits(), bits_str);
+                entry << bits_str << ",";
+
                 const boost::dynamic_bitset<> trt_bits = sweep_agent->apply_trt(
                         s_sim.inf_bits(), s_sim.history());
+
+                // treatment
+                boost::to_string(trt_bits, bits_str);
+                entry << bits_str << ",";
 
                 CHECK_EQ(trt_bits.count(), sweep_agent.num_trt());
 
                 s_sim.trt_bits(trt_bits);
 
                 s_sim.turn_clock();
-            }
 
+                // final infection
+                entry << bits_str << "\n";
+            }
         }
     }
 }
