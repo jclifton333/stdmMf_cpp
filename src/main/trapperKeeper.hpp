@@ -6,6 +6,7 @@
 #include <sstream>
 #include <map>
 #include <boost/filesystem.hpp>
+#include <mutex>
 
 
 namespace stdmMf {
@@ -26,6 +27,8 @@ protected:
 
     void wipe();
 
+    std::mutex stream_mutex_;
+
 public:
     Entry();
     Entry(const Entry & other);
@@ -45,6 +48,9 @@ class TrapperKeeper {
     const boost::filesystem::path date_;
 
     bool wiped_;
+    bool finished_;
+
+    std::mutex filesystem_mutex_;
 
 public:
     TrapperKeeper(const std::string & name,
