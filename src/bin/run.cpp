@@ -20,6 +20,10 @@
 
 #include "pool.hpp"
 
+#include "trapperKeeper.hpp"
+
+#include "projectInfo.hpp"
+
 #include <thread>
 
 #include <fstream>
@@ -625,7 +629,8 @@ int main(int argc, char *argv[]) {
     // double vector since model depends on network
     typedef std::pair<std::shared_ptr<Model>,
                       std::shared_ptr<Model> > ModelPair;
-    std::vector<std::vector<ModelPair> > models;
+    std::vector<std::pair<std::string,
+                          std::vector<ModelPair> > > models;
     { // models
         // latent infections
         const double prob_inf_latent = 0.01;
@@ -672,6 +677,7 @@ int main(int argc, char *argv[]) {
              trt_pre_inf,
              -trt_pre_inf};
 
+
         { // Correct: No So,  Postulated: No So
             std::vector<ModelPair> models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
@@ -684,7 +690,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_no_no", models_add));
         }
 
         { // Correct: OrSo,  Postulated: OrSo
@@ -699,7 +706,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_or_or", models_add));
         }
 
         { // Correct: XorSo,  Postulated: XorSo
@@ -714,7 +722,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_xor_xor", models_add));
         }
 
         { // Correct: SepSo,  Postulated: SepSo
@@ -729,7 +738,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_sep", models_add));
         }
 
         { // Correct: SepSo,  Postulated: OrSo
@@ -744,7 +754,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_or", models_add));
         }
 
         { // Correct: SepSo,  Postulated: XorSo
@@ -759,7 +770,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_xor", models_add));
         }
 
         { // Correct: SepSo,  Postulated: No So
@@ -774,7 +786,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_sep_no", models_add));
         }
 
         { // Correct: XorSo,  Postulated: OrSo
@@ -789,7 +802,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_xor_or", models_add));
         }
 
         { // Correct: XorSo,  Postulated: No So
@@ -804,7 +818,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_xor_no", models_add));
         }
 
         { // Correct: OrSo,  Postulated: No So
@@ -819,7 +834,8 @@ int main(int argc, char *argv[]) {
 
                 models_add.push_back(mp);
             }
-            models.push_back(models_add);
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("model_or_no", models_add));
         }
     }
 
@@ -834,36 +850,36 @@ int main(int argc, char *argv[]) {
     CHECK(ofs_read.good()) << "could not open file";
     ofs_read.close();
 
+    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR);
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
 
         for (uint32_t j = 0; j < models.size(); ++j) {
-            ModelPair & mp(models.at(j).at(i));
+            ModelPair & mp(models.at(j).second.at(i));
+
+            Entry & e_raw = tk.entry(net->kind() + "_" + models.at(j).first
+                    + "_raw.txt");
+            Entry & e_read = tk.entry(net->kind() + "_" + models.at(j).first
+                    + "_read.txt");
 
             std::vector<std::pair<std::string, std::vector<double> > >
                 results = run(net, mp.first, mp.second, 50);
-
-            ofs_raw.open("run_results_raw.txt", std::ios_base::app);
-            CHECK(ofs_raw.good()) << "could not open file";
-
-            ofs_read.open("run_results_read.txt", std::ios_base::app);
-            CHECK(ofs_read.good()) << "could not open file";
 
             std::cout << "=====================================" << std::endl
                       << "results for network " << net->kind()
                       << " and model pair " << j << std::endl;
 
-            ofs_read << "=====================================" << std::endl
-                << "results for network " << net->kind()
-                << " and model pair " << j << std::endl;
+            e_read << "=====================================" << "\n"
+                   << "results for network " << net->kind()
+                   << " and model pair " << j << "\n";
 
             for (uint32_t k = 0; k < results.size(); ++k) {
-                ofs_raw << net->kind() << ","
-                        << j << ","
-                        << results.at(k).first << ","
-                        << results.at(k).second.at(0) << ","
-                        << results.at(k).second.at(1) << ","
-                        << results.at(k).second.at(2) << std::endl;
+                e_raw << net->kind() << ","
+                      << j << ","
+                      << results.at(k).first << ","
+                      << results.at(k).second.at(0) << ","
+                      << results.at(k).second.at(1) << ","
+                      << results.at(k).second.at(2) << "\n";
 
                 std::cout << results.at(k).first << ": "
                           << results.at(k).second.at(0) << " ("
@@ -871,17 +887,16 @@ int main(int argc, char *argv[]) {
                           << results.at(k).second.at(2) << "]"
                           << std::endl;
 
-                ofs_read << results.at(k).first << ": "
-                         << results.at(k).second.at(0) << " ("
-                         << results.at(k).second.at(1) << ")  ["
-                         << results.at(k).second.at(2) << "]"
-                         << std::endl;
+                e_read << results.at(k).first << ": "
+                       << results.at(k).second.at(0) << " ("
+                       << results.at(k).second.at(1) << ")  ["
+                       << results.at(k).second.at(2) << "]"
+                       << "\n";
             }
-
-            ofs_raw.close();
-            ofs_read.close();
         }
     }
+
+    tk.finished();
 
     return 0;
 }
