@@ -8,8 +8,8 @@ find_package(BLAS REQUIRED)
 include(GetGitRevisionDescription)
 git_describe(GIT_DESCRIBE_VAR)
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/git_description.cpp.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/projectInfo.cpp.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/projectInfo.cpp" @ONLY)
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
@@ -37,4 +37,4 @@ add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
 
   ## extra
   pool.cpp experiment.cpp trapperKeeper.cpp
-  ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/git_description.cpp")
+  ${PROTO_SRCS} "${CMAKE_CURRENT_BINARY_DIR}/projectInfo.cpp")
