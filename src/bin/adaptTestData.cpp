@@ -355,7 +355,8 @@ int main(int argc, char *argv[]) {
 
     Pool pool(std::thread::hardware_concurrency());
 
-    TrapperKeeper tp(argv[0], PROJECT_ROOT_DIR);
+    std::shared_ptr<TrapperKeeper> tp(new TrapperKeeper(argv[0],
+                    PROJECT_ROOT_DIR + "/data"));
 
     const uint32_t num_reps = 500;
     const uint32_t num_samples = 500;
@@ -371,14 +372,14 @@ int main(int argc, char *argv[]) {
 
             std::string entry_name = net_name + "_" + mod_name + ".txt";
 
-            pool.service()->post([&](){
+            pool.service()->post([=](){
                         run(net, mp.first, mp.second, num_reps, num_samples,
-                                num_points, tp.entry(entry_name));
+                                num_points, tp->entry(entry_name));
                     });
         }
     }
 
-    tp.finished();
+    tp->finished();
 
     return 0;
 }
