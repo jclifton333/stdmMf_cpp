@@ -29,9 +29,6 @@ void run(const std::shared_ptr<Network> & net,
         const uint32_t & num_samples,
         const uint32_t & num_points,
         Entry & entry) {
-    // header
-    entry << "rep,sample,time,inf,trt,next_inf" << "\n";
-
     std::shared_ptr<Features> features(
             new NetworkRunSymFeatures(net->clone(), 3));
 
@@ -371,6 +368,10 @@ int main(int argc, char *argv[]) {
             const std::string mod_name = models.at(j).first;
 
             std::string entry_name = net_name + "_" + mod_name + ".txt";
+
+            // header
+            tp->entry(entry_name)
+                << "rep,sample,time,inf,trt,next_inf" << "\n";
 
             for (uint32_t rep = 0; rep < num_reps; ++rep) {
                 pool.service()->post([=](){
