@@ -358,8 +358,8 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<TrapperKeeper> tp(new TrapperKeeper(argv[0],
                     PROJECT_ROOT_DIR + "/data"));
 
-    const uint32_t num_reps = 500;
-    const uint32_t num_samples = 500;
+    const uint32_t num_reps = 100;
+    const uint32_t num_samples = 100;
     const uint32_t num_points = 10;
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
