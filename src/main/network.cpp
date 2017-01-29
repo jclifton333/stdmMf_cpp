@@ -138,7 +138,7 @@ std::shared_ptr<Network> Network::gen_network(
         break;
     }
     case NetworkInit_NetType_BARABASI: {
-        CHECK(init.has_size()) << "barbasi requires a size";
+        CHECK(init.has_size()) << "barabasi requires a size";
 
         return Network::gen_barabasi(init.size());
     }
@@ -235,7 +235,7 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
     CHECK_GE(size, 2);
 
     // init adjacency matrix
-    network->kind_ = "barbasi_" + std::to_string(size);
+    network->kind_ = "barabasi_" + std::to_string(size);
     network->num_nodes = size;
     network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
             network->num_nodes, network->num_nodes);
