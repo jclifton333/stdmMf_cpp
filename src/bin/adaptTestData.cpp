@@ -113,6 +113,7 @@ void run(const std::shared_ptr<Network> & net,
             s_sim.turn_clock();
 
             // final infection
+            boost::to_string(s_sim.inf_bits(), bits_str);
             entry << bits_str << "\n";
         }
     }
