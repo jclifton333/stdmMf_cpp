@@ -159,18 +159,18 @@ int main(int argc, char *argv[]) {
             std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
 
         const double trt_act_inf =
-            std::log(std::pow(1. - prob_inf * 0.25, -1. / prob_num_neigh) - 1.)
+            std::log(std::pow(1. - prob_inf * 0.5, -1. / prob_num_neigh) - 1.)
             - intcp_inf;
 
         const double trt_pre_inf =
-            std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
+            std::log(std::pow(1. - prob_inf * 0.9, -1. / prob_num_neigh) - 1.)
             - intcp_inf;
 
         // recovery
         const double prob_rec = 0.25;
         const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
         const double trt_act_rec =
-            std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
+            std::log(1. / ((1. - prob_rec) * 0.9) - 1.) - intcp_rec;
 
 
         std::vector<double> par =
