@@ -21,10 +21,14 @@ protected:
 
     void worker_job();
 
+    bool joined_;
+
 public:
     Pool(const uint32_t & num_threads);
 
     Pool(const Pool & other);
+
+    ~Pool();
 
     const boost::shared_ptr<boost::asio::io_service> service() const;
 
