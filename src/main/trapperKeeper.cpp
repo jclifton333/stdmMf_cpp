@@ -4,6 +4,7 @@
 
 #include <glog/logging.h>
 #include <unistd.h>
+#include <limits.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <fstream>
 
@@ -81,8 +82,13 @@ TrapperKeeper::TrapperKeeper(const std::string & name,
       wiped_(false),
       finished_(false) {
 
+#ifdef HOST_NAME_MAX
     char hostname[HOST_NAME_MAX];
     int host_not_found = gethostname(hostname, HOST_NAME_MAX);
+#else
+    char hostname[255];
+    int host_not_found = gethostname(hostname, 255);
+#endif
 
     // create readme entry
     Entry& readme = this->entry("README.txt");
