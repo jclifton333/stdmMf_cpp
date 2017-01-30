@@ -5,6 +5,10 @@ find_package(GSL REQUIRED)
 find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
 
+IF(APPLE)
+  include_directories("/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/")
+ENDIF(APPLE)
+
 include(GetGitRevisionDescription)
 git_describe(GIT_SHA1_VAR)
 
