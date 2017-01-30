@@ -32,6 +32,7 @@ std::ostream & operator<<(std::ostream & os, const Entry & r) {
     std::lock_guard<std::mutex> lock(r.mutex_);
 
     os << r.content_.str();
+    return os;
 }
 
 
