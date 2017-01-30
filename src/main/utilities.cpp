@@ -1,6 +1,7 @@
 #include "utilities.hpp"
 #include <glog/logging.h>
 
+#include <cmath>
 #include <cblas.h>
 
 namespace stdmMf {
