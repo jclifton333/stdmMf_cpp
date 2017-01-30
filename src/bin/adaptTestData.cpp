@@ -83,9 +83,9 @@ void run(const std::shared_ptr<Network> & net,
         s_sim.set_seed(seed + sample + 1);
 
         // construct sweep agent
-        SweepAgent sweep_agent(net->clone(), features->clone(),
-                coef, 0, false);
-        sweep_agent.set_seed(seed + sample + 1);
+        // SweepAgent sweep_agent(net->clone(), features->clone(),
+        //         coef, 0, false);
+        // sweep_agent.set_seed(seed + sample + 1);
 
         for (uint32_t t = 0; t < num_points; ++t) {
             // rep, sample, time
@@ -108,7 +108,7 @@ void run(const std::shared_ptr<Network> & net,
             boost::to_string(trt_bits, bits_str);
             entry << bits_str << ",";
 
-            CHECK_EQ(trt_bits.count(), sweep_agent.num_trt());
+            // CHECK_EQ(trt_bits.count(), sweep_agent.num_trt());
 
             s_sim.trt_bits(trt_bits);
 
