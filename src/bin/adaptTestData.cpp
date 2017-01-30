@@ -99,8 +99,10 @@ void run(const std::shared_ptr<Network> & net,
             boost::to_string(s_sim.inf_bits(), bits_str);
             entry << bits_str << ",";
 
-            const boost::dynamic_bitset<> trt_bits = sweep_agent.apply_trt(
-                    s_sim.inf_bits(), s_sim.history());
+            // const boost::dynamic_bitset<> trt_bits = sweep_agent.apply_trt(
+            //         s_sim.inf_bits(), s_sim.history());
+            const boost::dynamic_bitset<> trt_bits =
+                s_orig.history().at(t).second;
 
             // treatment
             boost::to_string(trt_bits, bits_str);
