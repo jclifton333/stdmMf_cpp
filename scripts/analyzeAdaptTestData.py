@@ -84,9 +84,16 @@ def main(data_file):
     for g in df.groupby("time"):
         res = process_time(*g)
 
-        print "time:", g[0]
+        with open("out.txt", "a") as f:
+            f.write("time: " + str(g[0]))
+            f.write(str(sorted(res)) + "\n")
+            f.write(str(np.mean(res)) + "\n")
+            f.write(str(np.median(res)) + "\n")
+            f.write(str(np.std(res)) + "\n")
 
-        print res
+
+        print "time:", g[0]
+        print sorted(res)
         print np.mean(res)
         print np.median(res)
         print np.std(res)
