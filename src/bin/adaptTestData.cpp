@@ -357,7 +357,7 @@ int main(int argc, char *argv[]) {
                     PROJECT_ROOT_DIR + "/data"));
 
     const uint32_t num_reps = 100;
-    const uint32_t num_samples = 100;
+    const uint32_t num_samples = 1000;
     const uint32_t num_points = 10;
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
