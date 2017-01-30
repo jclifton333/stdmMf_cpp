@@ -39,11 +39,11 @@ boost::dynamic_bitset<> EpsAgent::apply_trt(
 }
 
 uint32_t EpsAgent::num_trt() const {
-    this->agent_->num_trt();
+    return this->agent_->num_trt();
 }
 
 uint32_t EpsAgent::num_trt_eps() const {
-    this->eps_agent_->num_trt();
+    return this->eps_agent_->num_trt();
 }
 
 
