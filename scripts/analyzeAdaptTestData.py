@@ -63,15 +63,12 @@ def process_time(rep, time_data):
     pool = multiprocessing.Pool()
     for g in time_data.groupby("rep"):
 
-        pool.apply_async(process, args = g,
-                         callback = (lambda res :
-                                     vals.append(
-                                         np.searchsorted(
-                                             sorted(res[1]), res[0]))))
+        def callback(res):
+            vals.append(np.searchsorted(sorted(res[1]), res[0]))
 
-        # obs_diff, sample_diff = process(*g)
+        # pool.apply_async(process, args = g, callback = callback)
+        callback(apply(process, g))
 
-        # vals.append(np.searchsorted(sample_diff, obs_diff))
 
     pool.close()
     pool.join()
