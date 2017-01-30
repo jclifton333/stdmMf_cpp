@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
             std::log(1. / (1. - prob_inf_latent) - 1);
 
         // neighbor infections
-        const double prob_inf = 0.5;
+        const double prob_inf = 0.7;
         const uint32_t prob_num_neigh = 3;
         const double intcp_inf =
             std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
             - intcp_inf;
 
         // recovery
-        const double prob_rec = 0.25;
+        const double prob_rec = 0.5;
         const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
         const double trt_act_rec =
             std::log(1. / ((1. - prob_rec) * 0.9) - 1.) - intcp_rec;
