@@ -5,6 +5,8 @@ import numpy as np
 
 import multiprocessing
 
+import gmpy
+
 def process(time, time_data):
     g = list(time_data.groupby("from_sim"))
     assert len(g) == 2
@@ -14,34 +16,38 @@ def process(time, time_data):
     assert len(obs_data.index) == 1
     obs_sample = obs_data.loc[obs_data.index[0]]
 
-    obs_inf = obs_sample["next_inf"]
+    obs_inf_bin = int(obs_sample["next_inf"], 2)
+
+    trt_bin = int(obs_sample["trt"], 2)
+
+    sample_inf_bin_all = [int(i,2) for i in sim_data["next_inf"]]
 
     obs_diff = 0
 
-    num_nodes = len(obs_inf)
+    num_nodes = len(obs_sample["next_inf"])
+    num_trt = gmpy.popcount(trt_bin)
 
     sample_diff = [0.] * len(sim_data.index)
 
-    for sample_ind, sample_index in enumerate(sim_data.index):
-         sample = sim_data.loc[sample_index]
+    for sample_ind in range(len(sim_data.index)):
+         sample_inf_bin = sample_inf_bin_all[sample_ind]
 
-         sample_inf = sample["next_inf"]
-
-         diff = sum(i != j for i,j in zip(obs_inf, sample_inf))
-         diff /= float(num_nodes)
+         diff = gmpy.popcount((sample_inf_bin ^ obs_inf_bin) & trt_bin)
+         diff /= float(num_trt)
 
          obs_diff += diff
 
-         for sample_comp_index in sim_data.index:
-             if sample_index != sample_comp_index:
-                 sample_comp = sim_data.loc[sample_comp_index]
+         for sample_comp_ind in range(len(sim_data.index)):
+             if sample_comp_ind > sample_ind:
+                 sample_comp_inf_bin = sample_inf_bin_all[sample_comp_ind]
 
-                 sample_comp_inf = sample_comp["next_inf"]
-
-                 diff = sum(i != j for i,j in zip(sample_inf, sample_comp_inf))
-                 diff /= float(num_nodes)
+                 diff = gmpy.popcount((sample_comp_inf_bin ^ sample_inf_bin)
+                                      & trt_bin)
+                 diff /= float(num_trt)
 
                  sample_diff[sample_ind] += diff
+
+                 sample_diff[sample_comp_ind] += diff
 
     obs_diff /= float(len(sim_data.index))
 
