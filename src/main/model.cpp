@@ -2,6 +2,7 @@
 #include "utilities.hpp"
 #include <glog/logging.h>
 #include <iostream>
+#include <cmath>
 
 namespace stdmMf {
 
