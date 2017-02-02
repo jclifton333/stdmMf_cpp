@@ -35,7 +35,8 @@ std::vector<std::pair<std::string, std::vector<double> > >
 run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod_system,
         const std::shared_ptr<Model> & mod_agents,
-        const uint32_t & num_reps) {
+        const uint32_t & num_reps,
+        const uint32_t & time_points) {
 
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
     Pool pool(std::thread::hardware_concurrency());
@@ -60,7 +61,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -92,7 +93,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -125,7 +126,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -158,7 +159,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -195,7 +196,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -233,7 +234,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -269,7 +270,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -307,7 +308,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -345,7 +346,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -383,7 +384,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -422,7 +423,7 @@ run(const std::shared_ptr<Network> & net,
                         std::chrono::high_resolution_clock> tick =
                         std::chrono::high_resolution_clock::now();
 
-                    r_val->set(runner(&s, &a, 20, 1.0));
+                    r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
                         std::chrono::high_resolution_clock> tock =
@@ -839,6 +840,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    const uint32_t num_reps = 50;
+    const uint32_t time_points = 50;
+
     std::ofstream ofs_raw;
     ofs_raw.open("run_results_raw.txt", std::ios_base::out);
     CHECK(ofs_raw.good()) << "could not open file";
@@ -863,7 +867,7 @@ int main(int argc, char *argv[]) {
                     + "_read.txt");
 
             std::vector<std::pair<std::string, std::vector<double> > >
-                results = run(net, mp.first, mp.second, 50);
+                results = run(net, mp.first, mp.second, num_reps, time_points);
 
             std::cout << "=====================================" << std::endl
                       << "results for network " << net->kind()
