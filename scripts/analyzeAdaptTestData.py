@@ -18,22 +18,22 @@ def process(time, time_data):
 
     obs_inf_bin = int(obs_sample["next_inf"], 2)
 
-    trt_bin = int(obs_sample["trt"], 2)
+    # trt_bin = int(obs_sample["trt"], 2)
 
     sample_inf_bin_all = [int(i,2) for i in sim_data["next_inf"]]
 
     obs_diff = 0
 
     num_nodes = len(obs_sample["next_inf"])
-    num_trt = gmpy.popcount(trt_bin)
+    # num_trt = gmpy.popcount(trt_bin)
 
     sample_diff = [0.] * len(sim_data.index)
 
     for sample_ind in range(len(sim_data.index)):
          sample_inf_bin = sample_inf_bin_all[sample_ind]
 
-         diff = gmpy.popcount((sample_inf_bin ^ obs_inf_bin) & trt_bin)
-         diff /= float(num_trt)
+         diff = gmpy.popcount(sample_inf_bin ^ obs_inf_bin)
+         diff /= float(num_nodes)
 
          obs_diff += diff
 
@@ -41,9 +41,8 @@ def process(time, time_data):
              if sample_comp_ind > sample_ind:
                  sample_comp_inf_bin = sample_inf_bin_all[sample_comp_ind]
 
-                 diff = gmpy.popcount((sample_comp_inf_bin ^ sample_inf_bin)
-                                      & trt_bin)
-                 diff /= float(num_trt)
+                 diff = gmpy.popcount(sample_comp_inf_bin ^ sample_inf_bin)
+                 diff /= float(num_nodes)
 
                  sample_diff[sample_ind] += diff
 
@@ -52,6 +51,27 @@ def process(time, time_data):
     obs_diff /= float(len(sim_data.index))
 
     sample_diff = [i / float(len(sim_data.index) - 1) for i in sample_diff]
+
+    # obs_sample = obs_data.loc[obs_data.index[0]]
+
+    # pre_inf = int(obs_sample["inf"], 2)
+
+    # trt = int(obs_sample["trt"], 2)
+
+    # num_trt = gmpy.popcount(trt)
+
+    # num_nodes = len(obs_sample["inf"])
+
+    # ## obs
+    # obs_inf = int(obs_sample["next_inf"], 2)
+
+    # obs_diff = gmpy.popcount((pre_inf ^ obs_inf) & trt) / float(num_trt)
+
+    # ## sampled
+    # sample_inf_all = [int(i, 2) for i in sim_data["next_inf"]]
+
+    # sample_diff = [gmpy.popcount((pre_inf ^ i) & trt) / float(num_trt)
+    #                for i in sample_inf_all]
 
     return obs_diff, sample_diff
 
@@ -66,8 +86,8 @@ def process_time(rep, time_data):
         def callback(res):
             vals.append(np.searchsorted(sorted(res[1]), res[0]))
 
-        # pool.apply_async(process, args = g, callback = callback)
-        callback(apply(process, g))
+        pool.apply_async(process, args = g, callback = callback)
+        # callback(apply(process, g))
 
 
     pool.close()
@@ -96,7 +116,7 @@ def main(data_file):
         print sorted(res)
         print np.mean(res)
         print np.median(res)
-        print np.std(res)
+        print np.std(res) / np.sqrt(len(res))
 
 
 if __name__ == "__main__":
