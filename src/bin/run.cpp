@@ -841,7 +841,7 @@ int main(int argc, char *argv[]) {
     }
 
     const uint32_t num_reps = 50;
-    const uint32_t time_points = 50;
+    const uint32_t time_points = 100;
 
     std::ofstream ofs_raw;
     ofs_raw.open("run_results_raw.txt", std::ios_base::out);
