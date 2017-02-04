@@ -38,7 +38,7 @@ void run(const std::shared_ptr<Network> & net,
     VfnMaxSimPerturbAgent vmax_agent(net->clone(),
             features->clone(),
             mod_agents->clone(),
-            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            2, num_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
     vmax_agent.set_seed(seed);
 
     s_orig.start();
