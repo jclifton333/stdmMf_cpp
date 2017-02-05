@@ -913,9 +913,10 @@ int main(int argc, char *argv[]) {
     CHECK(ofs_read.good()) << "could not open file";
     ofs_read.close();
 
+    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
+
     Entry & e_read_all = tk.entry("all_read.txt");
 
-    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
 
