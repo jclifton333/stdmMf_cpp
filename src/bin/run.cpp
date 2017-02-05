@@ -816,9 +816,13 @@ int main(int argc, char *argv[]) {
     CHECK(ofs_read.good()) << "could not open file";
     ofs_read.close();
 
+    Entry & e_read_all = tk.entry("all_read.txt");
+
     TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
+
+        Entry & e_read_net = tk.entry(net->kind() + "_read.txt");
 
         for (uint32_t j = 0; j < models.size(); ++j) {
             ModelPair & mp(models.at(j).second.at(i));
@@ -837,11 +841,19 @@ int main(int argc, char *argv[]) {
 
             e_read << "=====================================" << "\n"
                    << "results for network " << net->kind()
-                   << " and model pair " << j << "\n";
+                   << " and model pair " << models.at(j).first << "\n";
+
+            e_read_net << "=====================================" << "\n"
+                       << "results for network " << net->kind()
+                       << " and model pair " << models.at(j).first << "\n";
+
+            e_read_all << "=====================================" << "\n"
+                       << "results for network " << net->kind()
+                       << " and model pair " << models.at(j).first << "\n";
 
             for (uint32_t k = 0; k < results.size(); ++k) {
                 e_raw << net->kind() << ","
-                      << j << ","
+                      << models.at(j).first << ","
                       << results.at(k).first << ","
                       << results.at(k).second.at(0) << ","
                       << results.at(k).second.at(1) << ","
@@ -858,6 +870,17 @@ int main(int argc, char *argv[]) {
                        << results.at(k).second.at(1) << ")  ["
                        << results.at(k).second.at(2) << "]"
                        << "\n";
+
+                e_read_net << results.at(k).first << ": "
+                           << results.at(k).second.at(0) << " ("
+                           << results.at(k).second.at(1) << ")  ["
+                           << results.at(k).second.at(2) << "]"
+                           << "\n";
+                e_read_all << results.at(k).first << ": "
+                           << results.at(k).second.at(0) << " ("
+                           << results.at(k).second.at(1) << ")  ["
+                           << results.at(k).second.at(2) << "]"
+                           << "\n";
             }
         }
     }
