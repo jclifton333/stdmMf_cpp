@@ -230,7 +230,8 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
         CHECK(ec == Optim::ErrorCode::SUCCESS
                 || (ec == Optim::ErrorCode::CONTINUE
-                        && sp.completed_steps() == num_steps));
+                        && sp.completed_steps() == num_steps))
+            << "error code: " << ec;
 
         optim_par = sp.par();
     }
