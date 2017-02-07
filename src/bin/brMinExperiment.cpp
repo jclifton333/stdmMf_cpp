@@ -64,6 +64,11 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     s.start();
     // simulate history
     for (uint32_t i = 0; i < 500; ++i) {
+        const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.inf_bits(),
+                s.history());
+
+        s.trt_bits(trt_bits);
+
         s.turn_clock();
     }
 
