@@ -429,8 +429,8 @@ int main(int argc, char *argv[]) {
             p.service()->post(std::bind(&run_adapt, r, rep, path_len,
                             num_reps_vfn, c_vfn, t_vfn, a_vfn, b_vfn,
                             ell_vfn, min_step_size_vfn,
-                            c_vfn, t_vfn, a_vfn, b_vfn,
-                            ell_vfn, min_step_size_vfn,
+                            c_br, t_br, a_br, b_br,
+                            ell_br, min_step_size_br,
                             step_scale_br, gamma_br, progress));
 
             ++num_jobs;
