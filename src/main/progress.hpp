@@ -40,8 +40,10 @@ protected:
             }
             *this->out_ << "]";
         }
-        const std::chrono::duration<double> elapsed =
-            std::chrono::duration_cast<std::chrono::seconds> (tock - this->tick_);
+
+        using FpHours =
+            std::chrono::duration<double, std::chrono::hours::period>;
+        FpHours elapsed = FpHours(tock - this->tick_);
 
         *this->out_ << " (" << std::setw(6) << std::setfill(' ')
                     << std::fixed << std::setprecision(2)
