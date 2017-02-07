@@ -20,11 +20,11 @@ protected:
 
     T * out_;
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> tick_;
+    std::chrono::time_point<std::chrono::system_clock> tick_;
 
     void print() {
-        std::chrono::time_point<std::chrono::high_resolution_clock> tock
-            = std::chrono::high_resolution_clock::now();
+        const std::chrono::time_point<std::chrono::system_clock> tock
+            = std::chrono::system_clock::now();
 
         *this->out_ << "\r" << std::setw(5) << std::setfill(' ') << num_done_;
         if (total_ > 0) {
@@ -56,7 +56,7 @@ public:
 
     Progress(const uint32_t & total, T * out)
         : num_done_(0), total_(total), bar_width_(20), out_(out),
-          tick_(std::chrono::high_resolution_clock::now()) {
+          tick_(std::chrono::system_clock::now()) {
         std::lock_guard<std::mutex> lock(this->mutex_);
         this->print();
     }
