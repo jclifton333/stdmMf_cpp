@@ -19,7 +19,7 @@
 using namespace stdmMf;
 
 
-void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
+void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const uint32_t & seed,
         const double & c,
         const double & t,
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
             factors.push_back(f);
             rep_number.push_back(rep);
             factors_level.push_back(level_num);
-            p.service()->post(std::bind(&run_vmax, r, rep, c, t, a, b,
+            p.service()->post(std::bind(&run_brmin, r, rep, c, t, a, b,
                             ell, min_step_size));
         }
 
