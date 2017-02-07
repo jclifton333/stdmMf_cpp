@@ -17,6 +17,7 @@
 #include "simPerturb.hpp"
 #include "experiment.hpp"
 #include "utilities.hpp"
+#include "progress.hpp"
 
 
 using namespace stdmMf;
@@ -39,7 +40,8 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const double & ell_br,
         const double & min_step_size_br,
         const uint32_t & num_steps_br,
-        const double & gamma_br) {
+        const double & gamma_br,
+        const std::shared_ptr<Progress<std::ostream> > & progress) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->set_seed(seed);
 
@@ -254,6 +256,8 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
                     std::chrono::duration_cast<std::chrono::seconds>(
                             elapsed).count(),
                     val));
+
+    progress->update();
 }
 
 
@@ -354,6 +358,11 @@ int main(int argc, char *argv[]) {
     std::vector<uint32_t> factors_level;
     std::vector<uint32_t> rep_number;
 
+    std::shared_ptr<Progress<std::ostream> > progress(
+            new Progress<std::ostream>(0, &std::cout));
+
+    uint32_t num_jobs = 0;
+
     e.start();
     uint32_t level_num = 0;
     do {
@@ -410,11 +419,15 @@ int main(int argc, char *argv[]) {
                             ell_vfn, min_step_size_vfn,
                             c_vfn, t_vfn, a_vfn, b_vfn,
                             ell_vfn, min_step_size_vfn,
-                            num_steps_br, gamma_br));
+                            num_steps_br, gamma_br, progress));
+
+            ++num_jobs;
         }
 
         ++level_num;
     } while (e.next());
+
+    progress->total(num_jobs);
 
     p.join();
 
