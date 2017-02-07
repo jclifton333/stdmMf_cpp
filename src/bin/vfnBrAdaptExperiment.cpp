@@ -18,6 +18,8 @@
 #include "experiment.hpp"
 #include "utilities.hpp"
 #include "progress.hpp"
+#include "trapperKeeper.hpp"
+#include "projectInfo.hpp"
 
 
 using namespace stdmMf;
@@ -436,9 +438,10 @@ int main(int argc, char *argv[]) {
     CHECK_EQ(factors.size(), rep_number.size());
 
 
-    std::ofstream out;
-    out.open("brMinExperiment_results.txt");
-    out << "level_num, rep_num, elapsed, value, path_len_vfn, num_reps_vfn, "
+    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
+    Entry & results_entry = tk.entry("brMinExperiment_results.txt");
+    results_entry
+        << "level_num, rep_num, elapsed, value, path_len_vfn, num_reps_vfn, "
         << "c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn, "
         << "c_br, t_br, a_br, b_br, ell_br, min_step_size_br, num_steps_br, "
         << "gamma_br"
@@ -446,13 +449,13 @@ int main(int argc, char *argv[]) {
 
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
-        out << factors_level.at(i) << ", " << rep_number.at(i) << ", "
-            << result_i.first << ", " << result_i.second;
+        results_entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
+                      << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);
         for (uint32_t j = 0; j < f.size(); ++j) {
-            out << ", " << f.at(j);
+            results_entry << ", " << f.at(j);
         }
-        out << "\n";
+        results_entry << "\n";
     }
 
     return 0;
