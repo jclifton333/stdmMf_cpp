@@ -40,8 +40,8 @@ protected:
             }
             *this->out_ << "]";
         }
-        std::chrono::duration<double> elapsed =
-            std::chrono::duration_cast<std::chrono::hours> (tock - this->tick_);
+        const std::chrono::duration<double> elapsed =
+            std::chrono::duration_cast<std::chrono::seconds> (tock - this->tick_);
 
         *this->out_ << " (" << std::setw(6) << std::setfill(' ')
                     << std::fixed << std::setprecision(2)
