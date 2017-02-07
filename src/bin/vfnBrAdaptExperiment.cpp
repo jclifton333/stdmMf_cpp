@@ -41,7 +41,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const double & b_br,
         const double & ell_br,
         const double & min_step_size_br,
-        const uint32_t & num_steps_br,
+        const uint32_t & step_scale_br,
         const double & gamma_br,
         const std::shared_ptr<Progress<std::ostream> > & progress) {
     std::shared_ptr<Rng> rng(new Rng);
@@ -173,7 +173,8 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         // set initial infections
         s.start();
         // simulate history
-        for (uint32_t i = 0; i < 50; ++i) {
+        const uint32_t num_points_for_br = 50;
+        for (uint32_t i = 0; i < num_points_for_br; ++i) {
             const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.inf_bits(),
                     s.history());
             s.trt_bits(trt_bits);
@@ -212,7 +213,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         do {
             ec = sp.step();
         } while (ec == Optim::ErrorCode::CONTINUE
-                && sp.completed_steps() < num_steps_br);
+                && sp.completed_steps() < num_points_for_br * step_scale_br);
 
         const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
             std::chrono::high_resolution_clock::now();
@@ -287,7 +288,7 @@ int main(int argc, char *argv[]) {
         const std::vector<double> ell_br_list = {1.0, 0.95, 0.85};
         const std::vector<double> min_step_size_br_list = {9.13e-6, 6.473e-6,
                                                         5.072e-6};
-        const std::vector<int> num_steps_br_list = {1, 10, 100};
+        const std::vector<int> step_scale_br_list = {1, 10, 100};
         const std::vector<double> gamma_br_list = {0.9, 0.99};
 
         Experiment::FactorGroup * g = e.add_group();
@@ -307,7 +308,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(b_br_list);
         g->add_factor(ell_br_list);
         g->add_factor(min_step_size_br_list);
-        g->add_factor(num_steps_br_list);
+        g->add_factor(step_scale_br_list);
         g->add_factor(gamma_br_list);
     }
 
@@ -329,7 +330,7 @@ int main(int argc, char *argv[]) {
         const std::vector<double> b_br_list = {1};
         const std::vector<double> ell_br_list = {1.0, 0.95, 0.85};
         const std::vector<double> min_step_size_br_list = {9.13e-6};
-        const std::vector<int> num_steps_br_list = {1, 10, 100};
+        const std::vector<int> step_scale_br_list = {1, 10, 100};
         const std::vector<double> gamma_br_list = {0.9, 0.99};
 
         Experiment::FactorGroup * g = e.add_group();
@@ -349,7 +350,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(b_br_list);
         g->add_factor(ell_br_list);
         g->add_factor(min_step_size_br_list);
-        g->add_factor(num_steps_br_list);
+        g->add_factor(step_scale_br_list);
         g->add_factor(gamma_br_list);
     }
 
@@ -404,7 +405,7 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
             const double min_step_size_br = f.at(i++).val.double_val;
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
-            const int num_steps_br = f.at(i++).val.int_val;
+            const int step_scale_br = f.at(i++).val.int_val;
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
             const double gamma_br = f.at(i++).val.double_val;
 
@@ -421,7 +422,7 @@ int main(int argc, char *argv[]) {
                             ell_vfn, min_step_size_vfn,
                             c_vfn, t_vfn, a_vfn, b_vfn,
                             ell_vfn, min_step_size_vfn,
-                            num_steps_br, gamma_br, progress));
+                            step_scale_br, gamma_br, progress));
 
             ++num_jobs;
         }
@@ -443,7 +444,7 @@ int main(int argc, char *argv[]) {
     results_entry
         << "level_num, rep_num, elapsed, value, path_len_vfn, num_reps_vfn, "
         << "c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn, "
-        << "c_br, t_br, a_br, b_br, ell_br, min_step_size_br, num_steps_br, "
+        << "c_br, t_br, a_br, b_br, ell_br, min_step_size_br, step_scale_br, "
         << "gamma_br"
         << "\n";
 
