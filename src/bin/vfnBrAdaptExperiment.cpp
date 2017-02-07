@@ -220,8 +220,10 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
         elapsed = tock - tick;
 
-        CHECK_EQ(ec, Optim::ErrorCode::SUCCESS || Optim::ErrorCode::CONTINUE)
-            << "br tuning paramters" << std::endl
+        CHECK(ec == Optim::ErrorCode::SUCCESS ||
+                ec == Optim::ErrorCode::CONTINUE)
+            << ec << std::endl
+            << "br tuning paramters: "
             << c_br << ", "
             << t_br << ", "
             << a_br << ", "
