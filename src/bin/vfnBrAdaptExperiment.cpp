@@ -213,14 +213,23 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         do {
             ec = sp.step();
         } while (ec == Optim::ErrorCode::CONTINUE
-                && sp.completed_steps() < num_points_for_br * step_scale_br);
+                && sp.completed_steps() < (num_points_for_br * step_scale_br));
 
         const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
             std::chrono::high_resolution_clock::now();
 
         elapsed = tock - tick;
 
-        CHECK_EQ(ec, Optim::ErrorCode::SUCCESS || Optim::ErrorCode::CONTINUE);
+        CHECK_EQ(ec, Optim::ErrorCode::SUCCESS || Optim::ErrorCode::CONTINUE)
+            << "br tuning paramters" << std::endl
+            << c_br << ", "
+            << t_br << ", "
+            << a_br << ", "
+            << b_br << ", "
+            << ell_br << ", "
+            << min_step_size_br << ", "
+            << gamma_br << ", "
+            << step_scale_br;
 
         optim_par = sp.par();
     }
