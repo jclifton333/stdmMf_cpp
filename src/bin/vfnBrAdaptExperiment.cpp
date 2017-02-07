@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
         const std::vector<double> b_br_list = {1};
         const std::vector<double> ell_br_list = {1.0, 0.95, 0.85};
         const std::vector<double> min_step_size_br_list = {9.13e-6, 6.473e-6,
-                                                        5.072e-6};
+                                                           5.072e-6};
         const std::vector<int> step_scale_br_list = {1, 10, 100};
         const std::vector<double> gamma_br_list = {0.9, 0.99};
 
