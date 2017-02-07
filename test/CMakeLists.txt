@@ -22,7 +22,8 @@ SET(test_src
   test_simPerturb
   test_pool
   test_experiment
-  test_trapperKeeper)
+  test_trapperKeeper
+  test_progress)
 
 foreach(test_name ${test_src})
   add_executable(${test_name} ${test_name}.cpp)
