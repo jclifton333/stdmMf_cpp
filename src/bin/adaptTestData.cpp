@@ -395,9 +395,10 @@ int main(int argc, char *argv[]) {
             sd->set_network(net_name);
 
             for (uint32_t rep = 0; rep < num_reps; ++rep) {
+                Observation * obs = sd->add_rep();
                 pool.service()->post([=](){
                             run(net, mp.first, mp.second, rep,
-                                    num_points, sd->add_rep(), progress);
+                                    num_points, obs, progress);
                         });
             }
         }
