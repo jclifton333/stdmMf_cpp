@@ -32,8 +32,7 @@ void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod_agents,
         const uint32_t & rep,
         const uint32_t & num_points,
-        Observation * const obs,
-        const std::shared_ptr<Progress<std::ostream> > & progress) {
+        Observation * const obs) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->set_seed(rep);
 
@@ -83,8 +82,6 @@ void run(const std::shared_ptr<Network> & net,
 
     boost::to_string(s_orig.trt_bits(), bits_str);
     state->set_trt_bits(bits_str);
-
-    progress->update();
 }
 
 
@@ -398,7 +395,8 @@ int main(int argc, char *argv[]) {
                 Observation * obs = sd->add_rep();
                 pool.service()->post([=](){
                             run(net, mp.first, mp.second, rep,
-                                    num_points, obs, progress);
+                                    num_points, obs);
+                            progress->update();
                         });
             }
         }
