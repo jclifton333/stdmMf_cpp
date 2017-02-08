@@ -453,7 +453,7 @@ int main(int argc, char *argv[]) {
 
 
     TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
-    Entry & results_entry = tk.entry("brMinExperiment_results.txt");
+    Entry & results_entry = tk.entry("vfnBrAdaptExperiment_results.txt");
     results_entry
         << "level_num, rep_num, elapsed, value, path_len_vfn, num_reps_vfn, "
         << "c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn, "
