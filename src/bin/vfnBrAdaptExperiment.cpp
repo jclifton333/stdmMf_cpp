@@ -445,6 +445,8 @@ int main(int argc, char *argv[]) {
 
     p.join();
 
+    progress->done();
+
     CHECK_EQ(factors.size(), results.size());
     CHECK_EQ(factors.size(), factors_level.size());
     CHECK_EQ(factors.size(), rep_number.size());
