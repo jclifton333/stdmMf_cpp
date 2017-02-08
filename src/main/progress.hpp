@@ -78,6 +78,11 @@ public:
     uint32_t total() {
         return this->total_;
     };
+
+    void done() {
+        std::lock_guard<std::mutex> lock(this->mutex_);
+        *this->out_ << std::endl;
+    }
 };
 
 
