@@ -375,7 +375,7 @@ run(const std::shared_ptr<Network> & net,
                                     new NetworkRunSymFeatures(net->clone(), 3)),
                             mod_agents->clone(),
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
-                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
+                            2e-1, 1.0, 1e-3, 1, 1, 9.13e-6,
                             10);
                     a.set_seed(i);
 
@@ -414,7 +414,7 @@ run(const std::shared_ptr<Network> & net,
                                     new NetworkRunSymFeatures(net->clone(), 3)),
                             mod_agents->clone(),
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
-                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
+                            2e-1, 1.0, 1e-3, 1, 1, 9.13e-6,
                             100);
                     a.set_seed(i);
 
