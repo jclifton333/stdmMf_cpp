@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+package stdmMf;
+
+message State {
+  optional string inf_bits = 1;
+  optional string trt_bits = 2;
+}
+
+message Observation {
+  optional uint32 num_points = 1;
+  repeated State state = 2;
+}
+
+message SimData {
+  optional string true_model = 1;
+  optional string network = 2;
+  repeated Observation rep = 3;
+}
+
+message AdaptData {
+  repeated SimData sims = 1;
+}

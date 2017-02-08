@@ -18,6 +18,12 @@
 
 #include "projectInfo.hpp"
 
+#include "adaptTestData.pb.h"
+
+#include <google/protobuf/text_format.h>
+
+#include "progress.hpp"
+
 using namespace stdmMf;
 
 
@@ -25,100 +31,60 @@ void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod_system,
         const std::shared_ptr<Model> & mod_agents,
         const uint32_t & rep,
-        const uint32_t & seed,
-        const uint32_t & num_samples,
         const uint32_t & num_points,
-        Entry & entry) {
+        Observation * const obs,
+        const std::shared_ptr<Progress<std::ostream> > & progress) {
+    std::shared_ptr<Rng> rng(new Rng);
+    rng->set_seed(rep);
+
     std::shared_ptr<Features> features(
             new NetworkRunSymFeatures(net->clone(), 3));
 
     System s_orig(net->clone(), mod_system->clone());
 
-    s_orig.set_seed(seed);
+    s_orig.set_rng(rng);
     VfnMaxSimPerturbAgent vmax_agent(net->clone(),
             features->clone(),
             mod_agents->clone(),
             2, num_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    vmax_agent.set_seed(seed);
+    vmax_agent.set_rng(rng);
+
+    obs->set_num_points(num_points);
+
+    std::string bits_str;
 
     s_orig.start();
-
     for (uint32_t t = 0; t < num_points; ++t) {
-        // rep, sample, time
-        entry << rep << "," << -1 << "," << t << ",";
+        State * state = obs->add_state();
 
         // starting infection
-        std::string bits_str;
         boost::to_string(s_orig.inf_bits(), bits_str);
-        entry << bits_str << ",";
+        state->set_inf_bits(bits_str);
 
         const boost::dynamic_bitset<> trt_bits = vmax_agent.apply_trt(
                 s_orig.inf_bits(), s_orig.history());
 
         // treatment
         boost::to_string(trt_bits, bits_str);
-        entry << bits_str << ",";
+        state->set_trt_bits(bits_str);
 
         CHECK_EQ(trt_bits.count(), vmax_agent.num_trt());
 
         s_orig.trt_bits(trt_bits);
 
         s_orig.turn_clock();
-
-        // final infection
-        boost::to_string(s_orig.inf_bits(), bits_str);
-        entry << bits_str << "\n";
     }
 
-    // estimate from history
-    std::shared_ptr<Model> mod_agents_est(mod_agents->clone());
-    mod_agents_est->est_par(s_orig.inf_bits(), s_orig.history());
+    // final infection
+    State * state = obs->add_state();
 
-    // retreive last coefficients
-    const std::vector<double> coef = vmax_agent.coef();
+    boost::to_string(s_orig.inf_bits(), bits_str);
+    state->set_inf_bits(bits_str);
 
-    for (uint32_t sample = 0; sample < num_samples; ++sample) {
-        // use agents model for simulating
-        System s_sim(net->clone(), mod_agents_est->clone());
-        s_sim.set_seed(seed + sample + 1);
+    boost::to_string(s_orig.trt_bits(), bits_str);
+    state->set_trt_bits(bits_str);
 
-        // construct sweep agent
-        // SweepAgent sweep_agent(net->clone(), features->clone(),
-        //         coef, 0, false);
-        // sweep_agent.set_seed(seed + sample + 1);
-
-        for (uint32_t t = 0; t < num_points; ++t) {
-            // rep, sample, time
-            entry << rep << "," << sample << "," << t << ",";
-
-            // set infection to observed value
-            s_sim.inf_bits(s_orig.history().at(t).first);
-
-            // starting infection
-            std::string bits_str;
-            boost::to_string(s_sim.inf_bits(), bits_str);
-            entry << bits_str << ",";
-
-            // const boost::dynamic_bitset<> trt_bits = sweep_agent.apply_trt(
-            //         s_sim.inf_bits(), s_sim.history());
-            const boost::dynamic_bitset<> trt_bits =
-                s_orig.history().at(t).second;
-
-            // treatment
-            boost::to_string(trt_bits, bits_str);
-            entry << bits_str << ",";
-
-            // CHECK_EQ(trt_bits.count(), sweep_agent.num_trt());
-
-            s_sim.trt_bits(trt_bits);
-
-            s_sim.turn_clock();
-
-            // final infection
-            boost::to_string(s_sim.inf_bits(), bits_str);
-            entry << bits_str << "\n";
-        }
-    }
+    progress->update();
 }
 
 
@@ -153,24 +119,24 @@ int main(int argc, char *argv[]) {
             std::log(1. / (1. - prob_inf_latent) - 1);
 
         // neighbor infections
-        const double prob_inf = 0.7;
+        const double prob_inf = 0.5;
         const uint32_t prob_num_neigh = 3;
         const double intcp_inf =
             std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
 
         const double trt_act_inf =
-            std::log(std::pow(1. - prob_inf * 0.5, -1. / prob_num_neigh) - 1.)
+            std::log(std::pow(1. - prob_inf * 0.25, -1. / prob_num_neigh) - 1.)
             - intcp_inf;
 
         const double trt_pre_inf =
-            std::log(std::pow(1. - prob_inf * 0.9, -1. / prob_num_neigh) - 1.)
+            std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
             - intcp_inf;
 
         // recovery
-        const double prob_rec = 0.5;
+        const double prob_rec = 0.25;
         const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
         const double trt_act_rec =
-            std::log(1. / ((1. - prob_rec) * 0.9) - 1.) - intcp_rec;
+            std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
 
 
         std::vector<double> par =
@@ -407,8 +373,13 @@ int main(int argc, char *argv[]) {
                     PROJECT_ROOT_DIR + "/data"));
 
     const uint32_t num_reps = 100;
-    const uint32_t num_samples = 1000;
     const uint32_t num_points = 50;
+
+    AdaptData ad;
+
+    std::shared_ptr<Progress<std::ostream> > progress(
+            new Progress<std::ostream>(
+                    networks.size() * models.size() * num_reps, &std::cout));
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
@@ -418,23 +389,30 @@ int main(int argc, char *argv[]) {
             ModelPair & mp(models.at(j).second.at(i));
             const std::string mod_name = models.at(j).first;
 
-            std::string entry_name = net_name + "_" + mod_name + ".txt";
+            SimData * sd = ad.add_sims();
 
-            // header
-            tp->entry(entry_name)
-                << "rep,sample,time,inf,trt,next_inf" << "\n";
+            sd->set_true_model(mod_name);
+            sd->set_network(net_name);
 
             for (uint32_t rep = 0; rep < num_reps; ++rep) {
                 pool.service()->post([=](){
                             run(net, mp.first, mp.second, rep,
-                                    rep * (num_samples + 1), num_samples,
-                                    num_points, tp->entry(entry_name));
+                                    num_points, sd->add_rep(), progress);
                         });
             }
         }
     }
 
     pool.join();
+
+    progress->done();
+
+
+    std::string adapt_data_str;
+    google::protobuf::TextFormat::PrintToString(ad, &adapt_data_str);
+    Entry & entry = tp->entry("adapt_data.txt");
+    entry << adapt_data_str;
+
 
     tp->finished();
 

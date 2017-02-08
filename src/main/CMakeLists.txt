@@ -17,7 +17,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/projectInfo.cpp.in"
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
-  network.proto)
+  network.proto adaptTestData.proto)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
