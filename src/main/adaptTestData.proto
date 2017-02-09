@@ -13,7 +13,7 @@ message Observation {
 }
 
 message SimData {
-  optional string true_model = 1;
+  optional string model = 1;
   optional string network = 2;
   repeated Observation rep = 3;
 }

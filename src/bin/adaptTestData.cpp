@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
 
             SimData * sd = ad.add_sim();
 
-            sd->set_true_model(mod_name);
+            sd->set_model(mod_name);
             sd->set_network(net_name);
 
             for (uint32_t rep = 0; rep < num_reps; ++rep) {
