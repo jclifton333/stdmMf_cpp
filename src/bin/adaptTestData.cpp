@@ -385,7 +385,7 @@ int main(int argc, char *argv[]) {
             for (uint32_t i = 0; i < networks.size(); ++i) {
                 ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
                                         networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeXorModel(
+                        std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
                                         networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
@@ -401,7 +401,7 @@ int main(int argc, char *argv[]) {
             for (uint32_t i = 0; i < networks.size(); ++i) {
                 ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
                                         networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeSepModel(
+                        std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
                                         networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par_sep);
