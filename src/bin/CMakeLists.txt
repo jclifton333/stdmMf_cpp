@@ -16,6 +16,7 @@ SET(bin_file_names
   timeBrMinAgent
   run
   adaptTestData
+  adaptTestLikelihood
   sandbox)
 
 foreach(bin_file ${bin_file_names})
