@@ -19,5 +19,5 @@ message SimData {
 }
 
 message AdaptData {
-  repeated SimData sims = 1;
+  repeated SimData sim = 1;
 }

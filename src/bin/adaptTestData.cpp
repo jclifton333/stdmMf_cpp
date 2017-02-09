@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
             ModelPair & mp(models.at(j).second.at(i));
             const std::string mod_name = models.at(j).first;
 
-            SimData * sd = ad.add_sims();
+            SimData * sd = ad.add_sim();
 
             sd->set_true_model(mod_name);
             sd->set_network(net_name);
