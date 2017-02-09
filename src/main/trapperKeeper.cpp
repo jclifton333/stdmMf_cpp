@@ -118,9 +118,13 @@ void TrapperKeeper::finished() {
             boost::filesystem::create_directories(this->root_);
         }
 
+        boost::filesystem::path dest;
         if (!boost::filesystem::is_directory(this->root_ / this->date_)) {
             // use date as directory name if it doesn't already exists
             this->copy_contents(this->temp_, this->root_ / this->date_);
+            // delete temp directory
+            boost::filesystem::remove_all(this->temp_);
+            dest = this->root_ / this->date_;
         } else {
             // add a counter to date for a new directory name
             uint32_t counter = 1;
@@ -137,7 +141,12 @@ void TrapperKeeper::finished() {
             }
 
             this->copy_contents(this->temp_, new_path);
+            // delete temp directory
+            boost::filesystem::remove_all(this->temp_);
+            dest = new_path;
         }
+
+        std::cout << "Results: " << dest << std::endl;
 
         this->finished_ = true;
         this->wipe_no_lock();
