@@ -9,7 +9,16 @@
 
 #include "progress.hpp"
 
+#include "pool.hpp"
+
 #include "projectInfo.hpp"
+
+#include <iterator>
+#include <algorithm>
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
+namespace ba = boost::accumulators;
 
 #include <regex>
 
@@ -24,14 +33,55 @@
 using namespace stdmMf;
 
 
-std::vector<double> get_null_distribution(const Observation & obs,
-        const std::shared_ptr<Model> & mod) {
+std::vector<BitsetPair> obs_to_bitset_vector(
+        const Observation & obs) {
+    std::vector<BitsetPair> bitset_vector;
+    for (uint32_t i = 0; i < obs.state_size(); ++i) {
+        const boost::dynamic_bitset<> inf_bits(obs.state(i).inf_bits());
+        const boost::dynamic_bitset<> trt_bits(obs.state(i).trt_bits());
+
+        bitset_vector.emplace_back(inf_bits, trt_bits);
+    }
+
+    return bitset_vector;
 }
 
-double get_statistic(const Observation & obs,
+std::vector<double> get_null_distribution(
+        const std::vector<BitsetPair> & eval_history,
+        const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod) {
+    System s(net, mod);
 
+    const uint32_t num_reps = 100;
+    std::vector<double> null_dist;
+    for (uint32_t rep = 0; rep < num_reps; ++rep) {
 
+        double ll_total = 0.0;
+
+        for (uint32_t t = 0; t < eval_history.size(); ++t) {
+            s.inf_bits(eval_history.at(t).first);
+            s.trt_bits(eval_history.at(t).second);
+
+            // sim under dynamics mod
+            s.turn_clock();
+
+            std::vector<BitsetPair> sim_eval_history;
+            // starting point
+            sim_eval_history.emplace_back(eval_history.at(t).first,
+                    eval_history.at(t).second);
+
+            // point after sim
+            sim_eval_history.emplace_back(s.inf_bits(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            ll_total += mod->ll(sim_eval_history);
+        }
+
+        null_dist.push_back(ll_total / eval_history.size());
+    }
+
+    std::sort(null_dist.begin(), null_dist.end());
+    return null_dist;
 }
 
 
@@ -131,7 +181,6 @@ std::shared_ptr<Model> get_model(const std::string & model_kind,
 
 
 int main(int argc, char *argv[]) {
-
     // read in data
     AdaptData ad;
     std::ifstream in(PROJECT_ROOT_DIR +
@@ -142,6 +191,11 @@ int main(int argc, char *argv[]) {
     in.close();
     google::protobuf::TextFormat::ParseFromString(in_buf.str(), &ad);
 
+    Pool pool;
+
+    const uint32_t num_points_for_fit = 5;
+    const uint32_t num_points_for_eval = 20;
+
     for (uint32_t sim = 0; sim < ad.sim_size(); ++sim) {
         const SimData & sd = ad.sim(sim);
 
@@ -151,17 +205,93 @@ int main(int argc, char *argv[]) {
         std::smatch model_match;
         std::regex_search(sd.model(), model_match, model_regex);
 
-        std::shared_ptr<Model> mod_system(get_model(model_match.str(1), net));
+        // std::shared_ptr<Model> mod_system(get_model(model_match.str(1), net));
         std::shared_ptr<Model> mod_agent(get_model(model_match.str(2), net));
 
 
-        for (uint32_t rep = 0; rep < sd.rep_size(); ++rep) {
-            const Observation & obs = sd.rep(rep);
+        ba::accumulator_set<double, ba::stats<
+            ba::tag::mean, ba::tag::variance> > vals;
 
-            double obs_statistic = get_statistic(obs, mod_agent);
-            std::vector<double> null_distribution = get_null_distribution(obs,
-                    mod_agent);
+        uint32_t num_left = sd.rep_size();
+        std::mutex mtx;
+        std::condition_variable cv;
+
+        for (uint32_t rep = 0; rep < sd.rep_size(); ++rep) {
+            // const Observation obs = sd.rep(rep);
+            const Observation * obs(&sd.rep(rep));
+
+            auto fn = [=,&vals,&mtx,&num_left,&cv] () {
+                const std::vector<BitsetPair> history =
+                    obs_to_bitset_vector(*obs);
+                // const std::vector<BitsetPair> history =
+                //     obs_to_bitset_vector(obs);
+
+                // history for fitting model
+                std::vector<BitsetPair> fit_history(history.begin(),
+                        history.begin() + num_points_for_fit);
+                CHECK_EQ(fit_history.size(), num_points_for_fit);
+
+                // fit model
+                std::shared_ptr<Model> mod_agent_2 = mod_agent->clone();
+                mod_agent_2->est_par(fit_history);
+
+                // observed data for evaluation
+                std::vector<BitsetPair> eval_history(
+                        history.begin() + num_points_for_fit - 1,
+                        history.begin() + num_points_for_fit
+                        + num_points_for_eval - 1);
+                CHECK_EQ(eval_history.size(), num_points_for_eval);
+
+                // check tail and head of fit and eval
+                CHECK_EQ(fit_history.at(num_points_for_fit - 1).first,
+                        eval_history.at(0).first);
+                CHECK_EQ(fit_history.at(num_points_for_fit - 1).second,
+                        eval_history.at(0).second);
+
+                const double obs_statistic = mod_agent_2->ll(eval_history);
+
+                // history for null
+                std::vector<BitsetPair> null_history(eval_history.begin(),
+                        eval_history.end() - 1);
+                CHECK_EQ(null_history.size(), num_points_for_eval - 1);
+
+                // get null distribution
+                std::vector<double> null_distribution = get_null_distribution(
+                        null_history, net, mod_agent_2);
+
+                // position of observed value in null distribution
+                const std::vector<double>::iterator lb_it =
+                std::lower_bound(null_distribution.begin(),
+                        null_distribution.end(), obs_statistic);
+                const uint32_t lb = std::distance(
+                        null_distribution.begin(), lb_it);
+
+                // convert to a percentile
+                std::lock_guard<std::mutex> lock(mtx);
+                vals(static_cast<double>(lb) /
+                        static_cast<double>(null_distribution.size()));
+                --num_left;
+                cv.notify_one();
+            };
+
+            pool.service()->post(fn);
+
+            // std::cout << "rep: " << rep << std::endl;
+            // std::cout << "obs: " << obs_statistic << std::endl;
+            // std::cout << "sim:";
+            // for (uint32_t i = 0; i < null_distribution.size(); ++i) {
+            //     std::cout << " " << null_distribution.at(i);
+            // }
+            // std::cout << std::endl;
         }
+
+        std::unique_lock<std::mutex> finish_lock(mtx);
+        cv.wait(finish_lock, [&num_left]{return num_left == 0;});
+
+
+        std::cout << sd.model() << ": " << ba::mean(vals)
+                  << " (" << ba::variance(vals) << ")"
+                  << std::endl;
     }
 
     return 0;
