@@ -17,7 +17,7 @@ class GradientChecker {
 public:
     Model * m;
     int wiggle_var;
-    std::vector<InfAndTrt> * history;
+    std::vector<Transition> * history;
     std::vector<double> par;
 };
 
@@ -26,7 +26,7 @@ public:
     Model * m;
     int wiggle_var;
     int gradient_var;
-    std::vector<InfAndTrt> * history;
+    std::vector<Transition> * history;
     std::vector<double> par;
 };
 
@@ -74,41 +74,6 @@ TEST(TestNoCovEdgeOrSoModel, TestPar) {
 }
 
 
-TEST(TestNoCovEdgeModel, TestLL) {
-    // generate network
-    NetworkInit init;
-    init.set_dim_x(3);
-    init.set_dim_y(3);
-    init.set_wrap(false);
-    init.set_type(NetworkInit_NetType_GRID);
-
-    std::shared_ptr<Network> n = Network::gen_network(init);
-
-    std::shared_ptr<Model> m(new NoCovEdgeOrSoModel(n));
-
-    System s(n, m);
-
-    RandomAgent ra(n);
-    for (uint32_t i = 0; i < 100; ++i) {
-        const boost::dynamic_bitset<> trt_bits =
-            ra.apply_trt(s.inf_bits(), s.history());
-
-        s.trt_bits(trt_bits);
-
-        s.turn_clock();
-    }
-
-    std::vector<InfAndTrt> all_history(s.history());
-    all_history.push_back(InfAndTrt(s.inf_bits(),
-                    boost::dynamic_bitset<>(n->size())));
-
-    std::vector<Transition> all_transitions(
-            Transition::from_sequence(all_history));
-
-    EXPECT_EQ(m->ll(all_history), m->ll(all_transitions));
-}
-
-
 TEST(TestNoCovEdgeOrSoModel,TestLLGradient) {
     // generate network
     NetworkInit init;
@@ -135,10 +100,12 @@ TEST(TestNoCovEdgeOrSoModel,TestLLGradient) {
 
     RandomAgent a(n);
 
-    runner(&s, &a, 50, 1.0);
+    const uint32_t num_points = 50;
+    runner(&s, &a, num_points, 1.0);
 
-    std::vector<InfAndTrt> history = s.history();
-    history.push_back(InfAndTrt(s.inf_bits(), s.trt_bits()));
+    std::vector<Transition> history(
+            Transition::from_sequence(s.history(), s.inf_bits()));
+    CHECK_EQ(history.size(), num_points);
 
 
     // generate new parameters so gradient is not zero
@@ -197,11 +164,12 @@ TEST(TestNoCovEdgeOrSoModel,TestLLHessian) {
 
     RandomAgent a(n);
 
-    runner(&s, &a, 3, 1.0);
+    const uint32_t num_points = 3;
+    runner(&s, &a, num_points, 1.0);
 
-    std::vector<InfAndTrt> history = s.history();
-    history.push_back(InfAndTrt(s.inf_bits(), s.trt_bits()));
-
+    std::vector<Transition> history(
+            Transition::from_sequence(s.history(), s.inf_bits()));
+    CHECK_EQ(history.size(), num_points);
 
     // generate new parameters so gradient is not zero
     std::for_each(par.begin(),par.end(),
@@ -261,10 +229,12 @@ TEST(TestNoCovEdgeOrSoModel, EstPar) {
     const std::shared_ptr<RandomAgent> ra(new RandomAgent(n));
     EpsAgent ea(n, pa, ra, 0.1);
 
-    runner(&s, &ea, 100, 1.0);
+    const uint32_t num_points = 100;
+    runner(&s, &ea, num_points, 1.0);
 
-    std::vector<InfAndTrt> history = s.history();
-    history.push_back(InfAndTrt(s.inf_bits(), s.trt_bits()));
+    std::vector<Transition> history(
+            Transition::from_sequence(s.history(), s.inf_bits()));
+    CHECK_EQ(history.size(), num_points);
 
     // scale paramters
     std::vector<double> start_par = par;

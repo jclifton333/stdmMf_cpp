@@ -181,7 +181,9 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
             s.turn_clock();
         }
 
-        const std::vector<InfAndTrt> history(s.history());
+        std::vector<Transition> history(
+                Transition::from_sequence(s.history(), s.inf_bits()));
+        CHECK_EQ(history.size(), num_points_for_br);
 
 
         // function for br min

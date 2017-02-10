@@ -64,9 +64,8 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
     //     return ma.apply_trt(inf_bits, history);
     }
 
-    std::vector<InfAndTrt> all_history(history);
-    all_history.push_back(InfAndTrt(inf_bits,
-                    boost::dynamic_bitset<>(this->network_->size())));
+    const std::vector<Transition> all_history(
+            Transition::from_sequence(history, inf_bits));
 
     this->model_->est_par(all_history);
 

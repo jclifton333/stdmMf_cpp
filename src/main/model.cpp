@@ -6,15 +6,12 @@
 
 namespace stdmMf {
 
-void Model::est_par(const boost::dynamic_bitset<> & inf_bits,
-        std::vector<InfAndTrt> history) {
-    // this has been copied, so okay to modify
-    history.push_back(InfAndTrt(inf_bits,
-                    boost::dynamic_bitset<>(inf_bits.size())));
-    this->est_par(history);
+void Model::est_par(const std::vector<InfAndTrt> & history,
+        const boost::dynamic_bitset<> & inf_bits) {
+    this->est_par(Transition::from_sequence(history, inf_bits));
 }
 
-void Model::est_par(const std::vector<InfAndTrt> & history) {
+void Model::est_par(const std::vector<Transition> & history) {
     CHECK_GT(history.size(), 1);
 
     // create fit object
@@ -78,53 +75,18 @@ void Model::est_par(const std::vector<InfAndTrt> & history) {
 }
 
 
-double Model::ll(const std::vector<InfAndTrt> & history) const {
-    const uint32_t history_size = history.size();
-    CHECK_GE(history_size, 2);
-    double ll_value = 0.0;
-    for (uint32_t i = 0; i < (history_size - 1); ++i) {
-        const InfAndTrt & curr_history = history.at(i);
-        const boost::dynamic_bitset<> & curr_inf = curr_history.inf_bits;
-        const boost::dynamic_bitset<> & curr_trt = curr_history.trt_bits;
-        // infection probabilities
-        const std::vector<double> probs = this->probs(curr_inf, curr_trt);
-
-        const boost::dynamic_bitset<> & next_inf = history.at(i + 1).inf_bits;
-
-        // get bits for changes in infection
-        const boost::dynamic_bitset<> & change_inf = curr_inf ^ next_inf;
-
-        // convert bits to sets of indices
-        const auto change_both_sets = both_sets(change_inf);
-        const std::vector<uint32_t> changed = change_both_sets.first;
-        const uint32_t num_changed = changed.size();
-        const std::vector<uint32_t> unchanged = change_both_sets.second;
-        const uint32_t num_unchanged = unchanged.size();
-
-        for (uint32_t j = 0; j < num_changed; ++j) {
-            const double p = probs.at(changed.at(j));
-            ll_value += std::log(std::max(1e-14, p)); // for stability
-        }
-        for (uint32_t j = 0; j < num_unchanged; ++j) {
-            const double p = 1.0 - probs.at(unchanged.at(j));
-            ll_value += std::log(std::max(1e-14, p));
-        }
-    }
-    return ll_value / (history_size - 1);
-}
-
-
 double Model::ll(const std::vector<Transition> & history) const {
     const uint32_t history_size = history.size();
     CHECK_GE(history_size, 1);
     double ll_value = 0.0;
     for (uint32_t i = 0; i < history_size; ++i) {
-        const boost::dynamic_bitset<> & curr_inf = history.at(i).curr_inf_bits;
-        const boost::dynamic_bitset<> & curr_trt = history.at(i).curr_trt_bits;
+        const Transition & transition = history.at(i);
+        const boost::dynamic_bitset<> & curr_inf = transition.curr_inf_bits;
+        const boost::dynamic_bitset<> & curr_trt = transition.curr_trt_bits;
         // infection probabilities
         const std::vector<double> probs = this->probs(curr_inf, curr_trt);
 
-        const boost::dynamic_bitset<> & next_inf = history.at(i).next_inf_bits;
+        const boost::dynamic_bitset<> & next_inf = transition.next_inf_bits;
 
         // get bits for changes in infection
         const boost::dynamic_bitset<> & change_inf = curr_inf ^ next_inf;
@@ -149,7 +111,7 @@ double Model::ll(const std::vector<Transition> & history) const {
 }
 
 
-ModelFit::ModelFit(Model * const model, const std::vector<InfAndTrt> & history)
+ModelFit::ModelFit(Model * const model, const std::vector<Transition> & history)
     : model_(model), history_(history) {
 }
 

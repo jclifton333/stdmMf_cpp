@@ -19,34 +19,32 @@ public:
 
     virtual uint32_t par_size() const = 0;
 
-    virtual void est_par(const std::vector<InfAndTrt> & history);
+    virtual void est_par(const std::vector<Transition> & history);
 
-    void est_par(const boost::dynamic_bitset<> & inf_bits,
-            std::vector<InfAndTrt> history);
+    void est_par(const std::vector<InfAndTrt> & history,
+            const boost::dynamic_bitset<> & inf_bits);
 
     virtual std::vector<double> probs(
             const boost::dynamic_bitset<> & inf_status,
             const boost::dynamic_bitset<> & trt_status) const = 0;
 
-    virtual double ll(const std::vector<InfAndTrt> & history) const;
-
     virtual double ll(const std::vector<Transition> & history) const;
 
     virtual std::vector<double> ll_grad(
-            const std::vector<InfAndTrt> & history) const = 0;
+            const std::vector<Transition> & history) const = 0;
 
     virtual std::vector<double> ll_hess(
-            const std::vector<InfAndTrt> & history) const = 0;
+            const std::vector<Transition> & history) const = 0;
 };
 
 class ModelFit {
 private:
     Model * const model_;
-    const std::vector<InfAndTrt> & history_;
+    const std::vector<Transition> & history_;
 
 public:
 
-    ModelFit(Model * const model, const std::vector<InfAndTrt> & history);
+    ModelFit(Model * const model, const std::vector<Transition> & history);
 
     static double obj_fn(const gsl_vector * x, void * params);
 

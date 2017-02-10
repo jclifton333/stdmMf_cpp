@@ -33,21 +33,28 @@ namespace ba = boost::accumulators;
 using namespace stdmMf;
 
 
-std::vector<InfAndTrt> obs_to_bitset_vector(
+std::vector<Transition> obs_to_bitset_vector(
         const Observation & obs) {
-    std::vector<InfAndTrt> bitset_vector;
-    for (uint32_t i = 0; i < obs.state_size(); ++i) {
-        const boost::dynamic_bitset<> inf_bits(obs.state(i).inf_bits());
-        const boost::dynamic_bitset<> trt_bits(obs.state(i).trt_bits());
+    CHECK_GT(obs.transition_size(), 0);
 
-        bitset_vector.emplace_back(inf_bits, trt_bits);
+    std::vector<Transition> bitset_vector;
+
+    for (uint32_t i = 0; i < obs.transition_size(); ++i) {
+        const boost::dynamic_bitset<> curr_inf_bits(
+                obs.transition(i).curr_inf_bits());
+        const boost::dynamic_bitset<> curr_trt_bits(
+                obs.transition(i).curr_trt_bits());
+        const boost::dynamic_bitset<> next_inf_bits(
+                obs.transition(i).next_inf_bits());
+
+        bitset_vector.emplace_back(curr_inf_bits, curr_trt_bits, next_inf_bits);
     }
 
     return bitset_vector;
 }
 
 std::vector<double> get_null_distribution(
-        const std::vector<InfAndTrt> & eval_history,
+        const std::vector<Transition> & eval_history,
         const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod) {
     System s(net, mod);
@@ -56,28 +63,22 @@ std::vector<double> get_null_distribution(
     std::vector<double> null_dist;
     for (uint32_t rep = 0; rep < num_reps; ++rep) {
 
-        double ll_total = 0.0;
+        std::vector<Transition> sim_eval_history;
 
         for (uint32_t t = 0; t < eval_history.size(); ++t) {
-            s.inf_bits(eval_history.at(t).inf_bits);
-            s.trt_bits(eval_history.at(t).trt_bits);
+            s.inf_bits(eval_history.at(t).curr_inf_bits);
+            s.trt_bits(eval_history.at(t).curr_trt_bits);
 
             // sim under dynamics mod
             s.turn_clock();
 
-            std::vector<InfAndTrt> sim_eval_history;
-            // starting point
-            sim_eval_history.emplace_back(eval_history.at(t).inf_bits,
-                    eval_history.at(t).trt_bits);
+            // transition
+            sim_eval_history.emplace_back(eval_history.at(t).curr_inf_bits,
+                    eval_history.at(t).curr_trt_bits, s.inf_bits());
 
-            // point after sim
-            sim_eval_history.emplace_back(s.inf_bits(),
-                    boost::dynamic_bitset<>(net->size()));
-
-            ll_total += mod->ll(sim_eval_history);
         }
 
-        null_dist.push_back(ll_total / eval_history.size());
+        null_dist.push_back(mod->ll(sim_eval_history));
     }
 
     std::sort(null_dist.begin(), null_dist.end());
@@ -221,13 +222,13 @@ int main(int argc, char *argv[]) {
             const Observation * obs(&sd.rep(rep));
 
             auto fn = [=,&vals,&mtx,&num_left,&cv] () {
-                const std::vector<InfAndTrt> history =
+                const std::vector<Transition> history =
                     obs_to_bitset_vector(*obs);
                 // const std::vector<InfAndTrt> history =
                 //     obs_to_bitset_vector(obs);
 
                 // history for fitting model
-                std::vector<InfAndTrt> fit_history(history.begin(),
+                std::vector<Transition> fit_history(history.begin(),
                         history.begin() + num_points_for_fit);
                 CHECK_EQ(fit_history.size(), num_points_for_fit);
 
@@ -236,24 +237,22 @@ int main(int argc, char *argv[]) {
                 mod_agent_2->est_par(fit_history);
 
                 // observed data for evaluation
-                std::vector<InfAndTrt> eval_history(
-                        history.begin() + num_points_for_fit - 1,
+                std::vector<Transition> eval_history(
+                        history.begin() + num_points_for_fit,
                         history.begin() + num_points_for_fit
-                        + num_points_for_eval - 1);
+                        + num_points_for_eval);
                 CHECK_EQ(eval_history.size(), num_points_for_eval);
 
                 // check tail and head of fit and eval
-                CHECK_EQ(fit_history.at(num_points_for_fit - 1).inf_bits,
-                        eval_history.at(0).inf_bits);
-                CHECK_EQ(fit_history.at(num_points_for_fit - 1).trt_bits,
-                        eval_history.at(0).trt_bits);
+                CHECK_EQ(fit_history.at(num_points_for_fit - 1).next_inf_bits,
+                        eval_history.at(0).curr_inf_bits);
 
                 const double obs_statistic = mod_agent_2->ll(eval_history);
 
                 // history for null
-                std::vector<InfAndTrt> null_history(eval_history.begin(),
-                        eval_history.end() - 1);
-                CHECK_EQ(null_history.size(), num_points_for_eval - 1);
+                std::vector<Transition> null_history(eval_history.begin(),
+                        eval_history.end());
+                CHECK_EQ(null_history.size(), num_points_for_eval);
 
                 // get null distribution
                 std::vector<double> null_distribution = get_null_distribution(

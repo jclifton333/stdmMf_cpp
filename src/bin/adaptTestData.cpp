@@ -54,34 +54,29 @@ void run(const std::shared_ptr<Network> & net,
 
     s_orig.start();
     for (uint32_t t = 0; t < num_points; ++t) {
-        State * state = obs->add_state();
+        TransitionPB * transition = obs->add_transition();
 
         // starting infection
         boost::to_string(s_orig.inf_bits(), bits_str);
-        state->set_inf_bits(bits_str);
+        transition->set_curr_inf_bits(bits_str);
 
         const boost::dynamic_bitset<> trt_bits = vmax_agent.apply_trt(
                 s_orig.inf_bits(), s_orig.history());
 
         // treatment
         boost::to_string(trt_bits, bits_str);
-        state->set_trt_bits(bits_str);
+        transition->set_curr_trt_bits(bits_str);
 
         CHECK_EQ(trt_bits.count(), vmax_agent.num_trt());
 
         s_orig.trt_bits(trt_bits);
 
         s_orig.turn_clock();
+
+        // starting infection
+        boost::to_string(s_orig.inf_bits(), bits_str);
+        transition->set_next_inf_bits(bits_str);
     }
-
-    // final infection
-    State * state = obs->add_state();
-
-    boost::to_string(s_orig.inf_bits(), bits_str);
-    state->set_inf_bits(bits_str);
-
-    boost::to_string(s_orig.trt_bits(), bits_str);
-    state->set_trt_bits(bits_str);
 }
 
 

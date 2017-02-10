@@ -51,8 +51,8 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         return a.apply_trt(inf_bits, history);
     }
 
-    std::vector<InfAndTrt> all_history = history;
-    all_history.push_back(InfAndTrt(inf_bits, boost::dynamic_bitset<>()));
+    std::vector<Transition> all_history(
+            Transition::from_sequence(history, inf_bits));
 
     auto f = [&](const std::vector<double> & par, void * const data) {
         SweepAgent a(this->network_, this->features_, par, 2, false);

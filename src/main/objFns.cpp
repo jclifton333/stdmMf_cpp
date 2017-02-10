@@ -24,7 +24,7 @@ double runner(System * system, Agent * agent, const uint32_t & final_time,
     return value;
 }
 
-double bellman_residual_sq(const std::vector<InfAndTrt> & history,
+double bellman_residual_sq(const std::vector<Transition> & history,
         Agent * const agent,
         const double gamma,
         const std::function<double(const boost::dynamic_bitset<> & inf_bits,
@@ -40,7 +40,7 @@ double bellman_residual_sq(const std::vector<InfAndTrt> & history,
 }
 
 std::vector<std::pair<double, double> > bellman_residual_parts(
-        const std::vector<InfAndTrt> & history, Agent * const agent,
+        const std::vector<Transition> & history, Agent * const agent,
         const double gamma, const std::function<double(
                 const boost::dynamic_bitset<> & inf_bits,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
@@ -49,21 +49,25 @@ std::vector<std::pair<double, double> > bellman_residual_parts(
     CHECK_GT(size, 1) << "need at least 2 points";
 
     std::vector<std::pair<double, double> > parts;
-    for (uint32_t i = 0; i < (size - 1); ++i) {
-        const InfAndTrt & bp_curr = history.at(i);
-        const InfAndTrt & bp_next = history.at(i+1);
+    for (uint32_t i = 0; i < size; ++i) {
+        const Transition & transition = history.at(i);
 
-        const double r = static_cast<double>(bp_next.inf_bits.count())
-            / static_cast<double>(bp_next.inf_bits.size());
+        // R
+        const double r = static_cast<double>(transition.next_inf_bits.count())
+            / static_cast<double>(transition.next_inf_bits.size());
 
+        // Q(S, A)
+        const double q_curr = q_fn(transition.curr_inf_bits,
+                transition.curr_trt_bits);
+
+        // Q(S', pi(S'))
         const boost::dynamic_bitset<> agent_trt =
-            agent->apply_trt(bp_curr.inf_bits);
+            agent->apply_trt(transition.next_inf_bits);
+        const double q_next = q_fn(transition.next_inf_bits, agent_trt);
 
-        const double q_curr = q_fn(bp_curr.inf_bits, bp_curr.trt_bits);
-        const double q_next = q_fn(bp_next.inf_bits, agent_trt);
-
-
+        // R + gamma * Q(S', pi(S') - Q(S, A)
         const double br = r + gamma * q_next - q_curr;
+
         parts.push_back(std::pair<double,double>(r, gamma * q_next - q_curr));
     }
     return parts;

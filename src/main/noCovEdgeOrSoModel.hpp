@@ -87,10 +87,10 @@ public:
             const boost::dynamic_bitset<> & trt_status) const;
 
     virtual std::vector<double> ll_grad(
-            const std::vector<InfAndTrt> & history) const;
+            const std::vector<Transition> & history) const;
 
     virtual std::vector<double> ll_hess(
-            const std::vector<InfAndTrt> & history) const;
+            const std::vector<Transition> & history) const;
 };
 
 

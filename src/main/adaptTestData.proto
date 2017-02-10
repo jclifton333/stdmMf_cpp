@@ -2,14 +2,15 @@ syntax = "proto2";
 
 package stdmMf;
 
-message State {
-  optional string inf_bits = 1;
-  optional string trt_bits = 2;
+message TransitionPB {
+  optional string curr_inf_bits = 1;
+  optional string curr_trt_bits = 2;
+  optional string next_inf_bits = 3;
 }
 
 message Observation {
   optional uint32 num_points = 1;
-  repeated State state = 2;
+  repeated TransitionPB transition = 2;
 }
 
 message SimData {

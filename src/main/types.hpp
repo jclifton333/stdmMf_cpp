@@ -25,6 +25,9 @@ struct Transition {
 
     static std::vector<Transition> from_sequence(
             const std::vector<InfAndTrt> & sequence);
+    static std::vector<Transition> from_sequence(
+            const std::vector<InfAndTrt> & sequence,
+            const boost::dynamic_bitset<> & final_inf);
 };
 
 

@@ -83,9 +83,8 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
     }
 
 
-    std::vector<InfAndTrt> all_history(history);
-    all_history.push_back(InfAndTrt(inf_bits,
-                    boost::dynamic_bitset<>(this->network_->size())));
+    const std::vector<Transition> all_history(
+            Transition::from_sequence(history, inf_bits));
 
     // estimate model
     this->model_->est_par(all_history);

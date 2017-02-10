@@ -72,7 +72,8 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         s.turn_clock();
     }
 
-    const std::vector<InfAndTrt> history(s.history());
+    const std::vector<Transition> history(
+            Transition::from_sequence(s.history(), s.inf_bits()));
 
 
     auto min_fn = [&](const std::vector<double> & par,
