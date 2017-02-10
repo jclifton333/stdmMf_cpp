@@ -79,8 +79,9 @@ void Model::est_par(const std::vector<BitsetPair> & history) {
 
 
 double Model::ll(const std::vector<BitsetPair> & history) const {
-    double ll_value = 0.0;
     const uint32_t history_size = history.size();
+    CHECK_GE(history_size, 2);
+    double ll_value = 0.0;
     for (uint32_t i = 0; i < (history_size - 1); ++i) {
         const BitsetPair & curr_history = history.at(i);
         const boost::dynamic_bitset<> & curr_inf = curr_history.first;
