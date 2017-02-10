@@ -24,6 +24,8 @@ protected:
     bool joined_;
 
 public:
+    Pool();
+
     Pool(const uint32_t & num_threads);
 
     Pool(const Pool & other);

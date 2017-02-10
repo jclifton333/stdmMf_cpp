@@ -1,11 +1,17 @@
 #include "pool.hpp"
 
+#include <thread>
+
 namespace stdmMf {
 
 void Pool::worker_job() {
     this->service_->run();
 }
 
+
+Pool::Pool()
+    : Pool(std::max(std::thread::hardware_concurrency(), 1u)) {
+}
 
 Pool::Pool(const uint32_t & num_threads)
     : num_threads_(num_threads), service_(new boost::asio::io_service),
