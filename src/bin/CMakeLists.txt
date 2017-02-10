@@ -17,6 +17,7 @@ SET(bin_file_names
   run
   adaptTestData
   adaptTestLikelihood
+  adaptTestMaxLikelihood
   sandbox)
 
 foreach(bin_file ${bin_file_names})
