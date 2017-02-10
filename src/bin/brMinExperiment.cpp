@@ -16,6 +16,12 @@
 #include "simPerturb.hpp"
 #include "experiment.hpp"
 #include "utilities.hpp"
+
+
+#include "trapperKeeper.hpp"
+#include "projectInfo.hpp"
+#include "progress.hpp"
+
 using namespace stdmMf;
 
 
@@ -200,8 +206,12 @@ int main(int argc, char *argv[]) {
     std::vector<uint32_t> factors_level;
     std::vector<uint32_t> rep_number;
 
+    std::shared_ptr<Progress<std::ostream> > progress(
+            new Progress<std::ostream>(&std::cout));
+
     e.start();
     uint32_t level_num = 0;
+    uint32_t num_jobs = 0;
     do {
         const Experiment::Factor f = e.get();
 
@@ -227,31 +237,38 @@ int main(int argc, char *argv[]) {
             factors.push_back(f);
             rep_number.push_back(rep);
             factors_level.push_back(level_num);
-            p.service()->post(std::bind(&run_brmin, r, rep, c, t, a, b,
-                            ell, min_step_size));
+            p.service()->post([=]() {
+                        run_brmin(r, rep, c, t, a, b, ell, min_step_size);
+                        progress->update();
+                    });
+
+            ++num_jobs;
         }
 
         ++level_num;
     } while (e.next());
 
+    progress->total(num_jobs);
+
     p.join();
+    progress->done();
 
     CHECK_EQ(factors.size(), results.size());
     CHECK_EQ(factors.size(), factors_level.size());
     CHECK_EQ(factors.size(), rep_number.size());
-    std::ofstream out;
-    out.open("brMinExperiment_results.txt");
-    out << "level_num, rep_num, elapsed, value, c, t, a, b, ell, "
-        << "min_step_size\n";
+    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
+    Entry & entry = tk.entry("brMinExperiment_results.txt");
+    entry << "level_num, rep_num, elapsed, value, c, t, a, b, ell, "
+          << "min_step_size\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
-        out << factors_level.at(i) << ", " << rep_number.at(i) << ", "
-            << result_i.first << ", " << result_i.second;
+        entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
+              << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);
         for (uint32_t j = 0; j < f.size(); ++j) {
-            out << ", " << f.at(j);
+            entry << ", " << f.at(j);
         }
-        out << "\n";
+        entry << "\n";
     }
 
     return 0;
