@@ -12,7 +12,7 @@ void Model::est_par(const std::vector<InfAndTrt> & history,
 }
 
 void Model::est_par(const std::vector<Transition> & history) {
-    CHECK_GT(history.size(), 1);
+    CHECK_GE(history.size(), 1);
 
     // create fit object
     ModelFit mf(this, history);
