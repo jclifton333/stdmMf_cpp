@@ -25,6 +25,9 @@ namespace ba = boost::accumulators;
 #include <iostream>
 #include <fstream>
 
+#include <mutex>
+#include <condition_variable>
+
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/text_format.h>
 
