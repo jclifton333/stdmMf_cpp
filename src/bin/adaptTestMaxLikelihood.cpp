@@ -56,8 +56,8 @@ std::vector<double> get_null_distribution(
     std::vector<double> null_dist;
     for (uint32_t rep = 0; rep < num_reps; ++rep) {
 
-        double ll_total = 0.0;
-
+        std::vector<std::pair<BitsetPair,
+                              boost::dynamic_bitset<> > > transitions;
         for (uint32_t t = 0; t < eval_history.size(); ++t) {
             s.inf_bits(eval_history.at(t).first);
             s.trt_bits(eval_history.at(t).second);
@@ -65,19 +65,11 @@ std::vector<double> get_null_distribution(
             // sim under dynamics mod
             s.turn_clock();
 
-            std::vector<BitsetPair> sim_eval_history;
-            // starting point
-            sim_eval_history.emplace_back(eval_history.at(t).first,
-                    eval_history.at(t).second);
-
-            // point after sim
-            sim_eval_history.emplace_back(s.inf_bits(),
-                    boost::dynamic_bitset<>(net->size()));
-
-            ll_total += mod->ll(sim_eval_history);
+            transitions.emplace_back(eval_history.at(t), s.inf_bits());
         }
 
-        null_dist.push_back(ll_total / eval_history.size());
+        mod->est_par(transitions);
+        null_dist.push_back(mod->ll(transitions));
     }
 
     std::sort(null_dist.begin(), null_dist.end());
@@ -193,21 +185,11 @@ int main(int argc, char *argv[]) {
 
     Pool pool;
 
-    const uint32_t num_points_for_fit = 5;
-    const uint32_t num_points_for_eval = 20;
+    const uint32_t num_points_for_fit = 20;
+    const uint32_t num_skip = 0;
 
     for (uint32_t sim = 0; sim < ad.sim_size(); ++sim) {
         const SimData & sd = ad.sim(sim);
-
-        std::shared_ptr<Network> net(get_network(sd.network()));
-
-        std::regex model_regex("^model_([a-zA-Z]*)_([a-zA-Z]*)$");
-        std::smatch model_match;
-        std::regex_search(sd.model(), model_match, model_regex);
-
-        // std::shared_ptr<Model> mod_system(get_model(model_match.str(1), net));
-        std::shared_ptr<Model> mod_agent(get_model(model_match.str(2), net));
-
 
         ba::accumulator_set<double, ba::stats<
             ba::tag::mean, ba::tag::variance> > vals;
@@ -221,43 +203,46 @@ int main(int argc, char *argv[]) {
             const Observation * obs(&sd.rep(rep));
 
             auto fn = [=,&vals,&mtx,&num_left,&cv] () {
+                // get network
+                std::shared_ptr<Network> net(get_network(sd.network()));
+
+                // get model
+                std::regex model_regex("^model_([a-zA-Z]*)_([a-zA-Z]*)$");
+                std::smatch model_match;
+                std::regex_search(sd.model(), model_match, model_regex);
+
+                std::shared_ptr<Model> mod_agent(
+                        get_model(model_match.str(2), net));
+
+                // convert observation to history
                 const std::vector<BitsetPair> history =
                     obs_to_bitset_vector(*obs);
                 // const std::vector<BitsetPair> history =
                 //     obs_to_bitset_vector(obs);
 
+                ////////////////////
+                // observed data
+
                 // history for fitting model
-                std::vector<BitsetPair> fit_history(history.begin(),
-                        history.begin() + num_points_for_fit);
+                std::vector<BitsetPair> fit_history(history.begin() + num_skip,
+                        history.begin() + num_points_for_fit + num_skip);
                 CHECK_EQ(fit_history.size(), num_points_for_fit);
 
                 // fit model
-                std::shared_ptr<Model> mod_agent_2 = mod_agent->clone();
-                mod_agent_2->est_par(fit_history);
+                mod_agent->est_par(fit_history);
+                const double obs_statistic = mod_agent->ll(fit_history);
+
+                ////////////////////
+                // simulated data
 
                 // observed data for evaluation
                 std::vector<BitsetPair> eval_history(
-                        history.begin() + num_points_for_fit - 1,
-                        history.begin() + num_points_for_fit
-                        + num_points_for_eval - 1);
-                CHECK_EQ(eval_history.size(), num_points_for_eval);
-
-                // check tail and head of fit and eval
-                CHECK_EQ(fit_history.at(num_points_for_fit - 1).first,
-                        eval_history.at(0).first);
-                CHECK_EQ(fit_history.at(num_points_for_fit - 1).second,
-                        eval_history.at(0).second);
-
-                const double obs_statistic = mod_agent_2->ll(eval_history);
-
-                // history for null
-                std::vector<BitsetPair> null_history(eval_history.begin(),
-                        eval_history.end() - 1);
-                CHECK_EQ(null_history.size(), num_points_for_eval - 1);
+                        fit_history.begin(), fit_history.end() - 1);
+                CHECK_EQ(eval_history.size(), num_points_for_fit - 1);
 
                 // get null distribution
                 std::vector<double> null_distribution = get_null_distribution(
-                        null_history, net, mod_agent_2);
+                        eval_history, net, mod_agent);
 
                 // position of observed value in null distribution
                 const std::vector<double>::iterator lb_it =
