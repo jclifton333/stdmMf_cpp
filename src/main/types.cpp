@@ -33,8 +33,11 @@ std::vector<Transition> Transition::from_sequence(
 std::vector<Transition> Transition::from_sequence(
         const std::vector<InfAndTrt> & sequence,
         const boost::dynamic_bitset<> & final_inf) {
-    CHECK_GT(sequence.size(), 1);
-    std::vector<Transition> transitions(Transition::from_sequence(sequence));
+    CHECK_GE(sequence.size(), 1);
+    std::vector<Transition> transitions;
+    if (sequence.size() > 1) {
+        transitions = Transition::from_sequence(sequence);
+    }
     const uint32_t sequence_size = sequence.size();
     transitions.emplace_back(sequence.at(sequence_size - 1).inf_bits,
             sequence.at(sequence_size - 1).trt_bits, final_inf);
