@@ -74,6 +74,47 @@ TEST(TestNoCovEdgeSepSoModel, TestPar) {
 }
 
 
+TEST(TestNoCovEdgeModel, TestLL) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(3);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    std::shared_ptr<Model> m(new NoCovEdgeSepSoModel(n));
+
+    System s(n, m);
+
+    RandomAgent ra(n);
+    for (uint32_t i = 0; i < 100; ++i) {
+        const boost::dynamic_bitset<> trt_bits =
+            ra.apply_trt(s.inf_bits(), s.history());
+
+        s.trt_bits(trt_bits);
+
+        s.turn_clock();
+    }
+
+    std::vector<BitsetPair> all_history(s.history());
+    all_history.push_back(BitsetPair(s.inf_bits(),
+                    boost::dynamic_bitset<>(n->size())));
+
+    std::vector<std::pair<BitsetPair, boost::dynamic_bitset<> > >
+        all_transitions;
+
+    for (uint32_t i = 0; i < (all_history.size() - 1); ++i) {
+        all_transitions.emplace_back(
+                all_history.at(i), all_history.at(i + 1).first);
+    }
+
+    EXPECT_EQ(m->ll(all_history), m->ll(all_transitions));
+}
+
+
+
 TEST(TestNoCovEdgeSepSoModel,TestLLGradient) {
     // generate network
     NetworkInit init;

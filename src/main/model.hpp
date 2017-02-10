@@ -30,6 +30,9 @@ public:
 
     virtual double ll(const std::vector<BitsetPair> & history) const;
 
+    virtual double ll(const std::vector<std::pair<BitsetPair,
+            boost::dynamic_bitset<> > > & history) const;
+
     virtual std::vector<double> ll_grad(
             const std::vector<BitsetPair> & history) const = 0;
 
