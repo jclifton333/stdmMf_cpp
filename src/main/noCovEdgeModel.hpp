@@ -69,10 +69,10 @@ public:
             const boost::dynamic_bitset<> & trt_status) const;
 
     virtual std::vector<double> ll_grad(
-            const std::vector<BitsetPair> & history) const;
+            const std::vector<InfAndTrt> & history) const;
 
     virtual std::vector<double> ll_hess(
-            const std::vector<BitsetPair> & history) const;
+            const std::vector<InfAndTrt> & history) const;
 };
 
 

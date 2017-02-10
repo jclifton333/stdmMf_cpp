@@ -17,7 +17,7 @@ std::shared_ptr<Agent> ProximalAgent::clone() const {
 
 boost::dynamic_bitset<> ProximalAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<BitsetPair> & history) {
+        const std::vector<InfAndTrt> & history) {
     return this->apply_trt(inf_bits);
 }
 

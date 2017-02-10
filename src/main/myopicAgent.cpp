@@ -28,7 +28,7 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
 
 boost::dynamic_bitset<> MyopicAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<BitsetPair> & history) {
+        const std::vector<InfAndTrt> & history) {
     boost::dynamic_bitset<> trt_bits(this->network_->size());
     if (history.size() < 1) {
         // not enough data to estimate a model

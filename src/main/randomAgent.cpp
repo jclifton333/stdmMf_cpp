@@ -18,7 +18,7 @@ std::shared_ptr<Agent> RandomAgent::clone() const {
 
 boost::dynamic_bitset<> RandomAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<BitsetPair> & history) {
+        const std::vector<InfAndTrt> & history) {
     return this->apply_trt(inf_bits);
 }
 

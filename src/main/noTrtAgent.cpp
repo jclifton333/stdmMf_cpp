@@ -17,7 +17,7 @@ std::shared_ptr<Agent> NoTrtAgent::clone() const {
 
 boost::dynamic_bitset<> NoTrtAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<BitsetPair> & history) {
+        const std::vector<InfAndTrt> & history) {
     return boost::dynamic_bitset<> (this->num_nodes_);
 }
 

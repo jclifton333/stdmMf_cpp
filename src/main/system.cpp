@@ -67,7 +67,7 @@ void System::trt_bits(const boost::dynamic_bitset<> & trt_bits) {
     this->trt_bits_ = trt_bits;
 }
 
-const std::vector<BitsetPair> & System::history() const {
+const std::vector<InfAndTrt> & System::history() const {
     return this->history_;
 }
 
@@ -88,7 +88,7 @@ void System::start() {
 
 void System::update_history() {
     this->history_.push_back(
-            BitsetPair(this->inf_bits_, this->trt_bits_));
+            InfAndTrt(this->inf_bits_, this->trt_bits_));
 }
 
 void System::turn_clock() {

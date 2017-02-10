@@ -103,21 +103,21 @@ std::vector<double> NoCovEdgeSepSoModel::probs(
 
 
 std::vector<double> NoCovEdgeSepSoModel::ll_grad(
-        const std::vector<BitsetPair> & history) const {
+        const std::vector<InfAndTrt> & history) const {
     std::vector<double> grad_value (this->par_size_, 0.0);
     const uint32_t history_size = history.size();
     for (uint32_t i = 0; i < (history_size - 1); ++i) {
         // current infection and treatments
-        const BitsetPair & curr_history = history.at(i);
-        const boost::dynamic_bitset<> curr_inf = curr_history.first;
-        const boost::dynamic_bitset<> curr_trt = curr_history.second;
+        const InfAndTrt & curr_history = history.at(i);
+        const boost::dynamic_bitset<> & curr_inf = curr_history.inf_bits;
+        const boost::dynamic_bitset<> & curr_trt = curr_history.trt_bits;;
         const std::vector<uint32_t> inf_and_trt =
             combine_sets(curr_inf, curr_trt);
 
         // infection probabilities
         const std::vector<double> probs = this->probs(curr_inf, curr_trt);
 
-        const boost::dynamic_bitset<> next_inf = history.at(i + 1).first;
+        const boost::dynamic_bitset<> & next_inf = history.at(i + 1).inf_bits;
 
         // get bits for changes in infection
         const boost::dynamic_bitset<> change_inf = curr_inf ^ next_inf;
@@ -209,22 +209,22 @@ std::vector<double> NoCovEdgeSepSoModel::ll_grad(
 
 
 std::vector<double> NoCovEdgeSepSoModel::ll_hess(
-        const std::vector<BitsetPair> & history) const {
+        const std::vector<InfAndTrt> & history) const {
     std::vector<double> hess_val(this->par_size_ * this->par_size_, 0.);
 
     const uint32_t history_size = history.size();
     for (uint32_t i = 0; i < (history_size - 1); ++i) {
         // current infection and treatments
-        const BitsetPair & curr_history = history.at(i);
-        const boost::dynamic_bitset<> curr_inf = curr_history.first;
-        const boost::dynamic_bitset<> curr_trt = curr_history.second;
+        const InfAndTrt & curr_history = history.at(i);
+        const boost::dynamic_bitset<> & curr_inf = curr_history.inf_bits;
+        const boost::dynamic_bitset<> & curr_trt = curr_history.trt_bits;
         const std::vector<uint32_t> inf_and_trt =
             combine_sets(curr_inf, curr_trt);
 
         // infection probabilities
         const std::vector<double> probs = this->probs(curr_inf, curr_trt);
 
-        const boost::dynamic_bitset<> next_inf = history.at(i + 1).first;
+        const boost::dynamic_bitset<> & next_inf = history.at(i + 1).inf_bits;
 
         // get bits for changes in infection
         const boost::dynamic_bitset<> change_inf = curr_inf ^ next_inf;

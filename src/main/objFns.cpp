@@ -24,7 +24,7 @@ double runner(System * system, Agent * agent, const uint32_t & final_time,
     return value;
 }
 
-double bellman_residual_sq(const std::vector<BitsetPair> & history,
+double bellman_residual_sq(const std::vector<InfAndTrt> & history,
         Agent * const agent,
         const double gamma,
         const std::function<double(const boost::dynamic_bitset<> & inf_bits,
@@ -40,7 +40,7 @@ double bellman_residual_sq(const std::vector<BitsetPair> & history,
 }
 
 std::vector<std::pair<double, double> > bellman_residual_parts(
-        const std::vector<BitsetPair> & history, Agent * const agent,
+        const std::vector<InfAndTrt> & history, Agent * const agent,
         const double gamma, const std::function<double(
                 const boost::dynamic_bitset<> & inf_bits,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
@@ -50,17 +50,17 @@ std::vector<std::pair<double, double> > bellman_residual_parts(
 
     std::vector<std::pair<double, double> > parts;
     for (uint32_t i = 0; i < (size - 1); ++i) {
-        const BitsetPair & bp_curr = history.at(i);
-        const BitsetPair & bp_next = history.at(i+1);
+        const InfAndTrt & bp_curr = history.at(i);
+        const InfAndTrt & bp_next = history.at(i+1);
 
-        const double r = static_cast<double>(bp_next.first.count())
-            / static_cast<double>(bp_next.first.size());
+        const double r = static_cast<double>(bp_next.inf_bits.count())
+            / static_cast<double>(bp_next.inf_bits.size());
 
         const boost::dynamic_bitset<> agent_trt =
-            agent->apply_trt(bp_curr.first);
+            agent->apply_trt(bp_curr.inf_bits);
 
-        const double q_curr = q_fn(bp_curr.first, bp_curr.second);
-        const double q_next = q_fn(bp_next.first, agent_trt);
+        const double q_curr = q_fn(bp_curr.inf_bits, bp_curr.trt_bits);
+        const double q_next = q_fn(bp_next.inf_bits, agent_trt);
 
 
         const double br = r + gamma * q_next - q_curr;

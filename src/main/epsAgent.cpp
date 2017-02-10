@@ -30,7 +30,7 @@ boost::dynamic_bitset<> EpsAgent::apply_trt(
 
 boost::dynamic_bitset<> EpsAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<BitsetPair> & history) {
+        const std::vector<InfAndTrt> & history) {
     if (this->rng->runif_01() < this->eps_) {
         return this->eps_agent_->apply_trt(inf_bits, history);
     } else {

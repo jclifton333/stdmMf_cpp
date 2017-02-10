@@ -17,7 +17,7 @@ class GradientChecker {
 public:
     Model * m;
     int wiggle_var;
-    std::vector<BitsetPair> * history;
+    std::vector<InfAndTrt> * history;
     std::vector<double> par;
 };
 
@@ -26,7 +26,7 @@ public:
     Model * m;
     int wiggle_var;
     int gradient_var;
-    std::vector<BitsetPair> * history;
+    std::vector<InfAndTrt> * history;
     std::vector<double> par;
 };
 
@@ -98,17 +98,12 @@ TEST(TestNoCovEdgeModel, TestLL) {
         s.turn_clock();
     }
 
-    std::vector<BitsetPair> all_history(s.history());
-    all_history.push_back(BitsetPair(s.inf_bits(),
+    std::vector<InfAndTrt> all_history(s.history());
+    all_history.push_back(InfAndTrt(s.inf_bits(),
                     boost::dynamic_bitset<>(n->size())));
 
-    std::vector<std::pair<BitsetPair, boost::dynamic_bitset<> > >
-        all_transitions;
-
-    for (uint32_t i = 0; i < (all_history.size() - 1); ++i) {
-        all_transitions.emplace_back(
-                all_history.at(i), all_history.at(i + 1).first);
-    }
+    std::vector<Transition> all_transitions(
+            Transition::from_sequence(all_history));
 
     EXPECT_EQ(m->ll(all_history), m->ll(all_transitions));
 }
@@ -143,8 +138,8 @@ TEST(TestNoCovEdgeXorSoModel,TestLLGradient) {
 
     runner(&s, &a, 50, 1.0);
 
-    std::vector<BitsetPair> history = s.history();
-    history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
+    std::vector<InfAndTrt> history = s.history();
+    history.push_back(InfAndTrt(s.inf_bits(), s.trt_bits()));
 
 
     // generate new parameters so gradient is not zero
@@ -205,8 +200,8 @@ TEST(TestNoCovEdgeXorSoModel,TestLLHessian) {
 
     runner(&s, &a, 3, 1.0);
 
-    std::vector<BitsetPair> history = s.history();
-    history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
+    std::vector<InfAndTrt> history = s.history();
+    history.push_back(InfAndTrt(s.inf_bits(), s.trt_bits()));
 
 
     // generate new parameters so gradient is not zero
@@ -269,8 +264,8 @@ TEST(TestNoCovEdgeXorSoModel, EstPar) {
 
     runner(&s, &ea, 100, 1.0);
 
-    std::vector<BitsetPair> history = s.history();
-    history.push_back(BitsetPair(s.inf_bits(), s.trt_bits()));
+    std::vector<InfAndTrt> history = s.history();
+    history.push_back(InfAndTrt(s.inf_bits(), s.trt_bits()));
 
     // scale paramters
     std::vector<double> start_par = par;

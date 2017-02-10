@@ -22,7 +22,7 @@ public:
 
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits,
-            const std::vector<BitsetPair> & history);
+            const std::vector<InfAndTrt> & history);
 
     virtual boost::dynamic_bitset<> apply_trt(
             const boost::dynamic_bitset<> & inf_bits);

@@ -22,7 +22,7 @@ private:
     boost::dynamic_bitset<> inf_bits_;
     boost::dynamic_bitset<> trt_bits_;
 
-    std::vector<BitsetPair> history_;
+    std::vector<InfAndTrt> history_;
 
     uint32_t time_;
 
@@ -56,7 +56,7 @@ public:
 
     void trt_bits(const boost::dynamic_bitset<> & trt_bits);
 
-    const std::vector<BitsetPair> & history() const;
+    const std::vector<InfAndTrt> & history() const;
 
     void start();
 

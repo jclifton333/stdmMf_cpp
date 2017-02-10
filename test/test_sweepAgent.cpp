@@ -87,7 +87,7 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
         std::string sweep_bits;
         {
             const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits,
-                    std::vector<BitsetPair>());
+                    std::vector<InfAndTrt>());
             boost::to_string(trt_bits, sweep_bits);
 
             const std::vector<double> f = nrf->get_features(inf_bits, trt_bits);

@@ -21,7 +21,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp
+add_library(stdmMf network.cpp random.cpp system.cpp utilities.cpp types.cpp
 
   ## models
   model.cpp noCovEdgeModel.cpp noCovEdgeOrSoModel.cpp noCovEdgeXorSoModel.cpp

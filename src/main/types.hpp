@@ -6,9 +6,26 @@
 
 namespace stdmMf {
 
+struct InfAndTrt {
+    boost::dynamic_bitset<> inf_bits;
+    boost::dynamic_bitset<> trt_bits;
 
-using BitsetPair = std::pair<boost::dynamic_bitset<>,
-                             boost::dynamic_bitset<> >;
+    InfAndTrt(const boost::dynamic_bitset<> & inf_bits,
+            const boost::dynamic_bitset<> & trt_bits);
+};
+
+struct Transition {
+    boost::dynamic_bitset<> curr_inf_bits;
+    boost::dynamic_bitset<> curr_trt_bits;
+    boost::dynamic_bitset<> next_inf_bits;
+
+    Transition(const boost::dynamic_bitset<> & curr_inf_bits,
+            const boost::dynamic_bitset<> & curr_trt_bits,
+            const boost::dynamic_bitset<> & next_inf_bits);
+
+    static std::vector<Transition> from_sequence(
+            const std::vector<InfAndTrt> & sequence);
+};
 
 
 } // namespace stdmMf

@@ -33,9 +33,9 @@ namespace ba = boost::accumulators;
 using namespace stdmMf;
 
 
-std::vector<BitsetPair> obs_to_bitset_vector(
+std::vector<InfAndTrt> obs_to_bitset_vector(
         const Observation & obs) {
-    std::vector<BitsetPair> bitset_vector;
+    std::vector<InfAndTrt> bitset_vector;
     for (uint32_t i = 0; i < obs.state_size(); ++i) {
         const boost::dynamic_bitset<> inf_bits(obs.state(i).inf_bits());
         const boost::dynamic_bitset<> trt_bits(obs.state(i).trt_bits());
@@ -47,7 +47,7 @@ std::vector<BitsetPair> obs_to_bitset_vector(
 }
 
 std::vector<double> get_null_distribution(
-        const std::vector<BitsetPair> & eval_history,
+        const std::vector<InfAndTrt> & eval_history,
         const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod) {
     System s(net, mod);
@@ -56,7 +56,7 @@ std::vector<double> get_null_distribution(
     std::vector<double> null_dist;
     for (uint32_t rep = 0; rep < num_reps; ++rep) {
 
-        std::vector<std::pair<BitsetPair,
+        std::vector<std::pair<InfAndTrt,
                               boost::dynamic_bitset<> > > transitions;
         for (uint32_t t = 0; t < eval_history.size(); ++t) {
             s.inf_bits(eval_history.at(t).first);
@@ -215,16 +215,16 @@ int main(int argc, char *argv[]) {
                         get_model(model_match.str(2), net));
 
                 // convert observation to history
-                const std::vector<BitsetPair> history =
+                const std::vector<InfAndTrt> history =
                     obs_to_bitset_vector(*obs);
-                // const std::vector<BitsetPair> history =
+                // const std::vector<InfAndTrt> history =
                 //     obs_to_bitset_vector(obs);
 
                 ////////////////////
                 // observed data
 
                 // history for fitting model
-                std::vector<BitsetPair> fit_history(history.begin() + num_skip,
+                std::vector<InfAndTrt> fit_history(history.begin() + num_skip,
                         history.begin() + num_points_for_fit + num_skip);
                 CHECK_EQ(fit_history.size(), num_points_for_fit);
 
@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
                 // simulated data
 
                 // observed data for evaluation
-                std::vector<BitsetPair> eval_history(
+                std::vector<InfAndTrt> eval_history(
                         fit_history.begin(), fit_history.end() - 1);
                 CHECK_EQ(eval_history.size(), num_points_for_fit - 1);
 

@@ -45,14 +45,14 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 
 boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<BitsetPair> & history) {
+        const std::vector<InfAndTrt> & history) {
     if (history.size() < 1) {
         ProximalAgent a(this->network_);
         return a.apply_trt(inf_bits, history);
     }
 
-    std::vector<BitsetPair> all_history = history;
-    all_history.push_back(BitsetPair(inf_bits, boost::dynamic_bitset<>()));
+    std::vector<InfAndTrt> all_history = history;
+    all_history.push_back(InfAndTrt(inf_bits, boost::dynamic_bitset<>()));
 
     auto f = [&](const std::vector<double> & par, void * const data) {
         SweepAgent a(this->network_, this->features_, par, 2, false);
