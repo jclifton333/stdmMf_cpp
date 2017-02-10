@@ -46,7 +46,7 @@ std::vector<std::pair<double, double> > bellman_residual_parts(
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
     const uint32_t size = history.size();
 
-    CHECK_GT(size, 1) << "need at least 2 points";
+    CHECK_GE(size, 1) << "need at least 1 transition";
 
     std::vector<std::pair<double, double> > parts;
     for (uint32_t i = 0; i < size; ++i) {
