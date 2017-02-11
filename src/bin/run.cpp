@@ -223,7 +223,7 @@ run(const std::shared_ptr<Network> & net,
                     BrMinSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunSymFeatures(net->clone(), 3)),
-                            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
+                            2e-1, 0.75, 1.41e-3, 1, 0.85, 9.130e-6);
                     a.set_seed(i);
 
                     s.start();
