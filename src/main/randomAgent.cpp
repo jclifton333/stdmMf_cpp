@@ -9,7 +9,7 @@ RandomAgent::RandomAgent(const std::shared_ptr<const Network> & network)
 }
 
 RandomAgent::RandomAgent(const RandomAgent & other)
-    : Agent(other) {
+    : Agent(other), RngClass(other) {
 }
 
 std::shared_ptr<Agent> RandomAgent::clone() const {
@@ -24,7 +24,7 @@ boost::dynamic_bitset<> RandomAgent::apply_trt(
 
 boost::dynamic_bitset<> RandomAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits) {
-    const std::vector<int> ind_to_trt = this->rng->sample_range(0,
+    const std::vector<int> ind_to_trt = this->rng_->sample_range(0,
             this->num_nodes_, this->num_trt_);
     boost::dynamic_bitset<> trt_bits(this->num_nodes_);
     for (uint32_t i = 0; i < this->num_trt_; ++i) {

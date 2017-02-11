@@ -26,7 +26,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const double & ell,
         const double & min_step_size) {
     std::shared_ptr<Rng> rng(new Rng);
-    rng->set_seed(seed);
+    rng->seed(seed);
 
     // setup network
     NetworkInit init;
@@ -49,9 +49,9 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     auto min_fn = [&](const std::vector<double> & par,
             void * const data) {
         SweepAgent agent(net, features, par, 2, true);
-        agent.set_rng(rng);
+        agent.rng(rng);
         System s(net, mod);
-        s.set_rng(rng);
+        s.rng(rng);
         double val = 0.0;
         for (uint32_t i = 0; i < num_reps; ++i) {
             s.cleanse();
@@ -70,7 +70,7 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     SimPerturb sp(min_fn, std::vector<double>(
                     features->num_features(), 0.),
             NULL, c, t, a, b, ell, min_step_size);
-    sp.set_rng(rng);
+    sp.rng(rng);
 
     Optim::ErrorCode ec;
     const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
@@ -88,9 +88,9 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     const std::vector<double> par = sp.par();
 
     SweepAgent agent(net, features, par, 2, true);
-    agent.set_rng(rng);
+    agent.rng(rng);
     System s(net, mod);
-    s.set_rng(rng);
+    s.rng(rng);
     double val = 0.0;
     for (uint32_t i = 0; i < 50; ++i) {
         s.cleanse();

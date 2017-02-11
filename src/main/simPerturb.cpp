@@ -28,7 +28,7 @@ Optim::ErrorCode SimPerturb::step() {
     std::vector<double> perturb;
     perturb.reserve(this->par_size_);
     for (uint32_t i = 0; i < this->par_size_; ++i) {
-        if (this->rng->runif_01() < 0.5)
+        if (this->rng_->runif_01() < 0.5)
             perturb.push_back(-scale);
         else
             perturb.push_back(scale);

@@ -35,12 +35,12 @@ int main(int argc, char *argv[]) {
 
     // br min
     System s(net->clone(), mod->clone());
-    s.set_seed(0);
+    s.seed(0);
     BrMinSimPerturbAgent a(net->clone(),
             std::shared_ptr<Features>(
                     new NetworkRunFeatures(net->clone(), 4)),
             1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
-    a.set_seed(0);
+    a.seed(0);
 
     s.start();
 

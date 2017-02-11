@@ -34,19 +34,19 @@ void run(const std::shared_ptr<Network> & net,
         const uint32_t & num_points,
         Observation * const obs) {
     std::shared_ptr<Rng> rng(new Rng);
-    rng->set_seed(rep);
+    rng->seed(rep);
 
     std::shared_ptr<Features> features(
             new NetworkRunSymFeatures(net->clone(), 3));
 
     System s_orig(net->clone(), mod_system->clone());
 
-    s_orig.set_rng(rng);
+    s_orig.rng(rng);
     VfnMaxSimPerturbAgent vmax_agent(net->clone(),
             features->clone(),
             mod_agents->clone(),
             2, num_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    vmax_agent.set_rng(rng);
+    vmax_agent.rng(rng);
 
     obs->set_num_points(num_points);
 

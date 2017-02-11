@@ -11,7 +11,7 @@ EpsAgent::EpsAgent(const std::shared_ptr<const Network> & network,
 }
 
 EpsAgent::EpsAgent(const EpsAgent & other)
-    : Agent(other), agent_(other.agent_->clone()),
+    : Agent(other), RngClass(other), agent_(other.agent_->clone()),
       eps_agent_(other.eps_agent_->clone()), eps_(other.eps_) {
 }
 
@@ -21,7 +21,7 @@ std::shared_ptr<Agent> EpsAgent::clone() const {
 
 boost::dynamic_bitset<> EpsAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits) {
-    if (this->rng->runif_01() < this->eps_) {
+    if (this->rng_->runif_01() < this->eps_) {
         return this->eps_agent_->apply_trt(inf_bits);
     } else {
         return this->agent_->apply_trt(inf_bits);
@@ -31,7 +31,7 @@ boost::dynamic_bitset<> EpsAgent::apply_trt(
 boost::dynamic_bitset<> EpsAgent::apply_trt(
         const boost::dynamic_bitset<> & inf_bits,
         const std::vector<InfAndTrt> & history) {
-    if (this->rng->runif_01() < this->eps_) {
+    if (this->rng_->runif_01() < this->eps_) {
         return this->eps_agent_->apply_trt(inf_bits, history);
     } else {
         return this->agent_->apply_trt(inf_bits, history);

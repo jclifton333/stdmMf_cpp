@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
             });
 
     SweepAgent sa(net, f, coef, 2, true);
-    sa.set_rng(rng);
+    sa.rng(rng);
 
     boost::dynamic_bitset<> inf_bits(net->size());
     inf_bits.set(0);

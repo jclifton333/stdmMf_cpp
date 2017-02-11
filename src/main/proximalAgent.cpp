@@ -8,7 +8,7 @@ ProximalAgent::ProximalAgent(const std::shared_ptr<const Network> & network)
 }
 
 ProximalAgent::ProximalAgent(const ProximalAgent & other)
-    : Agent(other) {
+    : Agent(other), RngClass(other) {
 }
 
 std::shared_ptr<Agent> ProximalAgent::clone() const {
@@ -28,7 +28,7 @@ boost::dynamic_bitset<> ProximalAgent::apply_trt(
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         const bool inf_i = inf_bits.test(i);
         bool next_to_opp = false;
-        const double draw = this->rng->runif_01();
+        const double draw = this->rng_->runif_01();
 
         const Node & node = this->network_->get_node(i);
         const uint32_t num_neigh = node.neigh_size();

@@ -13,9 +13,10 @@ System::System(const std::shared_ptr<const Network> & network,
 }
 
 System::System(const System & other)
-    : network_(other.network_->clone()), model_(other.model_->clone()),
-      num_nodes_(other.num_nodes_), inf_bits_(other.inf_bits_),
-      trt_bits_(other.trt_bits_), history_(other.history_), time_(other.time_) {
+    : RngClass(other), network_(other.network_->clone()),
+      model_(other.model_->clone()), num_nodes_(other.num_nodes_),
+      inf_bits_(other.inf_bits_), trt_bits_(other.trt_bits_),
+      history_(other.history_), time_(other.time_) {
 }
 
 std::shared_ptr<System> System::clone() const {
@@ -78,7 +79,7 @@ void System::start() {
 
     const uint32_t num_starts =
         static_cast<uint32_t>(ceil(this->num_nodes_ * 0.1));
-    const std::vector<int> infs = this->rng->sample_range(
+    const std::vector<int> infs = this->rng_->sample_range(
             0, this->num_nodes_, num_starts);
 
     for (uint32_t i = 0; i < num_starts; ++i) {
@@ -103,7 +104,7 @@ void System::turn_clock(const std::vector<double> & probs) {
 
     // update infection status
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-        double r = this->rng->runif_01();
+        double r = this->rng_->runif_01();
         if (r < probs.at(i)) {
             this->inf_bits_.flip(i);
         }

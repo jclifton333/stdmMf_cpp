@@ -17,7 +17,7 @@ SweepAgentSlow::SweepAgentSlow(const std::shared_ptr<const Network> & network,
 }
 
 SweepAgentSlow::SweepAgentSlow(const SweepAgentSlow & other)
-    : Agent(other), features_(other.features_->clone()),
+    : Agent(other), RngClass(other), features_(other.features_->clone()),
       max_sweeps_(other.max_sweeps_), coef_(other.coef_) {
 }
 
@@ -116,7 +116,7 @@ void SweepAgentSlow::set_new_treatment(
         has_trt.insert(best_node);
     } else {
         // multiple best nodes
-        const uint32_t index = this->rng->rint(0, best_nodes.size());
+        const uint32_t index = this->rng_->rint(0, best_nodes.size());
         const uint32_t best_node = best_nodes.at(index);
         trt_bits.set(best_node);
         // update sets
@@ -198,7 +198,7 @@ bool SweepAgentSlow::sweep_treatments(
             new_not_trt.insert(*has_it);
         } else {
             // multiple better nodes
-            const uint32_t index = this->rng->rint(0, num_better);
+            const uint32_t index = this->rng_->rint(0, num_better);
             const uint32_t better_node = better_nodes.at(index);
             CHECK(!trt_bits.test(better_node));
             trt_bits.set(better_node);

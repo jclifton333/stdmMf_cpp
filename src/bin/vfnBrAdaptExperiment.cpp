@@ -45,7 +45,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const double & gamma_br,
         const std::shared_ptr<Progress<std::ostream> > & progress) {
     std::shared_ptr<Rng> rng(new Rng);
-    rng->set_seed(seed);
+    rng->seed(seed);
 
     // setup network
     NetworkInit init;
@@ -110,9 +110,9 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         auto min_fn = [&](const std::vector<double> & par,
                 void * const data) {
             SweepAgent agent(net, features, par, 2, true);
-            agent.set_rng(rng);
+            agent.rng(rng);
             System s(net, mod);
-            s.set_rng(rng);
+            s.rng(rng);
             double val = 0.0;
             for (uint32_t i = 0; i < num_reps_vfn; ++i) {
                 s.cleanse();
@@ -131,7 +131,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         SimPerturb sp(min_fn, std::vector<double>(
                         features->num_features(), 0.),
                 NULL, c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn);
-        sp.set_rng(rng);
+        sp.rng(rng);
 
         Optim::ErrorCode ec;
         const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
@@ -155,7 +155,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     {
         // system
         System s(net, mod);
-        s.set_rng(rng);
+        s.rng(rng);
 
         // features
         std::shared_ptr<Features> features(new NetworkRunSymFeatures(net,
@@ -163,11 +163,11 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
         // eps agent
         std::shared_ptr<MyopicAgent> ma(new MyopicAgent(net, mod->clone()));
-        ma->set_rng(rng);
+        ma->rng(rng);
         std::shared_ptr<ProximalAgent> pa(new ProximalAgent(net));
-        pa->set_rng(rng);
+        pa->rng(rng);
         EpsAgent ea(net, ma, pa, 0.2);
-        ea.set_rng(rng);
+        ea.rng(rng);
 
 
         // set initial infections
@@ -190,7 +190,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         auto min_fn = [&](const std::vector<double> & par,
                 void * const data) {
             SweepAgent agent(net, features, par, 2, true);
-            agent.set_rng(rng);
+            agent.rng(rng);
 
             // q function
             auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
@@ -206,7 +206,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
         SimPerturb sp(min_fn, optim_par,
                 NULL, c_br, t_br, a_br, b_br, ell_br, min_step_size_br);
-        sp.set_rng(rng);
+        sp.rng(rng);
 
         Optim::ErrorCode ec;
         const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
@@ -241,14 +241,14 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     double val = 0.0;
     {
         System s(net, mod);
-        s.set_rng(rng);
+        s.rng(rng);
 
         // features
         std::shared_ptr<Features> features(new NetworkRunSymFeatures(net,
                         path_len));
 
         SweepAgent agent(net, features, optim_par, 2, true);
-        agent.set_rng(rng);
+        agent.rng(rng);
 
         for (uint32_t i = 0; i < 50; ++i) {
             s.cleanse();

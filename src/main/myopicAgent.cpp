@@ -12,7 +12,7 @@ MyopicAgent::MyopicAgent(const std::shared_ptr<const Network> & network,
 }
 
 MyopicAgent::MyopicAgent(const MyopicAgent & other)
-    : Agent(other), model_(other.model_->clone()) {
+    : Agent(other), RngClass(other), model_(other.model_->clone()) {
 }
 
 std::shared_ptr<Agent> MyopicAgent::clone() const {
@@ -45,7 +45,7 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
         for (uint32_t i = 0; i < this->num_nodes_; ++i) {
             shuffled_nodes.push_back(i);
         }
-        this->rng->shuffle(shuffled_nodes);
+        this->rng_->shuffle(shuffled_nodes);
 
         std::vector<std::pair<double, uint32_t> > sorted_inf;
         std::vector<std::pair<double, uint32_t> > sorted_not;

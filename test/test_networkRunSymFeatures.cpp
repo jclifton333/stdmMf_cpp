@@ -747,7 +747,7 @@ TEST(TestNetworkRunSymFeatures, UpdateFeatures) {
     std::random_device device;
     const uint32_t seed = device();
     Rng rng;
-    rng.set_seed(seed);
+    rng.seed(seed);
 
     NetworkRunSymFeatures nrf_get(n, 3);
     NetworkRunSymFeatures nrf_update(n, 3);
@@ -903,7 +903,7 @@ TEST(TestNetworkRunSymFeatures, Copy) {
     std::random_device device;
     const uint32_t seed = device();
     Rng rng;
-    rng.set_seed(seed);
+    rng.seed(seed);
 
     NetworkRunSymFeatures nrf_get(n, 3);
     NetworkRunSymFeatures nrf_update(n, 3);

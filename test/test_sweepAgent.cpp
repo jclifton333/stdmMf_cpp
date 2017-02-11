@@ -27,7 +27,7 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
     // std::random_device rd;
     const uint32_t seed = 0; // crd();
     Rng rng;
-    rng.set_seed(seed);
+    rng.seed(seed);
 
     // setup sweep agent
     std::vector<double> coef(nrf->num_features());

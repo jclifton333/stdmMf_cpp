@@ -46,7 +46,7 @@ VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
 
 VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
         const VfnBrAdaptSimPerturbAgent & other)
-    : Agent(other), features_(other.features_->clone()),
+    : Agent(other), RngClass(other), features_(other.features_->clone()),
       model_(other.model_->clone()),
 
       vfn_num_reps_(other.vfn_num_reps_), vfn_final_t_(other.vfn_final_t_),
@@ -110,7 +110,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
     // sample new parameters
     arma::vec std_norm(this->model_->par_size());
     for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        std_norm(i) = this->rng->rnorm_01();
+        std_norm(i) = this->rng_->rnorm_01();
         LOG_IF(FATAL, !std::isfinite(std_norm(i)));
     }
     const std::vector<double> par_samp(
@@ -130,9 +130,9 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
         auto f = [&](const std::vector<double> & par, void * const data) {
             SweepAgent a(this->network_, this->features_, par, 2, false);
-            a.set_rng(this->get_rng());
+            a.rng(this->rng());
             System s(this->network_, this->model_);
-            s.set_rng(this->get_rng());
+            s.rng(this->rng());
             double val = 0.0;
             for (uint32_t i = 0; i < this->vfn_num_reps_; ++i) {
                 s.cleanse();
@@ -151,7 +151,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         SimPerturb sp(f, optim_par, NULL, this->vfn_c_, this->vfn_t_,
                 this->vfn_a_, this->vfn_b_, this->vfn_ell_,
                 this->vfn_min_step_size_);
-        sp.set_rng(this->get_rng());
+        sp.rng(this->rng());
 
         Optim::ErrorCode ec;
         do {
@@ -205,7 +205,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
         auto f = [&](const std::vector<double> & par, void * const data) {
             SweepAgent a(this->network_, this->features_, par, 2, false);
-            a.set_rng(this->get_rng());
+            a.rng(this->rng());
 
             auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
@@ -218,7 +218,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
         SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_, this->br_a_,
                 this->br_b_, this->br_ell_, this->br_min_step_size_);
-        sp.set_rng(this->get_rng());
+        sp.rng(this->rng());
 
         Optim::ErrorCode ec;
         const uint32_t num_steps = history.size() * this->step_cap_mult_;
@@ -236,7 +236,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
     }
 
     SweepAgent a(this->network_, this->features_, optim_par, 2, false);
-    a.set_rng(this->get_rng());
+    a.rng(this->rng());
     return a.apply_trt(inf_bits, history);
 }
 

@@ -28,7 +28,7 @@ BrMinSimPerturbAgent::BrMinSimPerturbAgent(
 
 BrMinSimPerturbAgent::BrMinSimPerturbAgent(
         const BrMinSimPerturbAgent & other)
-    : Agent(other), features_(other.features_->clone()),
+    : Agent(other), RngClass(other), features_(other.features_->clone()),
       c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_){
 }
@@ -56,7 +56,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 
     auto f = [&](const std::vector<double> & par, void * const data) {
         SweepAgent a(this->network_, this->features_, par, 2, false);
-        a.set_rng(this->get_rng());
+        a.rng(this->rng());
 
         auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
                 const boost::dynamic_bitset<> & trt_bits_t) {
@@ -70,7 +70,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
     SimPerturb sp(f, std::vector<double>(this->features_->num_features(), 0.),
             NULL, this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_);
-    sp.set_rng(this->get_rng());
+    sp.rng(this->rng());
 
     Optim::ErrorCode ec;
     do {
@@ -81,7 +81,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 
     CHECK_EQ(ec, Optim::ErrorCode::SUCCESS)
         << std::endl
-        << "seed: " << this->get_seed() << std::endl
+        << "seed: " << this->seed() << std::endl
         << "steps: " << sp.completed_steps() << std::endl
         << "range: [" << *std::min_element(par.begin(), par.end())
         << ", " << *std::max_element(par.begin(), par.end()) << "]"
@@ -93,7 +93,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         << "ell: " << this->min_step_size_ << std::endl;
 
     SweepAgent a(this->network_, this->features_, sp.par(), 2, false);
-    a.set_rng(this->get_rng());
+    a.rng(this->rng());
     return a.apply_trt(inf_bits, history);
 }
 

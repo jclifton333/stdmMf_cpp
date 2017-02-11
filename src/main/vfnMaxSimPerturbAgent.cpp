@@ -33,7 +33,7 @@ VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
 
 VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
         const VfnMaxSimPerturbAgent & other)
-    : Agent(other), features_(other.features_->clone()),
+    : Agent(other), RngClass(other), features_(other.features_->clone()),
       model_(other.model_->clone()), coef_(other.coef_),
       num_reps_(other.num_reps_), final_t_(other.final_t_), c_(other.c_),
       t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
@@ -89,7 +89,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
     // sample new parameters
     arma::vec std_norm(this->model_->par_size());
     for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        std_norm(i) = this->rng->rnorm_01();
+        std_norm(i) = this->rng_->rnorm_01();
         LOG_IF(FATAL, !std::isfinite(std_norm(i)));
     }
     const std::vector<double> par_samp(
@@ -106,9 +106,9 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
 
     auto f = [&](const std::vector<double> & par, void * const data) {
         SweepAgent a(this->network_, this->features_, par, 2, false);
-        a.set_rng(this->get_rng());
+        a.rng(this->rng());
         System s(this->network_, this->model_);
-        s.set_rng(this->get_rng());
+        s.rng(this->rng());
         double val = 0.0;
         for (uint32_t i = 0; i < this->num_reps_; ++i) {
             s.cleanse();
@@ -127,7 +127,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
     SimPerturb sp(f, std::vector<double>(this->features_->num_features(), 0.),
             NULL, this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_);
-    sp.set_rng(this->get_rng());
+    sp.rng(this->rng());
 
     Optim::ErrorCode ec;
     do {
@@ -138,7 +138,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
 
     this->coef_ = sp.par();
     SweepAgent a(this->network_, this->features_, sp.par(), 2, false);
-    a.set_rng(this->get_rng());
+    a.rng(this->rng());
     return a.apply_trt(inf_bits, history);
 }
 

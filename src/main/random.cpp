@@ -1,38 +1,45 @@
-#include <glog/logging.h>
 #include "random.hpp"
+#include <glog/logging.h>
 #include <algorithm>
 
 namespace stdmMf {
 
 
 Rng::Rng()
-    : gen(0), seed(0), dis_runif_01(0., 1.), dis_rnorm_01(0., 1.) {
+    : gen_(0), seed_(0), dis_runif_01_(0., 1.), dis_rnorm_01_(0., 1.) {
 }
 
-void Rng::set_seed(const uint32_t seed) {
-    this->gen.seed(seed);
+void Rng::seed(const uint32_t seed) {
+    std::lock_guard<std::mutex> lock(this->gen_mutex_);
+    this->seed_ = seed;
+    this->gen_.seed(seed);
 }
 
 
-uint32_t Rng::get_seed() const {
-    return this->seed;
+uint32_t Rng::seed() const {
+    std::lock_guard<std::mutex> lock(this->gen_mutex_);
+    return this->seed_;
 }
 
-std::mt19937 & Rng::get_gen() {
-    return this->gen;
+std::mt19937 & Rng::gen() {
+    std::lock_guard<std::mutex> lock(this->gen_mutex_);
+    return this->gen_;
 }
 
-void Rng::set_gen(const std::mt19937 & gen) {
-    this->gen = gen;
+void Rng::gen(const std::mt19937 & gen) {
+    std::lock_guard<std::mutex> lock(this->gen_mutex_);
+    this->gen_ = gen;
 }
 
 double Rng::runif_01() {
-    return dis_runif_01(gen);
+    std::lock_guard<std::mutex> lock(this->gen_mutex_);
+    return this->dis_runif_01_(this->gen_);
 }
 
 
 double Rng::rnorm_01() {
-    return dis_rnorm_01(gen);
+    std::lock_guard<std::mutex> lock(this->gen_mutex_);
+    return this->dis_rnorm_01_(this->gen_);
 }
 
 double Rng::rnorm(const double mu, const double sigma) {
@@ -76,28 +83,34 @@ std::vector<int> Rng::sample_range(const int a, const int b, const int n) {
 }
 
 void Rng::shuffle(std::vector<uint32_t> & x) {
-    std::shuffle(x.begin(), x.end(), this->gen);
+    std::lock_guard<std::mutex> lock(this->gen_mutex_);
+    std::shuffle(x.begin(), x.end(), this->gen_);
 }
 
 
 RngClass::RngClass()
-    : rng(new Rng()) {
+    : rng_(new Rng()) {
 }
 
-void RngClass::set_rng(std::shared_ptr<Rng> rng) {
-    this->rng = rng;
+RngClass::RngClass(const RngClass & other)
+    : RngClass() {
+    this->seed(other.seed());
 }
 
-std::shared_ptr<Rng> RngClass::get_rng() {
-    return this->rng;
+void RngClass::rng(std::shared_ptr<Rng> rng) {
+    this->rng_ = rng;
 }
 
-void RngClass::set_seed(const uint32_t seed) {
-    this->rng->set_seed(seed);
+std::shared_ptr<Rng> RngClass::rng() {
+    return this->rng_;
 }
 
-uint32_t RngClass::get_seed() const {
-    return this->rng->get_seed();
+void RngClass::seed(const uint32_t seed) {
+    this->rng_->seed(seed);
+}
+
+uint32_t RngClass::seed() const {
+    return this->rng_->seed();
 }
 
 

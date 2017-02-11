@@ -44,14 +44,14 @@ int main(int argc, char *argv[]) {
     vfn_time.push_back(r_time);
 
     System s(net->clone(), mod->clone());
-    s.set_seed(0);
+    s.seed(0);
     VfnMaxSimPerturbAgent a(net->clone(),
             std::shared_ptr<Features>(
                     new NetworkRunFeatures(net->clone(), 4)),
             std::shared_ptr<Model>(
                     new NoCovEdgeModel(net->clone())),
             2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    a.set_seed(0);
+    a.seed(0);
 
     s.start();
 

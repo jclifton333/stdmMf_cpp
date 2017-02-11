@@ -54,7 +54,7 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=](){
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     NoTrtAgent a(net->clone());
 
                     s.start();
@@ -85,9 +85,9 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=](){
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     RandomAgent a(net->clone());
-                    a.set_seed(i);
+                    a.seed(i);
 
                     s.start();
 
@@ -118,9 +118,9 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     ProximalAgent a(net->clone());
-                    a.set_seed(i);
+                    a.seed(i);
 
                     s.start();
 
@@ -151,9 +151,9 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     MyopicAgent a(net->clone(), mod_agents->clone());
-                    a.set_seed(i);
+                    a.seed(i);
 
                     s.start();
 
@@ -184,14 +184,14 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     VfnMaxSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunSymFeatures(net->clone(),
                                             run_length)),
                             mod_agents->clone(),
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-                    a.set_seed(i);
+                    a.seed(i);
 
                     s.start();
 
@@ -222,13 +222,13 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     BrMinSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunSymFeatures(net->clone(),
                                             run_length)),
                             2e-1, 0.75, 1.41e-3, 1, 0.85, 9.130e-6);
-                    a.set_seed(i);
+                    a.seed(i);
 
                     s.start();
 
@@ -258,7 +258,7 @@ run(const std::shared_ptr<Network> & net,
 
     //     pool.service()->post([=]() {
     //                 System s(net->clone(), mod_system->clone());
-    //                 s.set_seed(i);
+    //                 s.seed(i);
     //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
     //                                 new NetworkRunSymFeatures(net->clone(), run_length)),
@@ -266,7 +266,7 @@ run(const std::shared_ptr<Network> & net,
     //                         2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
     //                         1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
     //                         1);
-    //                 a.set_seed(i);
+    //                 a.seed(i);
 
     //                 s.start();
 
@@ -296,7 +296,7 @@ run(const std::shared_ptr<Network> & net,
 
     //     pool.service()->post([=]() {
     //                 System s(net->clone(), mod_system->clone());
-    //                 s.set_seed(i);
+    //                 s.seed(i);
     //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
     //                                 new NetworkRunSymFeatures(net->clone(), run_length)),
@@ -304,7 +304,7 @@ run(const std::shared_ptr<Network> & net,
     //                         2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
     //                         1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
     //                         2);
-    //                 a.set_seed(i);
+    //                 a.seed(i);
 
     //                 s.start();
 
@@ -334,7 +334,7 @@ run(const std::shared_ptr<Network> & net,
 
     //     pool.service()->post([=]() {
     //                 System s(net->clone(), mod_system->clone());
-    //                 s.set_seed(i);
+    //                 s.seed(i);
     //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
     //                                 new NetworkRunSymFeatures(net->clone(), run_length)),
@@ -342,7 +342,7 @@ run(const std::shared_ptr<Network> & net,
     //                         2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
     //                         1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
     //                         5);
-    //                 a.set_seed(i);
+    //                 a.seed(i);
 
     //                 s.start();
 
@@ -373,7 +373,7 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     VfnBrAdaptSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunSymFeatures(net->clone(),
@@ -382,7 +382,7 @@ run(const std::shared_ptr<Network> & net,
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
                             2e-1, 1.0, 1e-3, 1, 1, 9.13e-6,
                             10);
-                    a.set_seed(i);
+                    a.seed(i);
 
                     s.start();
 
@@ -413,7 +413,7 @@ run(const std::shared_ptr<Network> & net,
 
         pool.service()->post([=]() {
                     System s(net->clone(), mod_system->clone());
-                    s.set_seed(i);
+                    s.seed(i);
                     VfnBrAdaptSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
                                     new NetworkRunSymFeatures(net->clone(),
@@ -422,7 +422,7 @@ run(const std::shared_ptr<Network> & net,
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
                             2e-1, 1.0, 1e-3, 1, 1, 9.13e-6,
                             100);
-                    a.set_seed(i);
+                    a.seed(i);
 
                     s.start();
 

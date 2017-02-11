@@ -23,7 +23,7 @@ SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
 
 
 SweepAgent::SweepAgent(const SweepAgent & other)
-    : Agent(other), features_(other.features_->clone()),
+    : Agent(other), RngClass(other), features_(other.features_->clone()),
       coef_(other.coef_), max_sweeps_(other.max_sweeps_),
       do_sweep_(other.do_sweep_), do_parallel_(other.do_parallel_),
       pool_(new Pool(*other.pool_)) {
@@ -154,7 +154,7 @@ void SweepAgent::set_new_treatment_serial(
         best_node = best_nodes.at(0);
     } else {
         // multiple best nodes
-        const uint32_t index = this->rng->rint(0, best_nodes.size());
+        const uint32_t index = this->rng_->rint(0, best_nodes.size());
         best_node = best_nodes.at(index);
         trt_bits.set(best_node);
     }
@@ -258,7 +258,7 @@ void SweepAgent::set_new_treatment_parallel(
         best_node = best_nodes.at(0);
     } else {
         // multiple best nodes
-        const uint32_t index = this->rng->rint(0, best_nodes.size());
+        const uint32_t index = this->rng_->rint(0, best_nodes.size());
         best_node = best_nodes.at(index);
         trt_bits.set(best_node);
     }
@@ -369,7 +369,7 @@ bool SweepAgent::sweep_treatments(
             new_not_trt.insert(*has_it);
         } else {
             // multiple better nodes
-            const uint32_t index = this->rng->rint(0, num_better);
+            const uint32_t index = this->rng_->rint(0, num_better);
             better_node = better_nodes.at(index);
             CHECK(!trt_bits.test(better_node));
             trt_bits.set(better_node);
