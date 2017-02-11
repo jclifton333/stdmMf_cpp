@@ -80,6 +80,8 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
     const std::vector<double> par(sp.par());
 
     CHECK_EQ(ec, Optim::ErrorCode::SUCCESS)
+        << std::endl
+        << "seed: " << this->get_seed() << std::endl
         << "steps: " << sp.completed_steps() << std::endl
         << "range: [" << *std::min_element(par.begin(), par.end())
         << ", " << *std::max_element(par.begin(), par.end()) << "]"
