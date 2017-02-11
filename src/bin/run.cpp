@@ -41,6 +41,8 @@ run(const std::shared_ptr<Network> & net,
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
     Pool pool(std::thread::hardware_concurrency());
 
+    const uint32_t run_length = 4;
+
     // none
     std::vector<std::shared_ptr<Result<double> > > none_val;
     std::vector<std::shared_ptr<Result<double> > > none_time;
@@ -185,7 +187,8 @@ run(const std::shared_ptr<Network> & net,
                     s.set_seed(i);
                     VfnMaxSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunSymFeatures(net->clone(), 3)),
+                                    new NetworkRunSymFeatures(net->clone(),
+                                            run_length)),
                             mod_agents->clone(),
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
                     a.set_seed(i);
@@ -222,8 +225,9 @@ run(const std::shared_ptr<Network> & net,
                     s.set_seed(i);
                     BrMinSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunSymFeatures(net->clone(), 3)),
-                            5e-2, 0.75, 1.41e-3, 1, 0.85, 9.130e-6);
+                                    new NetworkRunSymFeatures(net->clone(),
+                                            run_length)),
+                            2e-1, 0.75, 1.41e-3, 1, 0.85, 9.130e-6);
                     a.set_seed(i);
 
                     s.start();
@@ -257,7 +261,7 @@ run(const std::shared_ptr<Network> & net,
     //                 s.set_seed(i);
     //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunSymFeatures(net->clone(), 3)),
+    //                                 new NetworkRunSymFeatures(net->clone(), run_length)),
     //                         mod_agents->clone(),
     //                         2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
     //                         1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
@@ -295,7 +299,7 @@ run(const std::shared_ptr<Network> & net,
     //                 s.set_seed(i);
     //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunSymFeatures(net->clone(), 3)),
+    //                                 new NetworkRunSymFeatures(net->clone(), run_length)),
     //                         mod_agents->clone(),
     //                         2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
     //                         1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
@@ -333,7 +337,7 @@ run(const std::shared_ptr<Network> & net,
     //                 s.set_seed(i);
     //                 VfnBrAdaptSimPerturbAgent a(net->clone(),
     //                         std::shared_ptr<Features>(
-    //                                 new NetworkRunSymFeatures(net->clone(), 3)),
+    //                                 new NetworkRunSymFeatures(net->clone(), run_length)),
     //                         mod_agents->clone(),
     //                         2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
     //                         1e-1, 1.0, 1e-3, 1, 0.85, 1e-5,
@@ -372,7 +376,8 @@ run(const std::shared_ptr<Network> & net,
                     s.set_seed(i);
                     VfnBrAdaptSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunSymFeatures(net->clone(), 3)),
+                                    new NetworkRunSymFeatures(net->clone(),
+                                            run_length)),
                             mod_agents->clone(),
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
                             2e-1, 1.0, 1e-3, 1, 1, 9.13e-6,
@@ -411,7 +416,8 @@ run(const std::shared_ptr<Network> & net,
                     s.set_seed(i);
                     VfnBrAdaptSimPerturbAgent a(net->clone(),
                             std::shared_ptr<Features>(
-                                    new NetworkRunSymFeatures(net->clone(), 3)),
+                                    new NetworkRunSymFeatures(net->clone(),
+                                            run_length)),
                             mod_agents->clone(),
                             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7,
                             2e-1, 1.0, 1e-3, 1, 1, 9.13e-6,
