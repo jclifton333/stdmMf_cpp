@@ -8,7 +8,7 @@
 #include "brMinSimPerturbAgent.hpp"
 #include "vfnBrAdaptSimPerturbAgent.hpp"
 
-#include "networkRunFeatures.hpp"
+#include "networkRunSymFeatures.hpp"
 
 #include "objFns.hpp"
 
@@ -30,43 +30,70 @@ int main(int argc, char *argv[]) {
 
     const std::shared_ptr<Network> net(Network::gen_network(init));
 
+    // latent infections
+    const double prob_inf_latent = 0.01;
+    const double intcp_inf_latent =
+        std::log(1. / (1. - prob_inf_latent) - 1);
+
+    // neighbor infections
+    const double prob_inf = 0.5;
+    const uint32_t prob_num_neigh = 3;
+    const double intcp_inf =
+        std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
+
+    const double trt_act_inf =
+        std::log(std::pow(1. - prob_inf * 0.25, -1. / prob_num_neigh) - 1.)
+        - intcp_inf;
+
+    const double trt_pre_inf =
+        std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
+        - intcp_inf;
+
+    // recovery
+    const double prob_rec = 0.25;
+    const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
+    const double trt_act_rec =
+        std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
+
+
+    std::vector<double> par =
+        {intcp_inf_latent,
+         intcp_inf,
+         intcp_rec,
+         trt_act_inf,
+         trt_act_rec,
+         trt_pre_inf};
+
+    std::vector<double> par_sep =
+        {intcp_inf_latent,
+         intcp_inf,
+         intcp_rec,
+         trt_act_inf,
+         -trt_act_inf,
+         trt_act_rec,
+         -trt_act_rec,
+         trt_pre_inf,
+         -trt_pre_inf};
+
+
     const std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
-    mod->par({-4.0, -4.0, -1.5, -8.0, 2.0, -8.0});
-
-
-    // vfn max
-    std::vector<std::shared_ptr<Result<double> > > vfn_val;
-    std::vector<std::shared_ptr<Result<double> > > vfn_time;
-
-    std::shared_ptr<Result<double> > r_val(new Result<double>);
-    std::shared_ptr<Result<double> > r_time(new Result<double>);
-    vfn_val.push_back(r_val);
-    vfn_time.push_back(r_time);
+    mod->par(par);
 
     System s(net->clone(), mod->clone());
     s.seed(0);
-    VfnMaxSimPerturbAgent a(net->clone(),
+
+    const uint32_t run_length = 4;
+    const uint32_t time_points = 100;
+    BrMinSimPerturbAgent a(net->clone(),
             std::shared_ptr<Features>(
-                    new NetworkRunFeatures(net->clone(), 4)),
-            std::shared_ptr<Model>(
-                    new NoCovEdgeModel(net->clone())),
-            2, 20, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    new NetworkRunSymFeatures(net->clone(),
+                            run_length)),
+            2e-1, 0.75, 1.41e-3, 1, 0.85, 9.130e-6);
     a.seed(0);
 
     s.start();
 
-    std::chrono::time_point<
-        std::chrono::high_resolution_clock> tick =
-        std::chrono::high_resolution_clock::now();
-
-    r_val->set(runner(&s, &a, 20, 1.0));
-
-    std::chrono::time_point<
-        std::chrono::high_resolution_clock> tock =
-        std::chrono::high_resolution_clock::now();
-
-    r_time->set(std::chrono::duration_cast<
-            std::chrono::seconds>(tock - tick).count());
+    runner(&s, &a, time_points, 1.0);
 
     return 0;
 }
