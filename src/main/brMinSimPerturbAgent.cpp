@@ -77,7 +77,16 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         ec = sp.step();
     } while (ec == Optim::ErrorCode::CONTINUE);
 
-    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
+    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS)
+        << "steps: " << sp.completed_steps() << std::endl
+        << "range: [" << *std::min_element(sp.par().begin(), sp.par().end())
+        << ", " << *std::max_element(sp.par().begin(), sp.par().end()) << "]"
+        << std::endl
+        << "c: " << this->c_ << std::endl
+        << "t: " << this->t_ << std::endl
+        << "a: " << this->a_ << std::endl
+        << "b: " << this->b_ << std::endl
+        << "ell: " << this->min_step_size_ << std::endl;
 
     SweepAgent a(this->network_, this->features_, sp.par(), 2, false);
     a.set_rng(this->get_rng());
