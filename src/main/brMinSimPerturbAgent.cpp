@@ -77,10 +77,12 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
         ec = sp.step();
     } while (ec == Optim::ErrorCode::CONTINUE);
 
+    const std::vector<double> par(sp.par());
+
     CHECK_EQ(ec, Optim::ErrorCode::SUCCESS)
         << "steps: " << sp.completed_steps() << std::endl
-        << "range: [" << *std::min_element(sp.par().begin(), sp.par().end())
-        << ", " << *std::max_element(sp.par().begin(), sp.par().end()) << "]"
+        << "range: [" << *std::min_element(par.begin(), par.end())
+        << ", " << *std::max_element(par.begin(), par.end()) << "]"
         << std::endl
         << "c: " << this->c_ << std::endl
         << "t: " << this->t_ << std::endl
