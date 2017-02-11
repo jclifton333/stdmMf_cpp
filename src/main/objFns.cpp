@@ -36,7 +36,7 @@ double bellman_residual_sq(const std::vector<Transition> & history,
             [](const double & x, const std::pair<double, double> & a) {
                 return x + (a.first + a.second) * (a.first + a.second);
             });
-    return br_sq / static_cast<double>(history.size() - 1);
+    return br_sq / history.size();
 }
 
 std::vector<std::pair<double, double> > bellman_residual_parts(
