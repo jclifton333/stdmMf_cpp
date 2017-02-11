@@ -118,7 +118,7 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent::apply_trt(
 
     // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(all_history);
-    mult_b_to_a(hess, -1.0 * (all_history.size() - 1));
+    mult_b_to_a(hess, -1.0 * all_history.size());
 
     const arma::mat hess_mat(hess.data(), this->model_->par_size(),
             this->model_->par_size());
