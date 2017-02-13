@@ -7,11 +7,9 @@
 #include "noCovEdgeXorSoModel.hpp"
 #include "noCovEdgeSepSoModel.hpp"
 
-#include "progress.hpp"
-
-#include "pool.hpp"
-
-#include "projectInfo.hpp"
+#include <njm_cpp/tools/progress.hpp>
+#include <njm_cpp/thread/pool.hpp>
+#include <njm_cpp/info/project.hpp>
 
 #include <iterator>
 #include <algorithm>
@@ -187,7 +185,7 @@ std::shared_ptr<Model> get_model(const std::string & model_kind,
 int main(int argc, char *argv[]) {
     // read in data
     AdaptData ad;
-    std::ifstream in(PROJECT_ROOT_DIR +
+    std::ifstream in(njm::info::project::PROJECT_ROOT_DIR +
             "/data/2017-02-08_18-19-53/adapt_data.txt");
     CHECK(in.good());
     std::stringstream in_buf;
@@ -195,7 +193,7 @@ int main(int argc, char *argv[]) {
     in.close();
     google::protobuf::TextFormat::ParseFromString(in_buf.str(), &ad);
 
-    Pool pool;
+    njm::thread::Pool pool;
 
     const uint32_t num_points_for_fit = 5;
     const uint32_t num_points_for_eval = 20;

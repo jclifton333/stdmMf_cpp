@@ -4,6 +4,8 @@
 
 #include <armadillo>
 
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+
 #include "system.hpp"
 #include "objFns.hpp"
 
@@ -33,11 +35,11 @@ VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
 
 VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
         const VfnMaxSimPerturbAgent & other)
-    : Agent(other), RngClass(other), features_(other.features_->clone()),
-      model_(other.model_->clone()), coef_(other.coef_),
-      num_reps_(other.num_reps_), final_t_(other.final_t_), c_(other.c_),
-      t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
-      min_step_size_(other.min_step_size_){
+    : Agent(other), njm::tools::RngClass(other),
+    features_(other.features_->clone()), model_(other.model_->clone()),
+    coef_(other.coef_), num_reps_(other.num_reps_), final_t_(other.final_t_),
+    c_(other.c_), t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
+    min_step_size_(other.min_step_size_) {
 }
 
 std::shared_ptr<Agent> VfnMaxSimPerturbAgent::clone() const {
@@ -71,7 +73,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
 
     // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(all_history);
-    mult_b_to_a(hess, -1.0 * all_history.size());
+    njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
 
     const arma::mat hess_mat(hess.data(), this->model_->par_size(),
             this->model_->par_size());
@@ -93,7 +95,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
         LOG_IF(FATAL, !std::isfinite(std_norm(i)));
     }
     const std::vector<double> par_samp(
-            add_a_and_b(this->model_->par(),
+            njm::linalg::add_a_and_b(this->model_->par(),
                     arma::conv_to<std::vector<double> >::from(
                             var_sqrt * std_norm)));
 
@@ -124,17 +126,18 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
         return -val;
     };
 
-    SimPerturb sp(f, std::vector<double>(this->features_->num_features(), 0.),
+    njm::optim::SimPerturb sp(f,
+            std::vector<double>(this->features_->num_features(), 0.),
             NULL, this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_);
     sp.rng(this->rng());
 
-    Optim::ErrorCode ec;
+    njm::optim::ErrorCode ec;
     do {
         ec = sp.step();
-    } while (ec == Optim::ErrorCode::CONTINUE);
+    } while (ec == njm::optim::ErrorCode::CONTINUE);
 
-    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
+    CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
 
     this->coef_ = sp.par();
     SweepAgent a(this->network_, this->features_, sp.par(), 2, false);

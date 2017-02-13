@@ -16,13 +16,12 @@
 
 #include "objFns.hpp"
 
-#include "result.hpp"
-
-#include "pool.hpp"
-
-#include "trapperKeeper.hpp"
-
-#include "projectInfo.hpp"
+#include <njm_cpp/data/result.hpp>
+#include <njm_cpp/data/trapperKeeper.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+#include <njm_cpp/thread/pool.hpp>
+#include <njm_cpp/info/project.hpp>
+#include <njm_cpp/tools/stats.hpp>
 
 #include <thread>
 
@@ -30,6 +29,8 @@
 
 using namespace stdmMf;
 
+using njm::data::Result;
+using njm::tools::mean_and_var;
 
 std::vector<std::pair<std::string, std::vector<double> > >
 run(const std::shared_ptr<Network> & net,
@@ -39,7 +40,7 @@ run(const std::shared_ptr<Network> & net,
         const uint32_t & time_points) {
 
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
-    Pool pool(std::thread::hardware_concurrency());
+    njm::thread::Pool pool(std::thread::hardware_concurrency());
 
     const uint32_t run_length = 3;
 
@@ -970,22 +971,23 @@ int main(int argc, char *argv[]) {
     CHECK(ofs_read.good()) << "could not open file";
     ofs_read.close();
 
-    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
+    njm::data::TrapperKeeper tk(argv[0],
+            njm::info::project::PROJECT_ROOT_DIR + "/data");
 
-    Entry & e_read_all = tk.entry("all_read.txt");
+    njm::data::Entry & e_read_all = tk.entry("all_read.txt");
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
 
-        Entry & e_read_net = tk.entry(net->kind() + "_read.txt");
+        njm::data::Entry & e_read_net = tk.entry(net->kind() + "_read.txt");
 
         for (uint32_t j = 0; j < models.size(); ++j) {
             ModelPair & mp(models.at(j).second.at(i));
 
-            Entry & e_raw = tk.entry(net->kind() + "_" + models.at(j).first
-                    + "_raw.txt");
-            Entry & e_read = tk.entry(net->kind() + "_" + models.at(j).first
-                    + "_read.txt");
+            njm::data::Entry & e_raw = tk.entry(
+                    net->kind() + "_" + models.at(j).first + "_raw.txt");
+            njm::data::Entry & e_read = tk.entry(
+                    net->kind() + "_" + models.at(j).first + "_read.txt");
 
             std::vector<std::pair<std::string, std::vector<double> > >
                 results = run(net, mp.first, mp.second, num_reps, time_points);

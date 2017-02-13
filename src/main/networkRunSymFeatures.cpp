@@ -1,5 +1,5 @@
 #include "networkRunSymFeatures.hpp"
-#include "utilities.hpp"
+#include <njm_cpp/tools/bitManip.hpp>
 #include <glog/logging.h>
 
 namespace stdmMf {
@@ -21,8 +21,9 @@ NetworkRunSymFeatures::NetworkRunSymFeatures(
             // reverse infected bits, reverse treatment bits, then
             // combine back together
             const uint32_t mask_rev =
-                (reverse_bits(mask >> (i + 1)) >> (num_bits - (i + i + 2)))
-                | (reverse_bits(mask) >> (num_bits - (i + 1)));
+                (njm::tools::reverse_bits(
+                        mask >> (i + 1)) >> (num_bits - (i + i + 2)))
+                | (njm::tools::reverse_bits(mask) >> (num_bits - (i + 1)));
 
             if (mask <= mask_rev) {
                 index_len_ip1.push_back(index_val++);

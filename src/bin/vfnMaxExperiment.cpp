@@ -2,19 +2,26 @@
 #include <chrono>
 #include <fstream>
 #include <thread>
-#include "result.hpp"
-#include "pool.hpp"
+
+#include <njm_cpp/data/trapperKeeper.hpp>
+#include <njm_cpp/data/result.hpp>
+#include <njm_cpp/thread/pool.hpp>
+#include <njm_cpp/info/project.hpp>
+#include <njm_cpp/optim/simPerturb.hpp>
+#include <njm_cpp/tools/experiment.hpp>
+
 #include "system.hpp"
 #include "agent.hpp"
 #include "noCovEdgeModel.hpp"
 #include "networkRunFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "objFns.hpp"
-#include "simPerturb.hpp"
-#include "experiment.hpp"
 
 using namespace stdmMf;
 
+using njm::data::Result;
+using njm::tools::Rng;
+using njm::tools::Experiment;
 
 void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const uint32_t & seed,
@@ -67,23 +74,23 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         return -val;
     };
 
-    SimPerturb sp(min_fn, std::vector<double>(
+    njm::optim::SimPerturb sp(min_fn, std::vector<double>(
                     features->num_features(), 0.),
             NULL, c, t, a, b, ell, min_step_size);
     sp.rng(rng);
 
-    Optim::ErrorCode ec;
+    njm::optim::ErrorCode ec;
     const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
         std::chrono::high_resolution_clock::now();
     do {
         ec = sp.step();
-    } while (ec == Optim::ErrorCode::CONTINUE);
+    } while (ec == njm::optim::ErrorCode::CONTINUE);
     const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
         std::chrono::high_resolution_clock::now();
 
     const std::chrono::duration<double> elapsed = tock - tick;
 
-    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
+    CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
 
     const std::vector<double> par = sp.par();
 
@@ -131,7 +138,7 @@ int main(int argc, char *argv[]) {
     g0->add_factor(ell_list);
     g0->add_factor(min_step_size_list);
 
-    Pool p(std::thread::hardware_concurrency());
+    njm::thread::Pool p(std::thread::hardware_concurrency());
 
     std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
     std::vector<Experiment::Factor> factors;
@@ -179,19 +186,22 @@ int main(int argc, char *argv[]) {
     CHECK_EQ(factors.size(), results.size());
     CHECK_EQ(factors.size(), factors_level.size());
     CHECK_EQ(factors.size(), rep_number.size());
-    std::ofstream out;
-    out.open("vfnMaxExperiment_results.txt");
-    out << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
+    njm::data::TrapperKeeper tk(argv[0],
+            njm::info::project::PROJECT_ROOT_DIR + "/data");
+    njm::data::Entry & results_entry = tk.entry(
+            "vfnMaxExperiment_results.txt");
+    results_entry
+        << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
         << "min_step_size\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
-        out << factors_level.at(i) << ", " << rep_number.at(i) << ", "
+        results_entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
             << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);
         for (uint32_t j = 0; j < f.size(); ++j) {
-            out << ", " << f.at(j);
+            results_entry << ", " << f.at(j);
         }
-        out << "\n";
+        results_entry << "\n";
     }
 
     return 0;

@@ -1,7 +1,7 @@
 #include "sweepAgent.hpp"
 #include "networkRunFeatures.hpp"
 #include "network.hpp"
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
 #include <chrono>
 #include <fstream>
 #include <glog/logging.h>
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
-    std::shared_ptr<Rng> rng(new Rng);
+    std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
     std::shared_ptr<Network> net = Network::gen_network(init);
 
     std::shared_ptr<Features> f(new NetworkRunFeatures(net,4));

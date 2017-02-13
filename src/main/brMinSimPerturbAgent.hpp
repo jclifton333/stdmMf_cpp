@@ -1,7 +1,7 @@
 #ifndef BR_MIN_SIM_PERTURB_AGENT_HPP
 #define BR_MIN_SIM_PERTURB_AGENT_HPP
 
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
 #include "agent.hpp"
 #include "features.hpp"
 #include "model.hpp"
@@ -9,7 +9,7 @@
 namespace stdmMf {
 
 
-class BrMinSimPerturbAgent : public Agent, public RngClass {
+class BrMinSimPerturbAgent : public Agent, public njm::tools::RngClass {
     const std::shared_ptr<Features> features_;
 
     const double c_;

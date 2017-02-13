@@ -2,8 +2,16 @@
 #include <chrono>
 #include <fstream>
 #include <thread>
-#include "result.hpp"
-#include "pool.hpp"
+
+#include <njm_cpp/data/result.hpp>
+#include <njm_cpp/thread/pool.hpp>
+#include <njm_cpp/optim/simPerturb.hpp>
+#include <njm_cpp/tools/experiment.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+#include <njm_cpp/tools/progress.hpp>
+#include <njm_cpp/data/trapperKeeper.hpp>
+#include <njm_cpp/info/project.hpp>
+
 #include "system.hpp"
 #include "agent.hpp"
 #include "noCovEdgeModel.hpp"
@@ -14,16 +22,14 @@
 #include "myopicAgent.hpp"
 #include "epsAgent.hpp"
 #include "objFns.hpp"
-#include "simPerturb.hpp"
-#include "experiment.hpp"
-#include "utilities.hpp"
-#include "progress.hpp"
-#include "trapperKeeper.hpp"
-#include "projectInfo.hpp"
 
 
 using namespace stdmMf;
 
+using njm::tools::Rng;
+using njm::data::Result;
+using njm::tools::Progress;
+using njm::tools::Experiment;
 
 void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const uint32_t & seed,
@@ -128,23 +134,23 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
             return -val;
         };
 
-        SimPerturb sp(min_fn, std::vector<double>(
+        njm::optim::SimPerturb sp(min_fn, std::vector<double>(
                         features->num_features(), 0.),
                 NULL, c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn);
         sp.rng(rng);
 
-        Optim::ErrorCode ec;
+        njm::optim::ErrorCode ec;
         const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
             std::chrono::high_resolution_clock::now();
         do {
             ec = sp.step();
-        } while (ec == Optim::ErrorCode::CONTINUE);
+        } while (ec == njm::optim::ErrorCode::CONTINUE);
         const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
             std::chrono::high_resolution_clock::now();
 
         const std::chrono::duration<double> elapsed = tock - tick;
 
-        CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
+        CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
 
         optim_par = sp.par();
     }
@@ -195,8 +201,8 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
             // q function
             auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
                     const boost::dynamic_bitset<> & trt_bits) {
-                return dot_a_and_b(par,features->get_features(inf_bits,
-                                trt_bits));
+                return njm::linalg::dot_a_and_b(par,features->get_features(
+                                inf_bits, trt_bits));
             };
             const double br = bellman_residual_sq(history, &agent, gamma_br,
                     q_fn);
@@ -204,17 +210,17 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
             return br;
         };
 
-        SimPerturb sp(min_fn, optim_par,
+        njm::optim::SimPerturb sp(min_fn, optim_par,
                 NULL, c_br, t_br, a_br, b_br, ell_br, min_step_size_br);
         sp.rng(rng);
 
-        Optim::ErrorCode ec;
+        njm::optim::ErrorCode ec;
         const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
             std::chrono::high_resolution_clock::now();
 
         do {
             ec = sp.step();
-        } while (ec == Optim::ErrorCode::CONTINUE
+        } while (ec == njm::optim::ErrorCode::CONTINUE
                 && sp.completed_steps() < (num_points_for_br * step_scale_br));
 
         const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
@@ -222,8 +228,8 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
         elapsed = tock - tick;
 
-        CHECK(ec == Optim::ErrorCode::SUCCESS ||
-                ec == Optim::ErrorCode::CONTINUE)
+        CHECK(ec == njm::optim::ErrorCode::SUCCESS ||
+                ec == njm::optim::ErrorCode::CONTINUE)
             << ec << std::endl
             << "br tuning paramters: "
             << c_br << ", "
@@ -367,7 +373,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(gamma_br_list);
     }
 
-    Pool p(std::thread::hardware_concurrency());
+    njm::thread::Pool p(std::thread::hardware_concurrency());
 
     std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
     std::vector<Experiment::Factor> factors;
@@ -454,8 +460,10 @@ int main(int argc, char *argv[]) {
     CHECK_EQ(factors.size(), rep_number.size());
 
 
-    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
-    Entry & results_entry = tk.entry("vfnBrAdaptExperiment_results.txt");
+    njm::data::TrapperKeeper tk(argv[0],
+            njm::info::project::PROJECT_ROOT_DIR + "/data");
+    njm::data::Entry & results_entry = tk.entry(
+            "vfnBrAdaptExperiment_results.txt");
     results_entry
         << "level_num, rep_num, elapsed, value, path_len_vfn, num_reps_vfn, "
         << "c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn, "

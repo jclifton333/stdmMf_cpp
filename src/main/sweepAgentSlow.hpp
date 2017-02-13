@@ -1,7 +1,7 @@
 #ifndef SWEEP_AGENT_SLOW_HPP
 #define SWEEP_AGENT_SLOW_HPP
 
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
 #include "agent.hpp"
 #include "features.hpp"
 
@@ -9,7 +9,7 @@
 namespace stdmMf {
 
 
-class SweepAgentSlow : public Agent, public RngClass {
+class SweepAgentSlow : public Agent, public njm::tools::RngClass {
 protected:
     const std::shared_ptr<Features> features_;
     const std::vector<double> coef_;

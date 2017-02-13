@@ -2,13 +2,13 @@
 #define MYOPIC_AGENT_HPP
 
 #include "agent.hpp"
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
 #include "model.hpp"
 
 namespace stdmMf {
 
 
-class MyopicAgent : public Agent, public RngClass {
+class MyopicAgent : public Agent, public njm::tools::RngClass {
 protected:
     const std::shared_ptr<Model> model_;
 

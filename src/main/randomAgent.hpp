@@ -1,15 +1,15 @@
 #ifndef RANDOM_AGENT_HPP
 #define RANDOM_AGENT_HPP
 
+#include <njm_cpp/tools/random.hpp>
 #include "types.hpp"
-#include "random.hpp"
 #include "network.hpp"
 #include "agent.hpp"
 
 namespace stdmMf {
 
 
-class RandomAgent : public Agent, public RngClass {
+class RandomAgent : public Agent, public njm::tools::RngClass {
 public:
     RandomAgent(const std::shared_ptr<const Network> & network);
 

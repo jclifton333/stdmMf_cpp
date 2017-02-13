@@ -2,16 +2,16 @@
 #define VFN_BR_START_SIM_PERTURB_AGENT_HPP
 
 #include <cstdint>
+#include <njm_cpp/tools/random.hpp>
 #include "model.hpp"
 #include "agent.hpp"
 #include "features.hpp"
 #include "sweepAgent.hpp"
-#include "simPerturb.hpp"
 
 namespace stdmMf {
 
 
-class VfnBrStartSimPerturbAgent : public Agent, public RngClass {
+class VfnBrStartSimPerturbAgent : public Agent, public njm::tools::RngClass {
 protected:
     const std::shared_ptr<Features> features_;
     const std::shared_ptr<Model> model_;

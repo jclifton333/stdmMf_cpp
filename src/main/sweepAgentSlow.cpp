@@ -1,8 +1,8 @@
 #include <glog/logging.h>
 #include <set>
 #include <limits>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include "sweepAgentSlow.hpp"
-#include "utilities.hpp"
 
 namespace stdmMf {
 
@@ -50,7 +50,7 @@ boost::dynamic_bitset<> SweepAgentSlow::apply_trt(
     }
 
     std::vector<double> f = this->features_->get_features(inf_bits, trt_bits);
-    double best_val = dot_a_and_b(this->coef_, f);
+    double best_val = njm::linalg::dot_a_and_b(this->coef_, f);
 
     // sweep treatments
     if (this->max_sweeps_ > 0) {
@@ -93,7 +93,7 @@ void SweepAgentSlow::set_new_treatment(
         const std::vector<double> f = this->features_->get_features(inf_bits,
                 trt_bits);
 
-        const double val = dot_a_and_b(this->coef_, f);
+        const double val = njm::linalg::dot_a_and_b(this->coef_, f);
 
         trt_bits.reset(*it); // reset new bit
 
@@ -165,7 +165,7 @@ bool SweepAgentSlow::sweep_treatments(
             const std::vector<double> f = this->features_->get_features(
                     inf_bits, trt_bits);
 
-            const double val = dot_a_and_b(this->coef_, f);
+            const double val = njm::linalg::dot_a_and_b(this->coef_, f);
 
             trt_bits.reset(*not_it);
 

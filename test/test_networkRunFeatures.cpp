@@ -3,7 +3,7 @@
 
 #include <random>
 
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
 #include "network.hpp"
 #include "networkRunFeatures.hpp"
 
@@ -878,7 +878,7 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
 
     std::random_device device;
     const uint32_t seed = device();
-    Rng rng;
+    njm::tools::Rng rng;
     rng.seed(seed);
 
     NetworkRunFeatures nrf_get(n, 3);
@@ -1034,7 +1034,7 @@ TEST(TestNetworkRunFeatures, Copy) {
 
     std::random_device device;
     const uint32_t seed = device();
-    Rng rng;
+    njm::tools::Rng rng;
     rng.seed(seed);
 
     NetworkRunFeatures nrf_get(n, 3);

@@ -5,11 +5,14 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <njm_cpp/tools/random.hpp>
+#include <njm_cpp/data/Result.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include "sweepAgent.hpp"
-#include "utilities.hpp"
 
 namespace stdmMf {
 
+using njm::data::Result;
 
 SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Features> & features,
@@ -23,10 +26,11 @@ SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
 
 
 SweepAgent::SweepAgent(const SweepAgent & other)
-    : Agent(other), RngClass(other), features_(other.features_->clone()),
-      coef_(other.coef_), max_sweeps_(other.max_sweeps_),
-      do_sweep_(other.do_sweep_), do_parallel_(other.do_parallel_),
-      pool_(new Pool(*other.pool_)) {
+    : Agent(other), njm::tools::RngClass(other),
+    features_(other.features_->clone()), coef_(other.coef_),
+    max_sweeps_(other.max_sweeps_), do_sweep_(other.do_sweep_),
+    do_parallel_(other.do_parallel_),
+    pool_(new njm::thread::Pool(*other.pool_)) {
 }
 
 
@@ -39,7 +43,8 @@ void SweepAgent::set_parallel(const bool & do_parallel,
         const uint32_t & num_threads) {
     this->do_parallel_ = do_parallel;
     if (do_parallel) {
-        this->pool_ = std::shared_ptr<Pool>(new Pool(num_threads));
+        this->pool_ = std::shared_ptr<njm::thread::Pool>(
+                new njm::thread::Pool(num_threads));
     } else {
         this->pool_.reset();
     }
@@ -73,7 +78,7 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
         this->set_new_treatment(trt_bits, not_trt, has_trt, inf_bits, feat);
     }
 
-    double best_val = dot_a_and_b(this->coef_, feat);
+    double best_val = njm::linalg::dot_a_and_b(this->coef_, feat);
 
     // sweep treatments
     if (this->do_sweep_) {
@@ -130,7 +135,7 @@ void SweepAgent::set_new_treatment_serial(
         this->features_->update_features(*it, inf_bits, trt_bits,
                 inf_bits, trt_bits_old, feat);
 
-        const double val = dot_a_and_b(this->coef_, feat);
+        const double val = njm::linalg::dot_a_and_b(this->coef_, feat);
 
         // update features for removing treatment on *it
         this->features_->update_features(*it, inf_bits, trt_bits_old,
@@ -196,7 +201,7 @@ void SweepAgent::set_new_treatment_parallel(
     std::condition_variable cv;
 
     auto fn = [this, &feat, &inf_bits, &trt_bits, &trt_bits_old, &best_val,
-            &best_nodes, &num_left, &finish_mtx, &cv](
+            &best_nodes, &num_left, &finish_mtx, &cv] (
                     const uint32_t & new_trt,
                     const std::shared_ptr<Result<std::pair<double, uint32_t> > >
                     & res) {
@@ -211,7 +216,7 @@ void SweepAgent::set_new_treatment_parallel(
         this->features_->update_features_async(new_trt, inf_bits, trt_bits_cpy,
                 inf_bits, trt_bits_old, feat_cpy);
 
-        const double val = dot_a_and_b(this->coef_, feat_cpy);
+        const double val = njm::linalg::dot_a_and_b(this->coef_, feat_cpy);
 
         res->set(std::pair<double, uint32_t>(val, new_trt));
 
@@ -330,7 +335,7 @@ bool SweepAgent::sweep_treatments(
             this->features_->update_features(*not_it, inf_bits, trt_bits,
                     inf_bits, trt_bits_old, feat);
 
-            const double val = dot_a_and_b(this->coef_, feat);
+            const double val = njm::linalg::dot_a_and_b(this->coef_, feat);
 
             // update features for resetting *not_it
             this->features_->update_features(*not_it, inf_bits, trt_bits_old,

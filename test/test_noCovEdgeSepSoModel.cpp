@@ -2,8 +2,8 @@
 #include <glog/logging.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_deriv.h>
+#include <njm_cpp/tools/random.hpp>
 #include "noCovEdgeSepSoModel.hpp"
-#include "random.hpp"
 #include "system.hpp"
 #include "randomAgent.hpp"
 #include "proximalAgent.hpp"
@@ -88,7 +88,7 @@ TEST(TestNoCovEdgeSepSoModel,TestLLGradient) {
     const std::shared_ptr<NoCovEdgeSepSoModel> m(new NoCovEdgeSepSoModel(n));
 
     // set par
-    Rng rng;
+    njm::tools::Rng rng;
     std::vector<double> par(m->par());
     std::for_each(par.begin(),par.end(),
             [&rng](double & x) {
@@ -151,7 +151,7 @@ TEST(TestNoCovEdgeSepSoModel,TestLLHessian) {
     const std::shared_ptr<NoCovEdgeSepSoModel> m(new NoCovEdgeSepSoModel(n));
 
     // set par
-    Rng rng;
+    njm::tools::Rng rng;
     std::vector<double> par(m->par());
     std::for_each(par.begin(),par.end(),
             [&rng](double & x) {
@@ -214,7 +214,7 @@ TEST(TestNoCovEdgeSepSoModel, EstPar) {
 
     const std::shared_ptr<NoCovEdgeSepSoModel> m(new NoCovEdgeSepSoModel(n));
 
-    Rng rng;
+    njm::tools::Rng rng;
     std::vector<double> par;
     for (uint32_t i = 0; i < m->par_size(); ++i) {
         par.push_back(rng.rnorm(-2.0, 1.0));
@@ -264,7 +264,7 @@ TEST(TestNoCovEdgeSepSoModel, Spillover) {
 
     const std::shared_ptr<NoCovEdgeSepSoModel> m(new NoCovEdgeSepSoModel(n));
 
-    Rng rng;
+    njm::tools::Rng rng;
     std::vector<double> par;
     for (uint32_t i = 0; i < m->par_size(); ++i) {
         par.push_back(rng.rnorm(-2.0, 1.0));

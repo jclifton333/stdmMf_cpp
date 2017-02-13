@@ -2,8 +2,10 @@
 #include <glog/logging.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_deriv.h>
+
+#include <njm_cpp/tools/random.hpp>
+
 #include "noCovEdgeModel.hpp"
-#include "random.hpp"
 #include "system.hpp"
 #include "randomAgent.hpp"
 #include "proximalAgent.hpp"
@@ -87,7 +89,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
     const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
 
     // set par
-    Rng rng;
+    njm::tools::Rng rng;
     std::vector<double> par(m->par());
     std::for_each(par.begin(),par.end(),
             [&rng](double & x) {
@@ -151,7 +153,7 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
     const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
 
     // set par
-    Rng rng;
+    njm::tools::Rng rng;
     std::vector<double> par(m->par());
     std::for_each(par.begin(),par.end(),
             [&rng](double & x) {
@@ -215,7 +217,7 @@ TEST(TestNoCovEdgeModel, EstPar) {
 
     const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
 
-    Rng rng;
+    njm::tools::Rng rng;
     std::vector<double> par;
     for (uint32_t i = 0; i < m->par_size(); ++i) {
         par.push_back(rng.rnorm(-2.0, 1.0));

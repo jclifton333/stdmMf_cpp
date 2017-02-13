@@ -5,14 +5,15 @@
 #include <cstdint>
 #include <boost/dynamic_bitset.hpp>
 
+#include <njm_cpp/tools/random.hpp>
+
 #include "types.hpp"
-#include "random.hpp"
 #include "model.hpp"
 #include "network.hpp"
 
 namespace stdmMf {
 
-class System : public RngClass {
+class System : public njm::tools::RngClass {
 private:
     const std::shared_ptr<const Network> network_;
     const std::shared_ptr<Model> model_;

@@ -1,5 +1,6 @@
 #include "noCovEdgeOrSoModel.hpp"
-#include "utilities.hpp"
+#include <njm_cpp/tools/bitManip.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include <glog/logging.h>
 
 
@@ -59,7 +60,8 @@ std::vector<double> NoCovEdgeOrSoModel::probs(
         const boost::dynamic_bitset<> & inf_status,
         const boost::dynamic_bitset<> & trt_status) const {
     std::vector<double> probs;
-    std::vector<uint32_t> status = combine_sets(inf_status, trt_status);
+    std::vector<uint32_t> status = njm::tools::combine_sets(inf_status,
+            trt_status);
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         const uint32_t status_i = status.at(i);
         const bool trt_i = status_i % 2 == 1;
@@ -105,7 +107,7 @@ std::vector<double> NoCovEdgeOrSoModel::ll_grad(
         const boost::dynamic_bitset<> & curr_inf = transition.curr_inf_bits;
         const boost::dynamic_bitset<> & curr_trt = transition.curr_trt_bits;;
         const std::vector<uint32_t> inf_and_trt =
-            combine_sets(curr_inf, curr_trt);
+            njm::tools::combine_sets(curr_inf, curr_trt);
 
         // infection probabilities
         const std::vector<double> probs = this->probs(curr_inf, curr_trt);
@@ -117,7 +119,7 @@ std::vector<double> NoCovEdgeOrSoModel::ll_grad(
 
         // convert bits to sets of indices
         const std::vector<uint32_t> inf_and_change =
-            combine_sets(curr_inf, change_inf);
+            njm::tools::combine_sets(curr_inf, change_inf);
         for (uint32_t j = 0; j < this->num_nodes_; ++j) {
             const uint32_t status_j = inf_and_trt.at(j);
             const uint32_t change_j = inf_and_change.at(j);
@@ -144,9 +146,9 @@ std::vector<double> NoCovEdgeOrSoModel::ll_grad(
                                 curr_trt);
 
                         if (prob_jneigh < 1.0) {
-                            mult_b_to_a(grad_jneigh,
+                            njm::linalg::mult_b_to_a(grad_jneigh,
                                     - 1.0 / (1.0 - prob_jneigh));
-                            add_b_to_a(val_to_add, grad_jneigh);
+                            njm::linalg::add_b_to_a(val_to_add, grad_jneigh);
                         }
 
                     }
@@ -159,9 +161,9 @@ std::vector<double> NoCovEdgeOrSoModel::ll_grad(
                     std::vector<double> grad_j_latent = this->inf_b_grad(
                             j, trt_j, curr_inf, curr_trt);
                     if (prob_j_latent < 1.0) {
-                        mult_b_to_a(grad_j_latent,
+                        njm::linalg::mult_b_to_a(grad_j_latent,
                                 - 1.0 / (1.0 - prob_j_latent));
-                        add_b_to_a(val_to_add, grad_j_latent);
+                        njm::linalg::add_b_to_a(val_to_add, grad_j_latent);
                     }
                 }
 
@@ -169,12 +171,13 @@ std::vector<double> NoCovEdgeOrSoModel::ll_grad(
                 if (change_j % 2 == 1) {
                     // becomes infected
                     if (prob_j > 0.0) {
-                        mult_b_to_a(val_to_add, - (1.0 - prob_j) / prob_j);
-                        add_b_to_a(grad_value, val_to_add);
+                        njm::linalg::mult_b_to_a(val_to_add,
+                                - (1.0 - prob_j) / prob_j);
+                        njm::linalg::add_b_to_a(grad_value, val_to_add);
                     }
                 } else {
                     // remains uninfected
-                    add_b_to_a(grad_value, val_to_add);
+                    njm::linalg::add_b_to_a(grad_value, val_to_add);
                 }
             } else {
                 // was infected
@@ -183,20 +186,20 @@ std::vector<double> NoCovEdgeOrSoModel::ll_grad(
                 if (change_j % 2 == 1) {
                     // becomes uninfected
                     if (prob_j > 0.0) {
-                        mult_b_to_a(grad, 1.0 / prob_j);
-                        add_b_to_a(grad_value, grad);
+                        njm::linalg::mult_b_to_a(grad, 1.0 / prob_j);
+                        njm::linalg::add_b_to_a(grad_value, grad);
                     }
                 } else {
                     // remains infected
                     if (prob_j < 1.0) {
-                        mult_b_to_a(grad, - 1.0 / (1.0 - prob_j));
-                        add_b_to_a(grad_value, grad);
+                        njm::linalg::mult_b_to_a(grad, - 1.0 / (1.0 - prob_j));
+                        njm::linalg::add_b_to_a(grad_value, grad);
                     }
                 }
             }
         }
     }
-    mult_b_to_a(grad_value, 1.0 / history_size);
+    njm::linalg::mult_b_to_a(grad_value, 1.0 / history_size);
     return grad_value;
 }
 
@@ -214,7 +217,7 @@ std::vector<double> NoCovEdgeOrSoModel::ll_hess(
         const boost::dynamic_bitset<> & curr_inf = transition.curr_inf_bits;
         const boost::dynamic_bitset<> & curr_trt = transition.curr_trt_bits;
         const std::vector<uint32_t> inf_and_trt =
-            combine_sets(curr_inf, curr_trt);
+            njm::tools::combine_sets(curr_inf, curr_trt);
 
         // infection probabilities
         const std::vector<double> probs = this->probs(curr_inf, curr_trt);
@@ -226,7 +229,7 @@ std::vector<double> NoCovEdgeOrSoModel::ll_hess(
 
         // convert bits to sets of indices
         const std::vector<uint32_t> inf_and_change =
-            combine_sets(curr_inf, change_inf);
+            njm::tools::combine_sets(curr_inf, change_inf);
 
         for (uint32_t j = 0; j < this->num_nodes_; ++j) {
             const uint32_t status_j = inf_and_trt.at(j);
@@ -246,10 +249,11 @@ std::vector<double> NoCovEdgeOrSoModel::ll_hess(
                                     curr_inf, curr_trt));
                     std::vector<double> hess_j(this->inf_b_hess(j, trt_j,
                                     curr_inf, curr_trt));
-                    mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j0));
-                    mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j0));
-                    add_b_to_a(hess_j, mult_a_and_b(
-                                    outer_a_and_b(grad_j, grad_j), - 1));
+                    njm::linalg::mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j0));
+                    njm::linalg::mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j0));
+                    njm::linalg::add_b_to_a(hess_j, njm::linalg::mult_a_and_b(
+                                    njm::linalg::outer_a_and_b(grad_j, grad_j),
+                                    - 1));
 
 
                     // neighbor probs
@@ -266,33 +270,36 @@ std::vector<double> NoCovEdgeOrSoModel::ll_hess(
                             std::vector<double> add_to_grad(
                                     this->a_inf_b_grad(neigh, j, trt_neigh,
                                             trt_j, curr_inf, curr_trt));
-                            mult_b_to_a(add_to_grad,
+                            njm::linalg::mult_b_to_a(add_to_grad,
                                     - 1.0 / (1.0 - prob_ineigh));
-                            add_b_to_a(grad_j, add_to_grad);
+                            njm::linalg::add_b_to_a(grad_j, add_to_grad);
 
                             std::vector<double> add_to_hess(
                                     this->a_inf_b_hess(neigh, j, trt_neigh,
                                             trt_j, curr_inf, curr_trt));
-                            mult_b_to_a(add_to_hess,
+                            njm::linalg::mult_b_to_a(add_to_hess,
                                     - 1.0 / (1.0 - prob_ineigh));
-                            add_b_to_a(add_to_hess,
-                                    mult_a_and_b(outer_a_and_b(
+                            njm::linalg::add_b_to_a(add_to_hess,
+                                    njm::linalg::mult_a_and_b(
+                                            njm::linalg::outer_a_and_b(
                                                     add_to_grad, add_to_grad),
                                             -1));
-                            add_b_to_a(hess_j, add_to_hess);
+                            njm::linalg::add_b_to_a(hess_j, add_to_hess);
                         }
                     }
 
-                    mult_b_to_a(hess_j, (1.0 - ((change_j % 2) / prob_j)));
+                    njm::linalg::mult_b_to_a(hess_j,
+                            (1.0 - ((change_j % 2) / prob_j)));
 
-                    std::vector<double> outer_grad_j(outer_a_and_b(grad_j,
-                                    grad_j));
+                    std::vector<double> outer_grad_j(
+                            njm::linalg::outer_a_and_b(grad_j, grad_j));
                     const double scale = std::exp(std::log(1.0 - prob_j)
                             - 2.0 * std::log(prob_j));
-                    mult_b_to_a(outer_grad_j, - ((change_j % 2) * scale));
+                    njm::linalg::mult_b_to_a(outer_grad_j,
+                            - ((change_j % 2) * scale));
 
-                    add_b_to_a(hess_val, hess_j);
-                    add_b_to_a(hess_val, outer_grad_j);
+                    njm::linalg::add_b_to_a(hess_val, hess_j);
+                    njm::linalg::add_b_to_a(hess_val, outer_grad_j);
                 }
             } else {
                 // was infected
@@ -300,29 +307,31 @@ std::vector<double> NoCovEdgeOrSoModel::ll_hess(
                 if (prob_j > 0.0 && prob_j < 1.0) {
                     std::vector<double> grad_j(this->rec_b_grad(j, trt_j,
                                     curr_inf, curr_trt));
-                    mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j));
+                    njm::linalg::mult_b_to_a(grad_j, - 1.0 / (1.0 - prob_j));
 
                     const std::vector<double> outer_grad_j(
-                            outer_a_and_b(grad_j, grad_j));
+                            njm::linalg::outer_a_and_b(grad_j, grad_j));
 
                     std::vector<double> hess_j(this->rec_b_hess(j, trt_j,
                                     curr_inf, curr_trt));
-                    mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j));
-                    add_b_to_a(hess_j, mult_a_and_b(outer_grad_j, -1.0));
-                    mult_b_to_a(hess_j, 1.0 - ((change_j % 2) / prob_j));
+                    njm::linalg::mult_b_to_a(hess_j, - 1.0 / (1.0 - prob_j));
+                    njm::linalg::add_b_to_a(hess_j, njm::linalg::mult_a_and_b(
+                                    outer_grad_j, -1.0));
+                    njm::linalg::mult_b_to_a(hess_j,
+                            1.0 - ((change_j % 2) / prob_j));
 
-                    add_b_to_a(hess_val, hess_j);
+                    njm::linalg::add_b_to_a(hess_val, hess_j);
 
                     const double scale = std::exp(std::log(1.0 - prob_j)
                             - 2.0 * std::log(prob_j));
-                    add_b_to_a(hess_val, mult_a_and_b(outer_grad_j,
-                                    - ((change_j % 2) * scale)));
+                    njm::linalg::add_b_to_a(hess_val, njm::linalg::mult_a_and_b(
+                                    outer_grad_j, - ((change_j % 2) * scale)));
                 }
             }
         }
     }
 
-    mult_b_to_a(hess_val, 1.0 / history_size);
+    njm::linalg::mult_b_to_a(hess_val, 1.0 / history_size);
     return hess_val;
 }
 

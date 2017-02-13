@@ -1,9 +1,10 @@
 #include "brMinSimPerturbAgent.hpp"
 
-#include "utilities.hpp"
+#include <njm_cpp/tools/random.hpp>
+#include <njm_cpp/optim/simPerturb.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include "sweepAgent.hpp"
 #include "objFns.hpp"
-#include "simPerturb.hpp"
 
 #include "proximalAgent.hpp"
 
@@ -60,24 +61,25 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent::apply_trt(
 
         auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
                 const boost::dynamic_bitset<> & trt_bits_t) {
-            return dot_a_and_b(par,
+            return njm::linalg::dot_a_and_b(par,
                     this->features_->get_features(inf_bits_t, trt_bits_t));
         };
 
         return bellman_residual_sq(all_history, &a, 0.9, q_fn);
     };
 
-    SimPerturb sp(f, std::vector<double>(this->features_->num_features(), 0.),
+    njm::optim::SimPerturb sp(f,
+            std::vector<double>(this->features_->num_features(), 0.),
             NULL, this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_);
     sp.rng(this->rng());
 
-    Optim::ErrorCode ec;
+    njm::optim::ErrorCode ec;
     do {
         ec = sp.step();
-    } while (ec == Optim::ErrorCode::CONTINUE);
+    } while (ec == njm::optim::ErrorCode::CONTINUE);
 
-    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS)
+    CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
         << std::endl
         << "seed: " << this->seed() << std::endl
         << "steps: " << sp.completed_steps() << std::endl

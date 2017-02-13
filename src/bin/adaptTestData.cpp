@@ -8,24 +8,21 @@
 
 #include "networkRunSymFeatures.hpp"
 
-#include "result.hpp"
-
-#include "pool.hpp"
+#include <njm_cpp/data/result.hpp>
+#include <njm_cpp/data/trapperKeeper.hpp>
+#include <njm_cpp/thread/pool.hpp>
+#include <njm_cpp/info/project.hpp>
+#include <njm_cpp/tools/progress.hpp>
 
 #include <thread>
-
-#include "trapperKeeper.hpp"
-
-#include "projectInfo.hpp"
 
 #include "adaptTestData.pb.h"
 
 #include <google/protobuf/text_format.h>
 
-#include "progress.hpp"
-
 using namespace stdmMf;
 
+using njm::tools::Rng;
 
 void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model> & mod_system,
@@ -408,18 +405,18 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    Pool pool(std::thread::hardware_concurrency());
+    njm::thread::Pool pool(std::thread::hardware_concurrency());
 
-    std::shared_ptr<TrapperKeeper> tp(new TrapperKeeper(argv[0],
-                    PROJECT_ROOT_DIR + "/data"));
+    std::shared_ptr<njm::data::TrapperKeeper> tp(new njm::data::TrapperKeeper(
+                    argv[0], njm::info::project::PROJECT_ROOT_DIR + "/data"));
 
     const uint32_t num_reps = 100;
     const uint32_t num_points = 50;
 
     AdaptData ad;
 
-    std::shared_ptr<Progress<std::ostream> > progress(
-            new Progress<std::ostream>(
+    std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
+            new njm::tools::Progress<std::ostream>(
                     networks.size() * models.size() * num_reps, &std::cout));
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
@@ -453,7 +450,7 @@ int main(int argc, char *argv[]) {
 
     std::string adapt_data_str;
     google::protobuf::TextFormat::PrintToString(ad, &adapt_data_str);
-    Entry & entry = tp->entry("adapt_data.txt");
+    njm::data::Entry & entry = tp->entry("adapt_data.txt");
     entry << adapt_data_str;
 
 

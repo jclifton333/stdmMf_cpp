@@ -15,15 +15,9 @@ SET(test_src
   test_noCovEdgeOrSoModel
   test_noCovEdgeXorSoModel
   test_noCovEdgeSepSoModel
-  test_utilities
   test_networkRunFeatures
   test_networkRunSymFeatures
-  test_sweepAgent
-  test_simPerturb
-  test_pool
-  test_experiment
-  test_trapperKeeper
-  test_progress)
+  test_sweepAgent)
 
 foreach(test_name ${test_src})
   add_executable(${test_name} ${test_name}.cpp)

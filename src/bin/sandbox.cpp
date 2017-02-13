@@ -12,10 +12,6 @@
 
 #include "objFns.hpp"
 
-#include "result.hpp"
-
-#include "pool.hpp"
-
 #include <thread>
 
 using namespace stdmMf;

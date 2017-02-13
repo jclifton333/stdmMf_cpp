@@ -1,5 +1,5 @@
 #include "model.hpp"
-#include "utilities.hpp"
+#include <njm_cpp/tools/bitManip.hpp>
 #include <glog/logging.h>
 #include <iostream>
 #include <cmath>
@@ -92,7 +92,7 @@ double Model::ll(const std::vector<Transition> & history) const {
         const boost::dynamic_bitset<> & change_inf = curr_inf ^ next_inf;
 
         // convert bits to sets of indices
-        const auto change_both_sets = both_sets(change_inf);
+        const auto change_both_sets = njm::tools::both_sets(change_inf);
         const std::vector<uint32_t> changed = change_both_sets.first;
         const uint32_t num_changed = changed.size();
         const std::vector<uint32_t> unchanged = change_both_sets.second;

@@ -1,7 +1,7 @@
 #include "network.hpp"
 #include <algorithm>
 #include <glog/logging.h>
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
 
 namespace stdmMf {
 
@@ -254,7 +254,7 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
         network->adj(1,0) = 1;
     }
 
-    Rng rng;
+    njm::tools::Rng rng;
 
     std::vector<uint32_t> edge_deg(2, 1);
 

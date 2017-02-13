@@ -3,12 +3,13 @@
 
 #include <algorithm>
 
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+
 #include "network.hpp"
 #include "networkRunFeatures.hpp"
 #include "sweepAgentSlow.hpp"
 #include "sweepAgent.hpp"
-#include "utilities.hpp"
 
 namespace stdmMf {
 
@@ -26,7 +27,7 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
 
     // std::random_device rd;
     const uint32_t seed = 0; // crd();
-    Rng rng;
+    njm::tools::Rng rng;
     rng.seed(seed);
 
     // setup sweep agent
@@ -71,7 +72,7 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
                 const std::vector<double> f = nrf->get_features(inf_bits,
                         trt_bits);
 
-                const double val = dot_a_and_b(coef, f);
+                const double val = njm::linalg::dot_a_and_b(coef, f);
 
                 // assume no ties since coef are random
                 if (val > brute_best_val) {
@@ -91,7 +92,7 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
             boost::to_string(trt_bits, sweep_bits);
 
             const std::vector<double> f = nrf->get_features(inf_bits, trt_bits);
-            sweep_agent_best_val = dot_a_and_b(coef, f);
+            sweep_agent_best_val = njm::linalg::dot_a_and_b(coef, f);
         }
 
 
@@ -115,7 +116,7 @@ TEST(TestSweepAgent, TestEquality) {
     std::shared_ptr<Features> f_slow(new NetworkRunFeatures(n, 4));
     std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
 
-    std::shared_ptr<Rng> rng(new Rng);
+    std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
 
     for (uint32_t i = 0; i < 5; ++i) {
         std::vector<double> coef(f->num_features(),0.);
@@ -159,7 +160,7 @@ TEST(TestSweepAgent, TestScaling) {
 
     std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
 
-    std::shared_ptr<Rng> rng(new Rng);
+    std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
 
     for (uint32_t i = 0; i < 25; ++i) {
         // randomly infect 10 percent
@@ -209,7 +210,7 @@ TEST(TestSweepAgent, TestParallel) {
 
     std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
 
-    std::shared_ptr<Rng> rng(new Rng);
+    std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
 
     for (uint32_t i = 0; i < 25; ++i) {
         // randomly infect 10 percent

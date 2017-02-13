@@ -2,8 +2,16 @@
 #include <chrono>
 #include <fstream>
 #include <thread>
-#include "result.hpp"
-#include "pool.hpp"
+
+#include <njm_cpp/data/result.hpp>
+#include <njm_cpp/data/trapperKeeper.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+#include <njm_cpp/optim/simPerturb.hpp>
+#include <njm_cpp/thread/pool.hpp>
+#include <njm_cpp/tools/experiment.hpp>
+#include <njm_cpp/tools/progress.hpp>
+#include <njm_cpp/info/project.hpp>
+
 #include "system.hpp"
 #include "agent.hpp"
 #include "noCovEdgeModel.hpp"
@@ -13,17 +21,14 @@
 #include "proximalAgent.hpp"
 #include "epsAgent.hpp"
 #include "objFns.hpp"
-#include "simPerturb.hpp"
-#include "experiment.hpp"
-#include "utilities.hpp"
 
 
-#include "trapperKeeper.hpp"
-#include "projectInfo.hpp"
-#include "progress.hpp"
 
 using namespace stdmMf;
 
+using njm::data::Result;
+using njm::tools::Rng;
+using njm::tools::Experiment;
 
 void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const uint32_t & seed,
@@ -90,32 +95,33 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         // q function
         auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
                 const boost::dynamic_bitset<> & trt_bits) {
-            return dot_a_and_b(par,features->get_features(inf_bits, trt_bits));
+            return njm::linalg::dot_a_and_b(par,features->get_features(
+                            inf_bits, trt_bits));
         };
         const double br = bellman_residual_sq(history, &agent, 0.9, q_fn);
 
         return br;
     };
 
-    SimPerturb sp(min_fn, std::vector<double>(
+    njm::optim::SimPerturb sp(min_fn, std::vector<double>(
                     features->num_features(), 0.),
             NULL, c, t, a, b, ell, min_step_size);
     sp.rng(rng);
 
-    Optim::ErrorCode ec;
+    njm::optim::ErrorCode ec;
     const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
         std::chrono::high_resolution_clock::now();
 
     do {
         ec = sp.step();
-    } while (ec == Optim::ErrorCode::CONTINUE);
+    } while (ec == njm::optim::ErrorCode::CONTINUE);
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
         std::chrono::high_resolution_clock::now();
 
     const std::chrono::duration<double> elapsed = tock - tick;
 
-    CHECK_EQ(ec, Optim::ErrorCode::SUCCESS)
+    CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
         << "Failed with: c = " << c << ", t = " << t
         << ", a = " << a << ", b = " << b << ", ell = " << ell
         << ", min_step_size = " << min_step_size << ", completed_steps = "
@@ -199,15 +205,15 @@ int main(int argc, char *argv[]) {
         g->add_factor(min_step_size_list);
     }
 
-    Pool p(std::thread::hardware_concurrency());
+    njm::thread::Pool p(std::thread::hardware_concurrency());
 
     std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
     std::vector<Experiment::Factor> factors;
     std::vector<uint32_t> factors_level;
     std::vector<uint32_t> rep_number;
 
-    std::shared_ptr<Progress<std::ostream> > progress(
-            new Progress<std::ostream>(&std::cout));
+    std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
+            new njm::tools::Progress<std::ostream>(&std::cout));
 
     e.start();
     uint32_t level_num = 0;
@@ -256,8 +262,9 @@ int main(int argc, char *argv[]) {
     CHECK_EQ(factors.size(), results.size());
     CHECK_EQ(factors.size(), factors_level.size());
     CHECK_EQ(factors.size(), rep_number.size());
-    TrapperKeeper tk(argv[0], PROJECT_ROOT_DIR + "/data");
-    Entry & entry = tk.entry("brMinExperiment_results.txt");
+    njm::data::TrapperKeeper tk(argv[0],
+            njm::info::project::PROJECT_ROOT_DIR + "/data");
+    njm::data::Entry & entry = tk.entry("brMinExperiment_results.txt");
     entry << "level_num, rep_num, elapsed, value, c, t, a, b, ell, "
           << "min_step_size\n";
     for (uint32_t i = 0; i < results.size(); ++i) {

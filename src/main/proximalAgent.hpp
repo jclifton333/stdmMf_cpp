@@ -3,12 +3,12 @@
 
 #include "agent.hpp"
 #include "network.hpp"
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
 
 namespace stdmMf {
 
 
-class ProximalAgent : public Agent, public RngClass {
+class ProximalAgent : public Agent, public njm::tools::RngClass {
 
 public:
     ProximalAgent(const std::shared_ptr<const Network> & network);

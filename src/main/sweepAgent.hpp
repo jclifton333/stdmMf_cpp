@@ -1,17 +1,17 @@
 #ifndef SWEEP_AGENT_HPP
 #define SWEEP_AGENT_HPP
 
-#include "random.hpp"
+#include <njm_cpp/tools/random.hpp>
+#include <njm_cpp/thread/pool.hpp>
 #include "agent.hpp"
 #include "features.hpp"
 
-#include "pool.hpp"
 
 
 namespace stdmMf {
 
 
-class SweepAgent : public Agent, public RngClass {
+class SweepAgent : public Agent, public njm::tools::RngClass {
 protected:
     const std::shared_ptr<Features> features_;
     const std::vector<double> coef_;
@@ -22,7 +22,7 @@ protected:
 
     bool do_parallel_;
 
-    std::shared_ptr<Pool> pool_;
+    std::shared_ptr<njm::thread::Pool> pool_;
 
 public:
     SweepAgent(const std::shared_ptr<const Network> & network,

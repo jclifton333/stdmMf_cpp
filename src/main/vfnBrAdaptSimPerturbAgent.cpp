@@ -4,6 +4,8 @@
 
 #include <armadillo>
 
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+
 #include "system.hpp"
 #include "objFns.hpp"
 
@@ -92,7 +94,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
     // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(all_history);
-    mult_b_to_a(hess, -1.0 * all_history.size());
+    njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
 
     const arma::mat hess_mat(hess.data(), this->model_->par_size(),
             this->model_->par_size());
@@ -114,7 +116,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         LOG_IF(FATAL, !std::isfinite(std_norm(i)));
     }
     const std::vector<double> par_samp(
-            add_a_and_b(this->model_->par(),
+            njm::linalg::add_a_and_b(this->model_->par(),
                     arma::conv_to<std::vector<double> >::from(
                             var_sqrt * std_norm)));
 
@@ -148,17 +150,17 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
             return -val;
         };
 
-        SimPerturb sp(f, optim_par, NULL, this->vfn_c_, this->vfn_t_,
-                this->vfn_a_, this->vfn_b_, this->vfn_ell_,
+        njm::optim::SimPerturb sp(f, optim_par, NULL, this->vfn_c_,
+                this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
                 this->vfn_min_step_size_);
         sp.rng(this->rng());
 
-        Optim::ErrorCode ec;
+        njm::optim::ErrorCode ec;
         do {
             ec = sp.step();
-        } while (ec == Optim::ErrorCode::CONTINUE);
+        } while (ec == njm::optim::ErrorCode::CONTINUE);
 
-        CHECK_EQ(ec, Optim::ErrorCode::SUCCESS);
+        CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
 
         optim_par = sp.par();
     }
@@ -173,7 +175,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
             auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
-                return dot_a_and_b(optim_par,
+                return njm::linalg::dot_a_and_b(optim_par,
                         this->features_->get_features(inf_bits_t, trt_bits_t));
             };
 
@@ -195,10 +197,11 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
             // scale the par to minimize BR
             if (numer > 0) {
                 // if scalor is positive
-                mult_b_to_a(optim_par, numer / denom);
+                njm::linalg::mult_b_to_a(optim_par, numer / denom);
             } else {
                 // other wise just make it norm one
-                mult_b_to_a(optim_par, l2_norm(optim_par));
+                njm::linalg::mult_b_to_a(optim_par,
+                        njm::linalg::l2_norm(optim_par));
             }
         }
 
@@ -209,26 +212,27 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
             auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
-                return dot_a_and_b(par,
+                return njm::linalg::dot_a_and_b(par,
                         this->features_->get_features(inf_bits_t, trt_bits_t));
             };
 
             return bellman_residual_sq(all_history, &a, 0.9, q_fn);
         };
 
-        SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_, this->br_a_,
-                this->br_b_, this->br_ell_, this->br_min_step_size_);
+        njm::optim::SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_,
+                this->br_a_, this->br_b_, this->br_ell_,
+                this->br_min_step_size_);
         sp.rng(this->rng());
 
-        Optim::ErrorCode ec;
+        njm::optim::ErrorCode ec;
         const uint32_t num_steps = history.size() * this->step_cap_mult_;
         do {
             ec = sp.step();
-        } while (ec == Optim::ErrorCode::CONTINUE
+        } while (ec == njm::optim::ErrorCode::CONTINUE
                 && sp.completed_steps() < num_steps);
 
-        CHECK(ec == Optim::ErrorCode::SUCCESS
-                || (ec == Optim::ErrorCode::CONTINUE
+        CHECK(ec == njm::optim::ErrorCode::SUCCESS
+                || (ec == njm::optim::ErrorCode::CONTINUE
                         && sp.completed_steps() == num_steps))
             << "error code: " << ec;
 
