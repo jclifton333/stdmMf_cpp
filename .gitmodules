@@ -1,3 +1,6 @@
 [submodule "libs/googletest"]
 	path = libs/googletest
 	url = git:google/googletest
+[submodule "njm_cpp"]
+	path = libs/njm_cpp
+	url = https://github.com/nickjmeyer/njm_cpp
