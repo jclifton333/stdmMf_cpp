@@ -42,7 +42,7 @@ run(const std::shared_ptr<Network> & net,
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
     njm::thread::Pool pool(std::thread::hardware_concurrency());
 
-    const uint32_t run_length = 3;
+    const uint32_t run_length = 2;
 
     // none
     std::vector<std::shared_ptr<Result<double> > > none_val;
