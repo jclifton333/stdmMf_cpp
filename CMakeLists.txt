@@ -18,6 +18,7 @@ endif()
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
 add_subdirectory(libs/googletest)
+set(NJM_CPP_FORCE_BUILD_TEST YES)
 add_subdirectory(libs/njm_cpp)
 
 add_subdirectory(src/main)
