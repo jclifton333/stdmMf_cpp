@@ -6,7 +6,7 @@
 #include <mutex>
 #include <thread>
 #include <njm_cpp/tools/random.hpp>
-#include <njm_cpp/data/Result.hpp>
+#include <njm_cpp/data/result.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include "sweepAgent.hpp"
 
