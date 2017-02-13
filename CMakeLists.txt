@@ -17,7 +17,10 @@ endif()
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
+add_subdirectory(libs/googletest)
+add_subdirectory(libs/njm_cpp)
+
 add_subdirectory(src/main)
 add_subdirectory(src/bin)
-add_subdirectory(libs/googletest)
+
 add_subdirectory(test)
