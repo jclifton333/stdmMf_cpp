@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
                 ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeModel(
                                         networks.at(i))),
                         std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))));
+                                        networks.at(i)))); // sfsd
                 mp.first->par(par);
                 mp.second->par(par_sep);
 
