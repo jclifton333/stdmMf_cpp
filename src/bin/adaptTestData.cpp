@@ -33,8 +33,10 @@ void run(const std::shared_ptr<Network> & net,
     std::shared_ptr<Rng> rng(new Rng);
     rng->seed(rep);
 
+    const uint32_t run_length = 2;
+
     std::shared_ptr<Features> features(
-            new NetworkRunSymFeatures(net->clone(), 3));
+            new NetworkRunSymFeatures(net->clone(), run_length));
 
     System s_orig(net->clone(), mod_system->clone());
 
