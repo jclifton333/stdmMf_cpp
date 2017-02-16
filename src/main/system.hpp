@@ -20,10 +20,10 @@ private:
 
     const uint32_t num_nodes_;
 
-    boost::dynamic_bitset<> inf_bits_;
+    State state_;
     boost::dynamic_bitset<> trt_bits_;
 
-    std::vector<InfAndTrt> history_;
+    std::vector<StateAndTrt> history_;
 
     uint32_t time_;
 
@@ -41,23 +41,19 @@ public:
 
     uint32_t n_trt() const;
 
-    void cleanse();
-
-    void plague();
+    void reset();
 
     void wipe_trt();
 
-    void erase_history();
+    const State & state() const;
 
-    const boost::dynamic_bitset<> & inf_bits() const;
-
-    void inf_bits(const boost::dynamic_bitset<> & inf_bits);
+    void State(const State & state);
 
     const boost::dynamic_bitset<> & trt_bits() const;
 
     void trt_bits(const boost::dynamic_bitset<> & trt_bits);
 
-    const std::vector<InfAndTrt> & history() const;
+    const std::vector<StateAndTrt> & history() const;
 
     void start();
 
@@ -65,7 +61,7 @@ public:
 
     void turn_clock();
 
-    void turn_clock(const std::vector<double> & probs);
+    void turn_clock(const State & next_state);
 
 };
 

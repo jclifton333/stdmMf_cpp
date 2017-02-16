@@ -25,39 +25,35 @@ std::shared_ptr<System> System::clone() const {
 
 
 uint32_t System::n_inf() const {
-    return this->inf_bits_.count();
+    return this->state_.inf_bits.count();
 }
 
 uint32_t System::n_not() const {
-    return this->num_nodes_ - this->inf_bits_.count();
+    return this->num_nodes_ - this->state_.inf_bits.count();
 }
 
 uint32_t System::n_trt() const {
     return this->trt_bits_.count();
 }
 
-void System::cleanse() {
-    this->inf_bits_.reset();
-}
-
-void System::plague() {
-    this->inf_bits_.set();
-}
-
-void System::wipe_trt() {
+void System::reset() {
+    // wipe infection
+    this->state_.inf_bits.reset();
+    // set shield to zero
+    std::fill(this->state_.shield.begin(),
+            this->state_.shield.end(), 0.);
+    // wipe treatments
     this->trt_bits_.reset();
+    // erase history
+    this->erase_history();
 }
 
-void System::erase_history() {
-    this->history_.clear();
+const State & System::state() const {
+    return this->state_;
 }
 
-const boost::dynamic_bitset<> & System::inf_bits() const {
-    return this->inf_bits_;
-}
-
-void System::inf_bits(const boost::dynamic_bitset<> & inf_bits) {
-    this->inf_bits_ = inf_bits;
+void System::state(const State & state) {
+    this->state_ = state;
 }
 
 const boost::dynamic_bitset<> & System::trt_bits() const {
@@ -73,45 +69,40 @@ const std::vector<InfAndTrt> & System::history() const {
 }
 
 void System::start() {
-    this->cleanse();
-    this->wipe_trt();
-    this->erase_history();
+    this->reset();
 
+    // randomly select locations for infection
     const uint32_t num_starts =
         static_cast<uint32_t>(ceil(this->num_nodes_ * 0.1));
     const std::vector<int> infs = this->rng_->sample_range(
             0, this->num_nodes_, num_starts);
 
     for (uint32_t i = 0; i < num_starts; ++i) {
-        this->inf_bits_.set(infs.at(i));
+        this->state_.inf_bits.set(infs.at(i));
     }
 }
 
 void System::update_history() {
     this->history_.push_back(
-            InfAndTrt(this->inf_bits_, this->trt_bits_));
+            StateAndTrt(this->state_, this->trt_bits_));
 }
 
 void System::turn_clock() {
-    const std::vector<double> probs = this->model_->probs(this->inf_bits_,
-            this->trt_bits_);
-    this->turn_clock(probs);
+    const State next_state = this->model_->(turn_clock(this->state_,
+                    this->inf_bits));
+
+    this->turn_clock(next_state);
 }
 
-void System::turn_clock(const std::vector<double> & probs) {
+void System::turn_clock(const State & next_state) {
     // first record the history
     this->update_history();
 
-    // update infection status
-    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-        double r = this->rng_->runif_01();
-        if (r < probs.at(i)) {
-            this->inf_bits_.flip(i);
-        }
-    }
+    // assign next state
+    this->state_ = next_state;
 
     // clear treatments
-    this->wipe_trt();
+    this->trt_bits_.reset();
 }
 
 

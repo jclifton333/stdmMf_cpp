@@ -6,10 +6,6 @@
 namespace stdmMf {
 
 
-struct State {
-    boost::dynamci_bitset<> inf_bits;
-    std::vector<double> resistance;
-};
 
 
 } // namespace stdmMf

@@ -3,13 +3,15 @@
 
 #include "types.hpp"
 
+#include <njm_cpp/tools/random.hpp>
+
 #include <cstdint>
 #include <gsl/gsl_multimin.h>
 
 namespace stdmMf {
 
 
-class Model {
+class Model : public RngClass {
 public:
     virtual std::shared_ptr<Model> clone() const = 0;
 
@@ -21,20 +23,23 @@ public:
 
     virtual void est_par(const std::vector<Transition> & history);
 
-    void est_par(const std::vector<InfAndTrt> & history,
-            const boost::dynamic_bitset<> & inf_bits);
+    void est_par(const std::vector<StateAndTrt> & history,
+            const State & state);
 
     virtual std::vector<double> probs(
-            const boost::dynamic_bitset<> & inf_status,
+            const State & state,
             const boost::dynamic_bitset<> & trt_status) const = 0;
 
-    virtual double ll(const std::vector<Transition> & history) const;
+    virtual double ll(const std::vector<Transition> & history) const = 0;
 
     virtual std::vector<double> ll_grad(
             const std::vector<Transition> & history) const = 0;
 
     virtual std::vector<double> ll_hess(
             const std::vector<Transition> & history) const = 0;
+
+    virtual State turn_clock(const State & curr_state
+            const boost::dynamci_bitset<> & trt_bits) const = 0;
 };
 
 class ModelFit {
