@@ -7,33 +7,34 @@
 
 #include <njm_cpp/tools/random.hpp>
 
-#include "types.hpp"
+#include "states.hpp"
 #include "model.hpp"
 #include "network.hpp"
 
 namespace stdmMf {
 
-class System : public njm::tools::RngClass {
+template <typename State>
+class System<State> : public njm::tools::RngClass {
 private:
     const std::shared_ptr<const Network> network_;
-    const std::shared_ptr<Model> model_;
+    const std::shared_ptr<Model<State> > model_;
 
     const uint32_t num_nodes_;
 
     State state_;
     boost::dynamic_bitset<> trt_bits_;
 
-    std::vector<StateAndTrt> history_;
+    std::vector<StateAndTrt<State> > history_;
 
     uint32_t time_;
 
 public:
     System(const std::shared_ptr<const Network> & network,
-            const std::shared_ptr<Model> & model);
+            const std::shared_ptr<Model<State> > & model);
 
-    System(const System & other);
+    System(const System<State> & other);
 
-    std::shared_ptr<System> clone() const;
+    std::shared_ptr<System<State> > clone() const;
 
     uint32_t n_inf() const;
 
@@ -45,15 +46,15 @@ public:
 
     void wipe_trt();
 
-    const State & state() const;
+    const State<State> & state() const;
 
-    void State(const State & state);
+    void State(const State<State> & state);
 
     const boost::dynamic_bitset<> & trt_bits() const;
 
     void trt_bits(const boost::dynamic_bitset<> & trt_bits);
 
-    const std::vector<StateAndTrt> & history() const;
+    const std::vector<StateAndTrt<State> > & history() const;
 
     void start();
 

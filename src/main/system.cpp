@@ -4,38 +4,44 @@
 
 namespace stdmMf {
 
-
+template <typename State>
 System::System(const std::shared_ptr<const Network> & network,
-        const std::shared_ptr<Model> & model)
+        const std::shared_ptr<Model<State> > & model)
     : network_(network), model_(model),
       num_nodes_(this->network_->size()), inf_bits_(this->num_nodes_),
       trt_bits_(this->num_nodes_), time_(0) {
 }
 
-System::System(const System & other)
+template <typename State>
+System::System(const System<State> & other)
     : RngClass(other), network_(other.network_->clone()),
       model_(other.model_->clone()), num_nodes_(other.num_nodes_),
       inf_bits_(other.inf_bits_), trt_bits_(other.trt_bits_),
       history_(other.history_), time_(other.time_) {
 }
 
-std::shared_ptr<System> System::clone() const {
-    return std::shared_ptr<System>(new System(*this));
+template <typename State>
+std::shared_ptr<System<State> > System::clone() const {
+    return std::shared_ptr<System<State> >(new System<State>(*this));
 }
 
 
+template <typename State>
 uint32_t System::n_inf() const {
     return this->state_.inf_bits.count();
 }
 
+template <typename State>
 uint32_t System::n_not() const {
     return this->num_nodes_ - this->state_.inf_bits.count();
 }
 
+template <typename State>
 uint32_t System::n_trt() const {
     return this->trt_bits_.count();
 }
 
+template <typename State>
 void System::reset() {
     // wipe infection
     this->state_.inf_bits.reset();
@@ -48,26 +54,32 @@ void System::reset() {
     this->erase_history();
 }
 
+template <typename State>
 const State & System::state() const {
     return this->state_;
 }
 
+template <typename State>
 void System::state(const State & state) {
     this->state_ = state;
 }
 
+template <typename State>
 const boost::dynamic_bitset<> & System::trt_bits() const {
     return this->trt_bits_;
 }
 
+template <typename State>
 void System::trt_bits(const boost::dynamic_bitset<> & trt_bits) {
     this->trt_bits_ = trt_bits;
 }
 
-const std::vector<InfAndTrt> & System::history() const {
+template <typename State>
+const std::vector<InfAndTrt<State> > & System::history() const {
     return this->history_;
 }
 
+template <typename State>
 void System::start() {
     this->reset();
 
@@ -82,11 +94,13 @@ void System::start() {
     }
 }
 
+template <typename State>
 void System::update_history() {
     this->history_.push_back(
-            StateAndTrt(this->state_, this->trt_bits_));
+            StateAndTrt<State>(this->state_, this->trt_bits_));
 }
 
+template <typename State>
 void System::turn_clock() {
     const State next_state = this->model_->(turn_clock(this->state_,
                     this->inf_bits));
@@ -94,6 +108,7 @@ void System::turn_clock() {
     this->turn_clock(next_state);
 }
 
+template <typename State>
 void System::turn_clock(const State & next_state) {
     // first record the history
     this->update_history();
@@ -105,6 +120,9 @@ void System::turn_clock(const State & next_state) {
     this->trt_bits_.reset();
 }
 
+
+template class System<InfState>;
+template class System<InfShieldState>;
 
 
 } // namespace stdmMf
