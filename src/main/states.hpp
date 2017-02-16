@@ -1,12 +1,23 @@
-#ifndef TYPES_HPP
-#define TYPES_HPP
+#ifndef STATES_HPP
+#define STATES_HPP
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/serialization/strong_typedef.hpp>
 
 namespace stdmMf {
 
-struct State {
+struct InfState {
+    // infection status
+    boost::dynamic_bitset<> inf_bits;
+    // disease can have a shield against treatment
+    // if shield is large, then treatment has a decreased effect
+
+    State(const uint32_t & num_nodes);
+
+    State(const boost::dynamic_bitset<> & inf_bits);
+};
+
+
+struct InfShieldState {
     // infection status
     boost::dynamic_bitset<> inf_bits;
     // disease can have a shield against treatment
@@ -20,18 +31,16 @@ struct State {
 };
 
 
+template <typename State>
 struct StateAndTrt {
     State state;
     boost::dynamic_bitset<> trt_bits;
 
     StateAndTrt(const State & state,
             const boost::dynamic_bitset<> & trt_bits);
-
-    StateAndTrt(const boost::dynamic_bitset<> & inf_bits,
-            const std::vector<double> & shield,
-            const boost::dynamic_bitset<> & trt_bits);
 };
 
+template <typename State>
 struct Transition {
     State curr_state;
     boost::dynamic_bitset<> curr_trt_bits;
@@ -41,10 +50,13 @@ struct Transition {
             const boost::dynamic_bitset<> & curr_trt_bits,
             const State & next_state);
 
-    static std::vector<Transition> from_sequence(
-            const std::vector<StateAndTrt> & sequence);
-    static std::vector<Transition> from_sequence(
-            const std::vector<StateAndTrt> & sequence,
+    // turn a sequence of states into a vector of transitions
+    static std::vector<Transition<State> > from_sequence(
+            const std::vector<StateAndTrt<State> > & sequence);
+
+    // turn a sequence of states into a vector of transitions
+    static std::vector<Transition<State> > from_sequence(
+            const std::vector<StateAndTrt<State> > & sequence,
             const State & final_state);
 };
 
@@ -52,4 +64,4 @@ struct Transition {
 } // namespace stdmMf
 
 
-#endif // TYPES_HPP
+#endif // STATES_HPP

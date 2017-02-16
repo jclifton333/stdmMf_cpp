@@ -1,30 +1,40 @@
-#include "types.hpp"
+#include "states.hpp"
 
 #include <glog/logging.h>
 
 namespace stdmMf {
 
-State::State(const uint32_t & num_nodes)
+// infection only state
+InfState::InfState(const uint32_t & num_nodes)
+    : inf_bits(num_nodes) {
+}
+
+InfState::InfState(const boost::dynamic_bitset<> & inf_bits,
+        const std::vector<double> & shield)
+    : inf_bits(inf_bits) {
+}
+
+
+// infection and shield state
+InfShieldState::InfShieldState(const uint32_t & num_nodes)
     : inf_bits(num_nodes), shield(num_nodes, 0.) {
 }
 
-State::State(const boost::dynamic_bitset<> & inf_bits,
+InfShieldState::InfShieldState(const boost::dynamic_bitset<> & inf_bits,
         const std::vector<double> & shield)
     : inf_bits(inf_bits), shield(shield) {
 }
 
 
+// state and treatment together
+template <typename State>
 StateAndTrt::StateAndTrt(const State & state,
         const boost::dynamic_bitset<> & trt_bits)
     : state(state), trt_bits(trt_bits) {
 }
 
-StateAndTrt::StateAndTrt(const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<double> & shield,
-        const boost::dynamic_bitset<> & trt_bits)
-    : state(inf_bits, shield), trt_bits(trt_bits) {
-}
-
+// transitions
+template <typename State>
 Transition::Transition(const State & curr_state,
         const boost::dynamic_bitset<> & curr_trt_bits,
         const State & next_state)
@@ -32,11 +42,15 @@ Transition::Transition(const State & curr_state,
       next_state(next_state) {
 }
 
-std::vector<Transition> Transition::from_sequence(
-        const std::vector<StateAndTrt> & sequence) {
+template class StateAndTrt<InfState>;
+template class StateAndTrt<InfShieldState>;
+
+template <typename State>
+std::vector<Transition<State> > Transition::from_sequence(
+        const std::vector<StateAndTrt<State> > & sequence) {
     CHECK_GT(sequence.size(), 1);
     const uint32_t num_transitions = sequence.size() - 1;
-    std::vector<Transition> transitions;
+    std::vector<Transition<State> > transitions;
     for (uint32_t i = 0; i < num_transitions; ++i) {
         transitions.emplace_back(sequence.at(i).state,
                 sequence.at(i).trt_bits, sequence.at(i+1).state);
@@ -44,12 +58,12 @@ std::vector<Transition> Transition::from_sequence(
     return transitions;
 }
 
-
-std::vector<Transition> Transition::from_sequence(
-        const std::vector<StateAndTrt> & sequence,
+template <typename State>
+std::vector<Transition<State> > Transition::from_sequence(
+        const std::vector<StateAndTrt<State> > & sequence,
         const State & final_state) {
     CHECK_GE(sequence.size(), 1);
-    std::vector<Transition> transitions;
+    std::vector<Transition<State> > transitions;
     if (sequence.size() > 1) {
         transitions = Transition::from_sequence(sequence);
     }
@@ -58,6 +72,9 @@ std::vector<Transition> Transition::from_sequence(
             sequence.at(sequence_size - 1).trt_bits, final_state);
     return transitions;
 }
+
+template class Transition<InfState>;
+template class Transition<InfShieldState>;
 
 
 
