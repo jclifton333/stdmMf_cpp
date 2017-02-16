@@ -6,16 +6,40 @@
 
 namespace stdmMf {
 
-void Model::est_par(const std::vector<InfAndTrt> & history,
-        const boost::dynamic_bitset<> & inf_bits) {
-    this->est_par(Transition::from_sequence(history, inf_bits));
+
+template <typename State>
+Model::Model(const uint32_t & par_size,
+        const std::shared_ptr<const Network> & network)
+    : par_size_(par_size), network_(network->clone()),
+      num_nodes_(network->size()) {
 }
 
-void Model::est_par(const std::vector<Transition> & history) {
+
+template <typename State>
+Model::Model(const Model<State> & other)
+    : par_size_(other.par_size_), network_(other.network_->clone()),
+      num_nodes_(other.num_nodes_) {
+}
+
+template <typename State>
+uint32_t Model::par_size() const {
+    return this->par_size_;
+}
+
+
+template <typename State>
+void Model::est_par(const std::vector<InfAndTrt<State> > & history,
+        const boost::dynamic_bitset<> & inf_bits) {
+    this->est_par(Transition<State>::from_sequence(history, inf_bits));
+}
+
+
+template <typename State>
+void Model::est_par(const std::vector<Transition<State> > & history) {
     CHECK_GE(history.size(), 1);
 
     // create fit object
-    ModelFit mf(this, history);
+    ModelFit<State> mf(this, history);
 
     // set up gsl objects / containers
     const gsl_multimin_fdfminimizer_type * T;
@@ -29,9 +53,9 @@ void Model::est_par(const std::vector<Transition> & history) {
 
     gsl_multimin_function_fdf my_func;
     my_func.n = this->par_size();
-    my_func.f = ModelFit::obj_fn;
-    my_func.df = ModelFit::obj_fn_grad;
-    my_func.fdf = ModelFit::obj_fn_both;
+    my_func.f = ModelFit<State>::obj_fn;
+    my_func.df = ModelFit<State>::obj_fn_grad;
+    my_func.fdf = ModelFit<State>::obj_fn_both;
     my_func.params = &mf;
 
     T = gsl_multimin_fdfminimizer_vector_bfgs2;
@@ -75,13 +99,20 @@ void Model::est_par(const std::vector<Transition> & history) {
 }
 
 
-ModelFit::ModelFit(Model * const model, const std::vector<Transition> & history)
+template class Model<InfState>;
+template class Model<InfShieldState>;
+
+
+template <typename State>
+ModelFit::ModelFit(Model<State> * const model,
+        const std::vector<Transition<State> > & history)
     : model_(model), history_(history) {
 }
 
 
+template <typename State>
 double ModelFit::obj_fn(const gsl_vector * x, void * params){
-    ModelFit * mf = static_cast<ModelFit*>(params);
+    ModelFit<State> * mf = static_cast<ModelFit<State>*>(params);
     std::vector<double> par;
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
         par.push_back(gsl_vector_get(x, pi));
@@ -95,8 +126,9 @@ double ModelFit::obj_fn(const gsl_vector * x, void * params){
     return - ll;
 }
 
+template <typename State>
 void ModelFit::obj_fn_grad(const gsl_vector * x, void * params, gsl_vector * g){
-    ModelFit * mf = static_cast<ModelFit*>(params);
+    ModelFit<State> * mf = static_cast<ModelFit<State>*>(params);
     std::vector<double> par;
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
         par.push_back(gsl_vector_get(x, pi));
@@ -115,9 +147,10 @@ void ModelFit::obj_fn_grad(const gsl_vector * x, void * params, gsl_vector * g){
     }
 }
 
+template <typename State>
 void ModelFit::obj_fn_both(const gsl_vector * x, void * params, double * f,
         gsl_vector * g){
-    ModelFit * mf = static_cast<ModelFit*>(params);
+    ModelFit<State> * mf = static_cast<ModelFit<State>*>(params);
     std::vector<double> par;
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
         par.push_back(gsl_vector_get(x, pi));
@@ -143,6 +176,9 @@ void ModelFit::obj_fn_both(const gsl_vector * x, void * params, double * f,
     }
 }
 
+
+template class ModelFit<InfState>;
+template class ModelFit<InfShieldState>;
 
 
 } // namespace stdmMf
