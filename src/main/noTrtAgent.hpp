@@ -6,22 +6,25 @@
 namespace stdmMf {
 
 
-class NoTrtAgent : public Agent {
+template <typename State>
+class NoTrtAgent : public Agent<State> {
 public:
     NoTrtAgent(const std::shared_ptr<const Network> & network);
 
-    NoTrtAgent(const NoTrtAgent & other);
+    NoTrtAgent(const NoTrtAgent<State> & other);
 
-    virtual std::shared_ptr<Agent> clone() const;
+    ~NoTrtAgent() override = default;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits,
-            const std::vector<InfAndTrt> & history);
+    std::shared_ptr<Agent<State> > clone() const override;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits);
+    boost::dynamic_bitset<> apply_trt(
+            const State & state,
+            const std::vector<StateAndTrt<State> > & history) override;
 
-    virtual uint32_t num_trt() const;
+    boost::dynamic_bitset<> apply_trt(
+            const State & state) override;
+
+    uint32_t num_trt() const override;
 };
 
 

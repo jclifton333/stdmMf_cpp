@@ -3,33 +3,47 @@
 namespace stdmMf {
 
 
-NoTrtAgent::NoTrtAgent(const std::shared_ptr<const Network> & network)
+template<typename State>
+NoTrtAgent<State>::NoTrtAgent(const std::shared_ptr<const Network> & network)
     : Agent(network) {
 }
 
-NoTrtAgent::NoTrtAgent(const NoTrtAgent & other)
-    : Agent(other.network_->clone()) {
+
+template<typename State>
+NoTrtAgent<State>::NoTrtAgent(const NoTrtAgent<State> & other)
+    : Agent<State>(other.network_->clone()) {
 }
 
-std::shared_ptr<Agent> NoTrtAgent::clone() const {
-    return std::shared_ptr<Agent>(new NoTrtAgent(*this));
+
+template<typename State>
+std::shared_ptr<Agent<State> > NoTrtAgent<State>::clone() const {
+    return std::shared_ptr<Agent<State> >(new NoTrtAgent<State>(*this));
 }
 
-boost::dynamic_bitset<> NoTrtAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<InfAndTrt> & history) {
+
+template<typename State>
+boost::dynamic_bitset<> NoTrtAgent<State>::apply_trt(
+        const State & state,
+        const std::vector<StateAndTrt<State> > & history) {
     return boost::dynamic_bitset<> (this->num_nodes_);
 }
 
-boost::dynamic_bitset<> NoTrtAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
+
+template<typename State>
+boost::dynamic_bitset<> NoTrtAgent<State>::apply_trt(
+        const State & state) {
     return boost::dynamic_bitset<>(this->num_nodes_);
 }
 
-uint32_t NoTrtAgent::num_trt() const {
+
+template<typename State>
+uint32_t NoTrtAgent<State>::num_trt() const {
     return 0;
 }
 
+
+template class NoTrtAgent<InfState>;
+template class NoTrtAgent<InfShieldState>;
 
 
 } // namespace stdmMf
