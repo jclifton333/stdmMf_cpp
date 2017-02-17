@@ -8,9 +8,9 @@
 
 namespace stdmMf {
 
-
-class BrMinSimPerturbAgent : public Agent, public njm::tools::RngClass {
-    const std::shared_ptr<Features> features_;
+template <typename State>
+class BrMinSimPerturbAgent : public Agent<State>, public njm::tools::RngClass {
+    const std::shared_ptr<Features<State> > features_;
 
     const double c_;
     const double t_;
@@ -21,7 +21,7 @@ class BrMinSimPerturbAgent : public Agent, public njm::tools::RngClass {
 
 public:
     BrMinSimPerturbAgent(const std::shared_ptr<const Network> & network,
-            const std::shared_ptr<Features> & features,
+            const std::shared_ptr<Features<State> > & features,
             const double & c,
             const double & t,
             const double & a,
@@ -29,16 +29,15 @@ public:
             const double & ell,
             const double & min_step_size);
 
-    BrMinSimPerturbAgent(const BrMinSimPerturbAgent & other);
+    BrMinSimPerturbAgent(const BrMinSimPerturbAgent<State> & other);
 
-    virtual std::shared_ptr<Agent> clone() const;
+    ~BrMinSimPerturbAgent() override = default;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits,
-            const std::vector<InfAndTrt> & history);
+    std::shared_ptr<Agent<State> > clone() const override;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits);
+    boost::dynamic_bitset<> apply_trt(
+            const State & curr_state,
+            const std::vector<InfAndTrt> & history) override;
 };
 
 
