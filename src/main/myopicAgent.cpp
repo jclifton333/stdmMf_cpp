@@ -1,38 +1,39 @@
 #include "myopicAgent.hpp"
 #include <glog/logging.h>
 
+#inlude "states.hpp"
+
 #include "proximalAgent.hpp"
 
 namespace stdmMf {
 
 
-MyopicAgent::MyopicAgent(const std::shared_ptr<const Network> & network,
-        const std::shared_ptr<Model> & model)
-    : Agent(network), model_(model) {
-}
-
-MyopicAgent::MyopicAgent(const MyopicAgent & other)
-    : Agent(other), RngClass(other), model_(other.model_->clone()) {
-}
-
-std::shared_ptr<Agent> MyopicAgent::clone() const {
-    return std::shared_ptr<Agent>(new MyopicAgent(*this));
-}
-
-boost::dynamic_bitset<> MyopicAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
-    LOG(FATAL) << "Needs history to apply treatment.";
+template <typename State>
+MyopicAgent<State>::MyopicAgent(const std::shared_ptr<const Network> & network,
+        const std::shared_ptr<Model<State> > & model)
+    : Agent<State>(network), RngClass(), model_(model) {
 }
 
 
+template <typename State>
+MyopicAgent<State>::MyopicAgent(const MyopicAgent<State> & other)
+    : Agent<State>(other), RngClass(other), model_(other.model_->clone()) {
+}
 
-boost::dynamic_bitset<> MyopicAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<InfAndTrt> & history) {
+
+template <typename State>
+std::shared_ptr<Agent<State> > MyopicAgent<State>::clone() const {
+    return std::shared_ptr<Agent<State> >(new MyopicAgent<State>(*this));
+}
+
+
+boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
+        const State & curr_state,
+        const std::vector<StateAndTrt<State> > & history) {
     boost::dynamic_bitset<> trt_bits(this->network_->size());
     if (history.size() < 1) {
         // not enough data to estimate a model
-        ProximalAgent pa(this->network_);
+        ProximalAgent<State> pa(this->network_);
         trt_bits = pa.apply_trt(inf_bits, history);
     } else {
         // get probabilities
@@ -99,5 +100,7 @@ boost::dynamic_bitset<> MyopicAgent::apply_trt(
 }
 
 
+template class MyopicAgent<InfState>;
+template class MyopicAgent<InfShieldState>;
 
 } // namespace stdmMf

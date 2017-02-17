@@ -8,24 +8,27 @@
 namespace stdmMf {
 
 
-class MyopicAgent : public Agent, public njm::tools::RngClass {
+template <typename State>
+class MyopicAgent : public Agent<State>, public njm::tools::RngClass {
 protected:
-    const std::shared_ptr<Model> model_;
+    const std::shared_ptr<Model<State> > model_;
 
 public:
     MyopicAgent(const std::shared_ptr<const Network> & network,
-            const std::shared_ptr<Model> & model);
+            const std::shared_ptr<Model<State> > & model);
 
-    MyopicAgent(const MyopicAgent & other);
+    MyopicAgent(const MyopicAgent<State> & other);
 
-    virtual std::shared_ptr<Agent> clone() const;
+    ~MyopicAgent() override = default;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits,
-            const std::vector<InfAndTrt> & history);
+    std::shared_ptr<Agent<State> > clone() const override;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits);
+    boost::dynamic_bitset<> apply_trt(
+            const State & state,
+            const std::vector<StateAndTrt<State> > & history) override;
+
+    boost::dynamic_bitset<> apply_trt(
+            const State & state) override;
 
 };
 
