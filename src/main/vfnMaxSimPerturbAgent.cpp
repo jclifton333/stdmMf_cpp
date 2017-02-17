@@ -15,10 +15,11 @@
 namespace stdmMf {
 
 
-VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
+template <typename State>
+VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
         const std::shared_ptr<const Network> & network,
-        const std::shared_ptr<Features> & features,
-        const std::shared_ptr<Model> & model,
+        const std::shared_ptr<Features<State> > & features,
+        const std::shared_ptr<Model<State> > & model,
         const uint32_t & num_reps,
         const uint32_t & final_t,
         const double & c,
@@ -27,47 +28,50 @@ VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
         const double & b,
         const double & ell,
         const double & min_step_size)
-    : Agent(network), features_(features), model_(model),
-      coef_(this->features_->num_features(), 0), num_reps_(num_reps),
-      final_t_(final_t), c_(c), t_(t), a_(a), b_(b), ell_(ell),
-      min_step_size_(min_step_size) {
+    : Agent<State>(network), features_(features), model_(model),
+    coef_(this->features_->num_features(), 0), num_reps_(num_reps),
+    final_t_(final_t), c_(c), t_(t), a_(a), b_(b), ell_(ell),
+    min_step_size_(min_step_size) {
+    this->model_->rng(this->rng());
 }
 
-VfnMaxSimPerturbAgent::VfnMaxSimPerturbAgent(
-        const VfnMaxSimPerturbAgent & other)
-    : Agent(other), njm::tools::RngClass(other),
+
+template <typename State>
+VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
+        const VfnMaxSimPerturbAgent<State> & other)
+    : Agent<State>(other), njm::tools::RngClass(other),
     features_(other.features_->clone()), model_(other.model_->clone()),
     coef_(other.coef_), num_reps_(other.num_reps_), final_t_(other.final_t_),
     c_(other.c_), t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
     min_step_size_(other.min_step_size_) {
-}
-
-std::shared_ptr<Agent> VfnMaxSimPerturbAgent::clone() const {
-    return std::shared_ptr<Agent>(new VfnMaxSimPerturbAgent(*this));
-}
-
-boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
-    LOG(FATAL) << "Needs history to apply treatment.";
+    this->model_->rng(this->rng());
 }
 
 
-boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<InfAndTrt> & history) {
+template <typename State>
+std::shared_ptr<Agent<State> > VfnMaxSimPerturbAgent<State>::clone() const {
+    return std::shared_ptr<Agent<State> >(
+            new VfnMaxSimPerturbAgent<State>(*this));
+}
+
+
+template <typename State>
+boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
+        const State & state,
+        const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
-        ProximalAgent a(this->network_);
-        return a.apply_trt(inf_bits, history);
+        ProximalAgent<State> a(this->network_);
+        return a.apply_trt(state, history);
     } else if (history.size() < 2) {
-        MyopicAgent ma(this->network_, this->model_->clone());
-        return ma.apply_trt(inf_bits, history);
-    // } else if (history.size() < 3) {
-    //     MyopicAgent ma(this->network_, this->model_->clone());
-    //     return ma.apply_trt(inf_bits, history);
+        MyopicAgent<State> ma(this->network_, this->model_->clone());
+        return ma.apply_trt(state, history);
+        // } else if (history.size() < 3) {
+        //     MyopicAgent<State> ma(this->network_, this->model_->clone());
+        //     return ma.apply_trt(state, history);
     }
 
-    const std::vector<Transition> all_history(
-            Transition::from_sequence(history, inf_bits));
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, state));
 
     this->model_->est_par(all_history);
 
@@ -107,7 +111,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
 
 
     auto f = [&](const std::vector<double> & par, void * const data) {
-        SweepAgent a(this->network_, this->features_, par, 2, false);
+        SweepAgent<State> a(this->network_, this->features_, par, 2, false);
         a.rng(this->rng());
         System s(this->network_, this->model_);
         s.rng(this->rng());
@@ -116,7 +120,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
             s.cleanse();
             s.wipe_trt();
             s.erase_history();
-            s.inf_bits(inf_bits);
+            s.state(state);
 
             val += runner(&s, &a, num_points, 1.0);
         }
@@ -140,15 +144,20 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent::apply_trt(
     CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
 
     this->coef_ = sp.par();
-    SweepAgent a(this->network_, this->features_, sp.par(), 2, false);
+    SweepAgent<State> a(this->network_, this->features_, sp.par(), 2, false);
     a.rng(this->rng());
-    return a.apply_trt(inf_bits, history);
+    return a.apply_trt(state, history);
 }
 
 
-std::vector<double> VfnMaxSimPerturbAgent::coef() const {
+template <typename State>
+std::vector<double> VfnMaxSimPerturbAgent<State>::coef() const {
     return this->coef_;
 }
+
+
+template class VfnMaxSimPerturbAgent<InfState>;
+template class VfnMaxSimPerturbAgent<InfShieldState>;
 
 
 } // namespace stdmMf
