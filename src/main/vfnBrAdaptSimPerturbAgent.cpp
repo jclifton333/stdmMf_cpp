@@ -15,10 +15,11 @@
 namespace stdmMf {
 
 
-VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
+template <typename State>
+VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
         const std::shared_ptr<const Network> & network,
-        const std::shared_ptr<Features> & features,
-        const std::shared_ptr<Model> & model,
+        const std::shared_ptr<Features<State> > & features,
+        const std::shared_ptr<Model<State> > & model,
         const uint32_t & vfn_num_reps,
         const uint32_t & vfn_final_t,
         const double & vfn_c,
@@ -34,20 +35,22 @@ VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
         const double & br_ell,
         const double & br_min_step_size,
         const uint32_t & step_cap_mult)
-    : Agent(network), features_(features), model_(model),
+: Agent(network), RngClass(), features_(features), model_(model),
 
-      vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
-      vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
-      vfn_min_step_size_(vfn_min_step_size),
+  vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
+  vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
+  vfn_min_step_size_(vfn_min_step_size),
 
-      br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
-      br_min_step_size_(br_min_step_size),
+  br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
+  br_min_step_size_(br_min_step_size),
 
-      step_cap_mult_(step_cap_mult) {
+  step_cap_mult_(step_cap_mult) {
 }
 
-VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
-        const VfnBrAdaptSimPerturbAgent & other)
+
+template <typename State>
+VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
+        const VfnBrAdaptSimPerturbAgent<State> & other)
     : Agent(other), RngClass(other), features_(other.features_->clone()),
       model_(other.model_->clone()),
 
@@ -63,30 +66,29 @@ VfnBrAdaptSimPerturbAgent::VfnBrAdaptSimPerturbAgent(
       step_cap_mult_(other.step_cap_mult_) {
 }
 
-std::shared_ptr<Agent> VfnBrAdaptSimPerturbAgent::clone() const {
-    return std::shared_ptr<Agent>(new VfnBrAdaptSimPerturbAgent(*this));
+
+template <typename State>
+std::shared_ptr<Agent<State> > VfnBrAdaptSimPerturbAgent<State>::clone() const {
+    return std::shared_ptr<Agent<State> >(
+            new VfnBrAdaptSimPerturbAgent<State>(*this));
 }
 
-boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
-    LOG(FATAL) << "Needs history to apply treatment.";
-}
 
-
-boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<InfAndTrt> & history) {
+template <typename State>
+boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
+        const State & state,
+        const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
-        ProximalAgent a(this->network_);
-        return a.apply_trt(inf_bits, history);
-    // } else if (history.size() < 2) {
-    //     MyopicAgent ma(this->network_, this->model_->clone());
-    //     return ma.apply_trt(inf_bits, history);
+        ProximalAgent<State> a(this->network_);
+        return a.apply_trt(state, history);
+        // } else if (history.size() < 2) {
+        //     MyopicAgent ma(this->network_, this->model_->clone());
+        //     return ma.apply_trt(inf_bits, history);
     }
 
 
-    const std::vector<Transition> all_history(
-            Transition::from_sequence(history, inf_bits));
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, state));
 
     // estimate model
     this->model_->est_par(all_history);
@@ -131,16 +133,16 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         const uint32_t num_points = this->vfn_final_t_ - history.size();
 
         auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent a(this->network_, this->features_, par, 2, false);
+            SweepAgent<State> a(this->network_, this->features_, par, 2, false);
             a.rng(this->rng());
-            System s(this->network_, this->model_);
+            System<State> s(this->network_, this->model_);
             s.rng(this->rng());
             double val = 0.0;
             for (uint32_t i = 0; i < this->vfn_num_reps_; ++i) {
                 s.cleanse();
                 s.wipe_trt();
                 s.erase_history();
-                s.inf_bits(inf_bits);
+                s.state(state);
 
                 val += runner(&s, &a, num_points, 0.9);
             }
@@ -171,12 +173,13 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
         // find minimizing scalar for parameters
         {
-            SweepAgent a(this->network_, this->features_, optim_par, 2, false);
+            SweepAgent<State> a(this->network_, this->features_, optim_par,
+                    2, false);
 
-            auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
+            auto q_fn = [&](const State & state_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
                 return njm::linalg::dot_a_and_b(optim_par,
-                        this->features_->get_features(inf_bits_t, trt_bits_t));
+                        this->features_->get_features(state_t, trt_bits_t));
             };
 
             const std::vector<std::pair<double, double> > parts =
@@ -207,13 +210,13 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
 
 
         auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent a(this->network_, this->features_, par, 2, false);
+            SweepAgent<State> a(this->network_, this->features_, par, 2, false);
             a.rng(this->rng());
 
-            auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits_t,
+            auto q_fn = [&](const State & state_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
                 return njm::linalg::dot_a_and_b(par,
-                        this->features_->get_features(inf_bits_t, trt_bits_t));
+                        this->features_->get_features(state_t, trt_bits_t));
             };
 
             return bellman_residual_sq(all_history, &a, 0.9, q_fn);
@@ -239,10 +242,15 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent::apply_trt(
         optim_par = sp.par();
     }
 
-    SweepAgent a(this->network_, this->features_, optim_par, 2, false);
+    SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
     a.rng(this->rng());
-    return a.apply_trt(inf_bits, history);
+    return a.apply_trt(state, history);
 }
+
+
+
+template class VfnBrAdaptSimPerturbAgent<InfState>;
+template class VfnBrAdaptSimPerturbAgent<InfShieldState>;
 
 
 } // namespace stdmMf
