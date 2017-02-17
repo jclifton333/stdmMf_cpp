@@ -71,11 +71,11 @@ public:
 
     ~InfStateOrSoModel() override = default;
 
-    virtual std::shared_ptr<Model> clone() const override;
+    std::shared_ptr<Model<InfState> > clone() const override;
 
-    virtual std::vector<double> par() const override;
+    std::vector<double> par() const override;
 
-    virtual void par(const std::vector<double> & par) override;
+    void par(const std::vector<double> & par) override;
 };
 
 
