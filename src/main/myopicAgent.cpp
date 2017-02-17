@@ -1,7 +1,7 @@
 #include "myopicAgent.hpp"
 #include <glog/logging.h>
 
-#inlude "states.hpp"
+#include "states.hpp"
 
 #include "proximalAgent.hpp"
 
@@ -27,6 +27,7 @@ std::shared_ptr<Agent<State> > MyopicAgent<State>::clone() const {
 }
 
 
+template <typename State>
 boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
         const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
@@ -34,11 +35,11 @@ boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
     if (history.size() < 1) {
         // not enough data to estimate a model
         ProximalAgent<State> pa(this->network_);
-        trt_bits = pa.apply_trt(inf_bits, history);
+        trt_bits = pa.apply_trt(curr_state, history);
     } else {
         // get probabilities
-        this->model_->est_par(history, inf_bits);
-        const std::vector<double> probs = this->model_->probs(inf_bits,
+        this->model_->est_par(history, curr_state);
+        const std::vector<double> probs = this->model_->probs(curr_state,
                 trt_bits);
 
         // set up sorting
@@ -52,7 +53,7 @@ boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
         std::vector<std::pair<double, uint32_t> > sorted_not;
         for (uint32_t i = 0; i < this->num_nodes_; ++i) {
             const uint32_t & node = shuffled_nodes.at(i);
-            if (inf_bits.test(node)) {
+            if (curr_state.inf_bits.test(node)) {
                 // use raw probability.  sorting is ascending.  want
                 // to treat infected node with smallest probability of
                 // recovery
@@ -73,19 +74,19 @@ boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
         uint32_t num_trt_not = this->num_trt_ / 2 + 1;
         uint32_t num_trt_inf = this->num_trt_ - num_trt_not;
 
-        if (num_trt_not > (this->num_nodes_ - inf_bits.count())) {
+        if (num_trt_not > (this->num_nodes_ - curr_state.inf_bits.count())) {
             const uint32_t diff = num_trt_not -
-                (this->num_nodes_ - inf_bits.count());
+                (this->num_nodes_ - curr_state.inf_bits.count());
             num_trt_not -= diff;
             num_trt_inf += diff;
-        } else if (num_trt_inf > inf_bits.count()) {
-            const uint32_t diff = num_trt_inf - inf_bits.count();
+        } else if (num_trt_inf > curr_state.inf_bits.count()) {
+            const uint32_t diff = num_trt_inf - curr_state.inf_bits.count();
             num_trt_inf -= diff;
             num_trt_not += diff;
         }
 
-        CHECK_LE(num_trt_not, this->num_nodes_ - inf_bits.count());
-        CHECK_LE(num_trt_inf, inf_bits.count());
+        CHECK_LE(num_trt_not, this->num_nodes_ - curr_state.inf_bits.count());
+        CHECK_LE(num_trt_inf, curr_state.inf_bits.count());
         CHECK_EQ(num_trt_not + num_trt_inf, this->num_trt_);
 
         trt_bits.reset();

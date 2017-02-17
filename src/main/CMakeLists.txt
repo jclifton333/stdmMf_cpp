@@ -10,11 +10,11 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(njm_cpp)
-add_library(stdmMf network.cpp system.cpp types.cpp
+add_library(stdmMf network.cpp system.cpp states.cpp
 
   ## models
-  model.cpp noCovEdgeModel.cpp noCovEdgeOrSoModel.cpp noCovEdgeXorSoModel.cpp
-  noCovEdgeSepSoModel.cpp
+  model.cpp infStateModel.cpp infStateNoSoModel.cpp infStateOrSoModel.cpp
+  infStateXorSoModel.cpp infStateSepSoModel.cpp
 
   ## agents
   agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp

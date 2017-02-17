@@ -111,7 +111,7 @@ std::vector<double> NetworkRunFeatures<InfState>::get_features(
 
         mask = 0;
         for (uint32_t j = 0; j < run_len; j++) {
-            if (inf_bits.test(nr.nodes.at(j))) {
+            if (state.inf_bits.test(nr.nodes.at(j))) {
                 mask |= (1 << (j + run_len));
             }
 
@@ -247,8 +247,8 @@ void NetworkRunFeatures<InfState>::update_features_async(
 }
 
 
-template<>
-uint32_t NetworkRunFeatures<InfState>::num_features() const {
+template <typename State>
+uint32_t NetworkRunFeatures<State>::num_features() const {
     return this->num_features_;
 }
 

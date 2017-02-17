@@ -35,7 +35,7 @@ VfnBrStartSimPerturbAgent<State>::VfnBrStartSimPerturbAgent(
         const double & br_b,
         const double & br_ell,
         const double & br_min_step_size)
-: Agent<State>(network), RngClass(other), features_(features), model_(model),
+: Agent<State>(network), RngClass(), features_(features), model_(model),
 
   vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
   vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
@@ -72,34 +72,34 @@ std::shared_ptr<Agent<State> > VfnBrStartSimPerturbAgent<State>::clone() const {
 
 template <typename State>
 boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
-        const State & state,
+        const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
-        ProximalAgent a(this->network_);
-        return a.apply_trt(state, history);
+        ProximalAgent<State> a(this->network_);
+        return a.apply_trt(curr_state, history);
         // } else if (history.size() < 2) {
         //     MyopicAgent ma(this->network_, this->model_->clone());
         //     return ma.apply_trt(inf_bits, history);
     }
 
-    std::vector<Transition> all_history(
-            Transition::from_sequence(history, state));
+    std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, curr_state));
 
     // minimize bellman residual for starting values
     std::vector<double> optim_par(this->features_->num_features(), 0.);
     {
 
         auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent a(this->network_, this->features_, par, 2, false);
+            SweepAgent<State> a(this->network_, this->features_, par, 2, false);
             a.rng(this->rng());
 
-            auto q_fn = [&](const boost::dynamic_bitset<> & state_t,
+            auto q_fn = [&](const State & state_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
                 return njm::linalg::dot_a_and_b(par,
                         this->features_->get_features(state_t, trt_bits_t));
             };
 
-            return bellman_residual_sq(all_history, &a, 0.9, q_fn);
+            return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
         };
 
         njm::optim::SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_,
@@ -165,10 +165,8 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
             s.rng(this->rng());
             double val = 0.0;
             for (uint32_t i = 0; i < this->vfn_num_reps_; ++i) {
-                s.cleanse();
-                s.wipe_trt();
-                s.erase_history();
-                s.state(state);
+                s.reset();
+                s.state(curr_state);
 
                 val += runner(&s, &a, num_points, 0.9);
             }
@@ -196,7 +194,7 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
     a.rng(this->rng());
-    return a.apply_trt(state, history);
+    return a.apply_trt(curr_state, history);
 }
 
 

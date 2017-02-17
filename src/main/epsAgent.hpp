@@ -35,7 +35,7 @@ public:
 
     uint32_t num_trt() const override;
 
-    uint32_t num_trt_eps() const override;
+    uint32_t num_trt_eps() const;
 };
 
 

@@ -57,21 +57,21 @@ std::shared_ptr<Agent<State> > VfnMaxSimPerturbAgent<State>::clone() const {
 
 template <typename State>
 boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
-        const State & state,
+        const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
-        return a.apply_trt(state, history);
+        return a.apply_trt(curr_state, history);
     } else if (history.size() < 2) {
         MyopicAgent<State> ma(this->network_, this->model_->clone());
-        return ma.apply_trt(state, history);
+        return ma.apply_trt(curr_state, history);
         // } else if (history.size() < 3) {
         //     MyopicAgent<State> ma(this->network_, this->model_->clone());
         //     return ma.apply_trt(state, history);
     }
 
     const std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, state));
+            Transition<State>::from_sequence(history, curr_state));
 
     this->model_->est_par(all_history);
 
@@ -113,14 +113,12 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
     auto f = [&](const std::vector<double> & par, void * const data) {
         SweepAgent<State> a(this->network_, this->features_, par, 2, false);
         a.rng(this->rng());
-        System s(this->network_, this->model_);
+        System<State> s(this->network_, this->model_);
         s.rng(this->rng());
         double val = 0.0;
         for (uint32_t i = 0; i < this->num_reps_; ++i) {
-            s.cleanse();
-            s.wipe_trt();
-            s.erase_history();
-            s.state(state);
+            s.reset();
+            s.state(curr_state);
 
             val += runner(&s, &a, num_points, 1.0);
         }
@@ -146,7 +144,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
     this->coef_ = sp.par();
     SweepAgent<State> a(this->network_, this->features_, sp.par(), 2, false);
     a.rng(this->rng());
-    return a.apply_trt(state, history);
+    return a.apply_trt(curr_state, history);
 }
 
 

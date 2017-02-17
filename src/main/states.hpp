@@ -16,6 +16,8 @@ struct InfState {
     InfState(const InfState & other) = default;
 
     InfState(const boost::dynamic_bitset<> & inf_bits);
+
+    void reset();
 };
 
 
@@ -28,10 +30,12 @@ struct InfShieldState {
 
     InfShieldState(const uint32_t & num_nodes);
 
-    InfShieldState(const InfState & other) = default;
+    InfShieldState(const InfShieldState & other) = default;
 
     InfShieldState(const boost::dynamic_bitset<> & inf_bits,
             const std::vector<double> & shield);
+
+    void reset();
 };
 
 

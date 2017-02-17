@@ -48,9 +48,9 @@ public:
 
     void wipe_trt();
 
-    const State<State> & state() const;
+    const State & state() const;
 
-    void State(const State<State> & state);
+    void state(const State & state);
 
     const boost::dynamic_bitset<> & trt_bits() const;
 

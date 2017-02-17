@@ -23,7 +23,8 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    std::shared_ptr<NetworkRunFeatures> nrf(new NetworkRunFeatures(n, 1));
+    std::shared_ptr<NetworkRunFeatures<InfState> > nrf(
+            new NetworkRunFeatures<InfState>(n, 1));
 
     // std::random_device rd;
     const uint32_t seed = 0; // crd();
@@ -36,7 +37,7 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
             [&rng] (double & x) {
                 x = rng.rnorm_01();
             });
-    SweepAgentSlow sa(n, nrf, coef, 0);
+    SweepAgentSlow<InfState> sa(n, nrf, coef, 0);
 
 
     for (uint32_t reps = 0; reps < 50; ++reps) {
@@ -88,7 +89,7 @@ TEST(TestSweepAgentSlow, ApplyTrt) {
         std::string sweep_bits;
         {
             const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits,
-                    std::vector<InfAndTrt>());
+                    std::vector<StateAndTrt<InfState> >());
             boost::to_string(trt_bits, sweep_bits);
 
             const std::vector<double> f = nrf->get_features(inf_bits, trt_bits);
@@ -113,8 +114,10 @@ TEST(TestSweepAgent, TestEquality) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    std::shared_ptr<Features> f_slow(new NetworkRunFeatures(n, 4));
-    std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
+    std::shared_ptr<Features<InfState> > f_slow(
+            new NetworkRunFeatures<InfState>(n, 4));
+    std::shared_ptr<Features<InfState> > f(
+            new NetworkRunFeatures<InfState>(n, 4));
 
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
 
@@ -125,8 +128,8 @@ TEST(TestSweepAgent, TestEquality) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent sa(n, f, coef, 2, true);
-        SweepAgentSlow sas(n, f_slow, coef, 2);
+        SweepAgent<InfState> sa(n, f, coef, 2, true);
+        SweepAgentSlow<InfState> sas(n, f_slow, coef, 2);
 
         for (uint32_t j = 0; j < 5; ++j) {
             // randomly infect 10 percent
@@ -158,7 +161,8 @@ TEST(TestSweepAgent, TestScaling) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
+    std::shared_ptr<Features<InfState> > f(
+            new NetworkRunFeatures<InfState>(n, 4));
 
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
 
@@ -177,7 +181,7 @@ TEST(TestSweepAgent, TestScaling) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent sa(n, f, coef, 2, true);
+        SweepAgent<InfState> sa(n, f, coef, 2, true);
 
         const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits);
 
@@ -188,7 +192,7 @@ TEST(TestSweepAgent, TestScaling) {
                     x *= scalar;
                 });
 
-        SweepAgent sa_scaled(n, f, coef, 2, true);
+        SweepAgent<InfState> sa_scaled(n, f, coef, 2, true);
 
         const boost::dynamic_bitset<> trt_bits_scaled = sa_scaled.apply_trt(
                 inf_bits);
@@ -208,7 +212,8 @@ TEST(TestSweepAgent, TestParallel) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    std::shared_ptr<Features> f(new NetworkRunFeatures(n, 4));
+    std::shared_ptr<Features<InfState> > f(
+            new NetworkRunFeatures<InfState>(n, 4));
 
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
 
@@ -227,11 +232,11 @@ TEST(TestSweepAgent, TestParallel) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent sa(n, f, coef, 0, false);
+        SweepAgent<InfState> sa(n, f, coef, 0, false);
 
         const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits);
 
-        SweepAgent sa_parallel(n, f, coef, 0, false);
+        SweepAgent<InfState> sa_parallel(n, f, coef, 0, false);
         sa_parallel.set_parallel(true, 1);
 
         const boost::dynamic_bitset<> trt_bits_parallel = sa_parallel.apply_trt(

@@ -2,7 +2,7 @@
 #define RANDOM_AGENT_HPP
 
 #include <njm_cpp/tools/random.hpp>
-#include "types.hpp"
+#include "states.hpp"
 #include "network.hpp"
 #include "agent.hpp"
 

@@ -20,7 +20,7 @@ public:
 
     Agent(const Agent<State> & other);
 
-    virtual ~Agent();
+    virtual ~Agent() = default;
 
     virtual std::shared_ptr<Agent<State> > clone() const = 0;
 

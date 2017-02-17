@@ -43,7 +43,7 @@ public:
 
     boost::dynamic_bitset<> apply_trt(
             const State & state,
-            const std::vector<InfAndTrt> & history) override;
+            const std::vector<StateAndTrt<State> > & history) override;
 
     boost::dynamic_bitset<> apply_trt(
             const State & state) override;
@@ -52,7 +52,7 @@ public:
             std::set<uint32_t> & not_trt,
             std::set<uint32_t> & has_trt,
             const State & state,
-            std::vector<double> & feat) const
+            std::vector<double> & feat) const;
 
     void set_new_treatment_serial(boost::dynamic_bitset<> & trt_bits,
             std::set<uint32_t> & not_trt,

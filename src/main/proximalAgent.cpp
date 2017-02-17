@@ -36,7 +36,7 @@ boost::dynamic_bitset<> ProximalAgent<State>::apply_trt(
     std::vector<std::pair<double, uint32_t> > sorted;
 
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-        const bool inf_i = inf_bits.test(i);
+        const bool inf_i = state.inf_bits.test(i);
         bool next_to_opp = false;
         const double draw = this->rng_->runif_01();
 

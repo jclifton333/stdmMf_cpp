@@ -1,7 +1,7 @@
 #ifndef INF_STATE_OR_SO_MODEL_HPP
 #define INF_STATE_OR_SO_MODEL_HPP
 
-#include "types.hpp"
+#include "states.hpp"
 #include "network.hpp"
 #include "infStateModel.hpp"
 

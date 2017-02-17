@@ -25,7 +25,7 @@ std::shared_ptr<Agent<State> > RandomAgent<State>::clone() const {
 template<typename State>
 boost::dynamic_bitset<> RandomAgent<State>::apply_trt(
         const State & state,
-        const std::vector<InfAndTrt> & history) {
+        const std::vector<StateAndTrt<State> > & history) {
     return this->apply_trt(state);
 }
 

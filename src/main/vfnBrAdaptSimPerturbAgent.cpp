@@ -35,23 +35,23 @@ VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
         const double & br_ell,
         const double & br_min_step_size,
         const uint32_t & step_cap_mult)
-: Agent(network), RngClass(), features_(features), model_(model),
+: Agent<State>(network), RngClass(), features_(features), model_(model),
 
-  vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
-  vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
-  vfn_min_step_size_(vfn_min_step_size),
+    vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
+    vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
+    vfn_min_step_size_(vfn_min_step_size),
 
-  br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
-  br_min_step_size_(br_min_step_size),
+    br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
+    br_min_step_size_(br_min_step_size),
 
-  step_cap_mult_(step_cap_mult) {
+    step_cap_mult_(step_cap_mult) {
 }
 
 
 template <typename State>
 VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
         const VfnBrAdaptSimPerturbAgent<State> & other)
-    : Agent(other), RngClass(other), features_(other.features_->clone()),
+    : Agent<State>(other), RngClass(other), features_(other.features_->clone()),
       model_(other.model_->clone()),
 
       vfn_num_reps_(other.vfn_num_reps_), vfn_final_t_(other.vfn_final_t_),
@@ -76,11 +76,11 @@ std::shared_ptr<Agent<State> > VfnBrAdaptSimPerturbAgent<State>::clone() const {
 
 template <typename State>
 boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
-        const State & state,
+        const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
-        return a.apply_trt(state, history);
+        return a.apply_trt(curr_state, history);
         // } else if (history.size() < 2) {
         //     MyopicAgent ma(this->network_, this->model_->clone());
         //     return ma.apply_trt(inf_bits, history);
@@ -88,7 +88,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
 
 
     const std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, state));
+            Transition<State>::from_sequence(history, curr_state));
 
     // estimate model
     this->model_->est_par(all_history);
@@ -139,10 +139,8 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
             s.rng(this->rng());
             double val = 0.0;
             for (uint32_t i = 0; i < this->vfn_num_reps_; ++i) {
-                s.cleanse();
-                s.wipe_trt();
-                s.erase_history();
-                s.state(state);
+                s.reset();
+                s.state(curr_state);
 
                 val += runner(&s, &a, num_points, 0.9);
             }
@@ -183,7 +181,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
             };
 
             const std::vector<std::pair<double, double> > parts =
-                bellman_residual_parts(all_history, &a, 0.9, q_fn);
+                bellman_residual_parts<State>(all_history, &a, 0.9, q_fn);
 
             const double numer = std::accumulate(parts.begin(), parts.end(),
                     0.0, [](const double & x,
@@ -219,7 +217,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
                         this->features_->get_features(state_t, trt_bits_t));
             };
 
-            return bellman_residual_sq(all_history, &a, 0.9, q_fn);
+            return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
         };
 
         njm::optim::SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_,
@@ -244,7 +242,7 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
     a.rng(this->rng());
-    return a.apply_trt(state, history);
+    return a.apply_trt(curr_state, history);
 }
 
 

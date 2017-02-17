@@ -37,7 +37,7 @@ public:
 
     boost::dynamic_bitset<> apply_trt(
             const State & curr_state,
-            const std::vector<InfAndTrt> & history) override;
+            const std::vector<StateAndTrt<State> > & history) override;
 };
 
 

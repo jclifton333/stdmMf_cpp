@@ -1,11 +1,16 @@
 #include "infStateModel.hpp"
 
+#include <njm_cpp/tools/bitManip.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+
+#include <glog/logging.h>
+
 namespace stdmMf {
 
 
 InfStateModel::InfStateModel(const uint32_t & par_size,
         const std::shared_ptr<const Network> & network)
-    : Model<InfState>(par_size,network) {
+    : Model<InfState>(par_size, network) {
 }
 
 
@@ -20,8 +25,8 @@ std::vector<double> InfStateModel::probs(
     const boost::dynamic_bitset<> & inf_status(state.inf_bits);
 
     std::vector<double> probs;
-    const std::vector<uint32_t> status = njm::tools::combine_sets(inf_status,
-            trt_status);
+    const std::vector<uint32_t> status = njm::tools::combine_sets(
+            state.inf_bits, trt_status);
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         const uint32_t status_i = status.at(i);
         const bool trt_i = status_i % 2 == 1;
@@ -64,7 +69,7 @@ double InfStateModel::ll(
         // split up transition
         const Transition<InfState> & transition = history.at(i);
         const InfState & curr_state = transition.curr_state;
-        const boost::dynamic_bitset<> & curr_trt_bits =
+        const boost::dynamic_bitset<> & curr_trt =
             transition.curr_trt_bits;
         const InfState & next_state = transition.next_state;
 
@@ -108,14 +113,14 @@ std::vector<double> InfStateModel::ll_grad(
     for (uint32_t i = 0; i < history_size; ++i) {
         // split up transition
         const Transition<InfState> & transition = history.at(i);
-        const InfState & curr_trt = transition.curr_state;
+        const InfState & curr_state = transition.curr_state;
         const boost::dynamic_bitset<> & curr_trt = transition.curr_trt_bits;
-        const InfState & next_trt = transition.next_state;
+        const InfState & next_state = transition.next_state;
 
 
         // pull out inf bits
-        const boost::dynamic_bitset<> & curr_inf = curr_state.curr_inf_bits;
-        const boost::dynamic_bitset<> & next_inf = next_state.next_inf_bits;
+        const boost::dynamic_bitset<> & curr_inf = curr_state.inf_bits;
+        const boost::dynamic_bitset<> & next_inf = next_state.inf_bits;
 
         // infection probabilities
         const std::vector<double> probs = this->probs(curr_state, curr_trt);
@@ -230,8 +235,8 @@ std::vector<double> InfStateModel::ll_hess(
         const InfState & next_state = transition.next_state;
 
         // get inf bits
-        const boost::dynamic_bitset<> & curr_inf = curr_state.curr_inf_bits;
-        const boost::dynamic_bitset<> & next_inf = next_state.next_inf_bits;
+        const boost::dynamic_bitset<> & curr_inf = curr_state.inf_bits;
+        const boost::dynamic_bitset<> & next_inf = next_state.inf_bits;
 
         // infection probabilities
         const std::vector<double> probs = this->probs(curr_state, curr_trt);
@@ -352,7 +357,7 @@ std::vector<double> InfStateModel::ll_hess(
 }
 
 
-InfState InfStateModel::turn_clock(const InfState & curr_state
+InfState InfStateModel::turn_clock(const InfState & curr_state,
         const boost::dynamic_bitset<> & trt_bits) const {
     const std::vector<double> probs = this->probs(curr_state, trt_bits);
 
@@ -360,9 +365,9 @@ InfState InfStateModel::turn_clock(const InfState & curr_state
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
         const double & prob_i = probs.at(i);
 
-        const double r = this->rng_->runif01();
+        const double r = this->rng_->runif_01();
         if (r < prob_i) {
-            curr_state.inf_bits.flip(i);
+            next_state.inf_bits.flip(i);
         }
     }
 

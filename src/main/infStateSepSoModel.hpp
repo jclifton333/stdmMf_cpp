@@ -1,14 +1,14 @@
 #ifndef INF_STATE_SEP_SO_MODEL_HPP
 #define INF_STATE_SEP_SO_MODEL_HPP
 
-#include "types.hpp"
-#include "model.hpp"
+#include "states.hpp"
+#include "infStateModel.hpp"
 #include "network.hpp"
 
 namespace stdmMf {
 
 
-class InfStateSepSoModel : public Model {
+class InfStateSepSoModel : public InfStateModel {
 private:
     double intcp_inf_latent_;
     double intcp_inf_;
@@ -74,7 +74,7 @@ public:
 
     ~InfStateSepSoModel() override = default;
 
-    std::shared_ptr<Model<State> > clone() const override;
+    std::shared_ptr<Model<InfState> > clone() const override;
 
     std::vector<double> par() const override;
 

@@ -5,7 +5,7 @@ namespace stdmMf {
 
 template<typename State>
 NoTrtAgent<State>::NoTrtAgent(const std::shared_ptr<const Network> & network)
-    : Agent(network) {
+    : Agent<State>(network) {
 }
 
 

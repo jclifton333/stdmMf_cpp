@@ -16,7 +16,7 @@ class VfnBrAdaptSimPerturbAgent : public Agent<State>,
                                   public njm::tools::RngClass {
 protected:
     const std::shared_ptr<Features<State> > features_;
-    const std::shared_ptr<Model> model_;
+    const std::shared_ptr<Model<State> > model_;
 
     const uint32_t vfn_num_reps_;
     const uint32_t vfn_final_t_;

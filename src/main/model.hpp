@@ -3,6 +3,8 @@
 
 #include "states.hpp"
 
+#include "network.hpp"
+
 #include <njm_cpp/tools/random.hpp>
 
 #include <cstdint>
@@ -13,7 +15,7 @@ namespace stdmMf {
 
 template <typename State>
 class Model : public njm::tools::RngClass {
-private:
+protected:
     const uint32_t par_size_;
 
     const std::shared_ptr<const Network> network_;
@@ -53,7 +55,7 @@ public:
     virtual std::vector<double> ll_hess(
             const std::vector<Transition<State> > & history) const = 0;
 
-    virtual State turn_clock(const State & curr_state
+    virtual State turn_clock(const State & curr_state,
             const boost::dynamic_bitset<> & trt_bits) const = 0;
 };
 

@@ -8,7 +8,7 @@ template <typename State>
 System<State>::System(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<State> > & model)
     : network_(network), model_(model),
-      num_nodes_(this->network_->size()), inf_bits_(this->num_nodes_),
+      num_nodes_(this->network_->size()), state_(this->num_nodes_),
       trt_bits_(this->num_nodes_), time_(0) {
 }
 
@@ -16,7 +16,7 @@ template <typename State>
 System<State>::System(const System<State> & other)
     : RngClass(other), network_(other.network_->clone()),
       model_(other.model_->clone()), num_nodes_(other.num_nodes_),
-      inf_bits_(other.inf_bits_), trt_bits_(other.trt_bits_),
+      state_(other.state_), trt_bits_(other.trt_bits_),
       history_(other.history_), time_(other.time_) {
 }
 
@@ -49,15 +49,12 @@ uint32_t System<State>::n_trt() const {
 
 template <typename State>
 void System<State>::reset() {
-    // wipe infection
-    this->state_.inf_bits.reset();
-    // set shield to zero
-    std::fill(this->state_.shield.begin(),
-            this->state_.shield.end(), 0.);
+    // reset state
+    this->state_.reset();
     // wipe treatments
     this->trt_bits_.reset();
     // erase history
-    this->erase_history();
+    this->history_.clear();
 }
 
 template <typename State>
@@ -81,7 +78,7 @@ void System<State>::trt_bits(const boost::dynamic_bitset<> & trt_bits) {
 }
 
 template <typename State>
-const std::vector<InfAndTrt<State> > & System<State>::history() const {
+const std::vector<StateAndTrt<State> > & System<State>::history() const {
     return this->history_;
 }
 
@@ -109,7 +106,7 @@ void System<State>::update_history() {
 template <typename State>
 void System<State>::turn_clock() {
     const State next_state = this->model_->turn_clock(this->state_,
-            this->inf_bits);
+            this->trt_bits_);
 
     this->turn_clock(next_state);
 }

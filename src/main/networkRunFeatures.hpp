@@ -9,7 +9,7 @@
 namespace stdmMf {
 
 
-template <typename State>;
+template <typename State>
 class NetworkRunFeatures : public Features<State> {
 private:
     const std::shared_ptr<const Network> network_;

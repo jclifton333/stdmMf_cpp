@@ -57,14 +57,11 @@ public:
 
     ~VfnBrStartSimPerturbAgent() override = default;
 
-    std::shared_ptr<Agent<State> > clone() const;
+    std::shared_ptr<Agent<State> > clone() const override;
 
     boost::dynamic_bitset<> apply_trt(
             const State & state,
-            const std::vector<StateAndTrt<State> > & history);
-
-    boost::dynamic_bitset<> apply_trt(
-            const State & state);
+            const std::vector<StateAndTrt<State> > & history) override;
 };
 
 

@@ -8,7 +8,7 @@ namespace stdmMf {
 
 
 template <typename State>
-Model::Model(const uint32_t & par_size,
+Model<State>::Model(const uint32_t & par_size,
         const std::shared_ptr<const Network> & network)
     : par_size_(par_size), network_(network->clone()),
       num_nodes_(network->size()) {
@@ -16,27 +16,27 @@ Model::Model(const uint32_t & par_size,
 
 
 template <typename State>
-Model::Model(const Model<State> & other)
+Model<State>::Model(const Model<State> & other)
     : RngClass(other), par_size_(other.par_size_),
       network_(other.network_->clone()), num_nodes_(other.num_nodes_) {
 }
 
 
 template <typename State>
-uint32_t Model::par_size() const {
+uint32_t Model<State>::par_size() const {
     return this->par_size_;
 }
 
 
 template <typename State>
-void Model::est_par(const std::vector<InfAndTrt<State> > & history,
-        const boost::dynamic_bitset<> & inf_bits) {
-    this->est_par(Transition<State>::from_sequence(history, inf_bits));
+void Model<State>::est_par(const std::vector<StateAndTrt<State> > & history,
+        const State & state) {
+    this->est_par(Transition<State>::from_sequence(history, state));
 }
 
 
 template <typename State>
-void Model::est_par(const std::vector<Transition<State> > & history) {
+void Model<State>::est_par(const std::vector<Transition<State> > & history) {
     CHECK_GE(history.size(), 1);
 
     // create fit object
@@ -105,14 +105,14 @@ template class Model<InfShieldState>;
 
 
 template <typename State>
-ModelFit::ModelFit(Model<State> * const model,
+ModelFit<State>::ModelFit(Model<State> * const model,
         const std::vector<Transition<State> > & history)
     : model_(model), history_(history) {
 }
 
 
 template <typename State>
-double ModelFit::obj_fn(const gsl_vector * x, void * params){
+double ModelFit<State>::obj_fn(const gsl_vector * x, void * params){
     ModelFit<State> * mf = static_cast<ModelFit<State>*>(params);
     std::vector<double> par;
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
@@ -128,7 +128,8 @@ double ModelFit::obj_fn(const gsl_vector * x, void * params){
 }
 
 template <typename State>
-void ModelFit::obj_fn_grad(const gsl_vector * x, void * params, gsl_vector * g){
+void ModelFit<State>::obj_fn_grad(const gsl_vector * x, void * params,
+        gsl_vector * g){
     ModelFit<State> * mf = static_cast<ModelFit<State>*>(params);
     std::vector<double> par;
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
@@ -149,8 +150,8 @@ void ModelFit::obj_fn_grad(const gsl_vector * x, void * params, gsl_vector * g){
 }
 
 template <typename State>
-void ModelFit::obj_fn_both(const gsl_vector * x, void * params, double * f,
-        gsl_vector * g){
+void ModelFit<State>::obj_fn_both(const gsl_vector * x, void * params,
+        double * f, gsl_vector * g){
     ModelFit<State> * mf = static_cast<ModelFit<State>*>(params);
     std::vector<double> par;
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){

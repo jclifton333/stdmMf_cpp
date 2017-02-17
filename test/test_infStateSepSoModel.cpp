@@ -2,10 +2,8 @@
 #include <glog/logging.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_deriv.h>
-
 #include <njm_cpp/tools/random.hpp>
-
-#include "noCovEdgeModel.hpp"
+#include "infStateSepSoModel.hpp"
 #include "system.hpp"
 #include "randomAgent.hpp"
 #include "proximalAgent.hpp"
@@ -15,42 +13,49 @@
 namespace stdmMf {
 
 
+template <typename State>
 class GradientChecker {
 public:
-    Model * m;
+    Model<State> * m;
     int wiggle_var;
-    std::vector<Transition> * history;
+    std::vector<Transition<State> > * history;
     std::vector<double> par;
 };
 
+
+template <typename State>
 class HessianChecker {
 public:
-    Model * m;
+    Model<State> * m;
     int wiggle_var;
     int gradient_var;
-    std::vector<Transition> * history;
+    std::vector<Transition<State> > * history;
     std::vector<double> par;
 };
 
 const double eps = 1e-4;
 
-double f (double x, void * params) {
-    GradientChecker * gc = static_cast<GradientChecker *>(params);
+
+template <typename State>
+double f(double x, void * params) {
+    GradientChecker<State> * gc = static_cast<GradientChecker<State>*>(params);
     std::vector<double> par = gc->par;
     par.at(gc->wiggle_var) = x;
     gc->m->par(par);
     return gc->m->ll(*gc->history);
 }
 
-double f_grad (double x, void * params) {
-    HessianChecker * hc = static_cast<HessianChecker *>(params);
+
+template <typename State>
+double f_grad(double x, void * params) {
+    HessianChecker<State> * hc = static_cast<HessianChecker<State>*>(params);
     std::vector<double> par = hc->m->par();
     par.at(hc->wiggle_var) = x;
     hc->m->par(par);
     return hc->m->ll_grad(*hc->history).at(hc->gradient_var);
 }
 
-TEST(TestNoCovEdgeModel, TestPar) {
+TEST(TestInfStateSepSoModel, TestPar) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -60,22 +65,23 @@ TEST(TestNoCovEdgeModel, TestPar) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NoCovEdgeModel m(n);
+    InfStateSepSoModel m(n);
 
     std::vector<double> par (m.par());
     for (uint32_t i = 0; i < par.size(); ++i) {
-        CHECK_EQ(par.at(i), 0.);
+        EXPECT_EQ(par.at(i), 0.);
         par.at(i) = i;
     }
 
     m.par(par);
     par = m.par();
     for (uint32_t i = 0; i < par.size(); ++i) {
-        CHECK_EQ(par.at(i), static_cast<double>(i));
+        EXPECT_EQ(par.at(i), static_cast<double>(i));
     }
 }
 
-TEST(TestNoCovEdgeModel,TestLLGradient) {
+
+TEST(TestInfStateSepSoModel,TestLLGradient) {
     // generate network
     NetworkInit init;
     init.set_dim_x(10);
@@ -86,7 +92,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
     std::shared_ptr<Network> n = Network::gen_network(init);
 
     // init model
-    const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
+    const std::shared_ptr<InfStateSepSoModel> m(new InfStateSepSoModel(n));
 
     // set par
     njm::tools::Rng rng;
@@ -97,17 +103,16 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
             });
     m->par(par);
 
-    System s(n,m);
+    System<InfState> s(n,m);
 
-    RandomAgent a(n);
+    RandomAgent<InfState> a(n);
 
     const uint32_t num_points = 50;
     runner(&s, &a, num_points, 1.0);
 
-    std::vector<Transition> history(
-            Transition::from_sequence(s.history(), s.inf_bits()));
-    CHECK_EQ(history.size(), num_points);
-
+    std::vector<Transition<InfState> > history(
+            Transition<InfState>::from_sequence(s.history(), s.state()));
+    ASSERT_EQ(history.size(), num_points);
 
     // generate new parameters so gradient is not zero
     std::for_each(par.begin(),par.end(),
@@ -119,14 +124,14 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
         m->ll_grad(history);
 
     for (uint32_t i = 0; i < par.size(); ++i) {
-        GradientChecker gc;
+        GradientChecker<InfState> gc;
         gc.m = m.get();
         gc.wiggle_var = i;
         gc.history = &history;
         gc.par = par;
 
         gsl_function F;
-        F.function = &f;
+        F.function = &f<InfState>;
         F.params = &gc;
 
         double result;
@@ -139,7 +144,7 @@ TEST(TestNoCovEdgeModel,TestLLGradient) {
 }
 
 
-TEST(TestNoCovEdgeModel,TestLLHessian) {
+TEST(TestInfStateSepSoModel,TestLLHessian) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -150,7 +155,7 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
     std::shared_ptr<Network> n = Network::gen_network(init);
 
     // init model
-    const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
+    const std::shared_ptr<InfStateSepSoModel> m(new InfStateSepSoModel(n));
 
     // set par
     njm::tools::Rng rng;
@@ -161,17 +166,16 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
             });
     m->par(par);
 
-    System s(n,m);
+    System<InfState> s(n,m);
 
-    RandomAgent a(n);
+    RandomAgent<InfState> a(n);
 
     const uint32_t num_points = 3;
     runner(&s, &a, num_points, 1.0);
 
-    std::vector<Transition> history(
-            Transition::from_sequence(s.history(), s.inf_bits()));
+    std::vector<Transition<InfState> > history(
+            Transition<InfState>::from_sequence(s.history(), s.state()));
     CHECK_EQ(history.size(), num_points);
-
 
     // generate new parameters so gradient is not zero
     std::for_each(par.begin(),par.end(),
@@ -184,7 +188,7 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
 
     for (uint32_t i = 0; i < par.size(); ++i) {
         for (uint32_t j = 0; j < par.size(); ++j) {
-            HessianChecker hc;
+            HessianChecker<InfState> hc;
             hc.m = m.get();
             hc.wiggle_var = i;
             hc.gradient_var = j;
@@ -192,7 +196,7 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
             hc.par = par;
 
             gsl_function F;
-            F.function = &f_grad;
+            F.function = &f_grad<InfState>;
             F.params = &hc;
 
             double result;
@@ -206,7 +210,7 @@ TEST(TestNoCovEdgeModel,TestLLHessian) {
 }
 
 
-TEST(TestNoCovEdgeModel, EstPar) {
+TEST(TestInfStateSepSoModel, EstPar) {
     NetworkInit init;
     init.set_dim_x(10);
     init.set_dim_y(10);
@@ -215,7 +219,7 @@ TEST(TestNoCovEdgeModel, EstPar) {
 
     const std::shared_ptr<Network> n = Network::gen_network(init);
 
-    const std::shared_ptr<NoCovEdgeModel> m(new NoCovEdgeModel(n));
+    const std::shared_ptr<InfStateSepSoModel> m(new InfStateSepSoModel(n));
 
     njm::tools::Rng rng;
     std::vector<double> par;
@@ -225,18 +229,19 @@ TEST(TestNoCovEdgeModel, EstPar) {
 
     m->par(par);
 
-    System s(n,m);
+    System<InfState> s(n,m);
 
-    const std::shared_ptr<ProximalAgent> pa(new ProximalAgent(n));
-    const std::shared_ptr<RandomAgent> ra(new RandomAgent(n));
-    EpsAgent ea(n, pa, ra, 0.1);
+    const std::shared_ptr<ProximalAgent<InfState> > pa(
+            new ProximalAgent<InfState>(n));
+    const std::shared_ptr<RandomAgent<InfState> > ra(
+            new RandomAgent<InfState>(n));
+    EpsAgent<InfState> ea(n, pa, ra, 0.1);
 
     const uint32_t num_points = 100;
     runner(&s, &ea, num_points, 1.0);
 
-    std::vector<Transition> history(
-            Transition::from_sequence(s.history(), s.inf_bits()));
-    CHECK_EQ(history.size(), num_points);
+    std::vector<Transition<InfState> > history(
+            Transition<InfState>::from_sequence(s.history(), s.state()));
 
     // scale paramters
     std::vector<double> start_par = par;
@@ -253,6 +258,95 @@ TEST(TestNoCovEdgeModel, EstPar) {
         EXPECT_LT(diff / par.at(i), 0.1)
             << "Par " << i << " failed with truth " << par.at(i)
             << " and estimate " << est_par.at(i);
+    }
+}
+
+
+TEST(TestInfStateSepSoModel, Spillover) {
+    NetworkInit init;
+    init.set_dim_x(5);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    const std::shared_ptr<Network> n = Network::gen_network(init);
+
+    const std::shared_ptr<InfStateSepSoModel> m(new InfStateSepSoModel(n));
+
+    njm::tools::Rng rng;
+    std::vector<double> par;
+    for (uint32_t i = 0; i < m->par_size(); ++i) {
+        par.push_back(rng.rnorm(-2.0, 1.0));
+    }
+
+    // make spillover cancel out treatment effects
+    par.at(4) = -par.at(3);
+    par.at(6) = -par.at(5);
+    par.at(8) = -par.at(7);
+
+    m->par(par);
+    for (uint32_t i = 0; i < n->size(); ++i) {
+        EXPECT_LT(n->size(), 20); // make sure no overflow in next line
+        const boost::dynamic_bitset<> inf_bits(n->size(),
+                rng.rint(0, 1 << n->size()));
+
+        boost::dynamic_bitset<> trt_bits(n->size());
+
+        // check latent infection
+        trt_bits.reset();
+        const double prob_not = m->probs(inf_bits, trt_bits).at(i);
+        trt_bits.reset();
+        trt_bits.set(i);
+        const double prob_trt = m->probs(inf_bits, trt_bits).at(i);
+
+        EXPECT_NE(prob_trt, prob_not) << i << ", " << inf_bits.test(i);
+        break;
+
+        const Node & node_i = n->get_node(i);
+        const uint32_t num_neigh = node_i.neigh_size();
+        for (uint32_t j = 0; j < num_neigh; ++j) {
+            const uint32_t neigh = node_i.neigh(j);
+
+            {
+                // set both
+                trt_bits.reset();
+                trt_bits.set(i);
+                trt_bits.set(neigh);
+
+                double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+
+                if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                    EXPECT_NEAR(prob_not, prob_neigh_trt, 1e-10);
+                } else if (!inf_bits.test(i)) {
+                    if (par.at(3) > 0) {
+                        EXPECT_GT(prob_trt, prob_neigh_trt);
+                    } else {
+                        EXPECT_LE(prob_trt, prob_neigh_trt);
+                    }
+                } else {
+                    EXPECT_EQ(prob_trt, prob_neigh_trt);
+                }
+            }
+            {
+                // set only neigh
+                trt_bits.reset();
+                trt_bits.set(neigh);
+
+                double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
+
+                if (inf_bits.test(i) == inf_bits.test(neigh)) {
+                    EXPECT_NEAR(prob_not, prob_neigh_trt, 1e-10);
+                } else if (!inf_bits.test(i)) {
+                    if (par.at(7) > 0) {
+                        EXPECT_GT(prob_trt, prob_neigh_trt);
+                    } else {
+                        EXPECT_LE(prob_trt, prob_neigh_trt);
+                    }
+                } else {
+                    EXPECT_EQ(prob_not, prob_neigh_trt);
+                }
+            }
+        }
     }
 }
 

@@ -9,13 +9,14 @@ EpsAgent<State>::EpsAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Agent<State> > & agent,
         const std::shared_ptr<Agent<State> > & eps_agent,
         const double & eps)
-    : Agent(network), agent_(agent), eps_agent_(eps_agent), eps_(eps) {
+    : Agent<State>(network), RngClass(), agent_(agent), eps_agent_(eps_agent),
+    eps_(eps) {
 }
 
 
 template <typename State>
 EpsAgent<State>::EpsAgent(const EpsAgent & other)
-    : Agent(other), RngClass(other), agent_(other.agent_->clone()),
+    : Agent<State>(other), RngClass(other), agent_(other.agent_->clone()),
       eps_agent_(other.eps_agent_->clone()), eps_(other.eps_) {
 }
 
@@ -32,7 +33,7 @@ boost::dynamic_bitset<> EpsAgent<State>::apply_trt(
     if (this->rng_->runif_01() < this->eps_) {
         return this->eps_agent_->apply_trt(curr_state);
     } else {
-        return this->agent_->apply_trt(curr_states);
+        return this->agent_->apply_trt(curr_state);
     }
 }
 

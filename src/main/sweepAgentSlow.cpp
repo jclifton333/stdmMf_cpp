@@ -84,6 +84,8 @@ boost::dynamic_bitset<> SweepAgentSlow<State>::apply_trt(
     return trt_bits;
 }
 
+
+template <typename State>
 void SweepAgentSlow<State>::set_new_treatment(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
@@ -135,6 +137,7 @@ void SweepAgentSlow<State>::set_new_treatment(
 }
 
 
+template <typename State>
 bool SweepAgentSlow<State>::sweep_treatments(
         boost::dynamic_bitset<> & trt_bits,
         double & best_val,

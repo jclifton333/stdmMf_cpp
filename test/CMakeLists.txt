@@ -11,10 +11,10 @@ include_directories(${gtest_SOURCE_DIR}/include
 
 SET(test_src
   test_network
-  test_noCovEdgeModel
-  test_noCovEdgeOrSoModel
-  test_noCovEdgeXorSoModel
-  test_noCovEdgeSepSoModel
+  test_infStateNoSoModel
+  test_infStateOrSoModel
+  test_infStateXorSoModel
+  test_infStateSepSoModel
   test_networkRunFeatures
   test_networkRunSymFeatures
   test_sweepAgent)

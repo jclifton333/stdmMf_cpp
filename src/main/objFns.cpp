@@ -111,10 +111,10 @@ std::vector<std::pair<double, double> > bellman_residual_parts<InfState>(
 
 template
 std::vector<std::pair<double, double> > bellman_residual_parts<InfShieldState>(
-            const std::vector<Transition<InfShieldState> > & history,
-            Agent<InfShieldState> * const agent, const double gamma,
-            const std::function<double(const InfShieldState & state,
-                    const boost::dynamic_bitset<> & trt_bits)> & q_fn)
+        const std::vector<Transition<InfShieldState> > & history,
+        Agent<InfShieldState> * const agent, const double gamma,
+        const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
 
 
 } // namespace stdmMf

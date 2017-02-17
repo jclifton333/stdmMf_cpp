@@ -5,12 +5,13 @@
 
 #include <njm_cpp/tools/random.hpp>
 #include "network.hpp"
+#include "states.hpp"
 #include "networkRunSymFeatures.hpp"
 
 namespace stdmMf {
 
 
-TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen1) {
+TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen1InfState) {
     // generate network
     NetworkInit init;
     init.set_dim_x(1);
@@ -20,7 +21,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen1) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunSymFeatures nrf(n, 1);
+    NetworkRunSymFeatures<InfState> nrf(n, 1);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3);
 
@@ -74,7 +75,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen1) {
 }
 
 
-TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen2) {
+TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen2InfState) {
     // generate network
     NetworkInit init;
     init.set_dim_x(1);
@@ -84,7 +85,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen2) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunSymFeatures nrf(n, 2);
+    NetworkRunSymFeatures<InfState> nrf(n, 2);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3 + 9);
 
@@ -519,7 +520,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen2) {
 }
 
 
-TEST(TestNetworkRunSymFeatures, TestFeaturesLen1) {
+TEST(TestNetworkRunSymFeatures, TestFeaturesLen1InfState) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -529,7 +530,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesLen1) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunSymFeatures nrf(n, 1);
+    NetworkRunSymFeatures<InfState> nrf(n, 1);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3);
 
@@ -582,7 +583,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesLen1) {
     EXPECT_EQ(f.at(3), 0);
 }
 
-TEST(TestNetworkRunSymFeatures, TestFeaturesLen2) {
+TEST(TestNetworkRunSymFeatures, TestFeaturesLen2InfState) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -592,7 +593,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesLen2) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunSymFeatures nrf(n, 2);
+    NetworkRunSymFeatures<InfState> nrf(n, 2);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3 + 9);
 
@@ -734,7 +735,7 @@ TEST(TestNetworkRunSymFeatures, TestFeaturesLen2) {
 }
 
 
-TEST(TestNetworkRunSymFeatures, UpdateFeatures) {
+TEST(TestNetworkRunSymFeatures, UpdateFeaturesInfState) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -749,8 +750,8 @@ TEST(TestNetworkRunSymFeatures, UpdateFeatures) {
     njm::tools::Rng rng;
     rng.seed(seed);
 
-    NetworkRunSymFeatures nrf_get(n, 3);
-    NetworkRunSymFeatures nrf_update(n, 3);
+    NetworkRunSymFeatures<InfState> nrf_get(n, 3);
+    NetworkRunSymFeatures<InfState> nrf_update(n, 3);
     for (uint32_t reps = 0; reps < 100; ++reps) {
         const uint32_t num_inf = rng.rint(0, n->size());
         const std::vector<int> inf_list =
@@ -890,7 +891,7 @@ TEST(TestNetworkRunSymFeatures, UpdateFeatures) {
 
 
 
-TEST(TestNetworkRunSymFeatures, Copy) {
+TEST(TestNetworkRunSymFeatures, CopyInfState) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -905,11 +906,11 @@ TEST(TestNetworkRunSymFeatures, Copy) {
     njm::tools::Rng rng;
     rng.seed(seed);
 
-    NetworkRunSymFeatures nrf_get(n, 3);
-    NetworkRunSymFeatures nrf_update(n, 3);
+    NetworkRunSymFeatures<InfState> nrf_get(n, 3);
+    NetworkRunSymFeatures<InfState> nrf_update(n, 3);
 
-    NetworkRunSymFeatures nrf_get_cpy(nrf_get);
-    NetworkRunSymFeatures nrf_update_cpy(nrf_update);
+    NetworkRunSymFeatures<InfState> nrf_get_cpy(nrf_get);
+    NetworkRunSymFeatures<InfState> nrf_update_cpy(nrf_update);
 
     EXPECT_EQ(nrf_get.num_features(), nrf_get_cpy.num_features());
     EXPECT_EQ(nrf_update.num_features(),

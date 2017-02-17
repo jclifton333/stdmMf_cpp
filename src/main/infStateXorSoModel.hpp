@@ -2,14 +2,14 @@
 #define INF_STATE_XOR_SO_MODEL_HPP
 
 
-#include "types.hpp"
-#include "model.hpp"
+#include "states.hpp"
+#include "infStateModel.hpp"
 #include "network.hpp"
 
 namespace stdmMf {
 
 
-class InfStateXorSoModel : public Model {
+class InfStateXorSoModel : public InfStateModel {
 private:
     double intcp_inf_latent_;
     double intcp_inf_;

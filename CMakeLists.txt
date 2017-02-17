@@ -22,6 +22,6 @@ set(NJM_CPP_FORCE_BUILD_TEST YES)
 add_subdirectory(libs/njm_cpp)
 
 add_subdirectory(src/main)
-add_subdirectory(src/bin)
+# add_subdirectory(src/bin)
 
 add_subdirectory(test)

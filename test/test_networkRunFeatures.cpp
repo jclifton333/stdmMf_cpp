@@ -5,6 +5,7 @@
 
 #include <njm_cpp/tools/random.hpp>
 #include "network.hpp"
+#include "states.hpp"
 #include "networkRunFeatures.hpp"
 
 namespace stdmMf {
@@ -20,7 +21,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen1) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunFeatures nrf(n, 1);
+    NetworkRunFeatures<InfState> nrf(n, 1);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3);
 
@@ -84,7 +85,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesSimpleLen2) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunFeatures nrf(n, 2);
+    NetworkRunFeatures<InfState> nrf(n, 2);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3 + 15);
 
@@ -625,7 +626,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen1) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunFeatures nrf(n, 1);
+    NetworkRunFeatures<InfState> nrf(n, 1);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3);
 
@@ -688,7 +689,7 @@ TEST(TestNetworkRunFeatures, TestFeaturesLen2) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NetworkRunFeatures nrf(n, 2);
+    NetworkRunFeatures<InfState> nrf(n, 2);
 
     ASSERT_EQ(nrf.num_features(), 1 + 3 + 15);
 
@@ -881,8 +882,8 @@ TEST(TestNetworkRunFeatures, UpdateFeatures) {
     njm::tools::Rng rng;
     rng.seed(seed);
 
-    NetworkRunFeatures nrf_get(n, 3);
-    NetworkRunFeatures nrf_update(n, 3);
+    NetworkRunFeatures<InfState> nrf_get(n, 3);
+    NetworkRunFeatures<InfState> nrf_update(n, 3);
     for (uint32_t reps = 0; reps < 100; ++reps) {
         const uint32_t num_inf = rng.rint(0, n->size());
         const std::vector<int> inf_list =
@@ -1037,11 +1038,11 @@ TEST(TestNetworkRunFeatures, Copy) {
     njm::tools::Rng rng;
     rng.seed(seed);
 
-    NetworkRunFeatures nrf_get(n, 3);
-    NetworkRunFeatures nrf_update(n, 3);
+    NetworkRunFeatures<InfState> nrf_get(n, 3);
+    NetworkRunFeatures<InfState> nrf_update(n, 3);
 
-    NetworkRunFeatures nrf_get_cpy(nrf_get);
-    NetworkRunFeatures nrf_update_cpy(nrf_update);
+    NetworkRunFeatures<InfState> nrf_get_cpy(nrf_get);
+    NetworkRunFeatures<InfState> nrf_update_cpy(nrf_update);
 
     EXPECT_EQ(nrf_get.num_features(), nrf_get_cpy.num_features());
     EXPECT_EQ(nrf_update.num_features(),

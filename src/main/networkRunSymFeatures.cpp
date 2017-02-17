@@ -1,4 +1,5 @@
 #include "networkRunSymFeatures.hpp"
+#include "states.hpp"
 #include <njm_cpp/tools/bitManip.hpp>
 #include <glog/logging.h>
 
@@ -147,11 +148,11 @@ std::vector<double> NetworkRunSymFeatures<InfState>::get_features(
 
 
 template <>
-void NetworkRunSymFeatures::update_features(
+void NetworkRunSymFeatures<InfState>::update_features(
         const uint32_t & changed_node,
-        const State & state_new,
+        const InfState & state_new,
         const boost::dynamic_bitset<> & trt_bits_new,
-        const State & state_old,
+        const InfState & state_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) {
 
@@ -208,9 +209,9 @@ void NetworkRunSymFeatures::update_features(
 template<>
 void NetworkRunSymFeatures<InfState>::update_features_async(
         const uint32_t & changed_node,
-        const State & state_new,
+        const InfState & state_new,
         const boost::dynamic_bitset<> & trt_bits_new,
-        const State & state_old,
+        const InfState & state_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) const {
 
@@ -256,8 +257,8 @@ void NetworkRunSymFeatures<InfState>::update_features_async(
 }
 
 
-template <>
-uint32_t NetworkRunSymFeatures<InfState>::num_features() const {
+template <typename State>
+uint32_t NetworkRunSymFeatures<State>::num_features() const {
     return this->num_features_;
 }
 

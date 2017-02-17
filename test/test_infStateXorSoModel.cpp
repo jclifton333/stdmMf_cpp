@@ -5,7 +5,7 @@
 
 #include <njm_cpp/tools/random.hpp>
 
-#include "noCovEdgeOrSoModel.hpp"
+#include "infStateXorSoModel.hpp"
 #include "system.hpp"
 #include "randomAgent.hpp"
 #include "proximalAgent.hpp"
@@ -15,42 +15,49 @@
 namespace stdmMf {
 
 
+template <typename State>
 class GradientChecker {
 public:
-    Model * m;
+    Model<InfState> * m;
     int wiggle_var;
-    std::vector<Transition> * history;
+    std::vector<Transition<InfState> > * history;
     std::vector<double> par;
 };
 
+template <typename State>
 class HessianChecker {
 public:
-    Model * m;
+    Model<InfState> * m;
     int wiggle_var;
     int gradient_var;
-    std::vector<Transition> * history;
+    std::vector<Transition<InfState> > * history;
     std::vector<double> par;
 };
 
 const double eps = 1e-4;
 
+template <typename State>
 double f (double x, void * params) {
-    GradientChecker * gc = static_cast<GradientChecker *>(params);
+    GradientChecker<InfState> * gc =
+        static_cast<GradientChecker<InfState>*>(params);
     std::vector<double> par = gc->par;
     par.at(gc->wiggle_var) = x;
     gc->m->par(par);
     return gc->m->ll(*gc->history);
 }
 
+
+template <typename State>
 double f_grad (double x, void * params) {
-    HessianChecker * hc = static_cast<HessianChecker *>(params);
+    HessianChecker<InfState> * hc =
+        static_cast<HessianChecker<InfState>*>(params);
     std::vector<double> par = hc->m->par();
     par.at(hc->wiggle_var) = x;
     hc->m->par(par);
     return hc->m->ll_grad(*hc->history).at(hc->gradient_var);
 }
 
-TEST(TestNoCovEdgeOrSoModel, TestPar) {
+TEST(TestInfStateXorSoModel, TestPar) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -60,7 +67,7 @@ TEST(TestNoCovEdgeOrSoModel, TestPar) {
 
     std::shared_ptr<Network> n = Network::gen_network(init);
 
-    NoCovEdgeOrSoModel m(n);
+    InfStateXorSoModel m(n);
 
     std::vector<double> par (m.par());
     for (uint32_t i = 0; i < par.size(); ++i) {
@@ -76,7 +83,7 @@ TEST(TestNoCovEdgeOrSoModel, TestPar) {
 }
 
 
-TEST(TestNoCovEdgeOrSoModel,TestLLGradient) {
+TEST(TestInfStateXorSoModel,TestLLGradient) {
     // generate network
     NetworkInit init;
     init.set_dim_x(10);
@@ -87,7 +94,7 @@ TEST(TestNoCovEdgeOrSoModel,TestLLGradient) {
     std::shared_ptr<Network> n = Network::gen_network(init);
 
     // init model
-    const std::shared_ptr<NoCovEdgeOrSoModel> m(new NoCovEdgeOrSoModel(n));
+    const std::shared_ptr<InfStateXorSoModel> m(new InfStateXorSoModel(n));
 
     // set par
     njm::tools::Rng rng;
@@ -98,17 +105,16 @@ TEST(TestNoCovEdgeOrSoModel,TestLLGradient) {
             });
     m->par(par);
 
-    System s(n,m);
+    System<InfState> s(n,m);
 
-    RandomAgent a(n);
+    RandomAgent<InfState> a(n);
 
     const uint32_t num_points = 50;
     runner(&s, &a, num_points, 1.0);
 
-    std::vector<Transition> history(
-            Transition::from_sequence(s.history(), s.inf_bits()));
+    std::vector<Transition<InfState> > history(
+            Transition<InfState>::from_sequence(s.history(), s.state()));
     CHECK_EQ(history.size(), num_points);
-
 
     // generate new parameters so gradient is not zero
     std::for_each(par.begin(),par.end(),
@@ -120,14 +126,14 @@ TEST(TestNoCovEdgeOrSoModel,TestLLGradient) {
         m->ll_grad(history);
 
     for (uint32_t i = 0; i < par.size(); ++i) {
-        GradientChecker gc;
+        GradientChecker<InfState> gc;
         gc.m = m.get();
         gc.wiggle_var = i;
         gc.history = &history;
         gc.par = par;
 
         gsl_function F;
-        F.function = &f;
+        F.function = &f<InfState>;
         F.params = &gc;
 
         double result;
@@ -140,7 +146,7 @@ TEST(TestNoCovEdgeOrSoModel,TestLLGradient) {
 }
 
 
-TEST(TestNoCovEdgeOrSoModel,TestLLHessian) {
+TEST(TestInfStateXorSoModel,TestLLHessian) {
     // generate network
     NetworkInit init;
     init.set_dim_x(3);
@@ -151,7 +157,7 @@ TEST(TestNoCovEdgeOrSoModel,TestLLHessian) {
     std::shared_ptr<Network> n = Network::gen_network(init);
 
     // init model
-    const std::shared_ptr<NoCovEdgeOrSoModel> m(new NoCovEdgeOrSoModel(n));
+    const std::shared_ptr<InfStateXorSoModel> m(new InfStateXorSoModel(n));
 
     // set par
     njm::tools::Rng rng;
@@ -162,16 +168,17 @@ TEST(TestNoCovEdgeOrSoModel,TestLLHessian) {
             });
     m->par(par);
 
-    System s(n,m);
+    System<InfState> s(n,m);
 
-    RandomAgent a(n);
+    RandomAgent<InfState> a(n);
 
     const uint32_t num_points = 3;
     runner(&s, &a, num_points, 1.0);
 
-    std::vector<Transition> history(
-            Transition::from_sequence(s.history(), s.inf_bits()));
+    std::vector<Transition<InfState> > history(
+            Transition<InfState>::from_sequence(s.history(), s.state()));
     CHECK_EQ(history.size(), num_points);
+
 
     // generate new parameters so gradient is not zero
     std::for_each(par.begin(),par.end(),
@@ -184,7 +191,7 @@ TEST(TestNoCovEdgeOrSoModel,TestLLHessian) {
 
     for (uint32_t i = 0; i < par.size(); ++i) {
         for (uint32_t j = 0; j < par.size(); ++j) {
-            HessianChecker hc;
+            HessianChecker<InfState> hc;
             hc.m = m.get();
             hc.wiggle_var = i;
             hc.gradient_var = j;
@@ -192,7 +199,7 @@ TEST(TestNoCovEdgeOrSoModel,TestLLHessian) {
             hc.par = par;
 
             gsl_function F;
-            F.function = &f_grad;
+            F.function = &f_grad<InfState>;
             F.params = &hc;
 
             double result;
@@ -206,7 +213,7 @@ TEST(TestNoCovEdgeOrSoModel,TestLLHessian) {
 }
 
 
-TEST(TestNoCovEdgeOrSoModel, EstPar) {
+TEST(TestInfStateXorSoModel, EstPar) {
     NetworkInit init;
     init.set_dim_x(10);
     init.set_dim_y(10);
@@ -215,7 +222,7 @@ TEST(TestNoCovEdgeOrSoModel, EstPar) {
 
     const std::shared_ptr<Network> n = Network::gen_network(init);
 
-    const std::shared_ptr<NoCovEdgeOrSoModel> m(new NoCovEdgeOrSoModel(n));
+    const std::shared_ptr<InfStateXorSoModel> m(new InfStateXorSoModel(n));
 
     njm::tools::Rng rng;
     std::vector<double> par;
@@ -225,17 +232,19 @@ TEST(TestNoCovEdgeOrSoModel, EstPar) {
 
     m->par(par);
 
-    System s(n,m);
+    System<InfState> s(n,m);
 
-    const std::shared_ptr<ProximalAgent> pa(new ProximalAgent(n));
-    const std::shared_ptr<RandomAgent> ra(new RandomAgent(n));
-    EpsAgent ea(n, pa, ra, 0.1);
+    const std::shared_ptr<ProximalAgent<InfState> > pa(
+            new ProximalAgent<InfState>(n));
+    const std::shared_ptr<RandomAgent<InfState> > ra(
+            new RandomAgent<InfState>(n));
+    EpsAgent<InfState> ea(n, pa, ra, 0.1);
 
     const uint32_t num_points = 100;
     runner(&s, &ea, num_points, 1.0);
 
-    std::vector<Transition> history(
-            Transition::from_sequence(s.history(), s.inf_bits()));
+    std::vector<Transition<InfState>> history(
+            Transition<InfState>::from_sequence(s.history(), s.state()));
     CHECK_EQ(history.size(), num_points);
 
     // scale paramters
@@ -257,7 +266,7 @@ TEST(TestNoCovEdgeOrSoModel, EstPar) {
 }
 
 
-TEST(TestNoCovEdgeOrSoModel, Spillover) {
+TEST(TestInfStateXorSoModel, Spillover) {
     NetworkInit init;
     init.set_dim_x(5);
     init.set_dim_y(3);
@@ -266,7 +275,7 @@ TEST(TestNoCovEdgeOrSoModel, Spillover) {
 
     const std::shared_ptr<Network> n = Network::gen_network(init);
 
-    const std::shared_ptr<NoCovEdgeOrSoModel> m(new NoCovEdgeOrSoModel(n));
+    const std::shared_ptr<InfStateXorSoModel> m(new InfStateXorSoModel(n));
 
     njm::tools::Rng rng;
     std::vector<double> par;
@@ -305,9 +314,10 @@ TEST(TestNoCovEdgeOrSoModel, Spillover) {
                 double prob_neigh_trt = m->probs(inf_bits, trt_bits).at(i);
 
                 if (inf_bits.test(i) == inf_bits.test(neigh)) {
-                    EXPECT_EQ(prob_trt, prob_neigh_trt);
+                    EXPECT_EQ(prob_not, prob_neigh_trt);
                 } else if (!inf_bits.test(i)) {
                     EXPECT_NE(prob_trt, prob_neigh_trt);
+                    EXPECT_NE(prob_not, prob_neigh_trt);
                 } else {
                     EXPECT_EQ(prob_trt, prob_neigh_trt);
                 }
@@ -323,6 +333,7 @@ TEST(TestNoCovEdgeOrSoModel, Spillover) {
                     EXPECT_EQ(prob_trt, prob_neigh_trt);
                 } else if (!inf_bits.test(i)) {
                     EXPECT_NE(prob_trt, prob_neigh_trt);
+                    EXPECT_NE(prob_not, prob_neigh_trt);
                 } else {
                     EXPECT_EQ(prob_not, prob_neigh_trt);
                 }

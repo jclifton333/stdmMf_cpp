@@ -47,15 +47,15 @@ std::shared_ptr<Agent<State> > BrMinSimPerturbAgent<State>::clone() const {
 
 template <typename State>
 boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
-        const State & inf_bits,
+        const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
-        return a.apply_trt(inf_bits, history);
+        return a.apply_trt(curr_state, history);
     }
 
     std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, inf_bits));
+            Transition<State>::from_sequence(history, curr_state));
 
     auto f = [&](const std::vector<double> & par, void * const data) {
         SweepAgent<State> a(this->network_, this->features_, par, 2, false);
@@ -67,7 +67,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
                     this->features_->get_features(state_t, trt_bits_t));
         };
 
-        return bellman_residual_sq(all_history, &a, 0.9, q_fn);
+        return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
     };
 
     njm::optim::SimPerturb sp(f,
