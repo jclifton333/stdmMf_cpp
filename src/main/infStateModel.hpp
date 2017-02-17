@@ -69,21 +69,21 @@ public:
 
     virtual void par(const std::vector<double> & par) override = 0;
 
-    virtual std::vector<double> probs(
+    std::vector<double> probs(
             const InfState & state,
             const boost::dynamic_bitset<> & trt_status) const override;
 
-    virtual double ll(
+    double ll(
             const std::vector<Transition<InfState> > & history) const override;
 
-    virtual std::vector<double> ll_grad(
+    std::vector<double> ll_grad(
             const std::vector<Transition<InfState> > & history) const override;
 
-    virtual std::vector<double> ll_hess(
+    std::vector<double> ll_hess(
             const std::vector<Transition<InfState> > & history) const override;
 
     virtual InfState turn_clock(const InfState & curr_state
-            const boost::dynamic_bitset<> & trt_bits) const override = 0;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 };
 
 
