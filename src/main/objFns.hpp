@@ -8,19 +8,24 @@
 namespace stdmMf {
 
 
-double runner(System * system, Agent * agent, const uint32_t & final_time,
-        const double gamma);
+template<typename State>
+double runner(System<State> * system, Agent<State> * agent,
+        const uint32_t & final_time, const double gamma);
 
-double bellman_residual_sq(const std::vector<Transition> & history,
-        Agent * const agent,
+
+template<typename State>
+double bellman_residual_sq(const std::vector<Transition<State> > & history,
+        Agent<State> * const agent,
         const double gamma,
-        const std::function<double(const boost::dynamic_bitset<> & inf_bits,
+        const std::function<double(const State & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn);
 
+
+template <typename State>
 std::vector<std::pair<double, double> > bellman_residual_parts(
-        const std::vector<Transition> & history, Agent * const agent,
-        const double gamma, const std::function<double(
-                const boost::dynamic_bitset<> & inf_bits,
+        const std::vector<Transition<State>> & history,
+        Agent<State> * const agent, const double gamma,
+        const std::function<double(const State & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn);
 
 
