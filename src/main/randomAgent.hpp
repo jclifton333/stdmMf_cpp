@@ -9,20 +9,23 @@
 namespace stdmMf {
 
 
-class RandomAgent : public Agent, public njm::tools::RngClass {
+template <typename State>
+class RandomAgent : public Agent<State>, public njm::tools::RngClass {
 public:
     RandomAgent(const std::shared_ptr<const Network> & network);
 
-    RandomAgent(const RandomAgent & agent);
+    RandomAgent(const RandomAgent<State> & agent);
 
-    virtual std::shared_ptr<Agent> clone() const;
+    ~RandomAgent() override = default;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits,
-            const std::vector<InfAndTrt> & history);
+    std::shared_ptr<Agent<State> > clone() const override;
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits);
+    boost::dynamic_bitset<> apply_trt(
+            const State & state,
+            const std::vector<StateAndTrt<State> > & history) override;
+
+    boost::dynamic_bitset<> apply_trt(
+            const State & state) override;
 };
 
 

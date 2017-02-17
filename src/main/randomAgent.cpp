@@ -4,26 +4,35 @@
 namespace stdmMf {
 
 
-RandomAgent::RandomAgent(const std::shared_ptr<const Network> & network)
-    : Agent(network) {
+template<typename State>
+RandomAgent<State>::RandomAgent(const std::shared_ptr<const Network> & network)
+    : Agent<State>(network), RngClass() {
 }
 
-RandomAgent::RandomAgent(const RandomAgent & other)
-    : Agent(other), RngClass(other) {
+
+template<typename State>
+RandomAgent<State>::RandomAgent(const RandomAgent & other)
+    : Agent<State>(other), RngClass(other) {
 }
 
-std::shared_ptr<Agent> RandomAgent::clone() const {
-    return std::shared_ptr<Agent>(new RandomAgent(*this));
+
+template<typename State>
+std::shared_ptr<Agent<State> > RandomAgent<State>::clone() const {
+    return std::shared_ptr<Agent<State> >(new RandomAgent<State>(*this));
 }
 
-boost::dynamic_bitset<> RandomAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
+
+template<typename State>
+boost::dynamic_bitset<> RandomAgent<State>::apply_trt(
+        const State & state,
         const std::vector<InfAndTrt> & history) {
-    return this->apply_trt(inf_bits);
+    return this->apply_trt(state);
 }
 
-boost::dynamic_bitset<> RandomAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
+
+template<typename State>
+boost::dynamic_bitset<> RandomAgent<State>::apply_trt(
+        const State & state) {
     const std::vector<int> ind_to_trt = this->rng_->sample_range(0,
             this->num_nodes_, this->num_trt_);
     boost::dynamic_bitset<> trt_bits(this->num_nodes_);
@@ -33,5 +42,9 @@ boost::dynamic_bitset<> RandomAgent::apply_trt(
 
     return trt_bits;
 }
+
+
+template class RandomAgent<InfState>;
+template class RandomAgent<InfShieldState>;
 
 } // namespace stdmMf
