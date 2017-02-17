@@ -17,9 +17,10 @@ Model::Model(const uint32_t & par_size,
 
 template <typename State>
 Model::Model(const Model<State> & other)
-    : par_size_(other.par_size_), network_(other.network_->clone()),
-      num_nodes_(other.num_nodes_) {
+    : RngClass(other), par_size_(other.par_size_),
+      network_(other.network_->clone()), num_nodes_(other.num_nodes_) {
 }
+
 
 template <typename State>
 uint32_t Model::par_size() const {
