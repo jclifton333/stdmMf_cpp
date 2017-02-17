@@ -4,7 +4,8 @@
 
 namespace stdmMf {
 
-NetworkRunSymFeatures::NetworkRunSymFeatures(
+template <>
+NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
         const std::shared_ptr<const Network> & network,
         const uint32_t & run_length)
     : network_(network), runs_(network->runs_of_len_cumu(run_length)),
@@ -62,8 +63,10 @@ NetworkRunSymFeatures::NetworkRunSymFeatures(
     }
 }
 
-NetworkRunSymFeatures::NetworkRunSymFeatures(
-        const NetworkRunSymFeatures & other)
+
+template<>
+NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
+        const NetworkRunSymFeatures<InfState> & other)
     : network_(other.network_->clone()), runs_(other.runs_),
       runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
       run_length_(other.run_length_), num_runs_(other.num_runs_),
@@ -89,7 +92,9 @@ NetworkRunSymFeatures::NetworkRunSymFeatures(
     }
 }
 
-NetworkRunSymFeatures::~NetworkRunSymFeatures() {
+
+template<>
+NetworkRunSymFeatures<InfState>::~NetworkRunSymFeatures() {
     // Only need to delete masks. Masks by node are referencing the
     // same memory.
     std::for_each(masks_.begin(), masks_.end(),
@@ -98,13 +103,17 @@ NetworkRunSymFeatures::~NetworkRunSymFeatures() {
             });
 }
 
-std::shared_ptr<Features> NetworkRunSymFeatures::clone() const {
-    return std::shared_ptr<Features>(new NetworkRunSymFeatures(*this));
+template <>
+std::shared_ptr<Features<InfState> >
+NetworkRunSymFeatures<InfState>::clone() const {
+    return std::shared_ptr<Features<InfState> >(
+            new NetworkRunSymFeatures<InfState>(*this));
 }
 
 
-std::vector<double> NetworkRunSymFeatures::get_features(
-        const boost::dynamic_bitset<> & inf_bits,
+template <>
+std::vector<double> NetworkRunSymFeatures<InfState>::get_features(
+        const InfState & state,
         const boost::dynamic_bitset<> & trt_bits) {
     std::vector<double> feat(this->num_features(), 0.0);
     feat.at(0) = 1.0; // intercept
@@ -117,7 +126,7 @@ std::vector<double> NetworkRunSymFeatures::get_features(
 
         mask = 0;
         for (uint32_t j = 0; j < run_len; j++) {
-            if (inf_bits.test(nr.nodes.at(j))) {
+            if (state.inf_bits.test(nr.nodes.at(j))) {
                 mask |= (1 << (j + run_len));
             }
 
@@ -137,11 +146,12 @@ std::vector<double> NetworkRunSymFeatures::get_features(
 }
 
 
+template <>
 void NetworkRunSymFeatures::update_features(
         const uint32_t & changed_node,
-        const boost::dynamic_bitset<> & inf_bits_new,
+        const State & state_new,
         const boost::dynamic_bitset<> & trt_bits_new,
-        const boost::dynamic_bitset<> & inf_bits_old,
+        const State & state_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) {
 
@@ -153,7 +163,8 @@ void NetworkRunSymFeatures::update_features(
         changed_masks = this->masks_by_node_.at(changed_node);
 
     const bool inf_changed =
-        inf_bits_new.test(changed_node) != inf_bits_old.test(changed_node);
+        state_new.inf_bits.test(changed_node)
+        != state_old.inf_bits.test(changed_node);
     const bool trt_changed =
         trt_bits_new.test(changed_node) != trt_bits_old.test(changed_node);
 
@@ -194,11 +205,12 @@ void NetworkRunSymFeatures::update_features(
 }
 
 
-void NetworkRunSymFeatures::update_features_async(
+template<>
+void NetworkRunSymFeatures<InfState>::update_features_async(
         const uint32_t & changed_node,
-        const boost::dynamic_bitset<> & inf_bits_new,
+        const State & state_new,
         const boost::dynamic_bitset<> & trt_bits_new,
-        const boost::dynamic_bitset<> & inf_bits_old,
+        const State & state_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) const {
 
@@ -216,13 +228,13 @@ void NetworkRunSymFeatures::update_features_async(
 
         for (uint32_t j = 0; j < run_len; ++j) {
             const uint32_t & node = nr.nodes.at(j);
-            if (inf_bits_new.test(node)) {
+            if (state_new.inf_bits.test(node)) {
                 mask_new |= (1 << (j + run_len));
             }
             if (trt_bits_new.test(node)) {
                 mask_new |= (1 << j);
             }
-            if (inf_bits_old.test(node)) {
+            if (state_old.inf_bits.test(node)) {
                 mask_old |= (1 << (j + run_len));
             }
             if (trt_bits_old.test(node)) {
@@ -244,7 +256,8 @@ void NetworkRunSymFeatures::update_features_async(
 }
 
 
-uint32_t NetworkRunSymFeatures::num_features() const {
+template <>
+uint32_t NetworkRunSymFeatures<InfState>::num_features() const {
     return this->num_features_;
 }
 

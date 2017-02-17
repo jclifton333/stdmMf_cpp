@@ -9,7 +9,8 @@
 namespace stdmMf {
 
 
-class NetworkRunFeatures : public Features {
+template <typename State>;
+class NetworkRunFeatures : public Features<State> {
 private:
     const std::shared_ptr<const Network> network_;
 
@@ -29,33 +30,33 @@ public:
     NetworkRunFeatures(const std::shared_ptr<const Network> & network,
             const uint32_t & run_length);
 
-    NetworkRunFeatures(const NetworkRunFeatures & other);
+    NetworkRunFeatures(const NetworkRunFeatures<State> & other);
 
-    ~NetworkRunFeatures();
+    ~NetworkRunFeatures() override;
 
-    virtual std::shared_ptr<Features> clone() const;
+    std::shared_ptr<Features<State> > clone() const override;
 
-    virtual std::vector<double> get_features(
-            const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits);
+    std::vector<double> get_features(
+            const State & state,
+            const boost::dynamic_bitset<> & trt_bits) override;
 
-    virtual void update_features(
+    void update_features(
             const uint32_t & changed_node,
-            const boost::dynamic_bitset<> & inf_bits_new,
+            const State & state_new,
             const boost::dynamic_bitset<> & trt_bits_new,
-            const boost::dynamic_bitset<> & inf_bits_old,
+            const State & state_old,
             const boost::dynamic_bitset<> & trt_bits_old,
-            std::vector<double> & feat);
+            std::vector<double> & feat) override;
 
-    virtual void update_features_async(
+    void update_features_async(
             const uint32_t & changed_node,
-            const boost::dynamic_bitset<> & inf_bits_new,
+            const State & state_new,
             const boost::dynamic_bitset<> & trt_bits_new,
-            const boost::dynamic_bitset<> & inf_bits_old,
+            const State & state_old,
             const boost::dynamic_bitset<> & trt_bits_old,
-            std::vector<double> & feat) const;
+            std::vector<double> & feat) const override;
 
-    virtual uint32_t num_features() const;
+    uint32_t num_features() const override;
 };
 
 
