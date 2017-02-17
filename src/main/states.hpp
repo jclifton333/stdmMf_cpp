@@ -11,9 +11,11 @@ struct InfState {
     // disease can have a shield against treatment
     // if shield is large, then treatment has a decreased effect
 
-    State(const uint32_t & num_nodes);
+    InfState(const uint32_t & num_nodes);
 
-    State(const boost::dynamic_bitset<> & inf_bits);
+    InfState(const InfState & other) = default;
+
+    InfState(const boost::dynamic_bitset<> & inf_bits);
 };
 
 
@@ -24,9 +26,11 @@ struct InfShieldState {
     // if shield is large, then treatment has a decreased effect
     std::vector<double> shield;
 
-    State(const uint32_t & num_nodes);
+    InfShieldState(const uint32_t & num_nodes);
 
-    State(const boost::dynamic_bitset<> & inf_bits,
+    InfShieldState(const InfState & other) = default;
+
+    InfShieldState(const boost::dynamic_bitset<> & inf_bits,
             const std::vector<double> & shield);
 };
 
