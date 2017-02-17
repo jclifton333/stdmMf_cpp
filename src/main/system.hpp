@@ -14,7 +14,7 @@
 namespace stdmMf {
 
 template <typename State>
-class System<State> : public njm::tools::RngClass {
+class System : public njm::tools::RngClass {
 private:
     const std::shared_ptr<const Network> network_;
     const std::shared_ptr<Model<State> > model_;
@@ -35,6 +35,8 @@ public:
     System(const System<State> & other);
 
     std::shared_ptr<System<State> > clone() const;
+
+    uint32_t num_nodes() const;
 
     uint32_t n_inf() const;
 
