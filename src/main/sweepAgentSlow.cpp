@@ -7,33 +7,42 @@
 namespace stdmMf {
 
 
-SweepAgentSlow::SweepAgentSlow(const std::shared_ptr<const Network> & network,
-        const std::shared_ptr<Features> & features,
+template <typename State>
+SweepAgentSlow<State>::SweepAgentSlow(
+        const std::shared_ptr<const Network> & network,
+        const std::shared_ptr<Features<State> > & features,
         const std::vector<double> & coef,
         const uint32_t & max_sweeps)
-    : Agent(network), features_(features), max_sweeps_(max_sweeps),
-      coef_(coef) {
+    : Agent<State>(network), RngClass(), features_(features),
+    max_sweeps_(max_sweeps), coef_(coef) {
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
 
-SweepAgentSlow::SweepAgentSlow(const SweepAgentSlow & other)
-    : Agent(other), RngClass(other), features_(other.features_->clone()),
+
+template <typename State>
+SweepAgentSlow<State>::SweepAgentSlow(const SweepAgentSlow<State> & other)
+    : Agent<State>(other), RngClass(other), features_(other.features_->clone()),
       max_sweeps_(other.max_sweeps_), coef_(other.coef_) {
 }
 
-std::shared_ptr<Agent> SweepAgentSlow::clone() const{
-    return std::shared_ptr<Agent>(new SweepAgentSlow(*this));
-}
 
-boost::dynamic_bitset<> SweepAgentSlow::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<InfAndTrt> & history) {
-    return this->apply_trt(inf_bits);
+template <typename State>
+std::shared_ptr<Agent<State> > SweepAgentSlow<State>::clone() const{
+    return std::shared_ptr<Agent<State> >(new SweepAgentSlow<State>(*this));
 }
 
 
-boost::dynamic_bitset<> SweepAgentSlow::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
+template <typename State>
+boost::dynamic_bitset<> SweepAgentSlow<State>::apply_trt(
+        const State & state,
+        const std::vector<StateAndTrt<State> > & history) {
+    return this->apply_trt(state);
+}
+
+
+template <typename State>
+boost::dynamic_bitset<> SweepAgentSlow<State>::apply_trt(
+        const State & state) {
     boost::dynamic_bitset<> trt_bits(this->num_nodes_);
 
     // sets of treated and not treated
@@ -46,17 +55,17 @@ boost::dynamic_bitset<> SweepAgentSlow::apply_trt(
 
     // initialize first treatment bits
     for (uint32_t i = 0; i < this->num_trt_; ++i) {
-        this->set_new_treatment(trt_bits, not_trt, has_trt, inf_bits);
+        this->set_new_treatment(trt_bits, not_trt, has_trt, state);
     }
 
-    std::vector<double> f = this->features_->get_features(inf_bits, trt_bits);
+    std::vector<double> f = this->features_->get_features(state, trt_bits);
     double best_val = njm::linalg::dot_a_and_b(this->coef_, f);
 
     // sweep treatments
     if (this->max_sweeps_ > 0) {
         for (uint32_t i = 0; i < this->max_sweeps_; ++i) {
             const bool changed = this->sweep_treatments(trt_bits, best_val,
-                    not_trt, has_trt, inf_bits);
+                    not_trt, has_trt, state);
 
             if (!changed)
                 break;
@@ -66,7 +75,7 @@ boost::dynamic_bitset<> SweepAgentSlow::apply_trt(
         uint32_t i = 0;
         while (changed) {
             changed = this->sweep_treatments(trt_bits, best_val,
-                    not_trt, has_trt, inf_bits);
+                    not_trt, has_trt, state);
         }
     }
 
@@ -75,11 +84,11 @@ boost::dynamic_bitset<> SweepAgentSlow::apply_trt(
     return trt_bits;
 }
 
-void SweepAgentSlow::set_new_treatment(
+void SweepAgentSlow<State>::set_new_treatment(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits) const {
+        const State & state) const {
 
     std::set<uint32_t>::const_iterator it, end;
     end = not_trt.end();
@@ -90,7 +99,7 @@ void SweepAgentSlow::set_new_treatment(
         CHECK(!trt_bits.test(*it)) << "bit is already set";
         trt_bits.set(*it); // set new bit
 
-        const std::vector<double> f = this->features_->get_features(inf_bits,
+        const std::vector<double> f = this->features_->get_features(state,
                 trt_bits);
 
         const double val = njm::linalg::dot_a_and_b(this->coef_, f);
@@ -126,12 +135,12 @@ void SweepAgentSlow::set_new_treatment(
 }
 
 
-bool SweepAgentSlow::sweep_treatments(
+bool SweepAgentSlow<State>::sweep_treatments(
         boost::dynamic_bitset<> & trt_bits,
         double & best_val,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits) const {
+        const State & state) const {
 
 
     std::set<uint32_t>::const_iterator has_it, not_it, has_end, not_end;
@@ -163,7 +172,7 @@ bool SweepAgentSlow::sweep_treatments(
             trt_bits.set(*not_it);
 
             const std::vector<double> f = this->features_->get_features(
-                    inf_bits, trt_bits);
+                    state, trt_bits);
 
             const double val = njm::linalg::dot_a_and_b(this->coef_, f);
 
@@ -226,7 +235,8 @@ bool SweepAgentSlow::sweep_treatments(
 
 
 
-
+template class SweepAgentSlow<InfState>;
+template class SweepAgentSlow<InfShieldState>;
 
 
 } // namespace stdmMf
