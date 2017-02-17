@@ -1,5 +1,6 @@
-#ifndef NO_COV_EDGE_XOR_SO_MODEL_HPP
-#define NO_COV_EDGE_XOR_SO_MODEL_HPP
+#ifndef INF_STATE_XOR_SO_MODEL_HPP
+#define INF_STATE_XOR_SO_MODEL_HPP
+
 
 #include "types.hpp"
 #include "model.hpp"
@@ -8,10 +9,8 @@
 namespace stdmMf {
 
 
-class NoCovEdgeXorSoModel : public Model {
+class InfStateXorSoModel : public Model {
 private:
-    const uint32_t par_size_;
-
     double intcp_inf_latent_;
     double intcp_inf_;
     double intcp_rec_;
@@ -19,82 +18,69 @@ private:
     double trt_act_rec_;
     double trt_pre_inf_;
 
-    const std::shared_ptr<const Network> network_;
-    const uint32_t num_nodes_;
-
     double inf_b(const uint32_t & b_node, const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
     double a_inf_b(const uint32_t & a_node, const uint32_t & b_node,
             const bool & a_trt, const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
     double rec_b(const uint32_t & b_node, const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
     std::vector<double> inf_b_grad(const uint32_t & b_node,
             const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
     std::vector<double> a_inf_b_grad(
             const uint32_t & a_node, const uint32_t & b_node,
             const bool & a_trt, const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
     std::vector<double> rec_b_grad(
             const uint32_t & b_node, const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
 
     std::vector<double> inf_b_hess(const uint32_t & b_node,
             const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
     std::vector<double> a_inf_b_hess(
             const uint32_t & a_node, const uint32_t & b_node,
             const bool & a_trt, const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
     std::vector<double> rec_b_hess(
             const uint32_t & b_node, const bool & b_trt,
             const boost::dynamic_bitset<> & inf_bits,
-            const boost::dynamic_bitset<> & trt_bits) const;
+            const boost::dynamic_bitset<> & trt_bits) const override;
 
 
 public:
-    NoCovEdgeXorSoModel(const std::shared_ptr<const Network> & network);
+    InfStateXorSoModel(const std::shared_ptr<const Network> & network);
 
-    NoCovEdgeXorSoModel(const NoCovEdgeXorSoModel & other);
+    InfStateXorSoModel(const InfStateXorSoModel & other);
 
-    virtual std::shared_ptr<Model> clone() const;
+    ~InfStateXorSoModel() override = default;
 
-    virtual std::vector<double> par() const;
+    virtual std::shared_ptr<Model> clone() const override;
 
-    virtual void par(const std::vector<double> & par);
+    virtual std::vector<double> par() const override;
 
-    virtual uint32_t par_size() const;
-
-    virtual std::vector<double> probs(
-            const boost::dynamic_bitset<> & inf_status,
-            const boost::dynamic_bitset<> & trt_status) const;
-
-    virtual std::vector<double> ll_grad(
-            const std::vector<Transition> & history) const;
-
-    virtual std::vector<double> ll_hess(
-            const std::vector<Transition> & history) const;
+    virtual void par(const std::vector<double> & par) override;
 };
 
 
 } // namespace stdmMf
 
 
-#endif // NO_COV_EDGE_XOR_SO_MODEL_HPP
+#endif // INF_STATE_XOR_SO_MODEL_HPP
