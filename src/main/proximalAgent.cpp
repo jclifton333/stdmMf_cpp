@@ -3,26 +3,36 @@
 namespace stdmMf {
 
 
-ProximalAgent::ProximalAgent(const std::shared_ptr<const Network> & network)
-    : Agent(network) {
+template<typename State>
+ProximalAgent<State>::ProximalAgent(
+        const std::shared_ptr<const Network> & network)
+    : Agent<State>(network), RngClass() {
 }
 
-ProximalAgent::ProximalAgent(const ProximalAgent & other)
-    : Agent(other), RngClass(other) {
+
+template<typename State>
+ProximalAgent<State>::ProximalAgent(const ProximalAgent & other)
+    : Agent<State>(other), RngClass(other) {
 }
 
-std::shared_ptr<Agent> ProximalAgent::clone() const {
-    return std::shared_ptr<Agent>(new ProximalAgent(*this));
+
+template<typename State>
+std::shared_ptr<Agent<State> > ProximalAgent<State>::clone() const {
+    return std::shared_ptr<Agent<State> >(new ProximalAgent<State>(*this));
 }
 
-boost::dynamic_bitset<> ProximalAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<InfAndTrt> & history) {
-    return this->apply_trt(inf_bits);
+
+template<typename State>
+boost::dynamic_bitset<> ProximalAgent<State>::apply_trt(
+        const State & state,
+        const std::vector<StateAndTrt<State> > & history) {
+    return this->apply_trt(state);
 }
 
-boost::dynamic_bitset<> ProximalAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
+
+template<typename State>
+boost::dynamic_bitset<> ProximalAgent<State>::apply_trt(
+        const State & state) {
     std::vector<std::pair<double, uint32_t> > sorted;
 
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
@@ -33,7 +43,7 @@ boost::dynamic_bitset<> ProximalAgent::apply_trt(
         const Node & node = this->network_->get_node(i);
         const uint32_t num_neigh = node.neigh_size();
         for (uint32_t j = 0; j < num_neigh; ++j) {
-            if (inf_i != inf_bits.test(node.neigh(j))) {
+            if (inf_i != state.inf_bits.test(node.neigh(j))) {
                 next_to_opp = true;
                 break;
             }
@@ -52,5 +62,10 @@ boost::dynamic_bitset<> ProximalAgent::apply_trt(
 
     return trt_bits;
 }
+
+template class ProximalAgent<InfState>;
+template class ProximalAgent<InfShieldState>;
+
+
 
 } // namespace stdmMf
