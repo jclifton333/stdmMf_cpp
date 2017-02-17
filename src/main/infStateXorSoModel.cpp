@@ -20,8 +20,8 @@ InfStateXorSoModel::InfStateXorSoModel(const InfStateXorSoModel & other)
       trt_pre_inf_(other.trt_pre_inf_) {
 }
 
-std::shared_ptr<Model> InfStateXorSoModel::clone() const {
-    return std::shared_ptr<Model>(new InfStateXorSoModel(*this));
+std::shared_ptr<Model<InfState> > InfStateXorSoModel::clone() const {
+    return std::shared_ptr<Model<InfState> >(new InfStateXorSoModel(*this));
 }
 
 
