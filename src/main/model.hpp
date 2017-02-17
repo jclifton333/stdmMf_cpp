@@ -12,7 +12,7 @@ namespace stdmMf {
 
 
 template <typename State>
-class Model<State> : public RngClass {
+class Model<State> : public njm::tools::RngClass {
 private:
     const uint32_t par_size_;
 
