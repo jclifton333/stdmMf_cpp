@@ -2,11 +2,11 @@
 #define AGENT_HPP
 
 #include "network.hpp"
-#include "types.hpp"
+#include "states.hpp"
 
 namespace stdmMf {
 
-
+template<typename State>
 class Agent {
 protected:
     const std::shared_ptr<const Network> network_;
@@ -18,16 +18,18 @@ protected:
 public:
     Agent(const std::shared_ptr<const Network> & network);
 
-    Agent(const Agent & other);
+    Agent(const Agent<State> & other);
 
-    virtual std::shared_ptr<Agent> clone() const = 0;
+    virtual ~Agent();
 
-    virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits,
-            const std::vector<InfAndTrt> & history) = 0;
+    virtual std::shared_ptr<Agent<State> > clone() const = 0;
 
     virtual boost::dynamic_bitset<> apply_trt(
-            const boost::dynamic_bitset<> & inf_bits) = 0;
+            const State & inf_bits,
+            const std::vector<StateAndTrt<State> > & history) = 0;
+
+    virtual boost::dynamic_bitset<> apply_trt(
+            const State & inf_bits);
 
     virtual uint32_t num_trt() const;
 };
