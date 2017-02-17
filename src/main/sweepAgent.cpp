@@ -14,18 +14,21 @@ namespace stdmMf {
 
 using njm::data::Result;
 
-SweepAgent::SweepAgent(const std::shared_ptr<const Network> & network,
-        const std::shared_ptr<Features> & features,
+template <typename State>
+SweepAgent<State>::SweepAgent(const std::shared_ptr<const Network> & network,
+        const std::shared_ptr<Features<State> > & features,
         const std::vector<double> & coef,
         const uint32_t & max_sweeps,
         const bool & do_sweep)
-    : Agent(network), features_(features), coef_(coef), max_sweeps_(max_sweeps),
-      do_sweep_(do_sweep), do_parallel_(false) {
+    : Agent(network), RngClass(), features_(features), coef_(coef),
+      max_sweeps_(max_sweeps), do_sweep_(do_sweep), do_parallel_(false) {
+
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
 
 
-SweepAgent::SweepAgent(const SweepAgent & other)
+template <typename State>
+SweepAgent<State>::SweepAgent(const SweepAgent & other)
     : Agent(other), njm::tools::RngClass(other),
     features_(other.features_->clone()), coef_(other.coef_),
     max_sweeps_(other.max_sweeps_), do_sweep_(other.do_sweep_),
@@ -34,12 +37,14 @@ SweepAgent::SweepAgent(const SweepAgent & other)
 }
 
 
-std::shared_ptr<Agent> SweepAgent::clone() const{
-    return std::shared_ptr<Agent>(new SweepAgent(*this));
+template <typename State>
+std::shared_ptr<Agent<State> > SweepAgent<State>::clone() const{
+    return std::shared_ptr<Agent<State> >(new SweepAgent<State>(*this));
 }
 
 
-void SweepAgent::set_parallel(const bool & do_parallel,
+template <typename State>
+void SweepAgent<State>::set_parallel(const bool & do_parallel,
         const uint32_t & num_threads) {
     this->do_parallel_ = do_parallel;
     if (do_parallel) {
@@ -51,15 +56,17 @@ void SweepAgent::set_parallel(const bool & do_parallel,
 }
 
 
-boost::dynamic_bitset<> SweepAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits,
-        const std::vector<InfAndTrt> & history) {
-    return this->apply_trt(inf_bits);
+template <typename State>
+boost::dynamic_bitset<> SweepAgent<State>::apply_trt(
+        const State & state,
+        const std::vector<StateAndTrt<State> > & history) {
+    return this->apply_trt(state);
 }
 
 
-boost::dynamic_bitset<> SweepAgent::apply_trt(
-        const boost::dynamic_bitset<> & inf_bits) {
+template <typename State>
+boost::dynamic_bitset<> SweepAgent<State>::apply_trt(
+        const State & state) {
     boost::dynamic_bitset<> trt_bits(this->num_nodes_);
 
     // sets of treated and not treated
@@ -70,12 +77,12 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
         not_trt.insert(i);
     }
 
-    std::vector<double> feat = this->features_->get_features(inf_bits,
+    std::vector<double> feat = this->features_->get_features(state,
             trt_bits);
 
     // initialize first treatment bits
     for (uint32_t i = 0; i < this->num_trt_; ++i) {
-        this->set_new_treatment(trt_bits, not_trt, has_trt, inf_bits, feat);
+        this->set_new_treatment(trt_bits, not_trt, has_trt, state, feat);
     }
 
     double best_val = njm::linalg::dot_a_and_b(this->coef_, feat);
@@ -84,7 +91,7 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
     if (this->do_sweep_) {
         for (uint32_t i = 0; i < this->max_sweeps_; ++i) {
             const bool changed = this->sweep_treatments(trt_bits, best_val,
-                    not_trt, has_trt, inf_bits, feat);
+                    not_trt, has_trt, state, feat);
 
             if (!changed)
                 break;
@@ -97,25 +104,27 @@ boost::dynamic_bitset<> SweepAgent::apply_trt(
 }
 
 
-void SweepAgent::set_new_treatment(
+template <typename State>
+void SweepAgent<State>::set_new_treatment(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits,
+        const State & state,
         std::vector<double> & feat) const {
     if (this->do_parallel_) {
-        set_new_treatment_parallel(trt_bits, not_trt, has_trt, inf_bits, feat);
+        set_new_treatment_parallel(trt_bits, not_trt, has_trt, state, feat);
     } else {
-        set_new_treatment_serial(trt_bits, not_trt, has_trt, inf_bits, feat);
+        set_new_treatment_serial(trt_bits, not_trt, has_trt, state, feat);
     }
 }
 
 
-void SweepAgent::set_new_treatment_serial(
+template <typename State>
+void SweepAgent<State>::set_new_treatment_serial(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits,
+        const State & state,
         std::vector<double> & feat) const {
 
     std::set<uint32_t>::const_iterator it, end;
@@ -132,14 +141,14 @@ void SweepAgent::set_new_treatment_serial(
         trt_bits.set(*it); // set new bit
 
         // update features for treating *it
-        this->features_->update_features(*it, inf_bits, trt_bits,
-                inf_bits, trt_bits_old, feat);
+        this->features_->update_features(*it, state, trt_bits,
+                state, trt_bits_old, feat);
 
         const double val = njm::linalg::dot_a_and_b(this->coef_, feat);
 
         // update features for removing treatment on *it
-        this->features_->update_features(*it, inf_bits, trt_bits_old,
-                inf_bits, trt_bits, feat);
+        this->features_->update_features(*it, state, trt_bits_old,
+                state, trt_bits, feat);
 
         trt_bits.reset(*it);
 
@@ -176,16 +185,17 @@ void SweepAgent::set_new_treatment_serial(
     has_trt.insert(best_node);
 
     // update features for treating best_node
-    this->features_->update_features(best_node, inf_bits, trt_bits,
-            inf_bits, trt_bits_old, feat);
+    this->features_->update_features(best_node, state, trt_bits,
+            state, trt_bits_old, feat);
 }
 
 
-void SweepAgent::set_new_treatment_parallel(
+template <typename State>
+void SweepAgent<State>::set_new_treatment_parallel(
         boost::dynamic_bitset<> & trt_bits,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits,
+        const State & state,
         std::vector<double> & feat) const {
 
     std::set<uint32_t>::const_iterator it, end;
@@ -200,7 +210,7 @@ void SweepAgent::set_new_treatment_parallel(
     std::mutex finish_mtx;
     std::condition_variable cv;
 
-    auto fn = [this, &feat, &inf_bits, &trt_bits, &trt_bits_old, &best_val,
+    auto fn = [this, &feat, &state, &trt_bits, &trt_bits_old, &best_val,
             &best_nodes, &num_left, &finish_mtx, &cv] (
                     const uint32_t & new_trt,
                     const std::shared_ptr<Result<std::pair<double, uint32_t> > >
@@ -213,8 +223,8 @@ void SweepAgent::set_new_treatment_parallel(
         trt_bits_cpy.set(new_trt); // set new bit
 
         // update features for treating *it
-        this->features_->update_features_async(new_trt, inf_bits, trt_bits_cpy,
-                inf_bits, trt_bits_old, feat_cpy);
+        this->features_->update_features_async(new_trt, state, trt_bits_cpy,
+                state, trt_bits_old, feat_cpy);
 
         const double val = njm::linalg::dot_a_and_b(this->coef_, feat_cpy);
 
@@ -280,17 +290,18 @@ void SweepAgent::set_new_treatment_parallel(
     has_trt.insert(best_node);
 
     // update features for treating best_node
-    this->features_->update_features(best_node, inf_bits, trt_bits,
-            inf_bits, trt_bits_old, feat);
+    this->features_->update_features(best_node, state, trt_bits,
+            state, trt_bits_old, feat);
 }
 
 
-bool SweepAgent::sweep_treatments(
+template <typename State>
+bool SweepAgent<State>::sweep_treatments(
         boost::dynamic_bitset<> & trt_bits,
         double & best_val,
         std::set<uint32_t> & not_trt,
         std::set<uint32_t> & has_trt,
-        const boost::dynamic_bitset<> & inf_bits,
+        const State & state,
         std::vector<double> & feat) const {
 
 
@@ -312,8 +323,8 @@ bool SweepAgent::sweep_treatments(
         trt_bits.reset(*has_it); // reset
 
         // update features
-        this->features_->update_features(*has_it, inf_bits, trt_bits,
-                inf_bits, trt_bits_old, feat);
+        this->features_->update_features(*has_it, state, trt_bits,
+                state, trt_bits_old, feat);
 
         // set up old to match trt_bits
         trt_bits_old.reset(*has_it);
@@ -332,14 +343,14 @@ bool SweepAgent::sweep_treatments(
             trt_bits.set(*not_it);
 
             // update features for setting *not_it
-            this->features_->update_features(*not_it, inf_bits, trt_bits,
-                    inf_bits, trt_bits_old, feat);
+            this->features_->update_features(*not_it, state, trt_bits,
+                    state, trt_bits_old, feat);
 
             const double val = njm::linalg::dot_a_and_b(this->coef_, feat);
 
             // update features for resetting *not_it
-            this->features_->update_features(*not_it, inf_bits, trt_bits_old,
-                    inf_bits, trt_bits, feat);
+            this->features_->update_features(*not_it, state, trt_bits_old,
+                    state, trt_bits, feat);
 
             trt_bits.reset(*not_it);
 
@@ -390,8 +401,8 @@ bool SweepAgent::sweep_treatments(
         }
 
         // update features for new treatment
-        this->features_->update_features(better_node, inf_bits, trt_bits,
-                inf_bits, trt_bits_old, feat);
+        this->features_->update_features(better_node, state, trt_bits,
+                state, trt_bits_old, feat);
     }
 
     // add new_trt to has_trt
@@ -406,6 +417,8 @@ bool SweepAgent::sweep_treatments(
 
 
 
+template class SweepAgent<InfState>;
+template class SweepAgent<InfShieldState>;
 
 
 
