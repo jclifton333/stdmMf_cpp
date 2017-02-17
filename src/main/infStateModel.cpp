@@ -352,6 +352,23 @@ std::vector<double> InfStateModel::ll_hess(
 }
 
 
+InfState InfStateModel::turn_clock(const InfState & curr_state
+        const boost::dynamic_bitset<> & trt_bits) const {
+    const std::vector<double> probs = this->probs(curr_state, trt_bits);
+
+    InfState next_state(curr_state);
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+        const double & prob_i = probs.at(i);
+
+        const double r = this->rng_->runif01();
+        if (r < prob_i) {
+            curr_state.inf_bits.flip(i);
+        }
+    }
+
+    return next_state;
+}
+
 
 
 } // namespace stdmMf
