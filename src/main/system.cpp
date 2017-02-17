@@ -102,8 +102,8 @@ void System::update_history() {
 
 template <typename State>
 void System::turn_clock() {
-    const State next_state = this->model_->(turn_clock(this->state_,
-                    this->inf_bits));
+    const State next_state = this->model_->turn_clock(this->state_,
+            this->inf_bits);
 
     this->turn_clock(next_state);
 }
