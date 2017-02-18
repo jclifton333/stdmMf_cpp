@@ -24,8 +24,8 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const double & ell,
         const double & min_step_size)
     : Agent<State>(network), features_(features),
-      c_(c), t_(t), a_(a), b_(b), ell_(ell),
-      min_step_size_(min_step_size) {
+    c_(c), t_(t), a_(a), b_(b), ell_(ell),
+    min_step_size_(min_step_size) {
 }
 
 
@@ -33,8 +33,8 @@ template <typename State>
 BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const BrMinSimPerturbAgent & other)
     : Agent<State>(other), RngClass(other), features_(other.features_->clone()),
-      c_(other.c_), t_(other.t_), a_(other.a_),
-      b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_){
+    c_(other.c_), t_(other.t_), a_(other.a_),
+    b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_){
 }
 
 
