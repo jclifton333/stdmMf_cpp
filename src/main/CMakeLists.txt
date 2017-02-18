@@ -12,9 +12,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(njm_cpp)
 add_library(stdmMf network.cpp system.cpp states.cpp
 
-  ## models
-  model.cpp infStateModel.cpp infStateNoSoModel.cpp infStateOrSoModel.cpp
+  ## model
+  model.cpp
+
+  ## inf state models
+  infStateModel.cpp infStateNoSoModel.cpp infStateOrSoModel.cpp
   infStateXorSoModel.cpp infStateSepSoModel.cpp
+
+  ## inf shield state models
+  infShieldStateModel.cpp
 
   ## agents
   agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp

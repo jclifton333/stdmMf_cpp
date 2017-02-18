@@ -1,6 +1,8 @@
 #ifndef INF_SHIELD_STATE_MODEL_HPP
 #define INF_SHIELD_STATE_MODEL_HPP
 
+#include "states.hpp"
+#include "model.hpp"
 
 namespace stdmMf {
 
@@ -53,8 +55,21 @@ private:
             const InfShieldState & state,
             const boost::dynamic_bitset<> & trt_bits) const = 0;
 
+    virtual double shield_draw(
+            const uint32_t & loc, const InfShieldState & curr_state) const = 0;
+
     virtual double shield_prob(
-            const uint32_t & loc, const InfShield & state) const = 0;
+            const uint32_t & loc, const InfShieldState & curr_state,
+            const InfShieldState & next_state,
+            const bool & log_scale = false) const = 0;
+
+    virtual std::vector<double> shield_grad(
+            const uint32_t & loc, const InfShieldState & curr_state,
+            const InfShieldState & next_state) const = 0;
+
+    virtual std::vector<double> shield_hess(
+            const uint32_t & loc, const InfShieldState & curr_state,
+            const InfShieldState & next_state) const = 0;
 
 public:
     InfShieldStateModel(const uint32_t & par_size,
@@ -62,7 +77,7 @@ public:
 
     InfShieldStateModel(const InfShieldStateModel & other);
 
-    virtual ~InfStateShieldModel() override = default;
+    virtual ~InfShieldStateModel() override = default;
 
     virtual std::shared_ptr<Model<InfShieldState> > clone() const override = 0;
 
