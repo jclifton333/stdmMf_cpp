@@ -10,7 +10,7 @@ namespace stdmMf {
 template <typename State>
 Model<State>::Model(const uint32_t & par_size,
         const std::shared_ptr<const Network> & network)
-    : par_size_(par_size), network_(network->clone()),
+    : RngClass(), par_size_(par_size), network_(network->clone()),
       num_nodes_(network->size()) {
 }
 
