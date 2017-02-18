@@ -17,9 +17,9 @@ namespace stdmMf {
 template <typename State>
 class GradientChecker {
 public:
-    Model<InfState> * m;
+    Model<State> * m;
     int wiggle_var;
-    std::vector<Transition<InfState> > * history;
+    std::vector<Transition<State> > * history;
     std::vector<double> par;
 };
 
@@ -28,10 +28,10 @@ template <typename State>
 class HessianChecker {
 
 public:
-    Model<InfState> * m;
+    Model<State> * m;
     int wiggle_var;
     int gradient_var;
-    std::vector<Transition<InfState> > * history;
+    std::vector<Transition<State> > * history;
     std::vector<double> par;
 };
 
@@ -40,8 +40,8 @@ const double eps = 1e-4;
 
 template <typename State>
 double f (double x, void * params) {
-    GradientChecker<InfState> * gc =
-        static_cast<GradientChecker<InfState>*>(params);
+    GradientChecker<State> * gc =
+        static_cast<GradientChecker<State>*>(params);
     std::vector<double> par = gc->par;
     par.at(gc->wiggle_var) = x;
     gc->m->par(par);
@@ -51,8 +51,8 @@ double f (double x, void * params) {
 
 template <typename State>
 double f_grad (double x, void * params) {
-    HessianChecker<InfState> * hc =
-        static_cast<HessianChecker<InfState>*>(params);
+    HessianChecker<State> * hc =
+        static_cast<HessianChecker<State>*>(params);
     std::vector<double> par = hc->m->par();
     par.at(hc->wiggle_var) = x;
     hc->m->par(par);
