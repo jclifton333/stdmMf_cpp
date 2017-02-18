@@ -39,6 +39,7 @@ std::vector<double> InfStateSepSoModel::par() const {
     par.push_back(this->trt_act_rec_so_);
     par.push_back(this->trt_pre_inf_);
     par.push_back(this->trt_pre_inf_so_);
+    CHECK_EQ(par.size(), this->par_size());
     return par;
 }
 
@@ -55,6 +56,7 @@ void InfStateSepSoModel::par(const std::vector<double> & par) {
     this->trt_act_rec_so_ = *it++;
     this->trt_pre_inf_ = *it++;
     this->trt_pre_inf_so_ = *it++;
+    CHECK(par.end() == it);
 }
 
 

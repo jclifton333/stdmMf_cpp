@@ -33,6 +33,7 @@ std::vector<double> InfStateXorSoModel::par() const {
     par.push_back(this->trt_act_inf_);
     par.push_back(this->trt_act_rec_);
     par.push_back(this->trt_pre_inf_);
+    CHECK_EQ(par.size(), this->par_size());
     return par;
 }
 
@@ -46,6 +47,7 @@ void InfStateXorSoModel::par(const std::vector<double> & par) {
     this->trt_act_inf_ = *it++;
     this->trt_act_rec_ = *it++;
     this->trt_pre_inf_ = *it++;
+    CHECK(par.end() == it);
 }
 
 
