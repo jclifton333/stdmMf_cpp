@@ -15,6 +15,7 @@ SET(test_src
   test_infStateOrSoModel
   test_infStateXorSoModel
   test_infStateSepSoModel
+  test_infShieldStateNoImNoSoModel
   test_networkRunFeatures
   test_networkRunSymFeatures
   test_sweepAgent)
