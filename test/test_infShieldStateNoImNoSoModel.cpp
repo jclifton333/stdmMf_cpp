@@ -60,9 +60,219 @@ double f_grad (double x, void * params) {
 }
 
 
-TEST(TestInfShieldStateNoImNoSoModel, Reminder) {
-    EXPECT_TRUE(false) << "tests need implementing";
+TEST(TestInfShieldStateNoImNoSoModel, TestPar) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(3);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    InfShieldStateNoImNoSoModel m(n);
+
+    CHECK_EQ(m.par().size(), 7);
+
+    std::vector<double> par (m.par());
+    for (uint32_t i = 0; i < par.size(); ++i) {
+        CHECK_EQ(par.at(i), 0.);
+        par.at(i) = i;
+    }
+
+    m.par(par);
+    par = m.par();
+    for (uint32_t i = 0; i < par.size(); ++i) {
+        CHECK_EQ(par.at(i), static_cast<double>(i));
+    }
 }
+
+TEST(TestInfShieldStateNoImNoSoModel,TestLLGradient) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    // init model
+    const std::shared_ptr<InfShieldStateNoImNoSoModel> m(
+            new InfShieldStateNoImNoSoModel(n));
+
+    // set par
+    njm::tools::Rng rng;
+    std::vector<double> par(m->par());
+    std::for_each(par.begin(),par.end(),
+            [&rng](double & x) {
+                x = rng.rnorm_01();
+            });
+    m->par(par);
+
+    System<InfShieldState> s(n,m);
+
+    RandomAgent<InfShieldState> a(n);
+
+    const uint32_t num_points = 50;
+    runner(&s, &a, num_points, 1.0);
+
+    std::vector<Transition<InfShieldState>> history(
+            Transition<InfShieldState>::from_sequence(s.history(), s.state()));
+    CHECK_EQ(history.size(), num_points);
+
+
+    // generate new parameters so gradient is not zero
+    std::for_each(par.begin(),par.end(),
+            [&rng](double & x) {
+                x = rng.rnorm_01();
+            });
+    m->par(par);
+    const std::vector<double> grad_val =
+        m->ll_grad(history);
+
+    for (uint32_t i = 0; i < par.size(); ++i) {
+        GradientChecker<InfShieldState> gc;
+        gc.m = m.get();
+        gc.wiggle_var = i;
+        gc.history = &history;
+        gc.par = par;
+
+        gsl_function F;
+        F.function = &f<InfShieldState>;
+        F.params = &gc;
+
+        double result;
+        double abserr;
+        gsl_deriv_central(&F, par.at(i), 1e-3, &result, &abserr);
+
+        EXPECT_NEAR(grad_val.at(i), result, eps)
+            << "gradient failed for parameter " << i;
+    }
+}
+
+
+TEST(TestInfShieldStateNoImNoSoModel,TestLLHessian) {
+    // generate network
+    NetworkInit init;
+    init.set_dim_x(3);
+    init.set_dim_y(3);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    std::shared_ptr<Network> n = Network::gen_network(init);
+
+    // init model
+    const std::shared_ptr<InfShieldStateNoImNoSoModel> m(
+            new InfShieldStateNoImNoSoModel(n));
+
+    // set par
+    njm::tools::Rng rng;
+    std::vector<double> par(m->par());
+    std::for_each(par.begin(),par.end(),
+            [&rng](double & x) {
+                x = rng.rnorm_01();
+            });
+    m->par(par);
+
+    System<InfShieldState> s(n,m);
+
+    RandomAgent<InfShieldState> a(n);
+
+    const uint32_t num_points = 3;
+    runner(&s, &a, num_points, 1.0);
+
+    std::vector<Transition<InfShieldState>> history(
+            Transition<InfShieldState>::from_sequence(s.history(), s.state()));
+    CHECK_EQ(history.size(), num_points);
+
+
+    // generate new parameters so gradient is not zero
+    std::for_each(par.begin(),par.end(),
+            [&rng](double & x) {
+                x = rng.rnorm_01();
+            });
+    m->par(par);
+    const std::vector<double> hess_val =
+        m->ll_hess(history);
+
+    for (uint32_t i = 0; i < par.size(); ++i) {
+        for (uint32_t j = 0; j < par.size(); ++j) {
+            HessianChecker<InfShieldState> hc;
+            hc.m = m.get();
+            hc.wiggle_var = i;
+            hc.gradient_var = j;
+            hc.history = &history;
+            hc.par = par;
+
+            gsl_function F;
+            F.function = &f_grad<InfShieldState>;
+            F.params = &hc;
+
+            double result;
+            double abserr;
+            gsl_deriv_central(&F, par.at(i), 1e-3, &result, &abserr);
+
+            EXPECT_NEAR(hess_val.at(i * par.size() + j), result, eps)
+                << "hessian failed for parameters " << i << " and " << j;
+        }
+    }
+}
+
+
+TEST(TestInfShieldStateNoImNoSoModel, EstPar) {
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+
+    const std::shared_ptr<Network> n = Network::gen_network(init);
+
+    const std::shared_ptr<InfShieldStateNoImNoSoModel> m(
+            new InfShieldStateNoImNoSoModel(n));
+
+    njm::tools::Rng rng;
+    std::vector<double> par;
+    for (uint32_t i = 0; i < m->par_size(); ++i) {
+        par.push_back(rng.rnorm(-2.0, 1.0));
+    }
+
+    m->par(par);
+
+    System<InfShieldState> s(n,m);
+
+    const std::shared_ptr<ProximalAgent<InfShieldState> > pa(
+            new ProximalAgent<InfShieldState>(n));
+    const std::shared_ptr<RandomAgent<InfShieldState> > ra(
+            new RandomAgent<InfShieldState>(n));
+    EpsAgent<InfShieldState> ea(n, pa, ra, 0.1);
+
+    const uint32_t num_points = 100;
+    runner(&s, &ea, num_points, 1.0);
+
+    std::vector<Transition<InfShieldState> > history(
+            Transition<InfShieldState>::from_sequence(s.history(), s.state()));
+    CHECK_EQ(history.size(), num_points);
+
+    // scale paramters
+    std::vector<double> start_par = par;
+    std::for_each(start_par.begin(), start_par.end(),
+            [] (double & x) {
+                x *= 10.0;
+            });
+
+    m->est_par(history);
+
+    const std::vector<double> est_par = m->par();
+    for (uint32_t i = 0; i < m->par_size(); ++i) {
+        const double diff = std::abs(par.at(i) - est_par.at(i));
+        EXPECT_LT(diff / par.at(i), 0.1)
+            << "Par " << i << " failed with truth " << par.at(i)
+            << " and estimate " << est_par.at(i);
+    }
+}
+
 
 } // namespace coopPE
 
