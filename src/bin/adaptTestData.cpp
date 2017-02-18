@@ -1,9 +1,9 @@
 #include "system.hpp"
 #include "network.hpp"
-#include "noCovEdgeModel.hpp"
-#include "noCovEdgeOrSoModel.hpp"
-#include "noCovEdgeXorSoModel.hpp"
-#include "noCovEdgeSepSoModel.hpp"
+#include "InfStateNoSoModel.hpp"
+#include "InfStateOrSoModel.hpp"
+#include "InfStateXorSoModel.hpp"
+#include "InfStateSepSoModel.hpp"
 #include "vfnMaxSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
@@ -25,8 +25,8 @@ using namespace stdmMf;
 using njm::tools::Rng;
 
 void run(const std::shared_ptr<Network> & net,
-        const std::shared_ptr<Model> & mod_system,
-        const std::shared_ptr<Model> & mod_agents,
+        const std::shared_ptr<Model<InfState> > & mod_system,
+        const std::shared_ptr<Model<InfState> > & mod_agents,
         const uint32_t & rep,
         const uint32_t & num_points,
         Observation * const obs) {
@@ -35,13 +35,13 @@ void run(const std::shared_ptr<Network> & net,
 
     const uint32_t run_length = 2;
 
-    std::shared_ptr<Features> features(
-            new NetworkRunSymFeatures(net->clone(), run_length));
+    std::shared_ptr<Features<InfState> > features(
+            new NetworkRunSymFeatures<InfState> (net->clone(), run_length));
 
-    System s_orig(net->clone(), mod_system->clone());
+    System<InfState> s_orig(net->clone(), mod_system->clone());
 
     s_orig.rng(rng);
-    VfnMaxSimPerturbAgent vmax_agent(net->clone(),
+    VfnMaxSimPerturbAgent<InfState> vmax_agent(net->clone(),
             features->clone(),
             mod_agents->clone(),
             2, num_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
@@ -56,11 +56,11 @@ void run(const std::shared_ptr<Network> & net,
         TransitionPB * transition = obs->add_transition();
 
         // starting infection
-        boost::to_string(s_orig.inf_bits(), bits_str);
+        boost::to_string(s_orig.state().inf_bits, bits_str);
         transition->set_curr_inf_bits(bits_str);
 
         const boost::dynamic_bitset<> trt_bits = vmax_agent.apply_trt(
-                s_orig.inf_bits(), s_orig.history());
+                s_orig.state().inf_bits, s_orig.history());
 
         // treatment
         boost::to_string(trt_bits, bits_str);
@@ -73,7 +73,7 @@ void run(const std::shared_ptr<Network> & net,
         s_orig.turn_clock();
 
         // starting infection
-        boost::to_string(s_orig.inf_bits(), bits_str);
+        boost::to_string(s_orig.state().inf_bits, bits_str);
         transition->set_next_inf_bits(bits_str);
     }
 }
@@ -99,8 +99,8 @@ int main(int argc, char *argv[]) {
     }
 
     // double vector since model depends on network
-    typedef std::pair<std::shared_ptr<Model>,
-                      std::shared_ptr<Model> > ModelPair;
+    typedef std::pair<std::shared_ptr<Model<InfState> >,
+                      std::shared_ptr<Model<InfState> > > ModelPair;
     std::vector<std::pair<std::string,
                           std::vector<ModelPair> > > models;
     { // models
@@ -152,9 +152,9 @@ int main(int argc, char *argv[]) {
         { // Correct: No So,  Postulated: No So
             std::vector<ModelPair> models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeModel(
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateNoSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(new InfStateNoSoModel(
                                         networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
@@ -168,10 +168,10 @@ int main(int argc, char *argv[]) {
         { // Correct: OrSo,  Postulated: OrSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
 
@@ -184,10 +184,10 @@ int main(int argc, char *argv[]) {
         { // Correct: XorSo,  Postulated: XorSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
 
@@ -200,10 +200,10 @@ int main(int argc, char *argv[]) {
         { // Correct: SepSo,  Postulated: SepSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))));
                 mp.first->par(par_sep);
                 mp.second->par(par_sep);
 
@@ -216,10 +216,10 @@ int main(int argc, char *argv[]) {
         { // Correct: SepSo,  Postulated: OrSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))));
                 mp.first->par(par_sep);
                 mp.second->par(par);
 
@@ -232,10 +232,10 @@ int main(int argc, char *argv[]) {
         { // Correct: SepSo,  Postulated: XorSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))));
                 mp.first->par(par_sep);
                 mp.second->par(par);
 
@@ -248,10 +248,10 @@ int main(int argc, char *argv[]) {
         { // Correct: SepSo,  Postulated: No So
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateNoSoModel(networks.at(i))));
                 mp.first->par(par_sep);
                 mp.second->par(par);
 
@@ -264,10 +264,10 @@ int main(int argc, char *argv[]) {
         { // Correct: No So,  Postulated: SepSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateNoSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par_sep);
 
@@ -280,10 +280,10 @@ int main(int argc, char *argv[]) {
         { // Correct: No So,  Postulated: XorSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateNoSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
 
@@ -296,10 +296,10 @@ int main(int argc, char *argv[]) {
         { // Correct: No So,  Postulated: OrSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateNoSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
 
@@ -312,10 +312,10 @@ int main(int argc, char *argv[]) {
         { // Correct: XorSo,  Postulated: OrSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
 
@@ -328,9 +328,9 @@ int main(int argc, char *argv[]) {
         { // Correct: XorSo,  Postulated: No So
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeModel(
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(new InfStateNoSoModel(
                                         networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
@@ -345,10 +345,10 @@ int main(int argc, char *argv[]) {
         { // Correct: XorSo,  Postulated: SepSo
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par_sep);
 
@@ -361,9 +361,9 @@ int main(int argc, char *argv[]) {
         { // Correct: OrSo,  Postulated: No So
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeModel(
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(new InfStateNoSoModel(
                                         networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
@@ -377,10 +377,10 @@ int main(int argc, char *argv[]) {
         { // Correct: OrSo,  Postulated: Xor So
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeXorSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateXorSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par);
 
@@ -393,10 +393,10 @@ int main(int argc, char *argv[]) {
         { // Correct: OrSo,  Postulated: Sep So
             std::vector<ModelPair > models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model>(new NoCovEdgeOrSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model>(new NoCovEdgeSepSoModel(
-                                        networks.at(i))));
+                ModelPair mp (std::shared_ptr<Model<InfState> >(
+                                new InfStateOrSoModel(networks.at(i))),
+                        std::shared_ptr<Model<InfState> >(
+                                new InfStateSepSoModel(networks.at(i))));
                 mp.first->par(par);
                 mp.second->par(par_sep);
 

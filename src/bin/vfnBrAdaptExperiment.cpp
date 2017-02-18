@@ -14,7 +14,7 @@
 
 #include "system.hpp"
 #include "agent.hpp"
-#include "noCovEdgeModel.hpp"
+#include "infStateNoSoModel.hpp"
 #include "networkRunSymFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "randomAgent.hpp"
@@ -63,7 +63,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     std::shared_ptr<Network> net = Network::gen_network(init);
 
     // model
-    std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
+    std::shared_ptr<Model<InfState> > mod(new InfStateNoSoModel(net));
 
     {
         // latent infections
@@ -110,20 +110,18 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     // value function maximization
     {
         // features
-        std::shared_ptr<Features> features(new NetworkRunSymFeatures(net,
-                        path_len));
+        std::shared_ptr<Features<InfState> > features(
+                new NetworkRunSymFeatures<InfState>(net, path_len));
 
         auto min_fn = [&](const std::vector<double> & par,
                 void * const data) {
-            SweepAgent agent(net, features, par, 2, true);
+            SweepAgent<InfState> agent(net, features, par, 2, true);
             agent.rng(rng);
-            System s(net, mod);
+            System<InfState> s(net, mod);
             s.rng(rng);
             double val = 0.0;
             for (uint32_t i = 0; i < num_reps_vfn; ++i) {
-                s.cleanse();
-                s.wipe_trt();
-                s.erase_history();
+                s.reset();
                 s.start();
 
                 val += runner(&s, &agent, 20, 1.0);
@@ -160,19 +158,21 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     std::chrono::duration<double> elapsed;
     {
         // system
-        System s(net, mod);
+        System<InfState> s(net, mod);
         s.rng(rng);
 
         // features
-        std::shared_ptr<Features> features(new NetworkRunSymFeatures(net,
-                        path_len));
+        std::shared_ptr<Features<InfState>> features(
+                new NetworkRunSymFeatures<InfState>(net, path_len));
 
         // eps agent
-        std::shared_ptr<MyopicAgent> ma(new MyopicAgent(net, mod->clone()));
+        std::shared_ptr<MyopicAgent<InfState> > ma(
+                new MyopicAgent<InfState>(net, mod->clone()));
         ma->rng(rng);
-        std::shared_ptr<ProximalAgent> pa(new ProximalAgent(net));
+        std::shared_ptr<ProximalAgent<InfState> > pa(
+                new ProximalAgent<InfState>(net));
         pa->rng(rng);
-        EpsAgent ea(net, ma, pa, 0.2);
+        EpsAgent<InfState> ea(net, ma, pa, 0.2);
         ea.rng(rng);
 
 
@@ -181,31 +181,31 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         // simulate history
         const uint32_t num_points_for_br = 50;
         for (uint32_t i = 0; i < num_points_for_br; ++i) {
-            const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.inf_bits(),
+            const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.state(),
                     s.history());
             s.trt_bits(trt_bits);
             s.turn_clock();
         }
 
-        std::vector<Transition> history(
-                Transition::from_sequence(s.history(), s.inf_bits()));
+        std::vector<Transition<InfState> > history(
+                Transition<InfState>::from_sequence(s.history(), s.state()));
         CHECK_EQ(history.size(), num_points_for_br);
 
 
         // function for br min
         auto min_fn = [&](const std::vector<double> & par,
                 void * const data) {
-            SweepAgent agent(net, features, par, 2, true);
+            SweepAgent<InfState> agent(net, features, par, 2, true);
             agent.rng(rng);
 
             // q function
-            auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
+            auto q_fn = [&](const InfState & state,
                     const boost::dynamic_bitset<> & trt_bits) {
                 return njm::linalg::dot_a_and_b(par,features->get_features(
-                                inf_bits, trt_bits));
+                                state, trt_bits));
             };
-            const double br = bellman_residual_sq(history, &agent, gamma_br,
-                    q_fn);
+            const double br = bellman_residual_sq<InfState>(
+                    history, &agent, gamma_br, q_fn);
 
             return br;
         };
@@ -246,20 +246,18 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     double val = 0.0;
     {
-        System s(net, mod);
+        System<InfState> s(net, mod);
         s.rng(rng);
 
         // features
-        std::shared_ptr<Features> features(new NetworkRunSymFeatures(net,
-                        path_len));
+        std::shared_ptr<Features<InfState> > features(
+                new NetworkRunSymFeatures<InfState>(net, path_len));
 
-        SweepAgent agent(net, features, optim_par, 2, true);
+        SweepAgent<InfState> agent(net, features, optim_par, 2, true);
         agent.rng(rng);
 
         for (uint32_t i = 0; i < 50; ++i) {
-            s.cleanse();
-            s.wipe_trt();
-            s.erase_history();
+            s.reset();
             s.start();
 
             val += runner(&s, &agent, 20, 1.0);

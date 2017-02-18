@@ -19,7 +19,8 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
     std::shared_ptr<Network> net = Network::gen_network(init);
 
-    std::shared_ptr<Features> f(new NetworkRunFeatures(net,4));
+    std::shared_ptr<Features<InfState> > f(
+            new NetworkRunFeatures<InfState>(net,4));
 
     std::vector<double> coef(f->num_features());
     std::for_each(coef.begin(), coef.end(),
@@ -27,7 +28,7 @@ int main(int argc, char *argv[]) {
                 x = rng->rnorm_01();
             });
 
-    SweepAgent sa(net, f, coef, 2, true);
+    SweepAgent<InfState> sa(net, f, coef, 2, true);
     sa.rng(rng);
 
     boost::dynamic_bitset<> inf_bits(net->size());

@@ -2,10 +2,10 @@
 
 #include "system.hpp"
 
-#include "noCovEdgeModel.hpp"
-#include "noCovEdgeOrSoModel.hpp"
-#include "noCovEdgeXorSoModel.hpp"
-#include "noCovEdgeSepSoModel.hpp"
+#include "infStateNoSoModel.hpp"
+#include "infStateOrSoModel.hpp"
+#include "infStateXorSoModel.hpp"
+#include "infStateSepSoModel.hpp"
 
 #include <njm_cpp/tools/progress.hpp>
 #include <njm_cpp/thread/pool.hpp>
@@ -34,48 +34,48 @@ namespace ba = boost::accumulators;
 using namespace stdmMf;
 
 
-std::vector<Transition> obs_to_bitset_vector(
+std::vector<Transition<InfState> > obs_to_bitset_vector(
         const Observation & obs) {
     CHECK_GT(obs.transition_size(), 0);
 
-    std::vector<Transition> bitset_vector;
+    std::vector<Transition<InfState> > bitset_vector;
 
     for (uint32_t i = 0; i < obs.transition_size(); ++i) {
-        const boost::dynamic_bitset<> curr_inf_bits(
-                obs.transition(i).curr_inf_bits());
+        const InfState curr_state(
+                boost::dynamic_bitset<>(obs.transition(i).curr_inf_bits()));
         const boost::dynamic_bitset<> curr_trt_bits(
                 obs.transition(i).curr_trt_bits());
-        const boost::dynamic_bitset<> next_inf_bits(
-                obs.transition(i).next_inf_bits());
+        const InfState next_state(
+                boost::dynamic_bitset<>(obs.transition(i).next_inf_bits()));
 
-        bitset_vector.emplace_back(curr_inf_bits, curr_trt_bits, next_inf_bits);
+        bitset_vector.emplace_back(curr_state, curr_trt_bits, next_state);
     }
 
     return bitset_vector;
 }
 
 std::vector<double> get_null_distribution(
-        const std::vector<Transition> & eval_history,
+        const std::vector<Transition<InfState> > & eval_history,
         const std::shared_ptr<Network> & net,
-        const std::shared_ptr<Model> & mod) {
-    System s(net, mod);
+        const std::shared_ptr<Model<InfState> > & mod) {
+    System<InfState> s(net, mod);
 
     const uint32_t num_reps = 100;
     std::vector<double> null_dist;
     for (uint32_t rep = 0; rep < num_reps; ++rep) {
 
-        std::vector<Transition> sim_eval_history;
+        std::vector<Transition<InfState> > sim_eval_history;
 
         for (uint32_t t = 0; t < eval_history.size(); ++t) {
-            s.inf_bits(eval_history.at(t).curr_inf_bits);
+            s.state(eval_history.at(t).curr_state);
             s.trt_bits(eval_history.at(t).curr_trt_bits);
 
             // sim under dynamics mod
             s.turn_clock();
 
             // transition
-            sim_eval_history.emplace_back(eval_history.at(t).curr_inf_bits,
-                    eval_history.at(t).curr_trt_bits, s.inf_bits());
+            sim_eval_history.emplace_back(eval_history.at(t).curr_state,
+                    eval_history.at(t).curr_trt_bits, s.state());
 
         }
 
@@ -113,7 +113,7 @@ std::shared_ptr<Network> get_network(const std::string & network_kind) {
     return net;
 }
 
-std::shared_ptr<Model> get_model(const std::string & model_kind,
+std::shared_ptr<Model<InfState> > get_model(const std::string & model_kind,
         const std::shared_ptr<Network> & net) {
 
     // latent infections
@@ -161,18 +161,22 @@ std::shared_ptr<Model> get_model(const std::string & model_kind,
          trt_pre_inf,
          -trt_pre_inf};
 
-    std::shared_ptr<Model> mod;
+    std::shared_ptr<Model<InfState> > mod;
     if (model_kind == "no") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeModel(net->clone()));
+        mod = std::shared_ptr<Model<InfState> >(
+                new InfStateNoSoModel(net->clone()));
         mod->par(par);
     } else if (model_kind == "or") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeOrSoModel(net->clone()));
+        mod = std::shared_ptr<Model<InfState> >(
+                new InfStateOrSoModel(net->clone()));
         mod->par(par);
     } else if (model_kind == "xor") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeXorSoModel(net->clone()));
+        mod = std::shared_ptr<Model<InfState> >(
+                new InfStateXorSoModel(net->clone()));
         mod->par(par);
     } else if (model_kind == "sep") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeSepSoModel(net->clone()));
+        mod = std::shared_ptr<Model<InfState> >(
+                new InfStateSepSoModel(net->clone()));
         mod->par(par_sep);
     } else {
         LOG(FATAL) << "Don't know how to handle model kind: " << model_kind;
@@ -208,7 +212,8 @@ int main(int argc, char *argv[]) {
         std::regex_search(sd.model(), model_match, model_regex);
 
         // std::shared_ptr<Model> mod_system(get_model(model_match.str(1), net));
-        std::shared_ptr<Model> mod_agent(get_model(model_match.str(2), net));
+        std::shared_ptr<Model<InfState> > mod_agent(
+                get_model(model_match.str(2), net));
 
 
         ba::accumulator_set<double, ba::stats<
@@ -223,35 +228,38 @@ int main(int argc, char *argv[]) {
             const Observation * obs(&sd.rep(rep));
 
             auto fn = [=,&vals,&mtx,&num_left,&cv] () {
-                const std::vector<Transition> history =
+                const std::vector<Transition<InfState> > history =
                     obs_to_bitset_vector(*obs);
                 // const std::vector<InfAndTrt> history =
                 //     obs_to_bitset_vector(obs);
 
                 // history for fitting model
-                std::vector<Transition> fit_history(history.begin(),
+                std::vector<Transition<InfState> > fit_history(history.begin(),
                         history.begin() + num_points_for_fit);
                 CHECK_EQ(fit_history.size(), num_points_for_fit);
 
                 // fit model
-                std::shared_ptr<Model> mod_agent_2 = mod_agent->clone();
+                std::shared_ptr<Model<InfState> > mod_agent_2 =
+                mod_agent->clone();
                 mod_agent_2->est_par(fit_history);
 
                 // observed data for evaluation
-                std::vector<Transition> eval_history(
+                std::vector<Transition<InfState> > eval_history(
                         history.begin() + num_points_for_fit,
                         history.begin() + num_points_for_fit
                         + num_points_for_eval);
                 CHECK_EQ(eval_history.size(), num_points_for_eval);
 
                 // check tail and head of fit and eval
-                CHECK_EQ(fit_history.at(num_points_for_fit - 1).next_inf_bits,
-                        eval_history.at(0).curr_inf_bits);
+                CHECK_EQ(fit_history.at(
+                                num_points_for_fit - 1).next_state.inf_bits,
+                        eval_history.at(0).curr_state.inf_bits);
 
                 const double obs_statistic = mod_agent_2->ll(eval_history);
 
                 // history for null
-                std::vector<Transition> null_history(eval_history.begin(),
+                std::vector<Transition<InfState> > null_history(
+                        eval_history.begin(),
                         eval_history.end());
                 CHECK_EQ(null_history.size(), num_points_for_eval);
 

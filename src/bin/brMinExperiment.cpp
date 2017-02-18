@@ -14,7 +14,7 @@
 
 #include "system.hpp"
 #include "agent.hpp"
-#include "noCovEdgeModel.hpp"
+#include "infStateNoSoModel.hpp"
 #include "networkRunFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "randomAgent.hpp"
@@ -51,23 +51,25 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     std::shared_ptr<Network> net = Network::gen_network(init);
 
     // model
-    std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
+    std::shared_ptr<Model<InfState> > mod(new InfStateNoSoModel(net));
 
     mod->par({-4.0, -4.0, -1.5, -8.0, 2.0, -8.0});
 
     // system
-    System s(net, mod);
+    System<InfState> s(net, mod);
     s.rng(rng);
 
     // features
-    std::shared_ptr<Features> features(new NetworkRunFeatures(net, 4));
+    std::shared_ptr<Features<InfState> > features(
+            new NetworkRunFeatures<InfState>(net, 4));
 
     // eps agent
-    std::shared_ptr<ProximalAgent> pa(new ProximalAgent(net));
+    std::shared_ptr<ProximalAgent<InfState> > pa(
+            new ProximalAgent<InfState>(net));
     pa->rng(rng);
-    std::shared_ptr<RandomAgent> ra(new RandomAgent(net));
+    std::shared_ptr<RandomAgent<InfState> > ra(new RandomAgent<InfState>(net));
     ra->rng(rng);
-    EpsAgent ea(net, pa, ra, 0.2);
+    EpsAgent<InfState> ea(net, pa, ra, 0.2);
     ea.rng(rng);
 
 
@@ -75,7 +77,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     s.start();
     // simulate history
     for (uint32_t i = 0; i < 500; ++i) {
-        const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.inf_bits(),
+        const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.state(),
                 s.history());
 
         s.trt_bits(trt_bits);
@@ -83,22 +85,23 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         s.turn_clock();
     }
 
-    const std::vector<Transition> history(
-            Transition::from_sequence(s.history(), s.inf_bits()));
+    const std::vector<Transition<InfState> > history(
+            Transition<InfState>::from_sequence(s.history(), s.state()));
 
 
     auto min_fn = [&](const std::vector<double> & par,
             void * const data) {
-        SweepAgent agent(net, features, par, 2, true);
+        SweepAgent<InfState> agent(net, features, par, 2, true);
         agent.rng(rng);
 
         // q function
-        auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
+        auto q_fn = [&](const InfState & state,
                 const boost::dynamic_bitset<> & trt_bits) {
             return njm::linalg::dot_a_and_b(par,features->get_features(
-                            inf_bits, trt_bits));
+                            state, trt_bits));
         };
-        const double br = bellman_residual_sq(history, &agent, 0.9, q_fn);
+        const double br = bellman_residual_sq<InfState>(history, &agent, 0.9,
+                q_fn);
 
         return br;
     };
@@ -129,14 +132,12 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     const std::vector<double> par = sp.par();
 
-    SweepAgent agent(net, features, par, 2, true);
+    SweepAgent<InfState> agent(net, features, par, 2, true);
     agent.rng(rng);
 
     double val = 0.0;
     for (uint32_t i = 0; i < 50; ++i) {
-        s.cleanse();
-        s.wipe_trt();
-        s.erase_history();
+        s.reset();
         s.start();
 
         val += runner(&s, &agent, 20, 1.0);

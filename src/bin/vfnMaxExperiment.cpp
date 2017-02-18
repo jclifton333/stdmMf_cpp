@@ -12,7 +12,7 @@
 
 #include "system.hpp"
 #include "agent.hpp"
-#include "noCovEdgeModel.hpp"
+#include "infStateNoSoModel.hpp"
 #include "networkRunFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "objFns.hpp"
@@ -45,25 +45,24 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     std::shared_ptr<Network> net = Network::gen_network(init);
 
     // model
-    std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
+    std::shared_ptr<Model<InfState> > mod(new InfStateNoSoModel(net));
 
     mod->par({-4.0, -4.0, -1.5, -8.0, 2.0, -8.0});
 
 
     // features
-    std::shared_ptr<Features> features(new NetworkRunFeatures(net, 4));
+    std::shared_ptr<Features<InfState> > features(
+            new NetworkRunFeatures<InfState>(net, 4));
 
     auto min_fn = [&](const std::vector<double> & par,
             void * const data) {
-        SweepAgent agent(net, features, par, 2, true);
+        SweepAgent<InfState> agent(net, features, par, 2, true);
         agent.rng(rng);
-        System s(net, mod);
+        System<InfState> s(net, mod);
         s.rng(rng);
         double val = 0.0;
         for (uint32_t i = 0; i < num_reps; ++i) {
-            s.cleanse();
-            s.wipe_trt();
-            s.erase_history();
+            s.reset();
             s.start();
 
             val += runner(&s, &agent, 20, 1.0);
@@ -94,15 +93,13 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     const std::vector<double> par = sp.par();
 
-    SweepAgent agent(net, features, par, 2, true);
+    SweepAgent<InfState> agent(net, features, par, 2, true);
     agent.rng(rng);
-    System s(net, mod);
+    System<InfState> s(net, mod);
     s.rng(rng);
     double val = 0.0;
     for (uint32_t i = 0; i < 50; ++i) {
-        s.cleanse();
-        s.wipe_trt();
-        s.erase_history();
+        s.reset();
         s.start();
 
         val += runner(&s, &agent, 20, 1.0);

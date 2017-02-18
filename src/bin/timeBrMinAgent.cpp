@@ -1,5 +1,5 @@
 #include "system.hpp"
-#include "noCovEdgeModel.hpp"
+#include "infStateNoSoModel.hpp"
 #include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
@@ -26,15 +26,15 @@ int main(int argc, char *argv[]) {
 
     const std::shared_ptr<Network> net(Network::gen_network(init));
 
-    const std::shared_ptr<Model> mod(new NoCovEdgeModel(net));
+    const std::shared_ptr<Model<InfState> > mod(new InfStateNoSoModel(net));
     mod->par({-4.0, -4.0, -1.5, -8.0, 2.0, -8.0});
 
     // br min
-    System s(net->clone(), mod->clone());
+    System<InfState> s(net->clone(), mod->clone());
     s.seed(0);
-    BrMinSimPerturbAgent a(net->clone(),
-            std::shared_ptr<Features>(
-                    new NetworkRunFeatures(net->clone(), 4)),
+    BrMinSimPerturbAgent<InfState> a(net->clone(),
+            std::shared_ptr<Features<InfState> >(
+                    new NetworkRunFeatures<InfState>(net->clone(), 4)),
             1e-1, 1.0, 1e-3, 1, 0.85, 1e-5);
     a.seed(0);
 
