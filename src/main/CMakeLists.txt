@@ -21,6 +21,7 @@ add_library(stdmMf network.cpp system.cpp states.cpp
 
   ## inf shield state models
   infShieldStateModel.cpp infShieldStateNoImNoSoModel.cpp
+  infShieldStatePosImNoSoModel.cpp
 
   ## agents
   agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
