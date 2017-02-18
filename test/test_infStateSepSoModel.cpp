@@ -67,6 +67,8 @@ TEST(TestInfStateSepSoModel, TestPar) {
 
     InfStateSepSoModel m(n);
 
+    CHECK_EQ(m.par().size(), 9);
+
     std::vector<double> par (m.par());
     for (uint32_t i = 0; i < par.size(); ++i) {
         EXPECT_EQ(par.at(i), 0.);

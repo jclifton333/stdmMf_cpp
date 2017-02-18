@@ -69,6 +69,8 @@ TEST(TestInfStateXorSoModel, TestPar) {
 
     InfStateXorSoModel m(n);
 
+    CHECK_EQ(m.par().size(), 6);
+
     std::vector<double> par (m.par());
     for (uint32_t i = 0; i < par.size(); ++i) {
         EXPECT_EQ(par.at(i), 0.);
