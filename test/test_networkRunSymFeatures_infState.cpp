@@ -10,7 +10,6 @@
 
 namespace stdmMf {
 
-
 TEST(TestNetworkRunSymFeatures, TestFeaturesSimpleLen1InfState) {
     // generate network
     NetworkInit init;
