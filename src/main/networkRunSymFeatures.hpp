@@ -13,6 +13,8 @@ class NetworkRunSymFeatures : public Features<State> {
 private:
     const std::shared_ptr<const Network> network_;
 
+    const static uint32_t bits_per_node_;
+
     const std::vector<NetworkRun> runs_;
     const std::vector<std::vector<NetworkRun> > runs_by_node_;
     const uint32_t num_nodes_;

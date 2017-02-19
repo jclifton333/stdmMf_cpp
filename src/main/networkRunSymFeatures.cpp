@@ -5,8 +5,9 @@
 
 namespace stdmMf {
 
-template <>
-NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
+
+template <typename State>
+NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
         const std::shared_ptr<const Network> & network,
         const uint32_t & run_length)
     : network_(network), runs_(network->runs_of_len_cumu(run_length)),
@@ -14,18 +15,29 @@ NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
       num_nodes_(network->size()), run_length_(run_length),
       num_runs_(this->runs_.size()){
 
+    const uint32_t tot_bits = sizeof(uint32_t(0)) * 8;
+    CHECK_LE(this->bits_per_node_ * run_length_ + 1, tot_bits)
+        << "Number of needed bits is "
+        << (this->bits_per_node_ * run_length + 1)
+        << " but number of available bits is " << tot_bits;
+
     uint32_t index_val = 1;
-    uint32_t num_bits = sizeof(uint32_t(0)) * 8;
     for (uint32_t i = 0; i < this->run_length_; ++i) {
         std::vector<uint32_t> index_len_ip1;
-        const uint32_t max_mask = 1 << (i + i + 2);
+        const uint32_t current_len = i + 1;
+        const uint32_t num_bits = current_len * this->bits_per_node_;
+        const uint32_t max_mask = 1 << num_bits;
         for (uint32_t mask = 0; mask < (max_mask - 1); ++mask) {
-            // reverse infected bits, reverse treatment bits, then
-            // combine back together
-            const uint32_t mask_rev =
-                (njm::tools::reverse_bits(
-                        mask >> (i + 1)) >> (num_bits - (i + i + 2)))
-                | (njm::tools::reverse_bits(mask) >> (num_bits - (i + 1)));
+            // reverse each groups of bits then combine back together
+            // e.g., reverse treatment bits, reverse infection bits,
+            // reverse shielding bits
+            uint32_t mask_rev = 0;
+            for (uint32_t bit_group = 0; bit_group < this->bits_per_node_;
+                 ++bit_group) {
+                mask_rev |= njm::tools::reverse_bits(
+                        mask >> (bit_group * current_len))
+                    >> (tot_bits - (bit_group + 1) * current_len);
+            }
 
             if (mask <= mask_rev) {
                 index_len_ip1.push_back(index_val++);
@@ -50,7 +62,6 @@ NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
     for (uint32_t i = 0; i < this->num_runs_; ++i) {
         const NetworkRun & nr = this->runs_.at(i);
         const uint32_t run_len = nr.nodes.size();
-        CHECK_LT(run_len, 10);
         CHECK_LE(run_len, this->run_length_);
 
         uint32_t * const mask(new uint32_t(0));
@@ -64,6 +75,18 @@ NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
     }
 }
 
+
+template <typename State>
+uint32_t NetworkRunSymFeatures<State>::num_features() const {
+    return this->num_features_;
+}
+
+
+
+// BEGIN: Implementation for InfState
+
+template <>
+const uint32_t NetworkRunSymFeatures<InfState>::bits_per_node_ = 2;
 
 template<>
 NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
@@ -257,10 +280,13 @@ void NetworkRunSymFeatures<InfState>::update_features_async(
 }
 
 
-template <typename State>
-uint32_t NetworkRunSymFeatures<State>::num_features() const {
-    return this->num_features_;
-}
 
+// END: Implementation for InfState
+
+
+
+
+
+template class NetworkRunSymFeatures<InfState>;
 
 } // namespace stdmMf
