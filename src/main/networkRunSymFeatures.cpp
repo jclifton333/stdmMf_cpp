@@ -76,21 +76,10 @@ NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
 }
 
 
-template <typename State>
-uint32_t NetworkRunSymFeatures<State>::num_features() const {
-    return this->num_features_;
-}
 
-
-
-// BEGIN: Implementation for InfState
-
-template <>
-const uint32_t NetworkRunSymFeatures<InfState>::bits_per_node_ = 2;
-
-template<>
-NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
-        const NetworkRunSymFeatures<InfState> & other)
+template<typename State>
+NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
+        const NetworkRunSymFeatures<State> & other)
     : network_(other.network_->clone()), runs_(other.runs_),
       runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
       run_length_(other.run_length_), num_runs_(other.num_runs_),
@@ -116,8 +105,8 @@ NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
 }
 
 
-template<>
-NetworkRunSymFeatures<InfState>::~NetworkRunSymFeatures() {
+template <typename State>
+NetworkRunSymFeatures<State>::~NetworkRunSymFeatures() {
     // Only need to delete masks. Masks by node are referencing the
     // same memory.
     std::for_each(masks_.begin(), masks_.end(),
@@ -126,12 +115,25 @@ NetworkRunSymFeatures<InfState>::~NetworkRunSymFeatures() {
             });
 }
 
-template <>
-std::shared_ptr<Features<InfState> >
-NetworkRunSymFeatures<InfState>::clone() const {
-    return std::shared_ptr<Features<InfState> >(
-            new NetworkRunSymFeatures<InfState>(*this));
+template <typename State>
+std::shared_ptr<Features<State> >
+NetworkRunSymFeatures<State>::clone() const {
+    return std::shared_ptr<Features<State> >(
+            new NetworkRunSymFeatures<State>(*this));
 }
+
+
+template <typename State>
+uint32_t NetworkRunSymFeatures<State>::num_features() const {
+    return this->num_features_;
+}
+
+
+
+// BEGIN: Implementation for InfState
+
+template <>
+const uint32_t NetworkRunSymFeatures<InfState>::bits_per_node_ = 2;
 
 
 template <>
@@ -245,7 +247,6 @@ void NetworkRunSymFeatures<InfState>::update_features_async(
         const NetworkRun & nr = changed_runs.at(i);
         const uint32_t & run_len = nr.len;
 
-        CHECK_LE(run_len, 32);
         uint32_t mask_new = 0;
         uint32_t mask_old = 0;
 
@@ -283,9 +284,180 @@ void NetworkRunSymFeatures<InfState>::update_features_async(
 // END: Implementation for InfState
 
 
+// BEGIN: Implementation for InfShieldState
+
+template <>
+const uint32_t NetworkRunSymFeatures<InfShieldState>::bits_per_node_ = 3;
+
+
+template <>
+std::vector<double> NetworkRunSymFeatures<InfShieldState>::get_features(
+        const InfShieldState & state,
+        const boost::dynamic_bitset<> & trt_bits) {
+    std::vector<double> feat(this->num_features(), 0.0);
+    feat.at(0) = 1.0; // intercept
+
+    for (uint32_t i = 0; i < this->num_runs_; ++i) {
+        const NetworkRun & nr = this->runs_.at(i);
+        const uint32_t & run_len = nr.len;
+
+        uint32_t & mask(*this->masks_.at(i));
+
+        mask = 0;
+        for (uint32_t j = 0; j < run_len; j++) {
+            if (state.inf_bits.test(nr.nodes.at(j))) {
+                mask |= (1 << (j + run_len));
+            }
+
+            if (trt_bits.test(nr.nodes.at(j))) {
+                mask |= (1 << j);
+            }
+
+            if (state.shield.at(nr.nodes.at(j)) > 0) {
+                mask |= (1 << (j + run_len * 2));
+            }
+        }
+
+        const uint32_t max_mask = 1 << (run_len * 3);
+        if (mask < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(mask)) +=
+                1.0 / this->num_runs_by_len_.at(run_len - 1);
+        }
+    }
+
+    return feat;
+}
+
+
+template <>
+void NetworkRunSymFeatures<InfShieldState>::update_features(
+        const uint32_t & changed_node,
+        const InfShieldState & state_new,
+        const boost::dynamic_bitset<> & trt_bits_new,
+        const InfShieldState & state_old,
+        const boost::dynamic_bitset<> & trt_bits_old,
+        std::vector<double> & feat) {
+
+    const std::vector<NetworkRun> & changed_runs(
+            runs_by_node_.at(changed_node));
+    const uint32_t num_changed = changed_runs.size();
+
+    const std::vector<uint32_t *> &
+        changed_masks = this->masks_by_node_.at(changed_node);
+
+    const bool inf_changed =
+        state_new.inf_bits.test(changed_node)
+        != state_old.inf_bits.test(changed_node);
+    const bool trt_changed =
+        trt_bits_new.test(changed_node) != trt_bits_old.test(changed_node);
+
+    const bool shield_changed =
+        (state_new.shield.at(changed_node) > 0)
+        != (state_old.shield.at(changed_node) > 0);
+
+    for (uint32_t i = 0; i < num_changed; ++i) {
+        const NetworkRun & nr = changed_runs.at(i);
+        const uint32_t & run_len = nr.len;
+        uint32_t & cm = *changed_masks.at(i);
+
+        const uint32_t max_mask = 1 << (run_len * 3);
+
+        // update features for old masks
+        if (cm < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(cm)) -=
+                1.0 / this->num_runs_by_len_.at(run_len - 1);
+        }
+
+        // update masks
+        for (uint32_t j = 0; j < run_len; ++j) {
+            const uint32_t & node = nr.nodes.at(j);
+            if (node == changed_node) {
+                if (inf_changed) {
+                    cm ^= (1 << (j + run_len));
+                }
+                if (trt_changed) {
+                    cm ^= (1 << j);
+                }
+                if (shield_changed) {
+                    cm ^= (1 << (j + run_len * 2));
+                }
+                break;
+            }
+        }
+
+        // update features for new masks
+        if (cm < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(cm)) +=
+                1.0 / this->num_runs_by_len_.at(run_len - 1);
+        }
+
+    }
+}
+
+
+template<>
+void NetworkRunSymFeatures<InfShieldState>::update_features_async(
+        const uint32_t & changed_node,
+        const InfShieldState & state_new,
+        const boost::dynamic_bitset<> & trt_bits_new,
+        const InfShieldState & state_old,
+        const boost::dynamic_bitset<> & trt_bits_old,
+        std::vector<double> & feat) const {
+
+    const std::vector<NetworkRun> & changed_runs(
+            runs_by_node_.at(changed_node));
+    const uint32_t num_changed = changed_runs.size();
+
+    for (uint32_t i = 0; i < num_changed; ++i) {
+        const NetworkRun & nr = changed_runs.at(i);
+        const uint32_t & run_len = nr.len;
+
+        uint32_t mask_new = 0;
+        uint32_t mask_old = 0;
+
+        for (uint32_t j = 0; j < run_len; ++j) {
+            const uint32_t & node = nr.nodes.at(j);
+            if (state_new.inf_bits.test(node)) {
+                mask_new |= (1 << (j + run_len));
+            }
+            if (trt_bits_new.test(node)) {
+                mask_new |= (1 << j);
+            }
+            if (state_old.inf_bits.test(node)) {
+                mask_old |= (1 << (j + run_len));
+            }
+            if (trt_bits_old.test(node)) {
+                mask_old |= (1 << j);
+            }
+            if (state_new.shield.at(node) > 0) {
+                mask_new |= (1 << (j + run_len * 2));
+            }
+            if (state_old.shield.at(node) > 0) {
+                mask_old |= (1 << (j + run_len * 2));
+            }
+        }
+
+        const uint32_t max_mask = 1 << (run_len * 3);
+        if (mask_new < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(mask_new)) +=
+                1.0 / this->num_runs_by_len_.at(run_len - 1);
+        }
+
+        if (mask_old < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(mask_old)) -=
+                1.0 / this->num_runs_by_len_.at(run_len - 1);
+        }
+    }
+}
+
+
+
+// END: Implementation for InfShieldState
 
 
 
 template class NetworkRunSymFeatures<InfState>;
+template class NetworkRunSymFeatures<InfShieldState>;
+
 
 } // namespace stdmMf
