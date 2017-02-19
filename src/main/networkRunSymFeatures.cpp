@@ -102,7 +102,6 @@ NetworkRunSymFeatures<InfState>::NetworkRunSymFeatures(
     for (uint32_t i = 0; i < this->num_runs_; ++i) {
         const NetworkRun & nr = this->runs_.at(i);
         const uint32_t run_len = nr.nodes.size();
-        CHECK_LT(run_len, 10);
         CHECK_LE(run_len, this->run_length_);
 
         uint32_t * const mask(new uint32_t(*other.masks_.at(i)));
