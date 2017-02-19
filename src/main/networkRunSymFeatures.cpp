@@ -34,9 +34,14 @@ NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
             uint32_t mask_rev = 0;
             for (uint32_t bit_group = 0; bit_group < this->bits_per_node_;
                  ++bit_group) {
-                mask_rev |= njm::tools::reverse_bits(
-                        mask >> (bit_group * current_len))
-                    >> (tot_bits - (bit_group + 1) * current_len);
+                mask_rev |= (njm::tools::reverse_bits(
+                                mask >> (bit_group * current_len))
+                        >> (tot_bits - current_len)) // shift all but
+                                                     // reversed bits
+                                                     // to zero out
+                                                     // extra bits
+                    << (bit_group * current_len); // shift left to put
+                                                  // in right position
             }
 
             if (mask <= mask_rev) {
