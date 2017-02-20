@@ -14,7 +14,7 @@ SET(bin_file_names
   vfnBrAdaptExperiment
   timeSweepAgent
   timeBrMinAgent
-  run
+  run_infState
   adaptTestData
   adaptTestLikelihood
   # adaptTestMaxLikelihood
