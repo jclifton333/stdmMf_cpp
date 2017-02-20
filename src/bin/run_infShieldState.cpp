@@ -55,6 +55,7 @@ run(const std::shared_ptr<Network> & net,
                     System<InfShieldState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     NoTrtAgent<InfShieldState> a(net->clone());
+                    a.seed(i);
 
                     s.start();
 
@@ -151,7 +152,8 @@ run(const std::shared_ptr<Network> & net,
         pool.service()->post([=]() {
                     System<InfShieldState> s(net->clone(), mod_system->clone());
                     s.seed(i);
-                    MyopicAgent<InfShieldState> a(net->clone(), mod_agents->clone());
+                    MyopicAgent<InfShieldState> a(net->clone(),
+                            mod_agents->clone());
                     a.seed(i);
 
                     s.start();

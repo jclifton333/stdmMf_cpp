@@ -57,6 +57,7 @@ run(const std::shared_ptr<Network> & net,
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     NoTrtAgent<InfState> a(net->clone());
+                    a.seed(i);
 
                     s.start();
 

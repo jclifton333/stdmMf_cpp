@@ -22,17 +22,12 @@
 
 using namespace stdmMf;
 
-using njm::tools::Rng;
-
 void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model<InfState> > & mod_system,
         const std::shared_ptr<Model<InfState> > & mod_agents,
         const uint32_t & rep,
         const uint32_t & num_points,
         Observation * const obs) {
-    std::shared_ptr<Rng> rng(new Rng);
-    rng->seed(rep);
-
     const uint32_t run_length = 2;
 
     std::shared_ptr<Features<InfState> > features(
@@ -40,12 +35,12 @@ void run(const std::shared_ptr<Network> & net,
 
     System<InfState> s_orig(net->clone(), mod_system->clone());
 
-    s_orig.rng(rng);
+    s_orig.seed(rep);
     VfnMaxSimPerturbAgent<InfState> vmax_agent(net->clone(),
             features->clone(),
             mod_agents->clone(),
             2, num_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    vmax_agent.rng(rng);
+    vmax_agent.seed(rep);
 
     obs->set_num_points(num_points);
 
