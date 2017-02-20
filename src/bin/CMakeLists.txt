@@ -23,6 +23,7 @@ SET(bin_file_names
   adaptTestData_infState
   adaptTestLikelihood_infState
   # adaptTestMaxLikelihood
+  adaptTestData_infShieldState
 
   ## extra
   timeSweepAgent
