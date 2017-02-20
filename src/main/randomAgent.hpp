@@ -1,7 +1,6 @@
 #ifndef RANDOM_AGENT_HPP
 #define RANDOM_AGENT_HPP
 
-#include <njm_cpp/tools/random.hpp>
 #include "states.hpp"
 #include "network.hpp"
 #include "agent.hpp"
@@ -10,7 +9,7 @@ namespace stdmMf {
 
 
 template <typename State>
-class RandomAgent : public Agent<State>, public njm::tools::RngClass {
+class RandomAgent : public Agent<State> {
 public:
     RandomAgent(const std::shared_ptr<const Network> & network);
 

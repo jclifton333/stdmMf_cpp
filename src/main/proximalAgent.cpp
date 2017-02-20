@@ -6,13 +6,13 @@ namespace stdmMf {
 template<typename State>
 ProximalAgent<State>::ProximalAgent(
         const std::shared_ptr<const Network> & network)
-    : Agent<State>(network), RngClass() {
+    : Agent<State>(network) {
 }
 
 
 template<typename State>
 ProximalAgent<State>::ProximalAgent(const ProximalAgent & other)
-    : Agent<State>(other), RngClass(other) {
+    : Agent<State>(other) {
 }
 
 

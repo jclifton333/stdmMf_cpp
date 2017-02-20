@@ -12,8 +12,7 @@ namespace stdmMf {
 
 
 template <typename State>
-class VfnBrAdaptSimPerturbAgent : public Agent<State>,
-                                  public njm::tools::RngClass {
+class VfnBrAdaptSimPerturbAgent : public Agent<State> {
 protected:
     const std::shared_ptr<Features<State> > features_;
     const std::shared_ptr<Model<State> > model_;

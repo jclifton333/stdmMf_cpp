@@ -9,7 +9,7 @@ namespace stdmMf {
 
 
 template <typename State>
-class ProximalAgent : public Agent<State>, public njm::tools::RngClass {
+class ProximalAgent : public Agent<State> {
 
 public:
     ProximalAgent(const std::shared_ptr<const Network> & network);

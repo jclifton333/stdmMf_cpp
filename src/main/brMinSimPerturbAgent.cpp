@@ -1,6 +1,5 @@
 #include "brMinSimPerturbAgent.hpp"
 
-#include <njm_cpp/tools/random.hpp>
 #include <njm_cpp/optim/simPerturb.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include "sweepAgent.hpp"
@@ -32,7 +31,7 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
 template <typename State>
 BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const BrMinSimPerturbAgent & other)
-    : Agent<State>(other), RngClass(other), features_(other.features_->clone()),
+    : Agent<State>(other), features_(other.features_->clone()),
     c_(other.c_), t_(other.t_), a_(other.a_),
     b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_){
 }

@@ -9,7 +9,7 @@ namespace stdmMf {
 
 
 template <typename State>
-class MyopicAgent : public Agent<State>, public njm::tools::RngClass {
+class MyopicAgent : public Agent<State> {
 protected:
     const std::shared_ptr<Model<State> > model_;
 

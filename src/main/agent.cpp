@@ -5,14 +5,14 @@ namespace stdmMf {
 
 template <typename State>
 Agent<State>::Agent(const std::shared_ptr<const Network> & network)
-    : network_(network), num_nodes_(network->size()),
+    : RngClass(), network_(network), num_nodes_(network->size()),
       num_trt_(this->num_trt()) {
 }
 
 
 template <typename State>
 Agent<State>::Agent(const Agent<State> & other)
-    : network_(other.network_->clone()),
+    : RngClass(other), network_(other.network_->clone()),
       num_nodes_(other.num_nodes_), num_trt_(other.num_trt_) {
 }
 

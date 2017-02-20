@@ -10,7 +10,7 @@ namespace stdmMf {
 
 
 template <typename State>
-class SweepAgentSlow : public Agent<State>, public njm::tools::RngClass {
+class SweepAgentSlow : public Agent<State> {
 protected:
     const std::shared_ptr<Features<State> > features_;
     const std::vector<double> coef_;

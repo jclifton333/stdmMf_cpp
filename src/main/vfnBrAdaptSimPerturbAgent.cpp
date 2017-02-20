@@ -35,7 +35,7 @@ VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
         const double & br_ell,
         const double & br_min_step_size,
         const uint32_t & step_cap_mult)
-: Agent<State>(network), RngClass(), features_(features), model_(model),
+: Agent<State>(network), features_(features), model_(model),
 
     vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
     vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
@@ -45,13 +45,15 @@ VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
     br_min_step_size_(br_min_step_size),
 
     step_cap_mult_(step_cap_mult) {
+    // share rng
+    this->model_->rng(this->rng());
 }
 
 
 template <typename State>
 VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
         const VfnBrAdaptSimPerturbAgent<State> & other)
-    : Agent<State>(other), RngClass(other), features_(other.features_->clone()),
+    : Agent<State>(other), features_(other.features_->clone()),
     model_(other.model_->clone()),
 
     vfn_num_reps_(other.vfn_num_reps_), vfn_final_t_(other.vfn_final_t_),
@@ -64,6 +66,8 @@ VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
     br_min_step_size_(other.br_min_step_size_),
 
     step_cap_mult_(other.step_cap_mult_) {
+    // share rng
+    this->model_->rng(this->rng());
 }
 
 

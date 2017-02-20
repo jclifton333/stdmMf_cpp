@@ -3,11 +3,12 @@
 
 #include "network.hpp"
 #include "states.hpp"
+#include <njm_cpp/tools/random.hpp>
 
 namespace stdmMf {
 
 template<typename State>
-class Agent {
+class Agent : public njm::tools::RngClass {
 protected:
     const std::shared_ptr<const Network> network_;
 

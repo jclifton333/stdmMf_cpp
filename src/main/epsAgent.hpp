@@ -2,14 +2,13 @@
 #define EPS_AGENT_HPP
 
 #include "agent.hpp"
-#include <njm_cpp/tools/random.hpp>
 #include "network.hpp"
 
 namespace stdmMf {
 
 
 template <typename State>
-class EpsAgent : public Agent<State>, public njm::tools::RngClass {
+class EpsAgent : public Agent<State> {
     const std::shared_ptr<Agent<State> > agent_;
     const std::shared_ptr<Agent<State> > eps_agent_;
     const double eps_;

@@ -11,13 +11,17 @@ namespace stdmMf {
 template <typename State>
 MyopicAgent<State>::MyopicAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<State> > & model)
-    : Agent<State>(network), RngClass(), model_(model) {
+    : Agent<State>(network), model_(model) {
+    // share rng
+    this->model_->rng(this->rng());
 }
 
 
 template <typename State>
 MyopicAgent<State>::MyopicAgent(const MyopicAgent<State> & other)
-    : Agent<State>(other), RngClass(other), model_(other.model_->clone()) {
+    : Agent<State>(other), model_(other.model_->clone()) {
+    // share rng
+    this->model_->rng(this->rng());
 }
 
 

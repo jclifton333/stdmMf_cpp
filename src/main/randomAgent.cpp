@@ -6,13 +6,13 @@ namespace stdmMf {
 
 template<typename State>
 RandomAgent<State>::RandomAgent(const std::shared_ptr<const Network> & network)
-    : Agent<State>(network), RngClass() {
+    : Agent<State>(network) {
 }
 
 
 template<typename State>
 RandomAgent<State>::RandomAgent(const RandomAgent & other)
-    : Agent<State>(other), RngClass(other) {
+    : Agent<State>(other) {
 }
 
 

@@ -5,7 +5,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <njm_cpp/tools/random.hpp>
 #include <njm_cpp/data/result.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include "sweepAgent.hpp"
@@ -20,7 +19,7 @@ SweepAgent<State>::SweepAgent(const std::shared_ptr<const Network> & network,
         const std::vector<double> & coef,
         const uint32_t & max_sweeps,
         const bool & do_sweep)
-    : Agent<State>(network), RngClass(), features_(features), coef_(coef),
+    : Agent<State>(network), features_(features), coef_(coef),
       max_sweeps_(max_sweeps), do_sweep_(do_sweep), do_parallel_(false) {
 
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
@@ -29,7 +28,7 @@ SweepAgent<State>::SweepAgent(const std::shared_ptr<const Network> & network,
 
 template <typename State>
 SweepAgent<State>::SweepAgent(const SweepAgent & other)
-    : Agent<State>(other), RngClass(other),
+    : Agent<State>(other),
     features_(other.features_->clone()), coef_(other.coef_),
     max_sweeps_(other.max_sweeps_), do_sweep_(other.do_sweep_),
     do_parallel_(other.do_parallel_),

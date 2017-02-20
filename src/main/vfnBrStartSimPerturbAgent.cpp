@@ -35,31 +35,35 @@ VfnBrStartSimPerturbAgent<State>::VfnBrStartSimPerturbAgent(
         const double & br_b,
         const double & br_ell,
         const double & br_min_step_size)
-: Agent<State>(network), RngClass(), features_(features), model_(model),
+: Agent<State>(network), features_(features), model_(model),
 
-  vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
-  vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
-  vfn_min_step_size_(vfn_min_step_size),
+    vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
+    vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
+    vfn_min_step_size_(vfn_min_step_size),
 
-  br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
-  br_min_step_size_(br_min_step_size) {
+    br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
+    br_min_step_size_(br_min_step_size) {
+    // share rng
+    this->model_->rng(this->rng());
 }
 
 
 template <typename State>
 VfnBrStartSimPerturbAgent<State>::VfnBrStartSimPerturbAgent(
         const VfnBrStartSimPerturbAgent & other)
-    : Agent<State>(other), RngClass(other), features_(other.features_->clone()),
-      model_(other.model_->clone()),
+    : Agent<State>(other), features_(other.features_->clone()),
+    model_(other.model_->clone()),
 
-      vfn_num_reps_(other.vfn_num_reps_), vfn_final_t_(other.vfn_final_t_),
-      vfn_c_(other.vfn_c_), vfn_t_(other.vfn_t_), vfn_a_(other.vfn_a_),
-      vfn_b_(other.vfn_b_), vfn_ell_(other.vfn_ell_),
-      vfn_min_step_size_(other.vfn_min_step_size_),
+    vfn_num_reps_(other.vfn_num_reps_), vfn_final_t_(other.vfn_final_t_),
+    vfn_c_(other.vfn_c_), vfn_t_(other.vfn_t_), vfn_a_(other.vfn_a_),
+    vfn_b_(other.vfn_b_), vfn_ell_(other.vfn_ell_),
+    vfn_min_step_size_(other.vfn_min_step_size_),
 
-      br_c_(other.br_c_), br_t_(other.br_t_), br_a_(other.br_a_),
-      br_b_(other.br_b_), br_ell_(other.br_ell_),
-      br_min_step_size_(other.br_min_step_size_) {
+    br_c_(other.br_c_), br_t_(other.br_t_), br_a_(other.br_a_),
+    br_b_(other.br_b_), br_ell_(other.br_ell_),
+    br_min_step_size_(other.br_min_step_size_) {
+    // share rng
+    this->model_->rng(this->rng());
 }
 
 

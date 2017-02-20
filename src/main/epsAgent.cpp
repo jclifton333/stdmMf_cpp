@@ -9,15 +9,21 @@ EpsAgent<State>::EpsAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Agent<State> > & agent,
         const std::shared_ptr<Agent<State> > & eps_agent,
         const double & eps)
-    : Agent<State>(network), RngClass(), agent_(agent), eps_agent_(eps_agent),
+    : Agent<State>(network), agent_(agent), eps_agent_(eps_agent),
     eps_(eps) {
+    // share rng
+    this->agent_->rng(this->rng());
+    this->eps_agent_->rng(this->rng());
 }
 
 
 template <typename State>
 EpsAgent<State>::EpsAgent(const EpsAgent & other)
-    : Agent<State>(other), RngClass(other), agent_(other.agent_->clone()),
+    : Agent<State>(other), agent_(other.agent_->clone()),
       eps_agent_(other.eps_agent_->clone()), eps_(other.eps_) {
+    // share rng
+    this->agent_->rng(this->rng());
+    this->eps_agent_->rng(this->rng());
 }
 
 

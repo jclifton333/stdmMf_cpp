@@ -13,7 +13,7 @@ SweepAgentSlow<State>::SweepAgentSlow(
         const std::shared_ptr<Features<State> > & features,
         const std::vector<double> & coef,
         const uint32_t & max_sweeps)
-    : Agent<State>(network), RngClass(), features_(features),
+    : Agent<State>(network), features_(features),
     max_sweeps_(max_sweeps), coef_(coef) {
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
@@ -21,7 +21,7 @@ SweepAgentSlow<State>::SweepAgentSlow(
 
 template <typename State>
 SweepAgentSlow<State>::SweepAgentSlow(const SweepAgentSlow<State> & other)
-    : Agent<State>(other), RngClass(other), features_(other.features_->clone()),
+    : Agent<State>(other), features_(other.features_->clone()),
       max_sweeps_(other.max_sweeps_), coef_(other.coef_) {
 }
 
