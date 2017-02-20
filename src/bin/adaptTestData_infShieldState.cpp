@@ -56,7 +56,12 @@ void run(const std::shared_ptr<Network> & net,
 
         // starting infection
         boost::to_string(s_orig.state().inf_bits, bits_str);
-        transition->set_curr_inf_bits(bits_str);
+        transition->mutable_curr_state()->set_inf_bits(bits_str);
+        // starting shield
+        std::for_each(s_orig.state().shield.begin(),
+                s_orig.state().shield.end(), [&](const double & val) {
+                    transition->mutable_curr_state()->add_shield(val);
+                });
 
         const boost::dynamic_bitset<> trt_bits = vmax_agent.apply_trt(
                 s_orig.state(), s_orig.history());
@@ -71,9 +76,14 @@ void run(const std::shared_ptr<Network> & net,
 
         s_orig.turn_clock();
 
-        // starting infection
+        // ending infection
         boost::to_string(s_orig.state().inf_bits, bits_str);
-        transition->set_next_inf_bits(bits_str);
+        transition->mutable_next_state()->set_inf_bits(bits_str);
+        // ending shield
+        std::for_each(s_orig.state().shield.begin(),
+                s_orig.state().shield.end(), [&](const double & val) {
+                    transition->mutable_next_state()->add_shield(val);
+                });
     }
 }
 
