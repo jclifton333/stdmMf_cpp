@@ -676,6 +676,9 @@ int main(int argc, char *argv[]) {
         const double trt_act_rec =
             std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
 
+        // shield
+        const double shield_coef = 0.9;
+
 
         std::vector<double> par =
             {intcp_inf_latent,
@@ -683,7 +686,8 @@ int main(int argc, char *argv[]) {
              intcp_rec,
              trt_act_inf,
              trt_act_rec,
-             trt_pre_inf};
+             trt_pre_inf,
+             shield_coef};
 
         std::vector<double> par_sep =
             {intcp_inf_latent,
@@ -694,7 +698,8 @@ int main(int argc, char *argv[]) {
              trt_act_rec,
              -trt_act_rec,
              trt_pre_inf,
-             -trt_pre_inf};
+             -trt_pre_inf,
+             shield_coef};
 
 
         { // Correct: NoIm NoSo,  Postulated: NoIm NoSo
