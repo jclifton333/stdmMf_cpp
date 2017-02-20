@@ -1,9 +1,9 @@
 #include "system.hpp"
 #include "network.hpp"
-#include "InfStateNoSoModel.hpp"
-#include "InfStateOrSoModel.hpp"
-#include "InfStateXorSoModel.hpp"
-#include "InfStateSepSoModel.hpp"
+#include "infStateNoSoModel.hpp"
+#include "infStateOrSoModel.hpp"
+#include "infStateXorSoModel.hpp"
+#include "infStateSepSoModel.hpp"
 #include "vfnMaxSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
