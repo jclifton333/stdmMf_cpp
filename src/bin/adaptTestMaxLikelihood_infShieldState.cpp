@@ -2,14 +2,14 @@
 
 #include "system.hpp"
 
-#include "infShieldStateImNoSoModel.hpp"
-#include "infShieldStatePosNoSoModel.hpp"
+#include "infShieldStateNoImNoSoModel.hpp"
+#include "infShieldStatePosImNoSoModel.hpp"
 
-#include "progress.hpp"
+#include <njm_cpp/tools/progress.hpp>
 
-#include "pool.hpp"
+#include <njm_cpp/thread/pool.hpp>
 
-#include "projectInfo.hpp"
+#include <njm_cpp/info/project.hpp>
 
 #include <iterator>
 #include <algorithm>
@@ -31,43 +31,74 @@ namespace ba = boost::accumulators;
 using namespace stdmMf;
 
 
-std::vector<StateAndTrt<InfShieldState> > obs_to_bitset_vector(
+std::vector<Transition<InfShieldState> > obs_to_bitset_vector(
         const Observation & obs) {
-    std::vector<StateAndTrt<InfShieldState> > bitset_vector;
-    for (uint32_t i = 0; i < obs.state_size(); ++i) {
-        const boost::dynamic_bitset<> inf_bits(obs.state(i).inf_bits());
-        const boost::dynamic_bitset<> trt_bits(obs.state(i).trt_bits());
+    std::vector<Transition<InfShieldState> > bitset_vector;
+    for (uint32_t i = 0; i < obs.num_points(); ++i) {
+        const InfShieldState curr_state(
+                boost::dynamic_bitset<>(
+                        obs.transition(i).curr_state().inf_bits()),
+                std::vector<double>(
+                        obs.transition(i).curr_state().shield().begin(),
+                        obs.transition(i).curr_state().shield().end()));
 
-        bitset_vector.emplace_back(inf_bits, trt_bits);
+        const boost::dynamic_bitset<> trt_bits(
+                obs.transition(i).curr_trt_bits());
+
+        const InfShieldState next_state(
+                boost::dynamic_bitset<>(
+                        obs.transition(i).next_state().inf_bits()),
+                std::vector<double>(
+                        obs.transition(i).next_state().shield().begin(),
+                        obs.transition(i).next_state().shield().end()));
+
+        bitset_vector.emplace_back(curr_state, trt_bits, next_state);
     }
 
     return bitset_vector;
 }
 
-std::vector<double> get_null_distribution(
-        const std::vector<StateAndTrt<InfShieldState> > & eval_history,
+
+double get_statistic(
+        const std::vector<Transition<InfShieldState> > & history,
         const std::shared_ptr<Network> & net,
-        const std::shared_ptr<Model> & mod) {
-    System s(net, mod);
+        std::shared_ptr<Model<InfShieldState> > & mod) {
+    // zero-out parameter values
+    mod->par(std::vector<double>(mod->par_size(), 0.0));
+    // estimate MLE
+    mod->est_par(history);
+    // evaluate likelihood at MLE
+    return mod->ll(history);
+}
+
+
+std::vector<double> get_null_distribution(
+        const std::vector<Transition<InfShieldState> > & history,
+        const std::shared_ptr<Network> & net,
+        const std::shared_ptr<Model<InfShieldState> > & mod) {
+    System<InfShieldState> s(net, mod->clone());
 
     const uint32_t num_reps = 100;
     std::vector<double> null_dist;
     for (uint32_t rep = 0; rep < num_reps; ++rep) {
+        s.seed(rep);
 
-        std::vector<std::pair<InfAndTrt,
-                              boost::dynamic_bitset<> > > transitions;
-        for (uint32_t t = 0; t < eval_history.size(); ++t) {
-            s.inf_bits(eval_history.at(t).first);
-            s.trt_bits(eval_history.at(t).second);
+        std::vector<Transition<InfShieldState> > sim_history;
+        for (uint32_t t = 0; t < history.size(); ++t) {
+            s.state(history.at(t).curr_state);
+            s.trt_bits(history.at(t).curr_trt_bits);
 
             // sim under dynamics mod
             s.turn_clock();
 
-            transitions.emplace_back(eval_history.at(t), s.inf_bits());
+            // record transition
+            sim_history.emplace_back(history.at(t).curr_state,
+                    history.at(t).curr_trt_bits, s.state());
         }
 
-        mod->est_par(transitions);
-        null_dist.push_back(mod->ll(transitions));
+        std::shared_ptr<Model<InfShieldState> > mod_est(mod->clone());
+        mod_est->seed(rep);
+        null_dist.push_back(get_statistic(sim_history, net, mod_est));
     }
 
     std::sort(null_dist.begin(), null_dist.end());
@@ -101,7 +132,8 @@ std::shared_ptr<Network> get_network(const std::string & network_kind) {
     return net;
 }
 
-std::shared_ptr<Model> get_model(const std::string & model_kind,
+std::shared_ptr<Model<InfShieldState> > get_model(
+        const std::string & model_kind,
         const std::shared_ptr<Network> & net) {
 
     // latent infections
@@ -129,6 +161,7 @@ std::shared_ptr<Model> get_model(const std::string & model_kind,
     const double trt_act_rec =
         std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
 
+    const double shield_coef = 0.9;
 
     std::vector<double> par =
         {intcp_inf_latent,
@@ -136,7 +169,8 @@ std::shared_ptr<Model> get_model(const std::string & model_kind,
          intcp_rec,
          trt_act_inf,
          trt_act_rec,
-         trt_pre_inf};
+         trt_pre_inf,
+         shield_coef};
 
     std::vector<double> par_sep =
         {intcp_inf_latent,
@@ -147,21 +181,18 @@ std::shared_ptr<Model> get_model(const std::string & model_kind,
          trt_act_rec,
          -trt_act_rec,
          trt_pre_inf,
-         -trt_pre_inf};
+         -trt_pre_inf,
+         shield_coef};
 
-    std::shared_ptr<Model> mod;
-    if (model_kind == "no") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeModel(net->clone()));
+    std::shared_ptr<Model<InfShieldState> > mod;
+    if (model_kind == "NoImNoSo") {
+        mod = std::shared_ptr<Model<InfShieldState> >(
+                new InfShieldStateNoImNoSoModel(net->clone()));
         mod->par(par);
-    } else if (model_kind == "or") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeOrSoModel(net->clone()));
+    } else if (model_kind == "PosImNoSo") {
+        mod = std::shared_ptr<Model<InfShieldState> >(
+                new InfShieldStatePosImNoSoModel(net->clone()));
         mod->par(par);
-    } else if (model_kind == "xor") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeXorSoModel(net->clone()));
-        mod->par(par);
-    } else if (model_kind == "sep") {
-        mod = std::shared_ptr<Model>(new NoCovEdgeSepSoModel(net->clone()));
-        mod->par(par_sep);
     } else {
         LOG(FATAL) << "Don't know how to handle model kind: " << model_kind;
     }
@@ -173,7 +204,7 @@ std::shared_ptr<Model> get_model(const std::string & model_kind,
 int main(int argc, char *argv[]) {
     // read in data
     AdaptData ad;
-    std::ifstream in(PROJECT_ROOT_DIR +
+    std::ifstream in(njm::info::project::PROJECT_ROOT_DIR +
             "/data/2017-02-08_18-19-53/adapt_data.txt");
     CHECK(in.good());
     std::stringstream in_buf;
@@ -181,7 +212,7 @@ int main(int argc, char *argv[]) {
     in.close();
     google::protobuf::TextFormat::ParseFromString(in_buf.str(), &ad);
 
-    Pool pool;
+    njm::thread::Pool pool;
 
     const uint32_t num_points_for_fit = 20;
     const uint32_t num_skip = 0;
@@ -209,7 +240,7 @@ int main(int argc, char *argv[]) {
                 std::smatch model_match;
                 std::regex_search(sd.model(), model_match, model_regex);
 
-                std::shared_ptr<Model> mod_agent(
+                std::shared_ptr<Model<InfShieldState> > mod_agent(
                         get_model(model_match.str(2), net));
 
                 // convert observation to history
