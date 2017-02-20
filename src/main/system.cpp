@@ -10,6 +10,8 @@ System<State>::System(const std::shared_ptr<const Network> & network,
     : network_(network), model_(model),
       num_nodes_(this->network_->size()), state_(this->num_nodes_),
       trt_bits_(this->num_nodes_), time_(0) {
+    // share rng
+    model_->rng(this->rng());
 }
 
 template <typename State>
@@ -18,6 +20,8 @@ System<State>::System(const System<State> & other)
       model_(other.model_->clone()), num_nodes_(other.num_nodes_),
       state_(other.state_), trt_bits_(other.trt_bits_),
       history_(other.history_), time_(other.time_) {
+    // share rng
+    model_->rng(this->rng());
 }
 
 template <typename State>
