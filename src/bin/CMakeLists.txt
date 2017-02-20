@@ -20,8 +20,8 @@ SET(bin_file_names
 
 
   ## adaptive testing
-  adaptTestData_infState
-  adaptTestLikelihood_infState
+  # adaptTestData_infState
+  # adaptTestLikelihood_infState
   # adaptTestMaxLikelihood
   adaptTestData_infShieldState
 
