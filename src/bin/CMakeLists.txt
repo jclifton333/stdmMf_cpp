@@ -24,6 +24,7 @@ SET(bin_file_names
   adaptTestLikelihood_infState
   # adaptTestMaxLikelihood
 
+  ## extra
   timeSweepAgent
   timeBrMinAgent
   sandbox)
