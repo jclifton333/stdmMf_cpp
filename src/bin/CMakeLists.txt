@@ -9,16 +9,23 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
   "${CMAKE_BINARY_DIR}/src/main" "${CMAKE_SOURCE_DIR}/src/main")
 
 SET(bin_file_names
-  vfnMaxExperiment
-  brMinExperiment
-  vfnBrAdaptExperiment
-  timeSweepAgent
-  timeBrMinAgent
+  ## experiments
+  vfnMaxExperiment_infState
+  brMinExperiment_infState
+  vfnBrAdaptExperiment_infState
+
+  ## sims
   run_infState
   run_infShieldState
-  adaptTestData
-  adaptTestLikelihood
+
+
+  ## adaptive testing
+  adaptTestData_infState
+  adaptTestLikelihood_infState
   # adaptTestMaxLikelihood
+
+  timeSweepAgent
+  timeBrMinAgent
   sandbox)
 
 foreach(bin_file ${bin_file_names})
