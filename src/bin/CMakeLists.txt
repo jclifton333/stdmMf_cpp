@@ -15,6 +15,7 @@ SET(bin_file_names
   timeSweepAgent
   timeBrMinAgent
   run_infState
+  run_infShieldState
   adaptTestData
   adaptTestLikelihood
   # adaptTestMaxLikelihood
