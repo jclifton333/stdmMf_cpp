@@ -14,7 +14,7 @@
 
 #include "system.hpp"
 #include "agent.hpp"
-#include "infStateNoSoModel.hpp"
+#include "infShieldStateNoImNoSoModel.hpp"
 #include "networkRunSymFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "randomAgent.hpp"
