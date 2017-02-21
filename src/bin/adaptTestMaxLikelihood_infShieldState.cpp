@@ -20,6 +20,8 @@ namespace ba = boost::accumulators;
 
 #include <regex>
 
+#include <condition_variable>
+
 #include <iostream>
 #include <fstream>
 
