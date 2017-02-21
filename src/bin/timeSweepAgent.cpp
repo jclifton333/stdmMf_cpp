@@ -45,13 +45,13 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps = 100;
 
     std::vector<boost::dynamic_bitset<> > trt_bits;
-    const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
-        std::chrono::high_resolution_clock::now();
+    const std::chrono::time_point<std::chrono::steady_clock> tick =
+        std::chrono::steady_clock::now();
     for (uint32_t i = 0; i < num_reps; ++i) {
         trt_bits.push_back(sa.apply_trt(inf_bits));
     }
-    const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
-        std::chrono::high_resolution_clock::now();
+    const std::chrono::time_point<std::chrono::steady_clock> tock =
+        std::chrono::steady_clock::now();
 
     std::cout << "elapsed: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -62,13 +62,13 @@ int main(int argc, char *argv[]) {
     //     sa.set_parallel(true, num_threads);
 
     //     std::vector<boost::dynamic_bitset<> > trt_bits;
-    //     const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
-    //         std::chrono::high_resolution_clock::now();
+    //     const std::chrono::time_point<std::chrono::steady_clock> tick =
+    //         std::chrono::steady_clock::now();
     //     for (uint32_t i = 0; i < num_reps; ++i) {
     //         trt_bits.push_back(sa.apply_trt(inf_bits));
     //     }
-    //     const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
-    //         std::chrono::high_resolution_clock::now();
+    //     const std::chrono::time_point<std::chrono::steady_clock> tock =
+    //         std::chrono::steady_clock::now();
 
     //     std::cout << "elapsed (" << num_threads << "): "
     //               << std::chrono::duration_cast<std::chrono::milliseconds>(

@@ -79,13 +79,13 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     sp.rng(rng);
 
     njm::optim::ErrorCode ec;
-    const std::chrono::time_point<std::chrono::high_resolution_clock> tick =
-        std::chrono::high_resolution_clock::now();
+    const std::chrono::time_point<std::chrono::steady_clock> tick =
+        std::chrono::steady_clock::now();
     do {
         ec = sp.step();
     } while (ec == njm::optim::ErrorCode::CONTINUE);
-    const std::chrono::time_point<std::chrono::high_resolution_clock> tock =
-        std::chrono::high_resolution_clock::now();
+    const std::chrono::time_point<std::chrono::steady_clock> tock =
+        std::chrono::steady_clock::now();
 
     const std::chrono::duration<double> elapsed = tock - tick;
 

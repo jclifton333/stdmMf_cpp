@@ -58,14 +58,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -90,14 +90,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -123,14 +123,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -157,14 +157,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -195,14 +195,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -233,14 +233,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -271,14 +271,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -308,14 +308,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -345,14 +345,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -382,14 +382,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -421,14 +421,14 @@ run(const std::shared_ptr<Network> & net,
     //                 s.start();
 
     //                 std::chrono::time_point<
-    //                     std::chrono::high_resolution_clock> tick =
-    //                     std::chrono::high_resolution_clock::now();
+    //                     std::chrono::steady_clock> tick =
+    //                     std::chrono::steady_clock::now();
 
     //                 r_val->set(runner(&s, &a, time_points, 1.0));
 
     //                 std::chrono::time_point<
-    //                     std::chrono::high_resolution_clock> tock =
-    //                     std::chrono::high_resolution_clock::now();
+    //                     std::chrono::steady_clock> tock =
+    //                     std::chrono::steady_clock::now();
 
     //                 r_time->set(std::chrono::duration_cast<
     //                         std::chrono::seconds>(tock - tick).count());
@@ -459,14 +459,14 @@ run(const std::shared_ptr<Network> & net,
     //                 s.start();
 
     //                 std::chrono::time_point<
-    //                     std::chrono::high_resolution_clock> tick =
-    //                     std::chrono::high_resolution_clock::now();
+    //                     std::chrono::steady_clock> tick =
+    //                     std::chrono::steady_clock::now();
 
     //                 r_val->set(runner(&s, &a, time_points, 1.0));
 
     //                 std::chrono::time_point<
-    //                     std::chrono::high_resolution_clock> tock =
-    //                     std::chrono::high_resolution_clock::now();
+    //                     std::chrono::steady_clock> tock =
+    //                     std::chrono::steady_clock::now();
 
     //                 r_time->set(std::chrono::duration_cast<
     //                         std::chrono::seconds>(tock - tick).count());
@@ -497,14 +497,14 @@ run(const std::shared_ptr<Network> & net,
     //                 s.start();
 
     //                 std::chrono::time_point<
-    //                     std::chrono::high_resolution_clock> tick =
-    //                     std::chrono::high_resolution_clock::now();
+    //                     std::chrono::steady_clock> tick =
+    //                     std::chrono::steady_clock::now();
 
     //                 r_val->set(runner(&s, &a, time_points, 1.0));
 
     //                 std::chrono::time_point<
-    //                     std::chrono::high_resolution_clock> tock =
-    //                     std::chrono::high_resolution_clock::now();
+    //                     std::chrono::steady_clock> tock =
+    //                     std::chrono::steady_clock::now();
 
     //                 r_time->set(std::chrono::duration_cast<
     //                         std::chrono::seconds>(tock - tick).count());
@@ -537,14 +537,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -577,14 +577,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -617,14 +617,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -657,14 +657,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -697,14 +697,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
@@ -737,14 +737,14 @@ run(const std::shared_ptr<Network> & net,
                     s.start();
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tick =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
 
                     r_val->set(runner(&s, &a, time_points, 1.0));
 
                     std::chrono::time_point<
-                        std::chrono::high_resolution_clock> tock =
-                        std::chrono::high_resolution_clock::now();
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
