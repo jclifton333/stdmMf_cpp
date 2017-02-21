@@ -55,7 +55,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     // model
     std::shared_ptr<Model<InfShieldState> > mod(
             new InfShieldStateNoImNoSoModel(net));
-    mod.rng(rng);
+    mod->rng(rng);
 
     {
         // latent infections
