@@ -14,6 +14,8 @@ SET(bin_file_names
   brMinExperiment_infState
   vfnBrAdaptExperiment_infState
 
+  brMinExperiment_infShieldState
+
   ## sims
   run_infState
   run_infShieldState
