@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
                         get_model(model_match.str(2), net));
 
                 // convert observation to history
-                const std::vector<InfAndTrt> history =
+                const std::vector<Transition<InfShieldState> > history =
                     obs_to_bitset_vector(*obs);
                 // const std::vector<InfAndTrt> history =
                 //     obs_to_bitset_vector(obs);
@@ -253,7 +253,8 @@ int main(int argc, char *argv[]) {
                 // observed data
 
                 // history for fitting model
-                std::vector<InfAndTrt> fit_history(history.begin() + num_skip,
+                std::vector<Transition<InfShieldState> > fit_history(
+                        history.begin() + num_skip,
                         history.begin() + num_points_for_fit + num_skip);
                 CHECK_EQ(fit_history.size(), num_points_for_fit);
 
@@ -265,7 +266,7 @@ int main(int argc, char *argv[]) {
                 // simulated data
 
                 // observed data for evaluation
-                std::vector<InfAndTrt> eval_history(
+                std::vector<Transition<InfShieldState> > eval_history(
                         fit_history.begin(), fit_history.end() - 1);
                 CHECK_EQ(eval_history.size(), num_points_for_fit - 1);
 
