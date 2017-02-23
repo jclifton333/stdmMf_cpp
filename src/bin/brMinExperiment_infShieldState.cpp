@@ -39,7 +39,8 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const double & ell,
         const double & min_step_size,
         const uint32_t & run_length,
-        const bool & do_sweep) {
+        const bool & do_sweep,
+        const bool & sq_br) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->seed(seed);
 
@@ -144,8 +145,14 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
             return njm::linalg::dot_a_and_b(par,features->get_features(
                             state, trt_bits));
         };
-        const double br = sq_bellman_residual<InfShieldState>(history, &agent,
-                0.9, q_fn);
+        double br = 0.0;
+        if (sq_br) {
+            br = sq_bellman_residual<InfShieldState>(history, &agent,
+                    0.9, q_fn);
+        } else {
+            br = bellman_residual_sq<InfShieldState>(history, &agent,
+                    0.9, q_fn);
+        }
 
         return br;
     };
@@ -220,6 +227,7 @@ int main(int argc, char *argv[]) {
                         {2.79e-5, 1.29e-5, 7.15e-6})); // min_step_size
         g->add_factor(std::vector<int>({2, 3, 4})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
+        g->add_factor(std::vector<bool>({false, true})); // sq_br
     }
 
 
@@ -235,6 +243,7 @@ int main(int argc, char *argv[]) {
                         {2.79e-4, 1.29e-4, 7.15e-5})); // min_step_size
         g->add_factor(std::vector<int>({2, 3, 4})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
+        g->add_factor(std::vector<bool>({false, true})); // sq_br
     }
 
 
@@ -250,6 +259,7 @@ int main(int argc, char *argv[]) {
             {2.79e-3, 1.29e-3, 7.15e-4})); // min_step_size
         g->add_factor(std::vector<int>({2, 3, 4})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
+        g->add_factor(std::vector<bool>({false, true})); // sq_br
     }
 
 
@@ -289,6 +299,8 @@ int main(int argc, char *argv[]) {
                     f.at(i++).val.int_val);
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
             const bool do_sweep = f.at(i++).val.bool_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
+            const bool sq_br = f.at(i++).val.bool_val;
 
             std::shared_ptr<Result<std::pair<double, double> > >
                 r(new Result<std::pair<double, double> >);
@@ -298,7 +310,7 @@ int main(int argc, char *argv[]) {
             factors_level.push_back(level_num);
             p.service()->post([=]() {
                         run_brmin(r, rep, c, t, a, b, ell, min_step_size,
-                                run_length, do_sweep);
+                                run_length, do_sweep, sq_br);
                         progress->update();
                     });
 
