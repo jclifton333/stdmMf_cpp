@@ -144,7 +144,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
             return njm::linalg::dot_a_and_b(par,features->get_features(
                             state, trt_bits));
         };
-        const double br = bellman_residual_sq<InfShieldState>(history, &agent,
+        const double br = sq_bellman_residual<InfShieldState>(history, &agent,
                 0.9, q_fn);
 
         return br;
