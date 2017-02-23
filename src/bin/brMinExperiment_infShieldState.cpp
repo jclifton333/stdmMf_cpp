@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
                         {2.79e-5, 1.29e-5, 7.15e-6})); // min_step_size
-        g->add_factor(std::vector<int>({2, 3, 4})); // run_length
+        g->add_factor(std::vector<int>({2, 3})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // sq_br
     }
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
                         {2.79e-4, 1.29e-4, 7.15e-5})); // min_step_size
-        g->add_factor(std::vector<int>({2, 3, 4})); // run_length
+        g->add_factor(std::vector<int>({2, 3})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // sq_br
     }
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
             {2.79e-3, 1.29e-3, 7.15e-4})); // min_step_size
-        g->add_factor(std::vector<int>({2, 3, 4})); // run_length
+        g->add_factor(std::vector<int>({2, 3})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // sq_br
     }
