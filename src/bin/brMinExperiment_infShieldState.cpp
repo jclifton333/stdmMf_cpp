@@ -302,6 +302,9 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
             const bool sq_br = f.at(i++).val.bool_val;
 
+            // check number of factors
+            CHECK_EQ(i, f.size());
+
             std::shared_ptr<Result<std::pair<double, double> > >
                 r(new Result<std::pair<double, double> >);
             results.push_back(r);
