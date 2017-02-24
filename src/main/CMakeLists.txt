@@ -33,7 +33,7 @@ add_library(stdmMf network.cpp system.cpp states.cpp
   networkRunFeatures.cpp networkRunSymFeatures.cpp
 
   ## optimization
-  objFns.cpp
+  objFns.cpp polValIteration.cpp
 
   ## extra
   ${PROTO_SRCS})
