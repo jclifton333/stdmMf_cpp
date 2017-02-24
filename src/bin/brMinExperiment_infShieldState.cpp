@@ -215,53 +215,37 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 int main(int argc, char *argv[]) {
     Experiment e;
 
+
     {
+        // best
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<double>({0.5, 0.2})); // c
-        g->add_factor(std::vector<double>({0.15, 0.35, 0.75})); // t
+        g->add_factor(std::vector<double>({0.2})); // c
+        g->add_factor(std::vector<double>({0.35})); // t
         g->add_factor(std::vector<double>({1.41e-3})); // a
         g->add_factor(std::vector<double>({1})); // b
         g->add_factor(std::vector<double>({0.85})); // ell
-        g->add_factor(std::vector<double>(
-                        {2.79e-5, 1.29e-5, 7.15e-6})); // min_step_size
-        g->add_factor(std::vector<int>({2, 3})); // run_length
-        g->add_factor(std::vector<bool>({false, true})); // do_sweeps
-        g->add_factor(std::vector<bool>({false, true})); // sq_br
+        g->add_factor(std::vector<double>({2.79e-5})); // min_step_size
+        g->add_factor(std::vector<int>({2})); // run_length
+        g->add_factor(std::vector<bool>({false})); // do_sweeps
+        g->add_factor(std::vector<bool>({true})); // sq_br
     }
 
 
     {
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<double>({0.5, 0.2})); // c
-        g->add_factor(std::vector<double>({0.15, 0.35, 0.75})); // t
-        g->add_factor(std::vector<double>({1.41e-2})); // a
+        g->add_factor(std::vector<double>({0.2, 0.1, 0.05})); // c
+        g->add_factor(std::vector<double>({0.05, 0.1, 0.15, 0.35})); // t
+        g->add_factor(std::vector<double>({1.41e-0, 1.41e-1})); // a
         g->add_factor(std::vector<double>({1})); // b
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
-                        {2.79e-4, 1.29e-4, 7.15e-5})); // min_step_size
-        g->add_factor(std::vector<int>({2, 3})); // run_length
+                        {2.79e-3, 1.29e-3, 7.15e-4})); // min_step_size
+        g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // sq_br
     }
-
-
-    {
-        Experiment::FactorGroup * g = e.add_group();
-
-        g->add_factor(std::vector<double>({0.5, 0.2})); // c
-        g->add_factor(std::vector<double>({0.15, 0.35, 0.75})); // t
-        g->add_factor(std::vector<double>({1.41e-1})); // a
-        g->add_factor(std::vector<double>({1})); // b
-        g->add_factor(std::vector<double>({0.85})); // ell
-        g->add_factor(std::vector<double>(
-            {2.79e-3, 1.29e-3, 7.15e-4})); // min_step_size
-        g->add_factor(std::vector<int>({2, 3})); // run_length
-        g->add_factor(std::vector<bool>({false, true})); // do_sweeps
-        g->add_factor(std::vector<bool>({false, true})); // sq_br
-    }
-
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
 
