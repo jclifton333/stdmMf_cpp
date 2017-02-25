@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
             factors.push_back(f);
             rep_number.push_back(rep);
             factors_level.push_back(level_num);
-            p.service()->post([=]() {
+            p.service().post([=]() {
                         run_brmin(r, rep, c, t, a, b, ell, min_step_size);
                         progress->update();
                     });

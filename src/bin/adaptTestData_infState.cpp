@@ -431,7 +431,7 @@ int main(int argc, char *argv[]) {
 
             for (uint32_t rep = 0; rep < num_reps; ++rep) {
                 Observation * obs = sd->add_rep();
-                pool.service()->post([=](){
+                pool.service().post([=](){
                             run(net, mp.first, mp.second, rep,
                                     num_points, obs);
                             progress->update();

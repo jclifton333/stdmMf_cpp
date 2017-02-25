@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
             factors.push_back(f);
             rep_number.push_back(rep);
             factors_level.push_back(level_num);
-            p.service()->post(std::bind(&run_vmax, r, rep, num_reps, c, t, a, b,
+            p.service().post(std::bind(&run_vmax, r, rep, num_reps, c, t, a, b,
                             ell, min_step_size));
         }
 

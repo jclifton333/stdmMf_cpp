@@ -244,7 +244,7 @@ void SweepAgent<State>::set_new_treatment_parallel(
 
 
         all_res.emplace_back(new Result<std::pair<double, uint32_t> >);
-        this->pool_->service()->post(boost::bind<void>(fn, *it,
+        this->pool_->service().post(boost::bind<void>(fn, *it,
                         all_res.at(all_res.size() - 1)));
     }
 

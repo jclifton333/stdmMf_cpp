@@ -51,7 +51,7 @@ run(const std::shared_ptr<Network> & net,
         none_val.push_back(r_val);
         none_time.push_back(r_time);
 
-        pool.service()->post([=](){
+        pool.service().post([=](){
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     NoTrtAgent<InfState> a(net->clone());
@@ -83,7 +83,7 @@ run(const std::shared_ptr<Network> & net,
         random_val.push_back(r_val);
         random_time.push_back(r_time);
 
-        pool.service()->post([=](){
+        pool.service().post([=](){
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     RandomAgent<InfState> a(net->clone());
@@ -116,7 +116,7 @@ run(const std::shared_ptr<Network> & net,
         proximal_val.push_back(r_val);
         proximal_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     ProximalAgent<InfState> a(net->clone());
@@ -149,7 +149,7 @@ run(const std::shared_ptr<Network> & net,
         myopic_val.push_back(r_val);
         myopic_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     MyopicAgent<InfState> a(net->clone(), mod_agents->clone());
@@ -182,7 +182,7 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_1_val.push_back(r_val);
         vfn_len_1_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     VfnMaxSimPerturbAgent<InfState> a(net->clone(),
@@ -220,7 +220,7 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_2_val.push_back(r_val);
         vfn_len_2_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     VfnMaxSimPerturbAgent<InfState> a(net->clone(),
@@ -258,7 +258,7 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_3_val.push_back(r_val);
         vfn_len_3_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     VfnMaxSimPerturbAgent<InfState> a(net->clone(),
@@ -296,7 +296,7 @@ run(const std::shared_ptr<Network> & net,
         br_len_1_val.push_back(r_val);
         br_len_1_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     BrMinSimPerturbAgent<InfState> a(net->clone(),
@@ -333,7 +333,7 @@ run(const std::shared_ptr<Network> & net,
         br_len_2_val.push_back(r_val);
         br_len_2_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     BrMinSimPerturbAgent<InfState> a(net->clone(),
@@ -370,7 +370,7 @@ run(const std::shared_ptr<Network> & net,
         br_len_3_val.push_back(r_val);
         br_len_3_time.push_back(r_time);
 
-        pool.service()->post([=]() {
+        pool.service().post([=]() {
                     System<InfState> s(net->clone(), mod_system->clone());
                     s.seed(i);
                     BrMinSimPerturbAgent<InfState> a(net->clone(),

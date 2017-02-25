@@ -434,7 +434,7 @@ int main(int argc, char *argv[]) {
             factors.push_back(f);
             rep_number.push_back(rep);
             factors_level.push_back(level_num);
-            p.service()->post(std::bind(&run_adapt, r, rep, path_len,
+            p.service().post(std::bind(&run_adapt, r, rep, path_len,
                             num_reps_vfn, c_vfn, t_vfn, a_vfn, b_vfn,
                             ell_vfn, min_step_size_vfn,
                             c_br, t_br, a_br, b_br,

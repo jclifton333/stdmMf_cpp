@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
                 cv.notify_one();
             };
 
-            pool.service()->post(fn);
+            pool.service().post(fn);
 
             // std::cout << "rep: " << rep << std::endl;
             // std::cout << "obs: " << obs_statistic << std::endl;
