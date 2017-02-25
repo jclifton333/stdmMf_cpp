@@ -21,6 +21,8 @@
 #include <njm_cpp/info/project.hpp>
 #include <njm_cpp/tools/stats.hpp>
 
+#include <njm_cpp/tools/progress.hpp>
+
 #include <thread>
 
 #include <fstream>
@@ -40,10 +42,16 @@ run(const std::shared_ptr<Network> & net,
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
     njm::thread::Pool pool(std::thread::hardware_concurrency());
 
+    std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
+            new njm::tools::Progress<std::ostream>(&std::cout));
+
+    uint32_t total_sims = 0;
+
     // none
     std::vector<std::shared_ptr<Result<double> > > none_val;
     std::vector<std::shared_ptr<Result<double> > > none_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         none_val.push_back(r_val);
@@ -69,6 +77,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -76,6 +86,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > random_val;
     std::vector<std::shared_ptr<Result<double> > > random_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         random_val.push_back(r_val);
@@ -101,6 +112,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -109,6 +122,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > proximal_val;
     std::vector<std::shared_ptr<Result<double> > > proximal_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         proximal_val.push_back(r_val);
@@ -134,6 +148,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -142,6 +158,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > myopic_val;
     std::vector<std::shared_ptr<Result<double> > > myopic_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         myopic_val.push_back(r_val);
@@ -168,6 +185,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -176,6 +195,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > vfn_len_1_val;
     std::vector<std::shared_ptr<Result<double> > > vfn_len_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         vfn_len_1_val.push_back(r_val);
@@ -206,6 +226,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -214,6 +236,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > vfn_len_2_val;
     std::vector<std::shared_ptr<Result<double> > > vfn_len_2_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         vfn_len_2_val.push_back(r_val);
@@ -244,6 +267,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -252,6 +277,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > vfn_len_3_val;
     std::vector<std::shared_ptr<Result<double> > > vfn_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         vfn_len_3_val.push_back(r_val);
@@ -282,6 +308,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -290,6 +318,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > br_len_1_val;
     std::vector<std::shared_ptr<Result<double> > > br_len_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         br_len_1_val.push_back(r_val);
@@ -319,6 +348,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -327,6 +358,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > br_len_2_val;
     std::vector<std::shared_ptr<Result<double> > > br_len_2_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         br_len_2_val.push_back(r_val);
@@ -356,6 +388,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -364,6 +398,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > br_len_3_val;
     std::vector<std::shared_ptr<Result<double> > > br_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         br_len_3_val.push_back(r_val);
@@ -393,11 +428,16 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
+    progress->total(total_sims);
 
     pool.join();
+
+    progress->done();
 
     std::vector<std::pair<std::string, std::vector<double> > > all_results;
 
@@ -531,19 +571,19 @@ int main(int argc, char *argv[]) {
     std::vector<std::shared_ptr<Network> > networks;
     { // network 1
         NetworkInit init;
-        init.set_dim_x(10);
-        init.set_dim_y(10);
+        init.set_dim_x(2);
+        init.set_dim_y(2);
         init.set_wrap(false);
         init.set_type(NetworkInit_NetType_GRID);
         networks.push_back(Network::gen_network(init));
     }
 
-    { // network 2
-        NetworkInit init;
-        init.set_size(100);
-        init.set_type(NetworkInit_NetType_BARABASI);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // network 2
+    //     NetworkInit init;
+    //     init.set_size(100);
+    //     init.set_type(NetworkInit_NetType_BARABASI);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     // { // network 3
     //     NetworkInit init;

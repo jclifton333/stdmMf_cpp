@@ -22,6 +22,7 @@
 #include <njm_cpp/thread/pool.hpp>
 #include <njm_cpp/info/project.hpp>
 #include <njm_cpp/tools/stats.hpp>
+#include <njm_cpp/tools/progress.hpp>
 
 #include <thread>
 
@@ -42,10 +43,16 @@ run(const std::shared_ptr<Network> & net,
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
     njm::thread::Pool pool(std::thread::hardware_concurrency());
 
+    std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
+            new njm::tools::Progress<std::ostream>(&std::cout));
+
+    uint32_t total_sims = 0;
+
     // none
     std::vector<std::shared_ptr<Result<double> > > none_val;
     std::vector<std::shared_ptr<Result<double> > > none_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         none_val.push_back(r_val);
@@ -71,6 +78,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -78,6 +87,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > random_val;
     std::vector<std::shared_ptr<Result<double> > > random_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         random_val.push_back(r_val);
@@ -103,6 +113,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -111,6 +123,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > proximal_val;
     std::vector<std::shared_ptr<Result<double> > > proximal_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         proximal_val.push_back(r_val);
@@ -136,6 +149,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -144,6 +159,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > myopic_val;
     std::vector<std::shared_ptr<Result<double> > > myopic_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         myopic_val.push_back(r_val);
@@ -169,6 +185,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -177,6 +195,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > vfn_len_1_val;
     std::vector<std::shared_ptr<Result<double> > > vfn_len_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         vfn_len_1_val.push_back(r_val);
@@ -207,6 +226,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -215,6 +236,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > vfn_len_2_val;
     std::vector<std::shared_ptr<Result<double> > > vfn_len_2_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         vfn_len_2_val.push_back(r_val);
@@ -245,6 +267,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -253,6 +277,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > vfn_len_3_val;
     std::vector<std::shared_ptr<Result<double> > > vfn_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         vfn_len_3_val.push_back(r_val);
@@ -283,6 +308,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -291,6 +318,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > br_len_1_val;
     std::vector<std::shared_ptr<Result<double> > > br_len_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         br_len_1_val.push_back(r_val);
@@ -320,6 +348,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -328,6 +358,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > br_len_2_val;
     std::vector<std::shared_ptr<Result<double> > > br_len_2_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         br_len_2_val.push_back(r_val);
@@ -357,6 +388,8 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
@@ -365,6 +398,7 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::shared_ptr<Result<double> > > br_len_3_val;
     std::vector<std::shared_ptr<Result<double> > > br_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
         std::shared_ptr<Result<double> > r_val(new Result<double>);
         std::shared_ptr<Result<double> > r_time(new Result<double>);
         br_len_3_val.push_back(r_val);
@@ -394,11 +428,16 @@ run(const std::shared_ptr<Network> & net,
 
                     r_time->set(std::chrono::duration_cast<
                             std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
                 });
     }
 
+    progress->total(total_sims);
 
     pool.join();
+
+    progress->done();
 
     std::vector<std::pair<std::string, std::vector<double> > > all_results;
 
@@ -532,19 +571,19 @@ int main(int argc, char *argv[]) {
     std::vector<std::shared_ptr<Network> > networks;
     { // network 1
         NetworkInit init;
-        init.set_dim_x(10);
-        init.set_dim_y(10);
+        init.set_dim_x(2);
+        init.set_dim_y(2);
         init.set_wrap(false);
         init.set_type(NetworkInit_NetType_GRID);
         networks.push_back(Network::gen_network(init));
     }
 
-    { // network 2
-        NetworkInit init;
-        init.set_size(100);
-        init.set_type(NetworkInit_NetType_BARABASI);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // network 2
+    //     NetworkInit init;
+    //     init.set_size(100);
+    //     init.set_type(NetworkInit_NetType_BARABASI);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     // { // network 3
     //     NetworkInit init;
@@ -646,261 +685,250 @@ int main(int argc, char *argv[]) {
                     std::vector<ModelPair> >("model_no_no", models_add));
         }
 
-        { // Correct: OrSo,  Postulated: OrSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: OrSo,  Postulated: OrSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_or_or", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_or_or", models_add));
+        // }
 
-        { // Correct: XorSo,  Postulated: XorSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: XorSo,  Postulated: XorSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_xor_xor", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_xor_xor", models_add));
+        // }
 
-        { // Correct: SepSo,  Postulated: SepSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))));
-                mp.first->par(par_sep);
-                mp.second->par(par_sep);
+        // { // Correct: SepSo,  Postulated: SepSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))));
+        //         mp.first->par(par_sep);
+        //         mp.second->par(par_sep);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_sep_sep", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_sep_sep", models_add));
+        // }
 
-        { // Correct: SepSo,  Postulated: OrSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))));
-                mp.first->par(par_sep);
-                mp.second->par(par);
+        // { // Correct: SepSo,  Postulated: OrSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))));
+        //         mp.first->par(par_sep);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_sep_or", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_sep_or", models_add));
+        // }
 
-        { // Correct: SepSo,  Postulated: XorSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))));
-                mp.first->par(par_sep);
-                mp.second->par(par);
+        // { // Correct: SepSo,  Postulated: XorSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))));
+        //         mp.first->par(par_sep);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_sep_xor", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_sep_xor", models_add));
+        // }
 
-        { // Correct: SepSo,  Postulated: No So
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateNoSoModel(networks.at(i))));
-                mp.first->par(par_sep);
-                mp.second->par(par);
+        // { // Correct: SepSo,  Postulated: No So
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateNoSoModel(networks.at(i))));
+        //         mp.first->par(par_sep);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_sep_no", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_sep_no", models_add));
+        // }
 
-        { // Correct: XorSo,  Postulated: OrSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: XorSo,  Postulated: OrSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_xor_or", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_xor_or", models_add));
+        // }
 
-        { // Correct: XorSo,  Postulated: No So
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateNoSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: XorSo,  Postulated: No So
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateNoSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_xor_no", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_xor_no", models_add));
+        // }
 
-        { // Correct: XorSo,  Postulated: SepSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par_sep);
+        // { // Correct: XorSo,  Postulated: SepSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par_sep);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_xor_sep", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_xor_sep", models_add));
+        // }
 
-        { // Correct: OrSo,  Postulated: No So
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateNoSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: OrSo,  Postulated: No So
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateNoSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_or_no", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_or_no", models_add));
+        // }
 
-        { // Correct: OrSo,  Postulated: Xor So
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: OrSo,  Postulated: Xor So
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_or_xor", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_or_xor", models_add));
+        // }
 
-        { // Correct: OrSo,  Postulated: Sep So
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par_sep);
+        // { // Correct: OrSo,  Postulated: Sep So
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par_sep);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_or_sep", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_or_sep", models_add));
+        // }
 
 
-        { // Correct: NoSo,  Postulated: SepSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateNoSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateSepSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par_sep);
+        // { // Correct: NoSo,  Postulated: SepSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateNoSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateSepSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par_sep);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_no_sep", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_no_sep", models_add));
+        // }
 
-        { // Correct: NoSo,  Postulated: XorSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateNoSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateXorSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: NoSo,  Postulated: XorSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateNoSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateXorSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_no_xor", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_no_xor", models_add));
+        // }
 
-        { // Correct: NoSo,  Postulated: OrSo
-            std::vector<ModelPair > models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfState> >(
-                                new InfStateNoSoModel(networks.at(i))),
-                        std::shared_ptr<Model<InfState> >(
-                                new InfStateOrSoModel(networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        // { // Correct: NoSo,  Postulated: OrSo
+        //     std::vector<ModelPair > models_add;
+        //     for (uint32_t i = 0; i < networks.size(); ++i) {
+        //         ModelPair mp (std::shared_ptr<Model<InfState> >(
+        //                         new InfStateNoSoModel(networks.at(i))),
+        //                 std::shared_ptr<Model<InfState> >(
+        //                         new InfStateOrSoModel(networks.at(i))));
+        //         mp.first->par(par);
+        //         mp.second->par(par);
 
-                models_add.push_back(mp);
-            }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("model_no_or", models_add));
-        }
+        //         models_add.push_back(mp);
+        //     }
+        //     models.push_back(std::pair<std::string,
+        //             std::vector<ModelPair> >("model_no_or", models_add));
+        // }
     }
 
     const uint32_t num_reps = 50;
     const uint32_t time_points = 100;
-
-    std::ofstream ofs_raw;
-    ofs_raw.open("run_results_raw.txt", std::ios_base::out);
-    CHECK(ofs_raw.good()) << "could not open file";
-    ofs_raw << "network,model,agent,mean,se,time" << std::endl;
-    ofs_raw.close();
-
-    std::ofstream ofs_read;
-    ofs_read.open("run_results_read.txt", std::ios_base::out);
-    CHECK(ofs_read.good()) << "could not open file";
-    ofs_read.close();
 
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
