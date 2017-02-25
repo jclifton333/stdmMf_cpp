@@ -19,7 +19,7 @@ double runner(System<State> * system, Agent<State> * agent,
         system->turn_clock();
 
         // negative of the number of infected nodes
-        value += - gamma * static_cast<double>(system->n_inf())
+        value += - std::pow(gamma, i) * static_cast<double>(system->n_inf())
             / static_cast<double>(system->num_nodes());
     }
     return value;

@@ -20,7 +20,8 @@ SET(test_src
   test_networkRunFeatures
   test_networkRunSymFeatures_infState
   test_networkRunSymFeatures_infShieldState
-  test_sweepAgent)
+  test_sweepAgent
+  test_polValIteration)
 
 foreach(test_name ${test_src})
   add_executable(${test_name} ${test_name}.cpp)
