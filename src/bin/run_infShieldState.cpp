@@ -752,7 +752,7 @@ int main(int argc, char *argv[]) {
     }
 
     const uint32_t num_reps = 50;
-    const uint32_t time_points = 500;
+    const uint32_t time_points = 100;
 
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
