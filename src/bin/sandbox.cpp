@@ -1,5 +1,6 @@
 #include "system.hpp"
-#include "infStateNoSoModel.hpp"
+#include "infShieldStateNoImNoSoModel.hpp"
+#include "infShieldStatePosImNoSoModel.hpp"
 #include "noTrtAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
@@ -7,25 +8,65 @@
 #include "vfnMaxSimPerturbAgent.hpp"
 #include "brMinSimPerturbAgent.hpp"
 #include "vfnBrAdaptSimPerturbAgent.hpp"
+#include "vfnBrStartSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
 
 #include "objFns.hpp"
 
+#include <njm_cpp/data/result.hpp>
+#include <njm_cpp/data/trapperKeeper.hpp>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+#include <njm_cpp/thread/pool.hpp>
+#include <njm_cpp/info/project.hpp>
+#include <njm_cpp/tools/stats.hpp>
+
+#include <njm_cpp/tools/progress.hpp>
+
 #include <thread>
+
+#include <fstream>
 
 using namespace stdmMf;
 
-int main(int argc, char *argv[]) {
+using njm::data::Result;
+using njm::tools::mean_and_var;
 
+void run(const std::shared_ptr<Network> & net,
+        const std::shared_ptr<Model<InfShieldState> > & mod_system,
+        const std::shared_ptr<Model<InfShieldState> > & mod_agents,
+        const uint32_t & time_points) {
+
+
+    // vfn max length 2
+    System<InfShieldState> s(net->clone(), mod_system->clone());
+    s.seed(0);
+    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+            std::shared_ptr<Features<InfShieldState> >(
+                    new NetworkRunSymFeatures<InfShieldState>(
+                            net->clone(), 1)),
+            mod_agents->clone(),
+            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    a.seed(0);
+
+    s.start();
+
+    runner(&s, &a, time_points, 1.0);
+}
+
+
+int main(int argc, char *argv[]) {
+    // setup networks
+
+    // network 1
     NetworkInit init;
-    init.set_dim_x(10);
-    init.set_dim_y(10);
+    init.set_dim_x(2);
+    init.set_dim_y(2);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
+    std::shared_ptr<Network> network( Network::gen_network(init));
 
-    const std::shared_ptr<Network> net(Network::gen_network(init));
-
+    // models
     // latent infections
     const double prob_inf_latent = 0.01;
     const double intcp_inf_latent =
@@ -51,6 +92,9 @@ int main(int argc, char *argv[]) {
     const double trt_act_rec =
         std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
 
+    // shield
+    const double shield_coef = 0.9;
+
 
     std::vector<double> par =
         {intcp_inf_latent,
@@ -58,7 +102,8 @@ int main(int argc, char *argv[]) {
          intcp_rec,
          trt_act_inf,
          trt_act_rec,
-         trt_pre_inf};
+         trt_pre_inf,
+         shield_coef};
 
     std::vector<double> par_sep =
         {intcp_inf_latent,
@@ -69,27 +114,23 @@ int main(int argc, char *argv[]) {
          trt_act_rec,
          -trt_act_rec,
          trt_pre_inf,
-         -trt_pre_inf};
+         -trt_pre_inf,
+         shield_coef};
 
 
-    const std::shared_ptr<Model<InfState> > mod(new InfStateNoSoModel(net));
-    mod->par(par);
+    // Correct: NoIm NoSo,  Postulated: NoIm NoSo
+    std::shared_ptr<Model<InfShieldState> > systemModel(
+                    new InfShieldStateNoImNoSoModel(
+                            network));
+    std::shared_ptr<Model<InfShieldState> > agentModel(
+                    new InfShieldStateNoImNoSoModel(
+                            network));
 
-    System<InfState> s(net->clone(), mod->clone());
-    s.seed(0);
+    systemModel->par(par);
+    agentModel->par(par);
 
-    const uint32_t run_length = 4;
     const uint32_t time_points = 100;
-    BrMinSimPerturbAgent<InfState> a(net->clone(),
-            std::shared_ptr<Features<InfState> >(
-                    new NetworkRunSymFeatures<InfState>(net->clone(),
-                            run_length)),
-            2e-1, 0.75, 1.41e-3, 1, 0.85, 9.130e-6);
-    a.seed(0);
-
-    s.start();
-
-    runner(&s, &a, time_points, 1.0);
+    run(network, systemModel, agentModel, time_points);
 
     return 0;
 }
