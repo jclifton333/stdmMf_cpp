@@ -754,17 +754,6 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps = 50;
     const uint32_t time_points = 100;
 
-    std::ofstream ofs_raw;
-    ofs_raw.open("run_results_raw.txt", std::ios_base::out);
-    CHECK(ofs_raw.good()) << "could not open file";
-    ofs_raw << "network,model,agent,mean,se,time" << std::endl;
-    ofs_raw.close();
-
-    std::ofstream ofs_read;
-    ofs_read.open("run_results_read.txt", std::ios_base::out);
-    CHECK(ofs_read.good()) << "could not open file";
-    ofs_read.close();
-
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
 
