@@ -32,8 +32,7 @@ using namespace stdmMf;
 using njm::data::Result;
 using njm::tools::mean_and_var;
 
-std::vector<std::pair<std::string, std::vector<double> > >
-run(const std::shared_ptr<Network> & net,
+void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model<InfShieldState> > & mod_system,
         const std::shared_ptr<Model<InfShieldState> > & mod_agents,
         const uint32_t & num_reps,
@@ -295,130 +294,6 @@ run(const std::shared_ptr<Network> & net,
 
     progress->done();
 
-    std::vector<std::pair<std::string, std::vector<double> > > all_results;
-
-
-    {
-        const std::string agent_name = "none";
-        const std::pair<double, double> none_stats = mean_and_var(
-                result_to_vec(none_val));
-        const std::vector<double> agent_res =
-            {none_stats.first,
-             std::sqrt(none_stats.second / num_reps),
-             mean_and_var(result_to_vec(none_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "random";
-        const std::pair<double, double> random_stats = mean_and_var(
-                result_to_vec(random_val));
-        const std::vector<double> agent_res =
-            {random_stats.first,
-             std::sqrt(random_stats.second / num_reps),
-             mean_and_var(result_to_vec(random_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "proximal";
-        const std::pair<double, double> proximal_stats = mean_and_var(
-                result_to_vec(proximal_val));
-        const std::vector<double> agent_res =
-            {proximal_stats.first,
-             std::sqrt(proximal_stats.second / num_reps),
-             mean_and_var(result_to_vec(proximal_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "myopic";
-        const std::pair<double, double> myopic_stats = mean_and_var(
-                result_to_vec(myopic_val));
-        const std::vector<double> agent_res =
-            {myopic_stats.first,
-             std::sqrt(myopic_stats.second / num_reps),
-             mean_and_var(result_to_vec(myopic_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "vfn_len_1";
-        const std::pair<double, double> vfn_len_1_stats = mean_and_var(
-                result_to_vec(vfn_len_1_val));
-        const std::vector<double> agent_res =
-            {vfn_len_1_stats.first,
-             std::sqrt(vfn_len_1_stats.second / num_reps),
-             mean_and_var(result_to_vec(vfn_len_1_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "vfn_len_2";
-        const std::pair<double, double> vfn_len_2_stats = mean_and_var(
-                result_to_vec(vfn_len_2_val));
-        const std::vector<double> agent_res =
-            {vfn_len_2_stats.first,
-             std::sqrt(vfn_len_2_stats.second / num_reps),
-             mean_and_var(result_to_vec(vfn_len_2_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "vfn_len_3";
-        const std::pair<double, double> vfn_len_3_stats = mean_and_var(
-                result_to_vec(vfn_len_3_val));
-        const std::vector<double> agent_res =
-            {vfn_len_3_stats.first,
-             std::sqrt(vfn_len_3_stats.second / num_reps),
-             mean_and_var(result_to_vec(vfn_len_3_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "br_len_1";
-        const std::pair<double, double> br_len_1_stats = mean_and_var(
-                result_to_vec(br_len_1_val));
-        const std::vector<double> agent_res =
-            {br_len_1_stats.first,
-             std::sqrt(br_len_1_stats.second / num_reps),
-             mean_and_var(result_to_vec(br_len_1_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "br_len_2";
-        const std::pair<double, double> br_len_2_stats = mean_and_var(
-                result_to_vec(br_len_2_val));
-        const std::vector<double> agent_res =
-            {br_len_2_stats.first,
-             std::sqrt(br_len_2_stats.second / num_reps),
-             mean_and_var(result_to_vec(br_len_2_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    {
-        const std::string agent_name = "br_len_3";
-        const std::pair<double, double> br_len_3_stats = mean_and_var(
-                result_to_vec(br_len_3_val));
-        const std::vector<double> agent_res =
-            {br_len_3_stats.first,
-             std::sqrt(br_len_3_stats.second / num_reps),
-             mean_and_var(result_to_vec(br_len_3_time)).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    return all_results;
 }
 
 
@@ -610,89 +485,17 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps = 50;
     const uint32_t time_points = 100;
 
-    std::ofstream ofs_raw;
-    ofs_raw.open("run_results_raw.txt", std::ios_base::out);
-    CHECK(ofs_raw.good()) << "could not open file";
-    ofs_raw << "network,model,agent,mean,se,time" << std::endl;
-    ofs_raw.close();
-
-    std::ofstream ofs_read;
-    ofs_read.open("run_results_read.txt", std::ios_base::out);
-    CHECK(ofs_read.good()) << "could not open file";
-    ofs_read.close();
-
-    njm::data::TrapperKeeper tk(argv[0],
-            njm::info::project::PROJECT_ROOT_DIR + "/data");
-
-    njm::data::Entry & e_read_all = tk.entry("all_read.txt");
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
 
-        njm::data::Entry & e_read_net = tk.entry(net->kind() + "_read.txt");
-
         for (uint32_t j = 0; j < models.size(); ++j) {
             ModelPair & mp(models.at(j).second.at(i));
 
-            njm::data::Entry & e_raw = tk.entry(
-                    net->kind() + "_" + models.at(j).first + "_raw.txt");
-            njm::data::Entry & e_read = tk.entry(
-                    net->kind() + "_" + models.at(j).first + "_read.txt");
+            run(net, mp.first, mp.second, num_reps, time_points);
 
-            std::vector<std::pair<std::string, std::vector<double> > >
-                results = run(net, mp.first, mp.second, num_reps, time_points);
-
-            std::cout << "=====================================" << std::endl
-                      << "results for network " << net->kind()
-                      << " and model pair " << j << std::endl;
-
-            e_read << "=====================================" << "\n"
-                   << "results for network " << net->kind()
-                   << " and model pair " << models.at(j).first << "\n";
-
-            e_read_net << "=====================================" << "\n"
-                       << "results for network " << net->kind()
-                       << " and model pair " << models.at(j).first << "\n";
-
-            e_read_all << "=====================================" << "\n"
-                       << "results for network " << net->kind()
-                       << " and model pair " << models.at(j).first << "\n";
-
-            for (uint32_t k = 0; k < results.size(); ++k) {
-                e_raw << net->kind() << ","
-                      << models.at(j).first << ","
-                      << results.at(k).first << ","
-                      << results.at(k).second.at(0) << ","
-                      << results.at(k).second.at(1) << ","
-                      << results.at(k).second.at(2) << "\n";
-
-                std::cout << results.at(k).first << ": "
-                          << results.at(k).second.at(0) << " ("
-                          << results.at(k).second.at(1) << ")  ["
-                          << results.at(k).second.at(2) << "]"
-                          << std::endl;
-
-                e_read << results.at(k).first << ": "
-                       << results.at(k).second.at(0) << " ("
-                       << results.at(k).second.at(1) << ")  ["
-                       << results.at(k).second.at(2) << "]"
-                       << "\n";
-
-                e_read_net << results.at(k).first << ": "
-                           << results.at(k).second.at(0) << " ("
-                           << results.at(k).second.at(1) << ")  ["
-                           << results.at(k).second.at(2) << "]"
-                           << "\n";
-                e_read_all << results.at(k).first << ": "
-                           << results.at(k).second.at(0) << " ("
-                           << results.at(k).second.at(1) << ")  ["
-                           << results.at(k).second.at(2) << "]"
-                           << "\n";
-            }
         }
     }
-
-    tk.finished();
 
     return 0;
 }
