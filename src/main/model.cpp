@@ -130,7 +130,18 @@ double ModelFit<State>::obj_fn(const gsl_vector * x, void * params){
     // return negative since GSL minimizes the function
     const double ll = mf->model_->ll(mf->history_);
     CHECK(std::isfinite(ll)) << "Likelihood value is not finite";
-    return - ll;
+
+
+    // penalty
+    const double penalty = std::accumulate(par.begin(), par.end(), 0.0,
+            [](const double & a, const double & b) {
+                if (std::abs(b) > 30) {
+                    return a + (b - 30) * (b - 30);
+                } else {
+                    return a;
+                }
+            });
+    return - ll + penalty;
 }
 
 template <typename State>
@@ -150,8 +161,15 @@ void ModelFit<State>::obj_fn_grad(const gsl_vector * x, void * params,
         // GSL minimizes the function, need to adjust the gradient too
         CHECK(std::isfinite(ll_grad.at(pi)))
             << "Likelihood gradient value is not finite for parameter index "
-            << pi << " [seed = " << mf->model_->seed() << "]";
-        gsl_vector_set(g, pi, -ll_grad.at(pi));
+            << pi << " with value " << par.at(pi)
+            << " [seed = " << mf->model_->seed() << "]";
+
+        if (std::abs(par.at(pi)) > 30) {
+            gsl_vector_set(g, pi, - ll_grad.at(pi)
+                    + 2 * (std::abs(par.at(pi)) - 30));
+        } else {
+            gsl_vector_set(g, pi, - ll_grad.at(pi));
+        }
     }
 }
 
@@ -171,7 +189,18 @@ void ModelFit<State>::obj_fn_both(const gsl_vector * x, void * params,
 
     // log ll
     CHECK(std::isfinite(ll_value));
-    *f = -ll_value;
+
+    // penalty
+    const double penalty = std::accumulate(par.begin(), par.end(), 0.0,
+            [](const double & a, const double & b) {
+                if (std::abs(b) > 30) {
+                    return a + (b - 30) * (b - 30);
+                } else {
+                    return a;
+                }
+            });
+
+    *f = - ll_value + penalty;
 
     // log ll grad
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
@@ -181,6 +210,13 @@ void ModelFit<State>::obj_fn_both(const gsl_vector * x, void * params,
             << "Likelihood gradient value is not finite for parameter index "
             << pi;
         gsl_vector_set(g, pi, -ll_grad.at(pi));
+
+        if (std::abs(par.at(pi)) > 30) {
+            gsl_vector_set(g, pi, - ll_grad.at(pi)
+                    + 2 * (std::abs(par.at(pi)) - 30));
+        } else {
+            gsl_vector_set(g, pi, - ll_grad.at(pi));
+        }
     }
 }
 
