@@ -206,7 +206,7 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
 template<typename State>
 void VfnBrStartSimPerturbAgent<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
     this->model_->rng(rng);
 }
 

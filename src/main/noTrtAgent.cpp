@@ -44,7 +44,7 @@ uint32_t NoTrtAgent<State>::num_trt() const {
 
 template<typename State>
 void NoTrtAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
 }
 
 

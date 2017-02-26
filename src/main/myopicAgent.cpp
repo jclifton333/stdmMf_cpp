@@ -108,7 +108,7 @@ boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
 
 template<typename State>
 void MyopicAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
     this->model_->rng(rng);
 }
 

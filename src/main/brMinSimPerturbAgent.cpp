@@ -100,7 +100,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
 template<typename State>
 void BrMinSimPerturbAgent<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
 }
 
 

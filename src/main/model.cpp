@@ -102,7 +102,7 @@ void Model<State>::est_par(const std::vector<Transition<State> > & history) {
 
 template <typename State>
 void Model<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
 }
 
 

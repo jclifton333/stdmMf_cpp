@@ -34,7 +34,7 @@ boost::dynamic_bitset<> LookupAgent::apply_trt(
 
 
 void LookupAgent::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
 }
 
 
