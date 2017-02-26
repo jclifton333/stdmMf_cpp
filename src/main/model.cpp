@@ -144,7 +144,7 @@ void ModelFit<State>::obj_fn_grad(const gsl_vector * x, void * params,
         // GSL minimizes the function, need to adjust the gradient too
         CHECK(std::isfinite(ll_grad.at(pi)))
             << "Likelihood gradient value is not finite for parameter index "
-            << pi;
+            << pi << " [seed = " << mf->model_->seed() << "]";
         gsl_vector_set(g, pi, -ll_grad.at(pi));
     }
 }
