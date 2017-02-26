@@ -65,7 +65,7 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         ProximalAgent<State> a(this->network_);
         return a.apply_trt(curr_state, history);
     } else if (history.size() < 2) {
-        MyopicAgent<State> ma(this->network_, this->model_->clone());
+        MyopicAgent<State> ma(this->network_, this->model_);
         return ma.apply_trt(curr_state, history);
         // } else if (history.size() < 3) {
         //     MyopicAgent<State> ma(this->network_, this->model_->clone());
