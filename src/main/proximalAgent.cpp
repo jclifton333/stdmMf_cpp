@@ -63,6 +63,12 @@ boost::dynamic_bitset<> ProximalAgent<State>::apply_trt(
     return trt_bits;
 }
 
+template<typename State>
+void ProximalAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
+
 template class ProximalAgent<InfState>;
 template class ProximalAgent<InfShieldState>;
 

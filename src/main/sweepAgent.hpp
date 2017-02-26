@@ -72,6 +72,10 @@ public:
             std::set<uint32_t> & has_trt,
             const State & state,
             std::vector<double> & feat) const;
+
+
+    using njm::tools::RngClass::rng;
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 

@@ -43,6 +43,11 @@ boost::dynamic_bitset<> RandomAgent<State>::apply_trt(
     return trt_bits;
 }
 
+template<typename State>
+void RandomAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
 
 template class RandomAgent<InfState>;
 template class RandomAgent<InfShieldState>;

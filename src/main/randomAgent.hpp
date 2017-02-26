@@ -25,6 +25,8 @@ public:
 
     boost::dynamic_bitset<> apply_trt(
             const State & state) override;
+
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 

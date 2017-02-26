@@ -26,10 +26,17 @@ boost::dynamic_bitset<> LookupAgent::apply_trt(
     return this->lookup_.get(state.inf_bits);
 }
 
+
 boost::dynamic_bitset<> LookupAgent::apply_trt(
         const InfState & state) {
     return this->lookup_.get(state.inf_bits);
 }
+
+
+void LookupAgent::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
 
 
 } // namespace stdmMf

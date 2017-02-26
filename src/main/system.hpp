@@ -66,6 +66,8 @@ public:
 
     void turn_clock(const State & next_state);
 
+    using njm::tools::RngClass::rng;
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 

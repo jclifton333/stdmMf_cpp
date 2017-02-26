@@ -50,6 +50,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
+        a.rng(this->rng());
         return a.apply_trt(curr_state, history);
     }
 
@@ -94,6 +95,14 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }
+
+
+template<typename State>
+void BrMinSimPerturbAgent<State>::rng(
+        const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
 
 
 template class BrMinSimPerturbAgent<InfState>;

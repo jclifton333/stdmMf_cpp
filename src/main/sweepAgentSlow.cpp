@@ -237,6 +237,12 @@ bool SweepAgentSlow<State>::sweep_treatments(
 }
 
 
+template<typename State>
+void SweepAgentSlow<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
+
 
 template class SweepAgentSlow<InfState>;
 template class SweepAgentSlow<InfShieldState>;

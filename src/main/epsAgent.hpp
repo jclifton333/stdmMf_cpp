@@ -35,6 +35,9 @@ public:
     uint32_t num_trt() const override;
 
     uint32_t num_trt_eps() const;
+
+    using njm::tools::RngClass::rng;
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 

@@ -80,6 +80,7 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
+        a.rng(this->rng());
         return a.apply_trt(curr_state, history);
         // } else if (history.size() < 2) {
         //     MyopicAgent ma(this->network_, this->model_->clone());
@@ -200,6 +201,15 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }
+
+
+template<typename State>
+void VfnBrStartSimPerturbAgent<State>::rng(
+        const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+    this->model_->rng(rng);
+}
+
 
 
 template class VfnBrStartSimPerturbAgent<InfState>;

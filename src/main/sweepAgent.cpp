@@ -415,6 +415,11 @@ bool SweepAgent<State>::sweep_treatments(
 }
 
 
+template<typename State>
+void SweepAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
 
 template class SweepAgent<InfState>;
 template class SweepAgent<InfShieldState>;

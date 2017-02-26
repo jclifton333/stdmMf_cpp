@@ -51,6 +51,9 @@ public:
             const std::vector<StateAndTrt<State> > & history) override;
 
     std::vector<double> coef() const;
+
+    using njm::tools::RngClass::rng;
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 

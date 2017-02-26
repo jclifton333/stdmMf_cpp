@@ -39,6 +39,7 @@ boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
     if (history.size() < 1) {
         // not enough data to estimate a model
         ProximalAgent<State> pa(this->network_);
+        pa.rng(this->rng());
         trt_bits = pa.apply_trt(curr_state, history);
     } else {
         // get probabilities
@@ -103,6 +104,14 @@ boost::dynamic_bitset<> MyopicAgent<State>::apply_trt(
     }
     return trt_bits;
 }
+
+
+template<typename State>
+void MyopicAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+    this->model_->rng(rng);
+}
+
 
 
 template class MyopicAgent<InfState>;

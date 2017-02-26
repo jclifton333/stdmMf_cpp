@@ -25,6 +25,8 @@ public:
             const State & state) override;
 
     uint32_t num_trt() const override;
+
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 

@@ -128,6 +128,14 @@ void System<State>::turn_clock(const State & next_state) {
 }
 
 
+template<typename State>
+void System<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+    this->model_->rng(rng);
+}
+
+
+
 template class System<InfState>;
 template class System<InfShieldState>;
 

@@ -100,6 +100,12 @@ void Model<State>::est_par(const std::vector<Transition<State> > & history) {
 }
 
 
+template <typename State>
+void Model<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
+
 template class Model<InfState>;
 template class Model<InfShieldState>;
 

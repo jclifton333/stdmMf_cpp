@@ -63,9 +63,11 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
+        a.rng(this->rng());
         return a.apply_trt(curr_state, history);
     } else if (history.size() < 2) {
         MyopicAgent<State> ma(this->network_, this->model_);
+        ma.rng(this->rng());
         return ma.apply_trt(curr_state, history);
         // } else if (history.size() < 3) {
         //     MyopicAgent<State> ma(this->network_, this->model_->clone());
@@ -154,6 +156,15 @@ template <typename State>
 std::vector<double> VfnMaxSimPerturbAgent<State>::coef() const {
     return this->coef_;
 }
+
+
+template<typename State>
+void VfnMaxSimPerturbAgent<State>::rng(
+        const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+    this->model_->rng(rng);
+}
+
 
 
 template class VfnMaxSimPerturbAgent<InfState>;

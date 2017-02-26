@@ -57,6 +57,9 @@ public:
 
     virtual State turn_clock(const State & curr_state,
             const boost::dynamic_bitset<> & trt_bits) const = 0;
+
+    using njm::tools::RngClass::rng;
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 template <typename State>

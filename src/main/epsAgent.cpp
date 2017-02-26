@@ -67,6 +67,14 @@ uint32_t EpsAgent<State>::num_trt_eps() const {
     return this->eps_agent_->num_trt();
 }
 
+template<typename State>
+void EpsAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+    this->eps_agent_->rng(rng);
+    this->agent_->rng(rng);
+}
+
+
 
 template class EpsAgent<InfState>;
 template class EpsAgent<InfShieldState>;

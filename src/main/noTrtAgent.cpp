@@ -42,6 +42,13 @@ uint32_t NoTrtAgent<State>::num_trt() const {
 }
 
 
+template<typename State>
+void NoTrtAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
+    this->RngClass::rng(rng);
+}
+
+
+
 template class NoTrtAgent<InfState>;
 template class NoTrtAgent<InfShieldState>;
 

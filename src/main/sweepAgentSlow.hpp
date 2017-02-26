@@ -46,6 +46,9 @@ public:
             std::set<uint32_t> & not_trt,
             std::set<uint32_t> & has_trt,
             const State & state) const;
+
+    using njm::tools::RngClass::rng;
+    void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 
