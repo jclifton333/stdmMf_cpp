@@ -12,6 +12,9 @@
 #include "proximalAgent.hpp"
 #include "myopicAgent.hpp"
 
+#include "vfnMaxSimPerturbAgent.hpp"
+#include "brMinSimPerturbAgent.hpp"
+
 namespace stdmMf {
 
 
@@ -92,165 +95,86 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
     }
 
 
-    const std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, curr_state));
+    const std::vector<double> optim_par = this->train(curr_state, history,
+            std::vector<double>(this->features_->num_features(), 0.0));
 
-    // estimate model
-    this->model_->est_par(all_history);
-
-
-    // get information matrix and take inverse sqrt
-    std::vector<double> hess = this->model_->ll_hess(all_history);
-    njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
-
-    const arma::mat hess_mat(hess.data(), this->model_->par_size(),
-            this->model_->par_size());
-    arma::mat eigvec;
-    arma::vec eigval;
-    arma::eig_sym(eigval, eigvec, hess_mat);
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        if (eigval(i) > 0.0)
-            eigval(i) = std::sqrt(1.0 / eigval(i));
-        else
-            eigval(i) = 0.0;
-    }
-    const arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
-
-    // sample new parameters
-    arma::vec std_norm(this->model_->par_size());
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        std_norm(i) = this->rng_->rnorm_01();
-        LOG_IF(FATAL, !std::isfinite(std_norm(i)));
-    }
-    const std::vector<double> par_samp(
-            njm::linalg::add_a_and_b(this->model_->par(),
-                    arma::conv_to<std::vector<double> >::from(
-                            var_sqrt * std_norm)));
-
-    // set new parameters
-    this->model_->par(par_samp);
-
-
-    std::vector<double> optim_par(this->features_->num_features(), 0.);
-
-    // maximize value function
-    {
-        const uint32_t num_points = this->vfn_final_t_ - history.size();
-
-        auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent<State> a(this->network_, this->features_, par, 2, false);
-            a.rng(this->rng());
-            System<State> s(this->network_, this->model_);
-            s.rng(this->rng());
-            double val = 0.0;
-            for (uint32_t i = 0; i < this->vfn_num_reps_; ++i) {
-                s.reset();
-                s.state(curr_state);
-
-                val += runner(&s, &a, num_points, 0.9);
-            }
-            val /= this->vfn_num_reps_;
-
-            // return negative since optim minimizes functions
-            return -val;
-        };
-
-        njm::optim::SimPerturb sp(f, optim_par, NULL, this->vfn_c_,
-                this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
-                this->vfn_min_step_size_);
-        sp.rng(this->rng());
-
-        njm::optim::ErrorCode ec;
-        do {
-            ec = sp.step();
-        } while (ec == njm::optim::ErrorCode::CONTINUE);
-
-        CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
-
-        optim_par = sp.par();
-    }
-
-
-    // minimize bellman residual
-    {
-
-        // find minimizing scalar for parameters
-        {
-            SweepAgent<State> a(this->network_, this->features_, optim_par,
-                    2, false);
-            a.rng(this->rng());
-
-            auto q_fn = [&](const State & state_t,
-                    const boost::dynamic_bitset<> & trt_bits_t) {
-                return njm::linalg::dot_a_and_b(optim_par,
-                        this->features_->get_features(state_t, trt_bits_t));
-            };
-
-            const std::vector<std::pair<double, double> > parts =
-                bellman_residual_parts<State>(all_history, &a, 0.9, q_fn);
-
-            const double numer = std::accumulate(parts.begin(), parts.end(),
-                    0.0, [](const double & x,
-                            const std::pair<double,double> & a) {
-                        return x - a.first * a.second;
-                    });
-
-            const double denom = std::accumulate(parts.begin(), parts.end(),
-                    0.0, [](const double & x,
-                            const std::pair<double,double> & a) {
-                        return x + a.second * a.second;
-                    });
-
-            // scale the par to minimize BR
-            if (numer > 0) {
-                // if scalor is positive
-                njm::linalg::mult_b_to_a(optim_par, numer / denom);
-            } else {
-                // other wise just make it norm one
-                njm::linalg::mult_b_to_a(optim_par,
-                        njm::linalg::l2_norm(optim_par));
-            }
-        }
-
-
-        auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent<State> a(this->network_, this->features_, par, 2, false);
-            a.rng(this->rng());
-
-            auto q_fn = [&](const State & state_t,
-                    const boost::dynamic_bitset<> & trt_bits_t) {
-                return njm::linalg::dot_a_and_b(par,
-                        this->features_->get_features(state_t, trt_bits_t));
-            };
-
-            return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
-        };
-
-        njm::optim::SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_,
-                this->br_a_, this->br_b_, this->br_ell_,
-                this->br_min_step_size_);
-        sp.rng(this->rng());
-
-        njm::optim::ErrorCode ec;
-        const uint32_t num_steps = history.size() * this->step_cap_mult_;
-        do {
-            ec = sp.step();
-        } while (ec == njm::optim::ErrorCode::CONTINUE
-                && sp.completed_steps() < num_steps);
-
-        CHECK(ec == njm::optim::ErrorCode::SUCCESS
-                || (ec == njm::optim::ErrorCode::CONTINUE
-                        && sp.completed_steps() == num_steps))
-            << "error code: " << ec;
-
-        optim_par = sp.par();
-    }
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }
 
+template <typename State>
+std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
+        const State & curr_state,
+        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<double> & starting_vals) {
+
+
+    VfnMaxSimPerturbAgent<State> vfnMaxAgent(this->network_, this->features_,
+            this->model_, this->vfn_num_reps_, this->vfn_final_t_, this->vfn_c_,
+            this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
+            this->vfn_min_step_size_);
+    vfnMaxAgent.rng(this->rng());
+    std::vector<double> vfn_par = vfnMaxAgent.train(curr_state, history,
+            starting_vals);
+
+
+    // find minimizing scalar for parameters
+    {
+        const std::vector<Transition<State> > all_history(
+                Transition<State>::from_sequence(history, curr_state));
+
+        SweepAgent<State> a(this->network_, this->features_, vfn_par,
+                2, false);
+        a.rng(this->rng());
+
+        auto q_fn = [&](const State & state_t,
+                const boost::dynamic_bitset<> & trt_bits_t) {
+                        return njm::linalg::dot_a_and_b(vfn_par,
+                                this->features_->get_features(state_t,
+                                        trt_bits_t));
+                    };
+
+        const std::vector<std::pair<double, double> > parts =
+            bellman_residual_parts<State>(all_history, &a, 0.9, q_fn);
+
+        const double numer = std::accumulate(parts.begin(), parts.end(),
+                0.0, [](const double & x,
+                        const std::pair<double,double> & a) {
+                         return x - a.first * a.second;
+                     });
+
+        const double denom = std::accumulate(parts.begin(), parts.end(),
+                0.0, [](const double & x,
+                        const std::pair<double,double> & a) {
+                         return x + a.second * a.second;
+                     });
+
+        // scale the par to minimize BR
+        if (numer > 0) {
+            // if scalor is positive
+            njm::linalg::mult_b_to_a(vfn_par, numer / denom);
+        } else {
+            // other wise just make it norm one
+            njm::linalg::mult_b_to_a(vfn_par,
+                    njm::linalg::l2_norm(vfn_par));
+        }
+    }
+
+    // cap number of steps for br min
+    const uint32_t num_steps = history.size() * this->step_cap_mult_;
+    const double min_step_size = this->br_a_ /
+        std::pow(num_steps + this->br_b_, this->br_ell_);
+    BrMinSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
+            this->br_c_, this->br_t_, this->br_a_, this->br_b_, this->br_ell_,
+            std::max(this->br_min_step_size_, min_step_size));
+    brMinAgent.rng(this->rng());
+    const std::vector<double> br_par = brMinAgent.train(curr_state, history,
+            vfn_par);
+
+    return br_par;
+}
 
 
 template<typename State>

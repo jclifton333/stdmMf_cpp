@@ -29,9 +29,8 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
         const double & ell,
         const double & min_step_size)
     : Agent<State>(network), features_(features), model_(model),
-    coef_(this->features_->num_features(), 0), num_reps_(num_reps),
-    final_t_(final_t), c_(c), t_(t), a_(a), b_(b), ell_(ell),
-    min_step_size_(min_step_size) {
+      num_reps_(num_reps), final_t_(final_t), c_(c), t_(t), a_(a), b_(b),
+      ell_(ell), min_step_size_(min_step_size) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -41,10 +40,10 @@ template <typename State>
 VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
         const VfnMaxSimPerturbAgent<State> & other)
     : Agent<State>(other),
-    features_(other.features_->clone()), model_(other.model_->clone()),
-    coef_(other.coef_), num_reps_(other.num_reps_), final_t_(other.final_t_),
-    c_(other.c_), t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
-    min_step_size_(other.min_step_size_) {
+      features_(other.features_->clone()), model_(other.model_->clone()),
+      num_reps_(other.num_reps_), final_t_(other.final_t_),
+      c_(other.c_), t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
+      min_step_size_(other.min_step_size_) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -73,6 +72,21 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     MyopicAgent<State> ma(this->network_, this->model_->clone());
         //     return ma.apply_trt(state, history);
     }
+
+    const std::vector<double> optim_par = this->train(curr_state, history,
+            std::vector<double>(this->features_->num_features(), 0.0));
+
+    SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
+    a.rng(this->rng());
+    return a.apply_trt(curr_state, history);
+}
+
+
+template <typename State>
+std::vector<double> VfnMaxSimPerturbAgent<State>::train(
+        const State & curr_state,
+        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<double> & starting_vals) {
 
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
@@ -115,27 +129,26 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
 
 
     auto f = [&](const std::vector<double> & par, void * const data) {
-        SweepAgent<State> a(this->network_, this->features_, par, 2, false);
-        a.rng(this->rng());
-        System<State> s(this->network_, this->model_);
-        s.rng(this->rng());
-        double val = 0.0;
-        for (uint32_t i = 0; i < this->num_reps_; ++i) {
-            s.reset();
-            s.state(curr_state);
+                 SweepAgent<State> a(this->network_, this->features_,
+                         par, 2, false);
+                 a.rng(this->rng());
+                 System<State> s(this->network_, this->model_);
+                 s.rng(this->rng());
+                 double val = 0.0;
+                 for (uint32_t i = 0; i < this->num_reps_; ++i) {
+                     s.reset();
+                     s.state(curr_state);
 
-            val += runner(&s, &a, num_points, 1.0);
-        }
-        val /= this->num_reps_;
+                     val += runner(&s, &a, num_points, 1.0);
+                 }
+                 val /= this->num_reps_;
 
-        // return negative since optim minimizes functions
-        return -val;
-    };
+                 // return negative since optim minimizes functions
+                 return -val;
+             };
 
-    njm::optim::SimPerturb sp(f,
-            std::vector<double>(this->features_->num_features(), 0.),
-            NULL, this->c_, this->t_, this->a_, this->b_, this->ell_,
-            this->min_step_size_);
+    njm::optim::SimPerturb sp(f, starting_vals, NULL, this->c_, this->t_,
+            this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
 
     njm::optim::ErrorCode ec;
@@ -145,17 +158,9 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
 
     CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
 
-    this->coef_ = sp.par();
-    SweepAgent<State> a(this->network_, this->features_, sp.par(), 2, false);
-    a.rng(this->rng());
-    return a.apply_trt(curr_state, history);
+    return sp.par();
 }
 
-
-template <typename State>
-std::vector<double> VfnMaxSimPerturbAgent<State>::coef() const {
-    return this->coef_;
-}
 
 
 template<typename State>

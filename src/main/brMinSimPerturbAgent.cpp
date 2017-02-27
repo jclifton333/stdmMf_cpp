@@ -54,6 +54,21 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
         return a.apply_trt(curr_state, history);
     }
 
+    const std::vector<double> optim_par = this->train(curr_state, history,
+            std::vector<double>(this->features_->num_features(), 0.0));
+
+    SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
+    a.rng(this->rng());
+    return a.apply_trt(curr_state, history);
+}
+
+
+template <typename State>
+std::vector<double> BrMinSimPerturbAgent<State>::train(
+        const State & curr_state,
+        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<double> & starting_vals) {
+
     std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
@@ -70,10 +85,8 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
         return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
     };
 
-    njm::optim::SimPerturb sp(f,
-            std::vector<double>(this->features_->num_features(), 0.),
-            NULL, this->c_, this->t_, this->a_, this->b_, this->ell_,
-            this->min_step_size_);
+    njm::optim::SimPerturb sp(f, starting_vals, NULL, this->c_, this->t_,
+            this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
 
     njm::optim::ErrorCode ec;
@@ -91,9 +104,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
         << "b: " << this->b_ << std::endl
         << "ell: " << this->min_step_size_ << std::endl;
 
-    SweepAgent<State> a(this->network_, this->features_, sp.par(), 2, false);
-    a.rng(this->rng());
-    return a.apply_trt(curr_state, history);
+    return sp.par();
 }
 
 

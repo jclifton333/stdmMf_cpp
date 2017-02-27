@@ -13,6 +13,9 @@
 #include "proximalAgent.hpp"
 #include "myopicAgent.hpp"
 
+#include "vfnMaxSimPerturbAgent.hpp"
+#include "brMinSimPerturbAgent.hpp"
+
 namespace stdmMf {
 
 
@@ -37,12 +40,12 @@ VfnBrStartSimPerturbAgent<State>::VfnBrStartSimPerturbAgent(
         const double & br_min_step_size)
 : Agent<State>(network), features_(features), model_(model),
 
-    vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
-    vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
-    vfn_min_step_size_(vfn_min_step_size),
+  vfn_num_reps_(vfn_num_reps), vfn_final_t_(vfn_final_t), vfn_c_(vfn_c),
+  vfn_t_(vfn_t), vfn_a_(vfn_a), vfn_b_(vfn_b), vfn_ell_(vfn_ell),
+  vfn_min_step_size_(vfn_min_step_size),
 
-    br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
-    br_min_step_size_(br_min_step_size) {
+  br_c_(br_c), br_t_(br_t), br_a_(br_a), br_b_(br_b), br_ell_(br_ell),
+  br_min_step_size_(br_min_step_size) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -52,16 +55,16 @@ template <typename State>
 VfnBrStartSimPerturbAgent<State>::VfnBrStartSimPerturbAgent(
         const VfnBrStartSimPerturbAgent & other)
     : Agent<State>(other), features_(other.features_->clone()),
-    model_(other.model_->clone()),
+      model_(other.model_->clone()),
 
-    vfn_num_reps_(other.vfn_num_reps_), vfn_final_t_(other.vfn_final_t_),
-    vfn_c_(other.vfn_c_), vfn_t_(other.vfn_t_), vfn_a_(other.vfn_a_),
-    vfn_b_(other.vfn_b_), vfn_ell_(other.vfn_ell_),
-    vfn_min_step_size_(other.vfn_min_step_size_),
+      vfn_num_reps_(other.vfn_num_reps_), vfn_final_t_(other.vfn_final_t_),
+      vfn_c_(other.vfn_c_), vfn_t_(other.vfn_t_), vfn_a_(other.vfn_a_),
+      vfn_b_(other.vfn_b_), vfn_ell_(other.vfn_ell_),
+      vfn_min_step_size_(other.vfn_min_step_size_),
 
-    br_c_(other.br_c_), br_t_(other.br_t_), br_a_(other.br_a_),
-    br_b_(other.br_b_), br_ell_(other.br_ell_),
-    br_min_step_size_(other.br_min_step_size_) {
+      br_c_(other.br_c_), br_t_(other.br_t_), br_a_(other.br_a_),
+      br_b_(other.br_b_), br_ell_(other.br_ell_),
+      br_min_step_size_(other.br_min_step_size_) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -87,119 +90,37 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(inf_bits, history);
     }
 
-    std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, curr_state));
-
-    // minimize bellman residual for starting values
-    std::vector<double> optim_par(this->features_->num_features(), 0.);
-    {
-
-        auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent<State> a(this->network_, this->features_, par, 2, false);
-            a.rng(this->rng());
-
-            auto q_fn = [&](const State & state_t,
-                    const boost::dynamic_bitset<> & trt_bits_t) {
-                return njm::linalg::dot_a_and_b(par,
-                        this->features_->get_features(state_t, trt_bits_t));
-            };
-
-            return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
-        };
-
-        njm::optim::SimPerturb sp(f, optim_par, NULL, this->br_c_, this->br_t_,
-                this->br_a_, this->br_b_, this->br_ell_,
-                this->br_min_step_size_);
-        sp.rng(this->rng());
-
-        njm::optim::ErrorCode ec;
-        do {
-            ec = sp.step();
-        } while (ec == njm::optim::ErrorCode::CONTINUE);
-
-        CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
-
-        optim_par = sp.par();
-    }
-
-
-    // estimate model
-    this->model_->est_par(all_history);
-
-
-    // get information matrix and take inverse sqrt
-    std::vector<double> hess = this->model_->ll_hess(all_history);
-    njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
-
-    const arma::mat hess_mat(hess.data(), this->model_->par_size(),
-            this->model_->par_size());
-    arma::mat eigvec;
-    arma::vec eigval;
-    arma::eig_sym(eigval, eigvec, hess_mat);
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        if (eigval(i) > 0.0)
-            eigval(i) = std::sqrt(1.0 / eigval(i));
-        else
-            eigval(i) = 0.0;
-    }
-    const arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
-
-    // sample new parameters
-    arma::vec std_norm(this->model_->par_size());
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        std_norm(i) = this->rng_->rnorm_01();
-        LOG_IF(FATAL, !std::isfinite(std_norm(i)));
-    }
-    const std::vector<double> par_samp(
-            njm::linalg::add_a_and_b(this->model_->par(),
-                    arma::conv_to<std::vector<double> >::from(
-                            var_sqrt * std_norm)));
-
-    // set new parameters
-    this->model_->par(par_samp);
-
-
-    // maximize value function
-    {
-        const uint32_t num_points = this->vfn_final_t_ - history.size();
-
-        auto f = [&](const std::vector<double> & par, void * const data) {
-            SweepAgent<State> a(this->network_, this->features_, par, 2, false);
-            a.rng(this->rng());
-            System<State> s(this->network_, this->model_);
-            s.rng(this->rng());
-            double val = 0.0;
-            for (uint32_t i = 0; i < this->vfn_num_reps_; ++i) {
-                s.reset();
-                s.state(curr_state);
-
-                val += runner(&s, &a, num_points, 0.9);
-            }
-            val /= this->vfn_num_reps_;
-
-            // return negative since optim minimizes functions
-            return -val;
-        };
-
-        njm::optim::SimPerturb sp(f, optim_par, NULL, this->vfn_c_,
-                this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
-                this->vfn_min_step_size_);
-        sp.rng(this->rng());
-
-        njm::optim::ErrorCode ec;
-        do {
-            ec = sp.step();
-        } while (ec == njm::optim::ErrorCode::CONTINUE);
-
-        CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
-
-        optim_par = sp.par();
-    }
-
+    const std::vector<double> optim_par = this->train(curr_state, history,
+            std::vector<double>(this->features_->num_features(), 0.0));
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
+}
+
+template <typename State>
+std::vector<double> VfnBrStartSimPerturbAgent<State>::train(
+        const State & curr_state,
+        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<double> & starting_vals) {
+
+    BrMinSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
+            this->br_c_, this->br_t_, this->br_a_, this->br_b_, this->br_ell_,
+            this->br_min_step_size_);
+    brMinAgent.rng(this->rng());
+    const std::vector<double> br_par = brMinAgent.train(curr_state, history,
+            starting_vals);
+
+
+    VfnMaxSimPerturbAgent<State> vfnMaxAgent(this->network_, this->features_,
+            this->model_, this->vfn_num_reps_, this->vfn_final_t_, this->vfn_c_,
+            this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
+            this->vfn_min_step_size_);
+    vfnMaxAgent.rng(this->rng());
+    const std::vector<double> vfn_par = vfnMaxAgent.train(curr_state, history,
+            br_par);
+
+    return vfn_par;
 }
 
 

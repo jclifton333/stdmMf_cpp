@@ -62,6 +62,11 @@ public:
             const State & state,
             const std::vector<StateAndTrt<State> > & history) override;
 
+    std::vector<double> train(
+            const State & state,
+            const std::vector<StateAndTrt<State> > & history,
+            const std::vector<double> & starting_vals);
+
     using njm::tools::RngClass::rng;
     void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };

@@ -16,7 +16,6 @@ class VfnMaxSimPerturbAgent : public Agent<State> {
 protected:
     const std::shared_ptr<Features<State> > features_;
     const std::shared_ptr<Model<State> > model_;
-    std::vector<double> coef_;
 
     const uint32_t num_reps_;
     const uint32_t final_t_;
@@ -50,7 +49,10 @@ public:
             const State & state,
             const std::vector<StateAndTrt<State> > & history) override;
 
-    std::vector<double> coef() const;
+    std::vector<double> train(
+            const State & state,
+            const std::vector<StateAndTrt<State> > & history,
+            const std::vector<double> & starting_vals);
 
     using njm::tools::RngClass::rng;
     void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
