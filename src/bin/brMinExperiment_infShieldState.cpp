@@ -220,15 +220,15 @@ int main(int argc, char *argv[]) {
         // best
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<double>({0.2})); // c
-        g->add_factor(std::vector<double>({0.35})); // t
-        g->add_factor(std::vector<double>({1.41e-3})); // a
+        g->add_factor(std::vector<double>({0.1})); // c
+        g->add_factor(std::vector<double>({0.15})); // t
+        g->add_factor(std::vector<double>({1.41})); // a
         g->add_factor(std::vector<double>({1})); // b
         g->add_factor(std::vector<double>({0.85})); // ell
-        g->add_factor(std::vector<double>({2.79e-5})); // min_step_size
-        g->add_factor(std::vector<int>({2})); // run_length
+        g->add_factor(std::vector<double>({0.00715})); // min_step_size
+        g->add_factor(std::vector<int>({1})); // run_length
         g->add_factor(std::vector<bool>({false})); // do_sweeps
-        g->add_factor(std::vector<bool>({true})); // sq_br
+        g->add_factor(std::vector<bool>({false})); // sq_br
     }
 
 
