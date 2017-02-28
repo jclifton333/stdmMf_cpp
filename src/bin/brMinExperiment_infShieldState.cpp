@@ -148,10 +148,10 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         double br = 0.0;
         if (sq_br) {
             br = sq_bellman_residual<InfShieldState>(history, &agent,
-                    0.9, q_fn);
+                    0.9, q_fn, q_fn);
         } else {
             br = bellman_residual_sq<InfShieldState>(history, &agent,
-                    0.9, q_fn);
+                    0.9, q_fn, q_fn);
         }
 
         return br;

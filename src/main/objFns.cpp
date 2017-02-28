@@ -38,9 +38,12 @@ template <typename State>
 double bellman_residual_sq(const std::vector<Transition<State> > & history,
         Agent<State> * const agent, const double gamma,
         const std::function<double(const State & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next) {
+
     const std::vector<std::pair<double, double> > parts =
-        bellman_residual_parts(history, agent, gamma, q_fn);
+        bellman_residual_parts(history, agent, gamma, q_fn, q_fn_next);
 
     const double br_sq = std::accumulate(parts.begin(), parts.end(), 0.0,
             [](const double & x, const std::pair<double, double> & a) {
@@ -50,26 +53,35 @@ double bellman_residual_sq(const std::vector<Transition<State> > & history,
 }
 
 
+
+
 template double bellman_residual_sq<InfState>(
         const std::vector<Transition<InfState> > & history,
         Agent<InfState> * const agent, const double gamma,
         const std::function<double(const InfState & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
 template double bellman_residual_sq<InfShieldState>(
         const std::vector<Transition<InfShieldState> > & history,
         Agent<InfShieldState> * const agent, const double gamma,
         const std::function<double(const InfShieldState & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
 
 template <typename State>
 double sq_bellman_residual(const std::vector<Transition<State> > & history,
         Agent<State> * const agent, const double gamma,
         const std::function<double(const State & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next) {
+
     const std::vector<std::pair<double, double> > parts =
-        bellman_residual_parts(history, agent, gamma, q_fn);
+        bellman_residual_parts(history, agent, gamma, q_fn, q_fn_next);
 
     const double tot_sq_br = std::accumulate(parts.begin(), parts.end(), 0.0,
             [](const double & x, const std::pair<double, double> & a) {
@@ -84,13 +96,17 @@ template double sq_bellman_residual<InfState>(
         const std::vector<Transition<InfState> > & history,
         Agent<InfState> * const agent, const double gamma,
         const std::function<double(const InfState & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
 template double sq_bellman_residual<InfShieldState>(
         const std::vector<Transition<InfShieldState> > & history,
         Agent<InfShieldState> * const agent, const double gamma,
         const std::function<double(const InfShieldState & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
 
 template <typename State>
@@ -98,7 +114,9 @@ std::vector<std::pair<double, double> > bellman_residual_parts(
         const std::vector<Transition<State> > & history,
         Agent<State> * const agent, const double gamma,
         const std::function<double(const State & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn) {
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next) {
     const uint32_t size = history.size();
 
     CHECK_GE(size, 1) << "need at least 1 transition";
@@ -137,14 +155,19 @@ std::vector<std::pair<double, double> > bellman_residual_parts<InfState>(
         const std::vector<Transition<InfState> > & history,
         Agent<InfState> * const agent, const double gamma,
         const std::function<double(const InfState & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
+
 
 template
 std::vector<std::pair<double, double> > bellman_residual_parts<InfShieldState>(
         const std::vector<Transition<InfShieldState> > & history,
         Agent<InfShieldState> * const agent, const double gamma,
         const std::function<double(const InfShieldState & state,
-                const boost::dynamic_bitset<> & trt_bits)> & q_fn);
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
 
 } // namespace stdmMf

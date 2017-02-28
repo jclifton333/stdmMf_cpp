@@ -205,7 +205,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
                                 state, trt_bits));
             };
             const double br = bellman_residual_sq<InfState>(
-                    history, &agent, gamma_br, q_fn);
+                    history, &agent, gamma_br, q_fn, q_fn);
 
             return br;
         };

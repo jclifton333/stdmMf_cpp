@@ -101,7 +101,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
                             state, trt_bits));
         };
         const double br = bellman_residual_sq<InfState>(history, &agent, 0.9,
-                q_fn);
+                q_fn, q_fn);
 
         return br;
     };

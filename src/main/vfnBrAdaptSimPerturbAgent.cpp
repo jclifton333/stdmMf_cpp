@@ -137,7 +137,7 @@ std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
                     };
 
         const std::vector<std::pair<double, double> > parts =
-            bellman_residual_parts<State>(all_history, &a, 0.9, q_fn);
+            bellman_residual_parts<State>(all_history, &a, 0.9, q_fn, q_fn);
 
         const double numer = std::accumulate(parts.begin(), parts.end(),
                 0.0, [](const double & x,

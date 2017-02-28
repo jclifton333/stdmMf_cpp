@@ -74,7 +74,8 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
 
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
-        SweepAgent<State> a(this->network_, this->features_, par, 2, false);
+        SweepAgent<State> a(this->network_, this->features_, par_orig,
+                2, false);
         a.rng(this->rng());
 
         auto q_fn = [&](const State & state_t,
@@ -83,7 +84,15 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
                     this->features_->get_features(state_t, trt_bits_t));
         };
 
-        return sq_bellman_residual<State>(all_history, &a, 0.9, q_fn);
+        auto q_fn_next = [&](const State & state_t,
+                const boost::dynamic_bitset<> & trt_bits_t) {
+                        return njm::linalg::dot_a_and_b(par_orig,
+                                this->features_->get_features(state_t,
+                                        trt_bits_t));
+                    };
+
+        return sq_bellman_residual<State>(all_history, &a, 0.9, q_fn,
+                q_fn_next);
     };
 
     njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
