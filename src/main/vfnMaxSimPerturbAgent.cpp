@@ -128,7 +128,8 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     const uint32_t num_points = this->final_t_ - history.size();
 
 
-    auto f = [&](const std::vector<double> & par, void * const data) {
+    auto f = [&](const std::vector<double> & par,
+            const std::vector<double> & par_orig) {
                  SweepAgent<State> a(this->network_, this->features_,
                          par, 2, false);
                  a.rng(this->rng());
@@ -147,7 +148,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
                  return -val;
              };
 
-    njm::optim::SimPerturb sp(f, starting_vals, NULL, this->c_, this->t_,
+    njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
             this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
 

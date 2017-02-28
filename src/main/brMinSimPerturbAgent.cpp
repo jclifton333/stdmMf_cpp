@@ -72,7 +72,8 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
     std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
-    auto f = [&](const std::vector<double> & par, void * const data) {
+    auto f = [&](const std::vector<double> & par,
+            const std::vector<double> & par_orig) {
         SweepAgent<State> a(this->network_, this->features_, par, 2, false);
         a.rng(this->rng());
 
@@ -85,7 +86,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
         return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
     };
 
-    njm::optim::SimPerturb sp(f, starting_vals, NULL, this->c_, this->t_,
+    njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
             this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
 

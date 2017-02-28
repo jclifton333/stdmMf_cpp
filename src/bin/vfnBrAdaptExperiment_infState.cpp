@@ -114,7 +114,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
                 new NetworkRunSymFeatures<InfState>(net, path_len));
 
         auto min_fn = [&](const std::vector<double> & par,
-                void * const data) {
+                const std::vector<double> & par_orig) {
             SweepAgent<InfState> agent(net, features, par, 2, true);
             agent.rng(rng);
             System<InfState> s(net, mod);
@@ -134,7 +134,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
         njm::optim::SimPerturb sp(min_fn, std::vector<double>(
                         features->num_features(), 0.),
-                NULL, c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn);
+                c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn);
         sp.rng(rng);
 
         njm::optim::ErrorCode ec;
@@ -194,7 +194,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
         // function for br min
         auto min_fn = [&](const std::vector<double> & par,
-                void * const data) {
+                const std::vector<double> & par_orig) {
             SweepAgent<InfState> agent(net, features, par, 2, true);
             agent.rng(rng);
 
@@ -211,7 +211,7 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         };
 
         njm::optim::SimPerturb sp(min_fn, optim_par,
-                NULL, c_br, t_br, a_br, b_br, ell_br, min_step_size_br);
+                c_br, t_br, a_br, b_br, ell_br, min_step_size_br);
         sp.rng(rng);
 
         njm::optim::ErrorCode ec;

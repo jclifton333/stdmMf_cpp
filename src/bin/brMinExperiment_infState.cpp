@@ -90,7 +90,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
 
     auto min_fn = [&](const std::vector<double> & par,
-            void * const data) {
+            const std::vector<double> & par_orig) {
         SweepAgent<InfState> agent(net, features, par, 2, true);
         agent.rng(rng);
 
@@ -108,7 +108,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 
     njm::optim::SimPerturb sp(min_fn, std::vector<double>(
                     features->num_features(), 0.),
-            NULL, c, t, a, b, ell, min_step_size);
+            c, t, a, b, ell, min_step_size);
     sp.rng(rng);
 
     njm::optim::ErrorCode ec;
