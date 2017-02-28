@@ -83,7 +83,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
                     this->features_->get_features(state_t, trt_bits_t));
         };
 
-        return bellman_residual_sq<State>(all_history, &a, 0.9, q_fn);
+        return sq_bellman_residual<State>(all_history, &a, 0.9, q_fn);
     };
 
     njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
