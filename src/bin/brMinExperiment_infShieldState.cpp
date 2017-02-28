@@ -15,6 +15,7 @@
 #include "system.hpp"
 #include "agent.hpp"
 #include "infShieldStateNoImNoSoModel.hpp"
+#include "brMinSimPerturbAgent.hpp"
 #include "networkRunSymFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "randomAgent.hpp"
@@ -40,7 +41,8 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const double & min_step_size,
         const uint32_t & run_length,
         const bool & do_sweep,
-        const bool & sq_br) {
+        const bool & gs_step,
+        const bool & sq_total_br) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->seed(seed);
 
@@ -130,58 +132,26 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         s.turn_clock();
     }
 
-    const std::vector<Transition<InfShieldState> > history(
-            Transition<InfShieldState>::from_sequence(s.history(), s.state()));
+    const InfShieldState curr_state = s.state();
 
+    BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, c, t, a, b, ell,
+            min_step_size, do_sweep, gs_step, sq_total_br);
+    brAgent.rng(rng);
 
-    auto min_fn = [&](const std::vector<double> & par,
-            const std::vector<double> & par_orig) {
-        SweepAgent<InfShieldState> agent(net, features, par, 2, do_sweep);
-        agent.rng(rng);
-
-        // q function
-        auto q_fn = [&](const InfShieldState & state,
-                const boost::dynamic_bitset<> & trt_bits) {
-            return njm::linalg::dot_a_and_b(par,features->get_features(
-                            state, trt_bits));
-        };
-        double br = 0.0;
-        if (sq_br) {
-            br = sq_bellman_residual<InfShieldState>(history, &agent,
-                    0.9, q_fn, q_fn);
-        } else {
-            br = bellman_residual_sq<InfShieldState>(history, &agent,
-                    0.9, q_fn, q_fn);
-        }
-
-        return br;
-    };
-
-    njm::optim::SimPerturb sp(min_fn, std::vector<double>(
-                    features->num_features(), 0.),
-            c, t, a, b, ell, min_step_size);
-    sp.rng(rng);
-
-    njm::optim::ErrorCode ec;
+    // start timer
     const std::chrono::time_point<std::chrono::steady_clock> tick =
         std::chrono::steady_clock::now();
 
-    do {
-        ec = sp.step();
-    } while (ec == njm::optim::ErrorCode::CONTINUE);
+    // train
+    const std::vector<double> par = brAgent.train(curr_state, s.history(),
+            std::vector<double>(features->num_features(), 0.));
 
+    // end timer
     const std::chrono::time_point<std::chrono::steady_clock> tock =
         std::chrono::steady_clock::now();
 
     const std::chrono::duration<double> elapsed = tock - tick;
 
-    CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
-        << "Failed with: c = " << c << ", t = " << t
-        << ", a = " << a << ", b = " << b << ", ell = " << ell
-        << ", min_step_size = " << min_step_size << ", completed_steps = "
-        << sp.completed_steps();
-
-    const std::vector<double> par = sp.par();
 
     SweepAgent<InfShieldState> agent(net, features, par, 2, do_sweep);
     agent.rng(rng);
@@ -194,13 +164,6 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         val += runner(&s, &agent, 100, 1.0);
     }
     val /= 50.;
-
-    // // q function
-    // auto q_fn = [&](const boost::dynamic_bitset<> & inf_bits,
-    //         const boost::dynamic_bitset<> & trt_bits) {
-    //     return dot_a_and_b(par,features->get_features(inf_bits, trt_bits));
-    // };
-    // const double br = bellman_residual_sq(history, &agent, 0.9, q_fn);
 
     r->set(std::pair<double, double>(
                     std::chrono::duration_cast<std::chrono::seconds>(
@@ -228,7 +191,8 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<double>({0.00715})); // min_step_size
         g->add_factor(std::vector<int>({1})); // run_length
         g->add_factor(std::vector<bool>({false})); // do_sweeps
-        g->add_factor(std::vector<bool>({false})); // sq_br
+        g->add_factor(std::vector<bool>({false})); // gs_step
+        g->add_factor(std::vector<bool>({false})); // sq_total_br
     }
 
 
@@ -244,7 +208,8 @@ int main(int argc, char *argv[]) {
                         {2.79e-2, 1.29e-2, 7.15e-3})); // min_step_size
         g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
-        g->add_factor(std::vector<bool>({false, true})); // sq_br
+        g->add_factor(std::vector<bool>({false, true})); // gs_step
+        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
     }
 
     {
@@ -259,7 +224,8 @@ int main(int argc, char *argv[]) {
             {2.79e-3, 1.29e-3, 7.15e-4})); // min_step_size
         g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
-        g->add_factor(std::vector<bool>({false, true})); // sq_br
+        g->add_factor(std::vector<bool>({false, true})); // gs_step
+        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
@@ -299,7 +265,9 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
             const bool do_sweep = f.at(i++).val.bool_val;
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
-            const bool sq_br = f.at(i++).val.bool_val;
+            const bool gs_step = f.at(i++).val.bool_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
+            const bool sq_total_br = f.at(i++).val.bool_val;
 
             // check number of factors
             CHECK_EQ(i, f.size());
@@ -312,7 +280,7 @@ int main(int argc, char *argv[]) {
             factors_level.push_back(level_num);
             p.service().post([=]() {
                         run_brmin(r, rep, c, t, a, b, ell, min_step_size,
-                                run_length, do_sweep, sq_br);
+                                run_length, do_sweep, gs_step, sq_total_br);
                         progress->update();
                     });
 
@@ -334,7 +302,7 @@ int main(int argc, char *argv[]) {
             njm::info::project::PROJECT_ROOT_DIR + "/data");
     njm::data::Entry & entry = tk.entry("brMinExperiment_results.txt");
     entry << "level_num, rep_num, elapsed, value, c, t, a, b, ell, "
-          << "min_step_size, run_length, do_sweep, sq_br\n";
+          << "min_step_size, run_length, do_sweep, gs_step, sq_total_br\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
         entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "

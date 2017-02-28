@@ -17,6 +17,9 @@ class BrMinSimPerturbAgent : public Agent<State> {
     const double b_;
     const double ell_;
     const double min_step_size_;
+    const bool do_sweep_;
+    const bool gs_step_;
+    const bool sq_total_br_;
 
 public:
     BrMinSimPerturbAgent(const std::shared_ptr<const Network> & network,
@@ -26,7 +29,10 @@ public:
             const double & a,
             const double & b,
             const double & ell,
-            const double & min_step_size);
+            const double & min_step_size,
+            const bool & do_sweep,
+            const bool & gs_step,
+            const bool & sq_total_br);
 
     BrMinSimPerturbAgent(const BrMinSimPerturbAgent<State> & other);
 

@@ -21,10 +21,13 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const double & a,
         const double & b,
         const double & ell,
-        const double & min_step_size)
+        const double & min_step_size,
+        const bool & do_sweep,
+        const bool & gs_step,
+        const bool & sq_total_br)
     : Agent<State>(network), features_(features),
-    c_(c), t_(t), a_(a), b_(b), ell_(ell),
-    min_step_size_(min_step_size) {
+      c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
+      do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br) {
 }
 
 
@@ -32,8 +35,10 @@ template <typename State>
 BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const BrMinSimPerturbAgent & other)
     : Agent<State>(other), features_(other.features_->clone()),
-    c_(other.c_), t_(other.t_), a_(other.a_),
-    b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_){
+      c_(other.c_), t_(other.t_), a_(other.a_),
+      b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
+      do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
+      sq_total_br_(other.sq_total_br_) {
 }
 
 
@@ -57,7 +62,8 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
     const std::vector<double> optim_par = this->train(curr_state, history,
             std::vector<double>(this->features_->num_features(), 0.0));
 
-    SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
+    SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
+            this->do_sweep_);
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }
@@ -74,26 +80,46 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
 
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
-        SweepAgent<State> a(this->network_, this->features_, par_orig,
-                2, false);
-        a.rng(this->rng());
+                 auto q_fn = [&](const State & state_t,
+                         const boost::dynamic_bitset<> & trt_bits_t) {
+                                 return njm::linalg::dot_a_and_b(par,
+                                         this->features_->get_features(state_t,
+                                                 trt_bits_t));
+                             };
 
-        auto q_fn = [&](const State & state_t,
-                const boost::dynamic_bitset<> & trt_bits_t) {
-            return njm::linalg::dot_a_and_b(par,
-                    this->features_->get_features(state_t, trt_bits_t));
-        };
+                 auto q_fn_next = [&](const State & state_t,
+                         const boost::dynamic_bitset<> & trt_bits_t) {
+                                      return njm::linalg::dot_a_and_b(par_orig,
+                                              this->features_->get_features(
+                                                      state_t, trt_bits_t));
+                                  };
 
-        auto q_fn_next = [&](const State & state_t,
-                const boost::dynamic_bitset<> & trt_bits_t) {
-                        return njm::linalg::dot_a_and_b(par_orig,
-                                this->features_->get_features(state_t,
-                                        trt_bits_t));
-                    };
-
-        return sq_bellman_residual<State>(all_history, &a, 0.9, q_fn,
-                q_fn_next);
-    };
+                 if (this->gs_step_ && this->sq_total_br_) {
+                     SweepAgent<State> a(this->network_, this->features_,
+                             par_orig, 2, this->do_sweep_);
+                     a.rng(this->rng());
+                     return sq_bellman_residual<State>(all_history, &a, 0.9,
+                             q_fn, q_fn_next);
+                 } else if (this->gs_step_) {
+                     SweepAgent<State> a(this->network_, this->features_,
+                             par_orig, 2, this->do_sweep_);
+                     a.rng(this->rng());
+                     return bellman_residual_sq<State>(all_history, &a, 0.9,
+                             q_fn, q_fn_next);
+                 } else if (this->sq_total_br_) {
+                     SweepAgent<State> a(this->network_, this->features_,
+                             par, 2, this->do_sweep_);
+                     a.rng(this->rng());
+                     return sq_bellman_residual<State>(all_history, &a, 0.9,
+                             q_fn, q_fn);
+                 } else {
+                     SweepAgent<State> a(this->network_, this->features_,
+                             par, 2, this->do_sweep_);
+                     a.rng(this->rng());
+                     return bellman_residual_sq<State>(all_history, &a, 0.9,
+                             q_fn, q_fn);
+                 }
+             };
 
     njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
             this->a_, this->b_, this->ell_, this->min_step_size_);
