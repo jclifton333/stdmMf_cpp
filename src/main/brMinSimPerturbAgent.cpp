@@ -82,7 +82,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
 
     if (all_history.size() > 10) {
         typename std::vector<Transition<State> >::iterator it =
-            all_history.end();
+            all_history.begin();
         std::advance(it, all_history.size() - 10);
         all_history.erase(all_history.begin(), it);
     }
