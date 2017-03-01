@@ -9,6 +9,8 @@
 
 #include <glog/logging.h>
 
+#include <iterator>
+
 namespace stdmMf {
 
 
@@ -79,8 +81,9 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
             Transition<State>::from_sequence(history, curr_state));
 
     if (all_history.size() > 10) {
-        all_history.erase(all_history.begin(),
-                std::advance(all_history.end(), all_history.size() - 10));
+        std::vector<Transition<State> >::iterator it = all_history.end();
+        std::advance(it, all_historys.size() - 10);
+        all_history.erase(all_history.begin(), it);
     }
 
     auto f = [&](const std::vector<double> & par,
