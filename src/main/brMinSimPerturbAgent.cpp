@@ -78,6 +78,11 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
     std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
+    if (all_history.size() > 10) {
+        all_history.erase(all_history.begin(),
+                std::advance(all_history.end(), all_history.size() - 10));
+    }
+
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
                  auto q_fn = [&](const State & state_t,
