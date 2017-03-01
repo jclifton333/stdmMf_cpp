@@ -184,7 +184,9 @@ int main(int argc, char *argv[]) {
         // best
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({5, 10, 50, 100, 500, 1000, 10000}));
+
+        g->add_factor(std::vector<int>(
+            {5, 10, 50, 100, 500, 1000, 10000})); // num_reps
         g->add_factor(std::vector<double>({0.1})); // c
         g->add_factor(std::vector<double>({0.1})); // t
         g->add_factor(std::vector<double>({1.41})); // a
