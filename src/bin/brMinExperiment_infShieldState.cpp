@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
     njm::data::Entry & entry = tk.entry("brMinExperiment_results.txt");
-    entry << "level_num, rep_num, elapsed, value, c, t, a, b, ell, "
+    entry << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
           << "min_step_size, run_length, do_sweep, gs_step, sq_total_br\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
