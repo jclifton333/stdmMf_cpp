@@ -9,6 +9,7 @@
 #include "brMinSimPerturbAgent.hpp"
 #include "vfnBrAdaptSimPerturbAgent.hpp"
 #include "vfnBrStartSimPerturbAgent.hpp"
+#include "brModSuppSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
 
@@ -436,6 +437,135 @@ run(const std::shared_ptr<Network> & net,
                 });
     }
 
+
+
+
+    // supp length 1
+    std::vector<std::shared_ptr<Result<double> > > supp_len_1_val;
+    std::vector<std::shared_ptr<Result<double> > > supp_len_1_time;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        supp_len_1_val.push_back(r_val);
+        supp_len_1_time.push_back(r_time);
+
+        pool.service().post([=]() {
+                    System<InfShieldState> s(net->clone(), mod_system->clone());
+                    s.seed(i);
+                    BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
+                            std::shared_ptr<Features<InfShieldState> >(
+                                    new NetworkRunSymFeatures<InfShieldState>(
+                                            net->clone(), 1)),
+                            mod_agents->clone(),
+                            1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
+                            false, false, false, 10);
+                    a.seed(i);
+
+                    s.start();
+
+                    std::chrono::time_point<
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
+
+                    r_val->set(runner(&s, &a, time_points, 1.0));
+
+                    std::chrono::time_point<
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
+
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
+                });
+    }
+
+
+    // supp length 2
+    std::vector<std::shared_ptr<Result<double> > > supp_len_2_val;
+    std::vector<std::shared_ptr<Result<double> > > supp_len_2_time;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        supp_len_2_val.push_back(r_val);
+        supp_len_2_time.push_back(r_time);
+
+        pool.service().post([=]() {
+                    System<InfShieldState> s(net->clone(), mod_system->clone());
+                    s.seed(i);
+                    BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
+                            std::shared_ptr<Features<InfShieldState> >(
+                                    new NetworkRunSymFeatures<InfShieldState>(
+                                            net->clone(), 2)),
+                            mod_agents->clone(),
+                            1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
+                            false, false, false, 10);
+                    a.seed(i);
+
+                    s.start();
+
+                    std::chrono::time_point<
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
+
+                    r_val->set(runner(&s, &a, time_points, 1.0));
+
+                    std::chrono::time_point<
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
+
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
+                });
+    }
+
+
+    // supp length 3
+    std::vector<std::shared_ptr<Result<double> > > supp_len_3_val;
+    std::vector<std::shared_ptr<Result<double> > > supp_len_3_time;
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        ++total_sims;
+        std::shared_ptr<Result<double> > r_val(new Result<double>);
+        std::shared_ptr<Result<double> > r_time(new Result<double>);
+        supp_len_3_val.push_back(r_val);
+        supp_len_3_time.push_back(r_time);
+
+        pool.service().post([=]() {
+                    System<InfShieldState> s(net->clone(), mod_system->clone());
+                    s.seed(i);
+                    BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
+                            std::shared_ptr<Features<InfShieldState> >(
+                                    new NetworkRunSymFeatures<InfShieldState>(
+                                            net->clone(), 3)),
+                            mod_agents->clone(),
+                            1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
+                            false, false, false, 10);
+                    a.seed(i);
+
+                    s.start();
+
+                    std::chrono::time_point<
+                        std::chrono::steady_clock> tick =
+                        std::chrono::steady_clock::now();
+
+                    r_val->set(runner(&s, &a, time_points, 1.0));
+
+                    std::chrono::time_point<
+                        std::chrono::steady_clock> tock =
+                        std::chrono::steady_clock::now();
+
+                    r_time->set(std::chrono::duration_cast<
+                            std::chrono::seconds>(tock - tick).count());
+
+                    progress->update();
+                });
+    }
+
+
     progress->total(total_sims);
 
     pool.join();
@@ -561,6 +691,42 @@ run(const std::shared_ptr<Network> & net,
             {br_len_3_stats.first,
              std::sqrt(br_len_3_stats.second / num_reps),
              mean_and_var(result_to_vec(br_len_3_time)).first};
+        all_results.push_back(std::pair<std::string, std::vector<double> >
+                (agent_name, agent_res));
+    }
+
+    {
+        const std::string agent_name = "supp_len_1";
+        const std::pair<double, double> supp_len_1_stats = mean_and_var(
+                result_to_vec(supp_len_1_val));
+        const std::vector<double> agent_res =
+            {supp_len_1_stats.first,
+             std::sqrt(supp_len_1_stats.second / num_reps),
+             mean_and_var(result_to_vec(supp_len_1_time)).first};
+        all_results.push_back(std::pair<std::string, std::vector<double> >
+                (agent_name, agent_res));
+    }
+
+    {
+        const std::string agent_name = "supp_len_2";
+        const std::pair<double, double> supp_len_2_stats = mean_and_var(
+                result_to_vec(supp_len_2_val));
+        const std::vector<double> agent_res =
+            {supp_len_2_stats.first,
+             std::sqrt(supp_len_2_stats.second / num_reps),
+             mean_and_var(result_to_vec(supp_len_2_time)).first};
+        all_results.push_back(std::pair<std::string, std::vector<double> >
+                (agent_name, agent_res));
+    }
+
+    {
+        const std::string agent_name = "supp_len_3";
+        const std::pair<double, double> supp_len_3_stats = mean_and_var(
+                result_to_vec(supp_len_3_val));
+        const std::vector<double> agent_res =
+            {supp_len_3_stats.first,
+             std::sqrt(supp_len_3_stats.second / num_reps),
+             mean_and_var(result_to_vec(supp_len_3_time)).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
