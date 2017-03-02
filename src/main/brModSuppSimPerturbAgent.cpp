@@ -118,7 +118,7 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
         }
 
         const std::vector<Transition<State> > trans_to_supp(
-                Transition<State>::from_sequence(s.history()));
+                Transition<State>::from_sequence(s.history(), s.state()));
 
         supp_history.insert(supp_history.end(), trans_to_supp.begin(),
                 trans_to_supp.end());
