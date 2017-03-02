@@ -1,11 +1,14 @@
 #include "brModSuppSimPerturbAgent.hpp"
 
+#include "sweepAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
 #include "epsAgent.hpp"
 #include "brMinSimPerturbAgent.hpp"
 
 #include "system.hpp"
+
+#include <glog/logging.h>
 
 namespace stdmMf {
 
@@ -49,7 +52,8 @@ BrModSuppSimPerturbAgent<State>::BrModSuppSimPerturbAgent(
 
 template <typename State>
 std::shared_ptr<Agent<State> > BrModSuppSimPerturbAgent<State>::clone() const {
-    return std::make_shared(new BrModSuppSimPerturbAgent<State>(*this));
+    return std::shared_ptr<Agent<State> >(
+            new BrModSuppSimPerturbAgent<State>(*this));
 }
 
 
@@ -63,7 +67,16 @@ boost::dynamic_bitset<> BrModSuppSimPerturbAgent<State>::apply_trt(
         return a.apply_trt(curr_state, history);
     }
 
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, curr_state));
 
+    const std::vector<double> optim_par = this->train(all_history,
+            std::vector<double>(this->features_->num_features(), 0.0));
+
+    SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
+            this->do_sweep_);
+    a.rng(this->rng());
+    return a.apply_trt(curr_state, history);
 }
 
 
@@ -79,7 +92,7 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
         std::advance(it, supp_history.size() - this->num_points_);
         supp_history.erase(supp_history.begin(), it);
     } else if (supp_history.size() < this->num_points_) {
-        this->model_.est_par(history);
+        this->model_->est_par(history);
         System<State> s(this->network_, this->model_);
         s.rng(this->rng());
 
@@ -89,7 +102,7 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
         pa->rng(this->rng());
         std::shared_ptr<RandomAgent<State> > ra(
                 new RandomAgent<State>(this->network_));
-        ra->rng(this->rng)();
+        ra->rng(this->rng());
         EpsAgent<State> ea(this->network_, pa, ra, 0.2);
         ea.rng(this->rng());
 
@@ -130,6 +143,10 @@ void BrModSuppSimPerturbAgent<State>::rng(
     this->model_->rng(rng);
 }
 
+
+
+template class BrModSuppSimPerturbAgent<InfState>;
+template class BrModSuppSimPerturbAgent<InfShieldState>;
 
 
 } // namespace stdmMf
