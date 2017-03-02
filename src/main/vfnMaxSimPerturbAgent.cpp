@@ -124,7 +124,8 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     this->model_->par(par_samp);
 
 
-    const uint32_t num_points = this->final_t_ - history.size() - 1;
+
+    const uint32_t num_points = this->final_t_ - history.size();
 
     const State & curr_state = history.at(history.size() - 1).next_state;
 
