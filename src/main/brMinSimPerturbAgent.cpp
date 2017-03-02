@@ -80,12 +80,12 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
     std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
-    if (all_history.size() > 10) {
-        typename std::vector<Transition<State> >::iterator it =
-            all_history.begin();
-        std::advance(it, all_history.size() - 10);
-        all_history.erase(all_history.begin(), it);
-    }
+    // if (all_history.size() > 10) {
+    //     typename std::vector<Transition<State> >::iterator it =
+    //         all_history.begin();
+    //     std::advance(it, all_history.size() - 10);
+    //     all_history.erase(all_history.begin(), it);
+    // }
 
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
