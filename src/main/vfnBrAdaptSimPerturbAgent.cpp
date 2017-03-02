@@ -94,8 +94,10 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(inf_bits, history);
     }
 
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, curr_state));
 
-    const std::vector<double> optim_par = this->train(curr_state, history,
+    const std::vector<double> optim_par = this->train(all_history,
             std::vector<double>(this->features_->num_features(), 0.0));
 
 
@@ -106,25 +108,20 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
 
 template <typename State>
 std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
-        const State & curr_state,
-        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
-
 
     VfnMaxSimPerturbAgent<State> vfnMaxAgent(this->network_, this->features_,
             this->model_, this->vfn_num_reps_, this->vfn_final_t_, this->vfn_c_,
             this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
             this->vfn_min_step_size_);
     vfnMaxAgent.rng(this->rng());
-    std::vector<double> vfn_par = vfnMaxAgent.train(curr_state, history,
+    std::vector<double> vfn_par = vfnMaxAgent.train(history,
             starting_vals);
 
 
     // find minimizing scalar for parameters
     {
-        const std::vector<Transition<State> > all_history(
-                Transition<State>::from_sequence(history, curr_state));
-
         SweepAgent<State> a(this->network_, this->features_, vfn_par,
                 2, false);
         a.rng(this->rng());
@@ -137,7 +134,7 @@ std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
                     };
 
         const std::vector<std::pair<double, double> > parts =
-            bellman_residual_parts<State>(all_history, &a, 0.9, q_fn, q_fn);
+            bellman_residual_parts<State>(history, &a, 0.9, q_fn, q_fn);
 
         const double numer = std::accumulate(parts.begin(), parts.end(),
                 0.0, [](const double & x,
@@ -171,8 +168,7 @@ std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
             std::max(this->br_min_step_size_, min_step_size),
             false, false, false);
     brMinAgent.rng(this->rng());
-    const std::vector<double> br_par = brMinAgent.train(curr_state, history,
-            vfn_par);
+    const std::vector<double> br_par = brMinAgent.train(history, vfn_par);
 
     return br_par;
 }

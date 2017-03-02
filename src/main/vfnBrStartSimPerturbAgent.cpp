@@ -90,7 +90,10 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(inf_bits, history);
     }
 
-    const std::vector<double> optim_par = this->train(curr_state, history,
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, curr_state));
+
+    const std::vector<double> optim_par = this->train(all_history,
             std::vector<double>(this->features_->num_features(), 0.0));
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
@@ -100,15 +103,14 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
 
 template <typename State>
 std::vector<double> VfnBrStartSimPerturbAgent<State>::train(
-        const State & curr_state,
-        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
 
     BrMinSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
             this->br_c_, this->br_t_, this->br_a_, this->br_b_, this->br_ell_,
             this->br_min_step_size_, false, false, false);
     brMinAgent.rng(this->rng());
-    const std::vector<double> br_par = brMinAgent.train(curr_state, history,
+    const std::vector<double> br_par = brMinAgent.train(history,
             starting_vals);
 
 
@@ -117,7 +119,7 @@ std::vector<double> VfnBrStartSimPerturbAgent<State>::train(
             this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
             this->vfn_min_step_size_);
     vfnMaxAgent.rng(this->rng());
-    const std::vector<double> vfn_par = vfnMaxAgent.train(curr_state, history,
+    const std::vector<double> vfn_par = vfnMaxAgent.train(history,
             br_par);
 
     return vfn_par;

@@ -133,7 +133,8 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         s.turn_clock();
     }
 
-    const InfShieldState curr_state = s.state();
+    const std::vector<Transition<InfShieldState> > all_history(
+            Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, c, t, a, b, ell,
             min_step_size, do_sweep, gs_step, sq_total_br);
@@ -144,7 +145,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         std::chrono::steady_clock::now();
 
     // train
-    const std::vector<double> par = brAgent.train(curr_state, s.history(),
+    const std::vector<double> par = brAgent.train(all_history,
             std::vector<double>(features->num_features(), 0.));
 
     // end timer

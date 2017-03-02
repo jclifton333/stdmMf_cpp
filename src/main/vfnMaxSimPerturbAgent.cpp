@@ -73,7 +73,10 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(state, history);
     }
 
-    const std::vector<double> optim_par = this->train(curr_state, history,
+    const std::vector<Transition<State> > & all_history(
+            Transition<State>::from_sequence(history, curr_state));
+
+    const std::vector<double> optim_par = this->train(all_history,
             std::vector<double>(this->features_->num_features(), 0.0));
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
@@ -84,18 +87,14 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
 
 template <typename State>
 std::vector<double> VfnMaxSimPerturbAgent<State>::train(
-        const State & curr_state,
-        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
 
-    const std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, curr_state));
-
-    this->model_->est_par(all_history);
+    this->model_->est_par(history);
 
     // get information matrix and take inverse sqrt
-    std::vector<double> hess = this->model_->ll_hess(all_history);
-    njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
+    std::vector<double> hess = this->model_->ll_hess(history);
+    njm::linalg::mult_b_to_a(hess, -1.0 * history.size());
 
     const arma::mat hess_mat(hess.data(), this->model_->par_size(),
             this->model_->par_size());
@@ -125,7 +124,9 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     this->model_->par(par_samp);
 
 
-    const uint32_t num_points = this->final_t_ - history.size();
+    const uint32_t num_points = this->final_t_ - history.size() - 1;
+
+    const State & curr_state = history.at(history.size() - 1).next_state;
 
 
     auto f = [&](const std::vector<double> & par,

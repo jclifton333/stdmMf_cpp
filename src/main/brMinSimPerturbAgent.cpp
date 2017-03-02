@@ -61,7 +61,10 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
         return a.apply_trt(curr_state, history);
     }
 
-    const std::vector<double> optim_par = this->train(curr_state, history,
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, curr_state));
+
+    const std::vector<double> optim_par = this->train(all_history,
             std::vector<double>(this->features_->num_features(), 0.0));
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
@@ -73,12 +76,8 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
 
 template <typename State>
 std::vector<double> BrMinSimPerturbAgent<State>::train(
-        const State & curr_state,
-        const std::vector<StateAndTrt<State> > & history,
+        const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
-
-    std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, curr_state));
 
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
@@ -100,25 +99,25 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
                      SweepAgent<State> a(this->network_, this->features_,
                              par_orig, 2, this->do_sweep_);
                      a.rng(this->rng());
-                     return sq_bellman_residual<State>(all_history, &a, 0.9,
+                     return sq_bellman_residual<State>(history, &a, 0.9,
                              q_fn, q_fn_next);
                  } else if (this->gs_step_) {
                      SweepAgent<State> a(this->network_, this->features_,
                              par_orig, 2, this->do_sweep_);
                      a.rng(this->rng());
-                     return bellman_residual_sq<State>(all_history, &a, 0.9,
+                     return bellman_residual_sq<State>(history, &a, 0.9,
                              q_fn, q_fn_next);
                  } else if (this->sq_total_br_) {
                      SweepAgent<State> a(this->network_, this->features_,
                              par, 2, this->do_sweep_);
                      a.rng(this->rng());
-                     return sq_bellman_residual<State>(all_history, &a, 0.9,
+                     return sq_bellman_residual<State>(history, &a, 0.9,
                              q_fn, q_fn);
                  } else {
                      SweepAgent<State> a(this->network_, this->features_,
                              par, 2, this->do_sweep_);
                      a.rng(this->rng());
-                     return bellman_residual_sq<State>(all_history, &a, 0.9,
+                     return bellman_residual_sq<State>(history, &a, 0.9,
                              q_fn, q_fn);
                  }
              };
