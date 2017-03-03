@@ -322,7 +322,7 @@ int main(int argc, char *argv[]) {
 
     njm::tools::Experiment e;
 
-    njm::thread::Pool p(1);
+    njm::thread::Pool p(std::thread::hardware_concurrency());
 
     std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
             new njm::tools::Progress<std::ostream>(&std::cout));
