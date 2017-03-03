@@ -130,6 +130,7 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
             this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_, this->do_sweep_, this->gs_step_,
             this->sq_total_br_);
+    brMinAgent.rng(this->rng());
 
     return brMinAgent.train(supp_history,
             std::vector<double>(this->features_->num_features(), 0.0));
