@@ -71,13 +71,6 @@ std::vector<std::vector<double> > get_orth_vectors(const uint32_t & num_vec,
     }
 
 
-    for (uint32_t i = 0; i < num_vec; ++i) {
-        for (uint32_t j = 0; j < num_vec; ++j) {
-            std::cout << njm::linalg::dot_a_and_b(orth_vectors.at(i),
-                    orth_vectors.at(j)) << std::endl;
-        }
-    }
-
     return orth_vectors;
 }
 
@@ -211,7 +204,6 @@ void generate_jitters(const uint32_t & seed,
 
 
 
-
             SweepAgent<InfShieldState> agent_b(network, features, par_b_eps, 2,
                     false);
             agent_b.rng(rng);
@@ -226,7 +218,6 @@ void generate_jitters(const uint32_t & seed,
 
             const double br_b_on_b = sq_bellman_residual<InfShieldState>(
                     history_b, & agent_b, 0.9, q_fn_b, q_fn_b);
-
 
 
 
@@ -331,9 +322,7 @@ int main(int argc, char *argv[]) {
 
     njm::tools::Experiment e;
 
-    njm::thread::Pool p(std::thread::hardware_concurrency());
-
-    e.start();
+    njm::thread::Pool p(1);
 
     std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
             new njm::tools::Progress<std::ostream>(&std::cout));
@@ -365,6 +354,7 @@ int main(int argc, char *argv[]) {
           << "br_" << num_obs_b << "_warm_on_" << num_obs_a << ", "
           << "br_" << num_obs_b << "_warm_on_" << num_obs_b << "\n";
 
+    e.start();
 
     uint32_t num_jobs = 0;
     do {
