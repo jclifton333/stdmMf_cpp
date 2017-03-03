@@ -14,7 +14,7 @@ SweepAgentSlow<State>::SweepAgentSlow(
         const std::vector<double> & coef,
         const uint32_t & max_sweeps)
     : Agent<State>(network), features_(features),
-    max_sweeps_(max_sweeps), coef_(coef) {
+    coef_(coef), max_sweeps_(max_sweeps) {
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
 
@@ -22,7 +22,7 @@ SweepAgentSlow<State>::SweepAgentSlow(
 template <typename State>
 SweepAgentSlow<State>::SweepAgentSlow(const SweepAgentSlow<State> & other)
     : Agent<State>(other), features_(other.features_->clone()),
-      max_sweeps_(other.max_sweeps_), coef_(other.coef_) {
+    coef_(other.coef_), max_sweeps_(other.max_sweeps_) {
 }
 
 
@@ -72,7 +72,6 @@ boost::dynamic_bitset<> SweepAgentSlow<State>::apply_trt(
         }
     } else {
         bool changed = true;
-        uint32_t i = 0;
         while (changed) {
             changed = this->sweep_treatments(trt_bits, best_val,
                     not_trt, has_trt, state);
