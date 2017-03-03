@@ -38,4 +38,10 @@ foreach(bin_file ${bin_file_names})
   target_link_libraries(${bin_file} stdmMf ${Boost_LIBRARIES}
     ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES}
     ${ARMADILLO_LIBRARIES} ${BLAS_LIBRARIES})
+
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
+      OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"
+      OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    target_compile_options(${bin_file} PRIVATE -Wall -Wextra)
+  endif()
 endforeach(bin_file)
