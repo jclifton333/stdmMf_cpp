@@ -29,6 +29,7 @@ SET(bin_file_names
   adaptTestMaxLikelihood_infShieldState
 
   ## extra
+  inspectBrFn
   timeSweepAgent
   timeBrMinAgent
   sandbox)
