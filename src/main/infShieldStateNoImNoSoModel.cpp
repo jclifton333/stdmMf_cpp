@@ -62,7 +62,8 @@ void InfShieldStateNoImNoSoModel::par(const std::vector<double> & par) {
 
 
 
-double InfShieldStateNoImNoSoModel::inf_b(const uint32_t & b_node, const bool & b_trt,
+double InfShieldStateNoImNoSoModel::inf_b(
+        const uint32_t & b_node, const bool & b_trt,
         const InfShieldState & state,
         const boost::dynamic_bitset<> & trt_bits) const {
     const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
@@ -82,7 +83,8 @@ double InfShieldStateNoImNoSoModel::a_inf_b(
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
 }
 
-double InfShieldStateNoImNoSoModel::rec_b(const uint32_t & b_node, const bool & b_trt,
+double InfShieldStateNoImNoSoModel::rec_b(
+        const uint32_t & b_node, const bool & b_trt,
         const InfShieldState & state,
         const boost::dynamic_bitset<> & trt_bits) const {
     const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
