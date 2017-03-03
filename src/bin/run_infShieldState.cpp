@@ -41,7 +41,9 @@ run(const std::shared_ptr<Network> & net,
         const uint32_t & time_points) {
 
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
-    njm::thread::Pool pool(std::thread::hardware_concurrency());
+    // njm::thread::Pool pool(std::thread::hardware_concurrency());
+    njm::thread::Pool pool(1);
+
 
     std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
             new njm::tools::Progress<std::ostream>(&std::cout));
@@ -203,34 +205,35 @@ run(const std::shared_ptr<Network> & net,
         supp_len_1_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 1)),
-                            mod_agents->clone(),
-                            1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
-                            false, false, false, 10);
-                    a.seed(i);
+            std::cout << "len " << 1 << " seed " << i << std::endl;
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 1)),
+                    mod_agents->clone(),
+                    1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
+                    false, false, false, 10);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -245,34 +248,35 @@ run(const std::shared_ptr<Network> & net,
         supp_len_2_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 2)),
-                            mod_agents->clone(),
-                            1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
-                            false, false, false, 10);
-                    a.seed(i);
+            std::cout << "len " << 2 << " seed " << i << std::endl;
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 2)),
+                    mod_agents->clone(),
+                    1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
+                    false, false, false, 10);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -287,34 +291,35 @@ run(const std::shared_ptr<Network> & net,
         supp_len_3_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 3)),
-                            mod_agents->clone(),
-                            1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
-                            false, false, false, 10);
-                    a.seed(i);
+            std::cout << "len " << 3 << " seed " << i << std::endl;
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 3)),
+                    mod_agents->clone(),
+                    1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
+                    false, false, false, 10);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
