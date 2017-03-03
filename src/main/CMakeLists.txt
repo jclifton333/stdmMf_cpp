@@ -43,8 +43,6 @@ add_library(stdmMf network.cpp system.cpp states.cpp
 target_link_libraries(stdmMf njm_cpp)
 
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if (COMPILE_WITH_WARNINGS)
   target_compile_options(stdmMf PRIVATE -Wall -Wextra)
 endif()

@@ -39,9 +39,7 @@ foreach(bin_file ${bin_file_names})
     ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GSL_LIBRARIES}
     ${ARMADILLO_LIBRARIES} ${BLAS_LIBRARIES})
 
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-      OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"
-      OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  if (COMPILE_WITH_WARNINGS)
     target_compile_options(${bin_file} PRIVATE -Wall -Wextra)
   endif()
 endforeach(bin_file)
