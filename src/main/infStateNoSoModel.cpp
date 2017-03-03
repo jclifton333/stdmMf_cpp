@@ -59,10 +59,6 @@ double InfStateNoSoModel::inf_b(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
-
     const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
     return 1.0 - 1.0 / (1.0 + std::exp(std::min(100.0, base)));
@@ -74,11 +70,6 @@ double InfStateNoSoModel::a_inf_b(
         const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = a_node; // ignore warning
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
-
     const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt
         + this->trt_pre_inf_ * b_trt;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
@@ -90,10 +81,6 @@ double InfStateNoSoModel::a_inf_b(
 double InfStateNoSoModel::rec_b(const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
-
     const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
@@ -105,10 +92,6 @@ std::vector<double> InfStateNoSoModel::inf_b_grad(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
-
     const double base = this->intcp_inf_latent_ + this->trt_pre_inf_ * b_trt;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
 
@@ -126,10 +109,6 @@ std::vector<double> InfStateNoSoModel::a_inf_b_grad(
         const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = a_node; // ignore warning
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
 
     const double base = this->intcp_inf_ + this->trt_act_inf_ * a_trt
         + this->trt_pre_inf_ * b_trt;
@@ -150,10 +129,6 @@ std::vector<double> InfStateNoSoModel::rec_b_grad(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
-
 
     const double base = this->intcp_rec_ + this->trt_act_rec_ * b_trt;
     LOG_IF(FATAL, !std::isfinite(base)) << "base is not finite.";
@@ -172,9 +147,6 @@ std::vector<double> InfStateNoSoModel::inf_b_hess(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
 
     const std::vector<double> inner_grad({1, 0, 0, 0, 0,
                     static_cast<double>(b_trt)});
@@ -205,10 +177,6 @@ std::vector<double> InfStateNoSoModel::a_inf_b_hess(
         const bool & a_trt, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = a_node; // ignore warning
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
 
     const std::vector<double> inner_grad({0, 1, 0, static_cast<double>(a_trt),
                     0, static_cast<double>(b_trt)});
@@ -240,9 +208,6 @@ std::vector<double> InfStateNoSoModel::rec_b_hess(
         const uint32_t & b_node, const bool & b_trt,
         const boost::dynamic_bitset<> & inf_bits,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::ignore = b_node; // ignore warning
-    std::ignore = inf_bits; // ignore warning
-    std::ignore = trt_bits; // ignore warning
 
     const std::vector<double> inner_grad({0, 0, 1, 0,
                     static_cast<double>(b_trt), 0});

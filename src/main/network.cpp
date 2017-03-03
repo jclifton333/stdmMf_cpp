@@ -127,6 +127,8 @@ std::shared_ptr<Network> Network::gen_network(
         const NetworkInit & init) {
     CHECK(init.has_type());
 
+    std::shared_ptr<Network> network(NULL);
+
     // call appropriate initializer
     switch (init.type()) {
     case NetworkInit_NetType_GRID: {
@@ -134,19 +136,21 @@ std::shared_ptr<Network> Network::gen_network(
         CHECK(init.has_dim_y()) << "grid requires y dimension";
         CHECK(init.has_wrap()) << "grid requires a wrap specification";
 
-        return Network::gen_grid(init.dim_x(),init.dim_y(),init.wrap());
+        network = Network::gen_grid(init.dim_x(),init.dim_y(),init.wrap());
         break;
     }
     case NetworkInit_NetType_BARABASI: {
         CHECK(init.has_size()) << "barabasi requires a size";
 
-        return Network::gen_barabasi(init.size());
+        network = Network::gen_barabasi(init.size());
     }
     default:
         LOG(ERROR) << "Don't know how to initialize network of type "
                    << init.type() << ".";
         break;
     }
+
+    return network;
 }
 
 
