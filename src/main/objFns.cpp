@@ -139,7 +139,7 @@ std::vector<std::pair<double, double> > bellman_residual_parts(
         // Q(S', pi(S'))
         const boost::dynamic_bitset<> agent_trt =
             agent->apply_trt(transition.next_state);
-        const double q_next = q_fn(transition.next_state, agent_trt);
+        const double q_next = q_fn_next(transition.next_state, agent_trt);
 
         parts.push_back(std::pair<double,double>(r, gamma * q_next - q_curr));
     }
