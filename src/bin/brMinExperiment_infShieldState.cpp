@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
         Experiment::FactorGroup * g = e.add_group();
 
         g->add_factor(std::vector<int>(
-            {5, 10, 50, 100, 500, 1000})); // num_reps
+            {5, 10, 50, 100})); // num_reps
         g->add_factor(std::vector<double>({0.2, 0.1, 0.05})); // c
         g->add_factor(std::vector<double>({0.05, 0.1, 0.15, 0.35})); // t
         g->add_factor(std::vector<double>({1.41e-0})); // a
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
         Experiment::FactorGroup * g = e.add_group();
 
         g->add_factor(std::vector<int>(
-            {5, 10, 50, 100, 500, 1000})); // num_reps
+            {5, 10, 50, 100})); // num_reps
         g->add_factor(std::vector<double>({0.2, 0.1, 0.05})); // c
         g->add_factor(std::vector<double>({0.05, 0.1, 0.15, 0.35})); // t
         g->add_factor(std::vector<double>({1.41e-1})); // a
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
         Experiment::FactorGroup * g = e.add_group();
 
         g->add_factor(std::vector<int>(
-            {5, 10, 50, 100, 500, 1000})); // num_reps
+            {5, 10, 50, 100})); // num_reps
         g->add_factor(std::vector<double>({0.2, 0.1, 0.05})); // c
         g->add_factor(std::vector<double>({0.05, 0.1, 0.15, 0.35})); // t
         g->add_factor(std::vector<double>({1.41e-2})); // a
