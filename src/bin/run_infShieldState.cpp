@@ -450,7 +450,6 @@ run(const std::shared_ptr<Network> & net,
         supp_len_1_time.push_back(r_time);
 
         pool.service().post([=]() {
-            std::cout << "len " << 1 << " seed " << i << std::endl;
             System<InfShieldState> s(net->clone(), mod_system->clone());
             s.seed(i);
             BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
@@ -535,7 +534,6 @@ run(const std::shared_ptr<Network> & net,
         supp_len_3_time.push_back(r_time);
 
         pool.service().post([=]() {
-            std::cout << "len " << 3 << " seed " << i << std::endl;
             System<InfShieldState> s(net->clone(), mod_system->clone());
             s.seed(i);
             BrModSuppSimPerturbAgent<InfShieldState> a(net->clone(),
