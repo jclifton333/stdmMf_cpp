@@ -141,9 +141,6 @@ std::vector<std::pair<double, double> > bellman_residual_parts(
             agent->apply_trt(transition.next_state);
         const double q_next = q_fn(transition.next_state, agent_trt);
 
-        // R + gamma * Q(S', pi(S') - Q(S, A)
-        const double br = r + gamma * q_next - q_curr;
-
         parts.push_back(std::pair<double,double>(r, gamma * q_next - q_curr));
     }
     return parts;
