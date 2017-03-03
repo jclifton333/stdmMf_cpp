@@ -54,8 +54,8 @@ Transition<State>::Transition(const State & curr_state,
       next_state(next_state) {
 }
 
-template class StateAndTrt<InfState>;
-template class StateAndTrt<InfShieldState>;
+template struct StateAndTrt<InfState>;
+template struct StateAndTrt<InfShieldState>;
 
 template <typename State>
 std::vector<Transition<State> > Transition<State>::from_sequence(
@@ -85,8 +85,8 @@ std::vector<Transition<State> > Transition<State>::from_sequence(
     return transitions;
 }
 
-template class Transition<InfState>;
-template class Transition<InfShieldState>;
+template struct Transition<InfState>;
+template struct Transition<InfShieldState>;
 
 
 
