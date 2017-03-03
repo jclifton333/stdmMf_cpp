@@ -133,7 +133,7 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
     brMinAgent.rng(this->rng());
 
     return brMinAgent.train(supp_history,
-            std::vector<double>(this->features_->num_features(), 0.0));
+            starting_vals);
 }
 
 
