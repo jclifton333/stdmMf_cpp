@@ -180,80 +180,41 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
 int main(int argc, char *argv[]) {
     Experiment e;
 
-
-    // {
-    //     // best
-    //     Experiment::FactorGroup * g = e.add_group();
-
-
-    //     g->add_factor(std::vector<int>(
-    //         {5, 10, 50, 100, 500, 1000, 10000})); // num_reps
-    //     g->add_factor(std::vector<double>({0.1})); // c
-    //     g->add_factor(std::vector<double>({0.1})); // t
-    //     g->add_factor(std::vector<double>({1.41})); // a
-    //     g->add_factor(std::vector<double>({1})); // b
-    //     g->add_factor(std::vector<double>({0.85})); // ell
-    //     g->add_factor(std::vector<double>({0.00715})); // min_step_size
-    //     g->add_factor(std::vector<int>({1, 2, 3})); // run_length
-    //     g->add_factor(std::vector<bool>({false, true})); // do_sweeps
-    //     g->add_factor(std::vector<bool>({false, true})); // gs_step
-    //     g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-    // }
-
-
     {
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>(
-            {5, 10, 50, 100})); // num_reps
-        g->add_factor(std::vector<double>({0.2, 0.1, 0.05})); // c
-        g->add_factor(std::vector<double>({0.05, 0.1, 0.15, 0.35})); // t
+        g->add_factor(std::vector<int>({5, 10, 50, 100})); // num_reps
+        g->add_factor(std::vector<double>({0.1, 0.05})); // c
+        g->add_factor(std::vector<double>({0.1, 0.35})); // t
         g->add_factor(std::vector<double>({1.41e-0})); // a
         g->add_factor(std::vector<double>({1})); // b
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
-                        {2.79e-2, 1.29e-2, 7.15e-3})); // min_step_size
+            {7.15e-3, 3.97e-3})); // min_step_size
         g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
     }
+
 
     {
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>(
-            {5, 10, 50, 100})); // num_reps
-        g->add_factor(std::vector<double>({0.2, 0.1, 0.05})); // c
-        g->add_factor(std::vector<double>({0.05, 0.1, 0.15, 0.35})); // t
-        g->add_factor(std::vector<double>({1.41e-1})); // a
+        g->add_factor(std::vector<int>({5, 10, 50, 100})); // num_reps
+        g->add_factor(std::vector<double>({0.1, 0.05})); // c
+        g->add_factor(std::vector<double>({0.1, 0.35})); // t
+        g->add_factor(std::vector<double>({5.0})); // a
         g->add_factor(std::vector<double>({1})); // b
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
-            {2.79e-3, 1.29e-3, 7.15e-4})); // min_step_size
+            {0.02535, 0.0140799})); // min_step_size
         g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
     }
 
-    {
-        Experiment::FactorGroup * g = e.add_group();
-
-        g->add_factor(std::vector<int>(
-            {5, 10, 50, 100})); // num_reps
-        g->add_factor(std::vector<double>({0.2, 0.1, 0.05})); // c
-        g->add_factor(std::vector<double>({0.05, 0.1, 0.15, 0.35})); // t
-        g->add_factor(std::vector<double>({1.41e-2})); // a
-        g->add_factor(std::vector<double>({1})); // b
-        g->add_factor(std::vector<double>({0.85})); // ell
-        g->add_factor(std::vector<double>(
-            {2.79e-4, 1.29e-4, 7.15e-5})); // min_step_size
-        g->add_factor(std::vector<int>({1, 2})); // run_length
-        g->add_factor(std::vector<bool>({false, true})); // do_sweeps
-        g->add_factor(std::vector<bool>({false, true})); // gs_step
-        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-    }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
 
