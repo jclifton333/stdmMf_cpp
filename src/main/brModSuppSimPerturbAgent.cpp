@@ -86,7 +86,7 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
         const std::vector<double> & starting_vals) {
 
     // std::vector<Transition<State> > supp_history(history);
-    std::vector<Transition<State> > supp_history();
+    std::vector<Transition<State> > supp_history;
     if (supp_history.size() > this->num_points_) {
         typename std::vector<Transition<State> >::iterator it(
                 supp_history.begin());
