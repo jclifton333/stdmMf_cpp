@@ -171,20 +171,24 @@ void generate_jitters(const uint32_t & seed,
             const std::vector<double> eps_orth_vec(
                     njm::linalg::mult_a_and_b(orth_vectors.at(j), eps));
 
+            const double norm_a = njm::linalg::l2_norm(par_a);
             const std::vector<double> par_a_eps(
                     njm::linalg::add_a_and_b(
                             njm::linalg::mult_a_and_b(par_a, 1.0 - eps),
-                            eps_orth_vec));
+                            njm::linalg::mult_a_and_b(eps_orth_vec, norm_a)));
 
+            const double norm_b = njm::linalg::l2_norm(par_b);
             const std::vector<double> par_b_eps(
                     njm::linalg::add_a_and_b(
                             njm::linalg::mult_a_and_b(par_b, 1.0 - eps),
-                            eps_orth_vec));
+                            njm::linalg::mult_a_and_b(eps_orth_vec, norm_b)));
 
+            const double norm_b_warm = njm::linalg::l2_norm(par_b_warm);
             const std::vector<double> par_b_warm_eps(
                     njm::linalg::add_a_and_b(
                             njm::linalg::mult_a_and_b(par_b_warm, 1.0 - eps),
-                            eps_orth_vec));
+                            njm::linalg::mult_a_and_b(eps_orth_vec,
+                                    norm_b_warm)));
 
 
             SweepAgent<InfShieldState> agent_a(network, features, par_a_eps, 2,
