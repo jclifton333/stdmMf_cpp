@@ -381,7 +381,7 @@ int main(int argc, char *argv[]) {
                     "inspectBrFn_results.csv");
 
             p.service().post([=]() {
-                generate_jitters(i, run_length, num_obs_a, num_obs_b, gs_step,
+                generate_jitters(rep, run_length, num_obs_a, num_obs_b, gs_step,
                         sq_total_br, eps_values, network->clone(),
                         model->clone(), new_entry);
 
