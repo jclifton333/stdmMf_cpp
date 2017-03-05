@@ -161,7 +161,8 @@ void generate_jitters(const uint32_t & seed,
 
     // generate orthonogal vectors
     const std::vector<std::vector<double> > orth_vectors(
-            get_orth_vectors(100, features->num_features()));
+            get_orth_vectors(features->num_features(),
+                    features->num_features()));
 
     // calculate objective functionn
     for (uint32_t i = 0; i < eps_values.size(); ++i) {
