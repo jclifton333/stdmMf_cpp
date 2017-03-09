@@ -20,6 +20,7 @@ class BrMinSimPerturbAgent : public Agent<State> {
     const bool do_sweep_;
     const bool gs_step_;
     const bool sq_total_br_;
+    const uint32_t num_starts_;
 
 public:
     BrMinSimPerturbAgent(const std::shared_ptr<const Network> & network,
@@ -32,7 +33,8 @@ public:
             const double & min_step_size,
             const bool & do_sweep,
             const bool & gs_step,
-            const bool & sq_total_br);
+            const bool & sq_total_br,
+            const uint32_t & num_starts);
 
     BrMinSimPerturbAgent(const BrMinSimPerturbAgent<State> & other);
 
@@ -43,6 +45,9 @@ public:
     boost::dynamic_bitset<> apply_trt(
             const State & curr_state,
             const std::vector<StateAndTrt<State> > & history) override;
+
+    std::vector<double> train(
+            const std::vector<Transition<State> > & history);
 
     std::vector<double> train(
             const std::vector<Transition<State> > & history,

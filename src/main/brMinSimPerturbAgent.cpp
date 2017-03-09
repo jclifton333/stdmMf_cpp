@@ -26,10 +26,12 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const double & min_step_size,
         const bool & do_sweep,
         const bool & gs_step,
-        const bool & sq_total_br)
+        const bool & sq_total_br,
+        const uint32_t & num_starts)
     : Agent<State>(network), features_(features),
       c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
-      do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br) {
+      do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
+      num_starts_(num_starts) {
 }
 
 
@@ -40,7 +42,7 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
       c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
       do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
-      sq_total_br_(other.sq_total_br_) {
+      sq_total_br_(other.sq_total_br_), num_starts_(other.num_starts_) {
 }
 
 
@@ -66,9 +68,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
-    // train
-    const std::vector<double> optim_par = this->train(all_history,
-            std::vector<double>(this->features_->num_features(), 0.0));
+    const std::vector<double> optim_par = this->train(all_history);
 
     // use sweep agent to determine treatment
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
@@ -76,6 +76,70 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }
+
+
+template <typename State>
+std::vector<double> BrMinSimPerturbAgent<State>::train(
+        const std::vector<Transition<State> > & history) {
+    // try multiple starts
+    double smallest_obj = std::numeric_limits<double>::infinity();
+    std::vector<double> best_optim_par(this->features_->num_features(), 0.0);
+    for (uint32_t start = 0; start < this->num_starts_; ++start) {
+        std::vector<double> starting_vals(this->features_->num_features());
+        if (start == 0) {
+            // fill with zero on first start
+            std::fill(starting_vals.begin(), starting_vals.end(), 0.0);
+        } else {
+            // fill with standard normals, then standardize to norm 1
+            std::generate(starting_vals.begin(), starting_vals.end(),
+                    [this]() {
+                        return this->rng()->rnorm_01();
+                    });
+            const double norm = njm::linalg::l2_norm(starting_vals);
+            njm::linalg::mult_b_to_a(starting_vals, 1 / norm);
+        }
+
+        const std::vector<double> optim_par = this->train(history,
+                starting_vals);
+
+
+        // setup optimization function
+        auto q_fn = [&](const State & state_t,
+                const boost::dynamic_bitset<> & trt_bits_t) {
+                        return njm::linalg::dot_a_and_b(optim_par,
+                                this->features_->get_features(state_t,
+                                        trt_bits_t));
+                    };
+
+        double obj;
+        if (this->sq_total_br_) {
+            // (E[td-error])^2
+            SweepAgent<State> a(this->network_, this->features_,
+                    optim_par, 2, this->do_sweep_);
+            a.rng(this->rng());
+            obj = sq_bellman_residual<State>(history, &a, 0.9,
+                    q_fn, q_fn);
+        } else {
+            // update all parameters
+            // E[(td-error)^2]
+            SweepAgent<State> a(this->network_, this->features_,
+                    optim_par, 2, this->do_sweep_);
+            a.rng(this->rng());
+            obj = bellman_residual_sq<State>(history, &a, 0.9,
+                    q_fn, q_fn);
+        }
+
+        // check of objective function is smaller than the current smallest
+        if (obj < smallest_obj) {
+            smallest_obj = obj;
+            best_optim_par = optim_par;
+        }
+    }
+
+    return best_optim_par;
+}
+
+
 
 
 template <typename State>
