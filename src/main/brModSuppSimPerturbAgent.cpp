@@ -70,8 +70,7 @@ boost::dynamic_bitset<> BrModSuppSimPerturbAgent<State>::apply_trt(
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
-    const std::vector<double> optim_par = this->train(all_history,
-            std::vector<double>(this->features_->num_features(), 0.0));
+    const std::vector<double> optim_par = this->train(all_history);
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
             this->do_sweep_);
@@ -82,8 +81,7 @@ boost::dynamic_bitset<> BrModSuppSimPerturbAgent<State>::apply_trt(
 
 template <typename State>
 std::vector<double> BrModSuppSimPerturbAgent<State>::train(
-        const std::vector<Transition<State> > & history,
-        const std::vector<double> & starting_vals) {
+        const std::vector<Transition<State> > & history) {
 
     // std::vector<Transition<State> > supp_history(history);
     std::vector<Transition<State> > supp_history;
@@ -130,11 +128,10 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
     BrMinSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
             this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_, this->do_sweep_, this->gs_step_,
-            this->sq_total_br_);
+            this->sq_total_br_, 1);
     brMinAgent.rng(this->rng());
 
-    return brMinAgent.train(supp_history,
-            starting_vals);
+    return brMinAgent.train(supp_history);
 }
 
 

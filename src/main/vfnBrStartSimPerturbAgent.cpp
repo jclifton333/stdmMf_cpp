@@ -108,7 +108,7 @@ std::vector<double> VfnBrStartSimPerturbAgent<State>::train(
 
     BrMinSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
             this->br_c_, this->br_t_, this->br_a_, this->br_b_, this->br_ell_,
-            this->br_min_step_size_, false, false, false);
+            this->br_min_step_size_, false, false, false, 1);
     brMinAgent.rng(this->rng());
     const std::vector<double> br_par = brMinAgent.train(history,
             starting_vals);

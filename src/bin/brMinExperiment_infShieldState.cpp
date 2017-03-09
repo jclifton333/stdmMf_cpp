@@ -43,7 +43,8 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const uint32_t & run_length,
         const bool & do_sweep,
         const bool & gs_step,
-        const bool & sq_total_br) {
+        const bool & sq_total_br,
+        const uint32_t & num_starts) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->seed(seed);
 
@@ -137,7 +138,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, c, t, a, b, ell,
-            min_step_size, do_sweep, gs_step, sq_total_br);
+            min_step_size, do_sweep, gs_step, sq_total_br, num_starts);
     brAgent.rng(rng);
 
     // start timer
@@ -145,8 +146,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         std::chrono::steady_clock::now();
 
     // train
-    const std::vector<double> par = brAgent.train(all_history,
-            std::vector<double>(features->num_features(), 0.));
+    const std::vector<double> par = brAgent.train(all_history);
 
     // end timer
     const std::chrono::time_point<std::chrono::steady_clock> tock =
@@ -195,6 +195,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
+        g->add_factor(std::vector<int>({1, 10})); // num_starts
     }
 
 
@@ -213,6 +214,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
+        g->add_factor(std::vector<int>({1, 10})); // num_starts
     }
 
 
@@ -259,6 +261,9 @@ int main(int argc, char *argv[]) {
             const bool gs_step = f.at(i++).val.bool_val;
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
             const bool sq_total_br = f.at(i++).val.bool_val;
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
+            const uint32_t num_starts = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
 
             // check number of factors
             CHECK_EQ(i, f.size());
@@ -271,7 +276,7 @@ int main(int argc, char *argv[]) {
             factors_level.push_back(level_num);
             p.service().post([=]() {
                 run_brmin(r, rep, num_reps, c, t, a, b, ell, min_step_size,
-                                run_length, do_sweep, gs_step, sq_total_br);
+                        run_length, do_sweep, gs_step, sq_total_br, num_starts);
                         progress->update();
                     });
 

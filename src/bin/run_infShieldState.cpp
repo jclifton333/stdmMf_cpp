@@ -334,7 +334,7 @@ run(const std::shared_ptr<Network> & net,
                                     new NetworkRunSymFeatures<InfShieldState>(
                                             net->clone(), 1)),
                             1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                            false, false, false);
+                            false, false, false, 1);
                     a.seed(i);
 
                     s.start();
@@ -375,7 +375,7 @@ run(const std::shared_ptr<Network> & net,
                                     new NetworkRunSymFeatures<InfShieldState>(
                                             net->clone(), 2)),
                             1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                            false, false, false);
+                            false, false, false, 1);
                     a.seed(i);
 
                     s.start();
@@ -416,7 +416,7 @@ run(const std::shared_ptr<Network> & net,
                                     new NetworkRunSymFeatures<InfShieldState>(
                                             net->clone(), 3)),
                             1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                            false, false, false);
+                            false, false, false, 1);
                     a.seed(i);
 
                     s.start();
