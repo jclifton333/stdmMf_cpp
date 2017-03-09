@@ -56,17 +56,21 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
         const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
     if (history.size() < 1) {
+        // use proximal agent when no data is available
         ProximalAgent<State> a(this->network_);
         a.rng(this->rng());
         return a.apply_trt(curr_state, history);
     }
 
+    // use transition form
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
+    // train
     const std::vector<double> optim_par = this->train(all_history,
             std::vector<double>(this->features_->num_features(), 0.0));
 
+    // use sweep agent to determine treatment
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
             this->do_sweep_);
     a.rng(this->rng());
@@ -79,8 +83,10 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
         const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
 
+    // setup optimization function
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
+                 // q function for time t
                  auto q_fn = [&](const State & state_t,
                          const boost::dynamic_bitset<> & trt_bits_t) {
                                  return njm::linalg::dot_a_and_b(par,
@@ -88,6 +94,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
                                                  trt_bits_t));
                              };
 
+                 // q function for time t + 1
                  auto q_fn_next = [&](const State & state_t,
                          const boost::dynamic_bitset<> & trt_bits_t) {
                                       return njm::linalg::dot_a_and_b(par_orig,
@@ -96,24 +103,32 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
                                   };
 
                  if (this->gs_step_ && this->sq_total_br_) {
+                     // gauss-seidel step
+                     // (E[td-error])^2
                      SweepAgent<State> a(this->network_, this->features_,
                              par_orig, 2, this->do_sweep_);
                      a.rng(this->rng());
                      return sq_bellman_residual<State>(history, &a, 0.9,
                              q_fn, q_fn_next);
                  } else if (this->gs_step_) {
+                     // gauss-seidel step
+                     // E[(td-error)^2]
                      SweepAgent<State> a(this->network_, this->features_,
                              par_orig, 2, this->do_sweep_);
                      a.rng(this->rng());
                      return bellman_residual_sq<State>(history, &a, 0.9,
                              q_fn, q_fn_next);
                  } else if (this->sq_total_br_) {
+                     // update all parameters
+                     // (E[td-error])^2
                      SweepAgent<State> a(this->network_, this->features_,
                              par, 2, this->do_sweep_);
                      a.rng(this->rng());
                      return sq_bellman_residual<State>(history, &a, 0.9,
                              q_fn, q_fn);
                  } else {
+                     // update all parameters
+                     // E[(td-error)^2]
                      SweepAgent<State> a(this->network_, this->features_,
                              par, 2, this->do_sweep_);
                      a.rng(this->rng());
@@ -122,6 +137,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
                  }
              };
 
+    // optimize
     njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
             this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
@@ -131,6 +147,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
         ec = sp.step();
     } while (ec == njm::optim::ErrorCode::CONTINUE);
 
+    // check convergence
     CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
         << std::endl
         << "seed: " << this->seed() << std::endl
