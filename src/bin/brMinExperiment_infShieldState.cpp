@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({1, 10})); // num_starts
+        g->add_factor(std::vector<int>({1})); // num_starts
     }
 
 
@@ -214,7 +214,44 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({1, 10})); // num_starts
+        g->add_factor(std::vector<int>({1})); // num_starts
+    }
+
+    {
+        Experiment::FactorGroup * g = e.add_group();
+
+        g->add_factor(std::vector<int>({5, 10, 50, 100})); // num_reps
+        g->add_factor(std::vector<double>({0.1, 0.05})); // c
+        g->add_factor(std::vector<double>({0.1, 0.35})); // t
+        g->add_factor(std::vector<double>({1.41e-0})); // a
+        g->add_factor(std::vector<double>({1})); // b
+        g->add_factor(std::vector<double>({0.85})); // ell
+        g->add_factor(std::vector<double>(
+            {0.0279, 0.0129})); // min_step_size
+        g->add_factor(std::vector<int>({1, 2})); // run_length
+        g->add_factor(std::vector<bool>({false, true})); // do_sweeps
+        g->add_factor(std::vector<bool>({false, true})); // gs_step
+        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
+        g->add_factor(std::vector<int>({10})); // num_starts
+    }
+
+
+    {
+        Experiment::FactorGroup * g = e.add_group();
+
+        g->add_factor(std::vector<int>({5, 10, 50, 100})); // num_reps
+        g->add_factor(std::vector<double>({0.1, 0.05})); // c
+        g->add_factor(std::vector<double>({0.1, 0.35})); // t
+        g->add_factor(std::vector<double>({5.0})); // a
+        g->add_factor(std::vector<double>({1})); // b
+        g->add_factor(std::vector<double>({0.85})); // ell
+        g->add_factor(std::vector<double>(
+            {0.0989, 0.0456})); // min_step_size
+        g->add_factor(std::vector<int>({1, 2})); // run_length
+        g->add_factor(std::vector<bool>({false, true})); // do_sweeps
+        g->add_factor(std::vector<bool>({false, true})); // gs_step
+        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
+        g->add_factor(std::vector<int>({10})); // num_starts
     }
 
 
