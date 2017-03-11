@@ -61,11 +61,11 @@ template <typename State>
 boost::dynamic_bitset<> BrModSuppSimPerturbAgent<State>::apply_trt(
         const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
-    if (history.size() < 1) {
-        ProximalAgent<State> a(this->network_);
-        a.rng(this->rng());
-        return a.apply_trt(curr_state, history);
-    }
+    // if (history.size() < 1) {
+    //     ProximalAgent<State> a(this->network_);
+    //     a.rng(this->rng());
+    //     return a.apply_trt(curr_state, history);
+    // }
 
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
