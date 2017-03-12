@@ -61,15 +61,14 @@ template <typename State>
 boost::dynamic_bitset<> BrModSuppSimPerturbAgent<State>::apply_trt(
         const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
-    // if (history.size() < 1) {
-    //     ProximalAgent<State> a(this->network_);
-    //     a.rng(this->rng());
-    //     return a.apply_trt(curr_state, history);
-    // }
+    if (history.size() < 1) {
+        ProximalAgent<State> a(this->network_);
+        a.rng(this->rng());
+        return a.apply_trt(curr_state, history);
+    }
 
-    // const std::vector<Transition<State> > all_history(
-    //         Transition<State>::from_sequence(history, curr_state));
-    const std::vector<Transition<State> > all_history;
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, curr_state));
 
     const std::vector<double> optim_par = this->train(all_history);
 
@@ -84,15 +83,14 @@ template <typename State>
 std::vector<double> BrModSuppSimPerturbAgent<State>::train(
         const std::vector<Transition<State> > & history) {
 
-    // std::vector<Transition<State> > supp_history(history);
-    std::vector<Transition<State> > supp_history;
+    std::vector<Transition<State> > supp_history(history);
     if (supp_history.size() > this->num_points_) {
         typename std::vector<Transition<State> >::iterator it(
                 supp_history.begin());
         std::advance(it, supp_history.size() - this->num_points_);
         supp_history.erase(supp_history.begin(), it);
     } else if (supp_history.size() < this->num_points_) {
-        // this->model_->est_par(history);
+        this->model_->est_par(history);
         System<State> s(this->network_, this->model_);
         s.rng(this->rng());
 
