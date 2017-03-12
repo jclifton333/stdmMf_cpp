@@ -67,8 +67,9 @@ boost::dynamic_bitset<> BrModSuppSimPerturbAgent<State>::apply_trt(
     //     return a.apply_trt(curr_state, history);
     // }
 
-    const std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, curr_state));
+    // const std::vector<Transition<State> > all_history(
+    //         Transition<State>::from_sequence(history, curr_state));
+    const std::vector<Transition<State> > all_history;
 
     const std::vector<double> optim_par = this->train(all_history);
 
