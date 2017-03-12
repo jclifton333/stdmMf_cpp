@@ -334,19 +334,19 @@ int main(int argc, char *argv[]) {
     CHECK_EQ(factors.size(), rep_number.size());
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
-    njm::data::Entry & entry = tk.entry("brMinExperiment_results.txt");
-    entry << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
-          << "min_step_size, run_length, do_sweep, gs_step, sq_total_br, "
-          << "obs_per_iter\n";
+    njm::data::Entry * entry = tk.entry("brMinExperiment_results.txt");
+    *entry << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
+           << "min_step_size, run_length, do_sweep, gs_step, sq_total_br, "
+           << "obs_per_iter\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
-        entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
-              << result_i.first << ", " << result_i.second;
+        *entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
+               << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);
         for (uint32_t j = 0; j < f.size(); ++j) {
-            entry << ", " << f.at(j);
+            *entry << ", " << f.at(j);
         }
-        entry << "\n";
+        *entry << "\n";
     }
 
     return 0;

@@ -285,8 +285,8 @@ int main(int argc, char *argv[]) {
 
     std::string adapt_data_str;
     google::protobuf::TextFormat::PrintToString(ad, &adapt_data_str);
-    njm::data::Entry & entry = tp->entry("adapt_data.txt");
-    entry << adapt_data_str;
+    njm::data::Entry * entry = tp->entry("adapt_data.txt");
+    *entry << adapt_data_str;
 
 
     tp->finished();

@@ -460,9 +460,9 @@ int main(int argc, char *argv[]) {
 
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
-    njm::data::Entry & results_entry = tk.entry(
+    njm::data::Entry * results_entry = tk.entry(
             "vfnBrAdaptExperiment_results.txt");
-    results_entry
+    *results_entry
         << "level_num, rep_num, elapsed, value, path_len_vfn, num_reps_vfn, "
         << "c_vfn, t_vfn, a_vfn, b_vfn, ell_vfn, min_step_size_vfn, "
         << "c_br, t_br, a_br, b_br, ell_br, min_step_size_br, step_scale_br, "
@@ -471,13 +471,13 @@ int main(int argc, char *argv[]) {
 
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
-        results_entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
-                      << result_i.first << ", " << result_i.second;
+        *results_entry << factors_level.at(i) << ", " << rep_number.at(i)
+                       << ", " << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);
         for (uint32_t j = 0; j < f.size(); ++j) {
-            results_entry << ", " << f.at(j);
+            *results_entry << ", " << f.at(j);
         }
-        results_entry << "\n";
+        *results_entry << "\n";
     }
 
     return 0;

@@ -60,28 +60,28 @@ run(const std::shared_ptr<Network> & net,
         none_time.push_back(r_time);
 
         pool.service().post([=](){
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    NoTrtAgent<InfShieldState> a(net->clone());
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            NoTrtAgent<InfShieldState> a(net->clone());
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
     // random
@@ -95,28 +95,28 @@ run(const std::shared_ptr<Network> & net,
         random_time.push_back(r_time);
 
         pool.service().post([=](){
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    RandomAgent<InfShieldState> a(net->clone());
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            RandomAgent<InfShieldState> a(net->clone());
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -131,28 +131,28 @@ run(const std::shared_ptr<Network> & net,
         proximal_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    ProximalAgent<InfShieldState> a(net->clone());
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            ProximalAgent<InfShieldState> a(net->clone());
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -167,29 +167,29 @@ run(const std::shared_ptr<Network> & net,
         myopic_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    MyopicAgent<InfShieldState> a(net->clone(),
-                            mod_agents->clone());
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            MyopicAgent<InfShieldState> a(net->clone(),
+                    mod_agents->clone());
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -204,33 +204,33 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_1_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 1)),
-                            mod_agents->clone(),
-                            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 1)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -245,33 +245,33 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_2_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 2)),
-                            mod_agents->clone(),
-                            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 2)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -286,33 +286,33 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_3_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 3)),
-                            mod_agents->clone(),
-                            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 3)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -327,33 +327,33 @@ run(const std::shared_ptr<Network> & net,
         br_len_1_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 1)),
-                            1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                            false, false, false, 1);
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 1)),
+                    1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
+                    false, false, false, 1);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -368,33 +368,33 @@ run(const std::shared_ptr<Network> & net,
         br_len_2_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 2)),
-                            1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                            false, false, false, 1);
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 2)),
+                    1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
+                    false, false, false, 1);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -409,33 +409,33 @@ run(const std::shared_ptr<Network> & net,
         br_len_3_time.push_back(r_time);
 
         pool.service().post([=]() {
-                    System<InfShieldState> s(net->clone(), mod_system->clone());
-                    s.seed(i);
-                    BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<InfShieldState>(
-                                            net->clone(), 3)),
-                            1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                            false, false, false, 1);
-                    a.seed(i);
+            System<InfShieldState> s(net->clone(), mod_system->clone());
+            s.seed(i);
+            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures<InfShieldState>(
+                                    net->clone(), 3)),
+                    1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
+                    false, false, false, 1);
+            a.seed(i);
 
-                    s.start();
+            s.start();
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tick =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-                    r_val->set(runner(&s, &a, time_points, 1.0));
+            r_val->set(runner(&s, &a, time_points, 1.0));
 
-                    std::chrono::time_point<
-                        std::chrono::steady_clock> tock =
-                        std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-                    r_time->set(std::chrono::duration_cast<
-                            std::chrono::seconds>(tock - tick).count());
+            r_time->set(std::chrono::duration_cast<
+                    std::chrono::seconds>(tock - tick).count());
 
-                    progress->update();
-                });
+            progress->update();
+        });
     }
 
 
@@ -925,19 +925,19 @@ int main(int argc, char *argv[]) {
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
 
-    njm::data::Entry & e_read_all = tk.entry("all_read.txt");
+    njm::data::Entry * e_read_all = tk.entry("all_read.txt");
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
         const std::shared_ptr<Network> & net = networks.at(i);
 
-        njm::data::Entry & e_read_net = tk.entry(net->kind() + "_read.txt");
+        njm::data::Entry * e_read_net = tk.entry(net->kind() + "_read.txt");
 
         for (uint32_t j = 0; j < models.size(); ++j) {
             ModelPair & mp(models.at(j).second.at(i));
 
-            njm::data::Entry & e_raw = tk.entry(
+            njm::data::Entry * e_raw = tk.entry(
                     net->kind() + "_" + models.at(j).first + "_raw.txt");
-            njm::data::Entry & e_read = tk.entry(
+            njm::data::Entry * e_read = tk.entry(
                     net->kind() + "_" + models.at(j).first + "_read.txt");
 
             std::vector<std::pair<std::string, std::vector<double> > >
@@ -947,25 +947,25 @@ int main(int argc, char *argv[]) {
                       << "results for network " << net->kind()
                       << " and model pair " << j << std::endl;
 
-            e_read << "=====================================" << "\n"
-                   << "results for network " << net->kind()
-                   << " and model pair " << models.at(j).first << "\n";
+            *e_read << "=====================================" << "\n"
+                    << "results for network " << net->kind()
+                    << " and model pair " << models.at(j).first << "\n";
 
-            e_read_net << "=====================================" << "\n"
-                       << "results for network " << net->kind()
-                       << " and model pair " << models.at(j).first << "\n";
+            *e_read_net << "=====================================" << "\n"
+                        << "results for network " << net->kind()
+                        << " and model pair " << models.at(j).first << "\n";
 
-            e_read_all << "=====================================" << "\n"
-                       << "results for network " << net->kind()
-                       << " and model pair " << models.at(j).first << "\n";
+            *e_read_all << "=====================================" << "\n"
+                        << "results for network " << net->kind()
+                        << " and model pair " << models.at(j).first << "\n";
 
             for (uint32_t k = 0; k < results.size(); ++k) {
-                e_raw << net->kind() << ","
-                      << models.at(j).first << ","
-                      << results.at(k).first << ","
-                      << results.at(k).second.at(0) << ","
-                      << results.at(k).second.at(1) << ","
-                      << results.at(k).second.at(2) << "\n";
+                *e_raw << net->kind() << ","
+                       << models.at(j).first << ","
+                       << results.at(k).first << ","
+                       << results.at(k).second.at(0) << ","
+                       << results.at(k).second.at(1) << ","
+                       << results.at(k).second.at(2) << "\n";
 
                 std::cout << results.at(k).first << ": "
                           << results.at(k).second.at(0) << " ("
@@ -973,22 +973,22 @@ int main(int argc, char *argv[]) {
                           << results.at(k).second.at(2) << "]"
                           << std::endl;
 
-                e_read << results.at(k).first << ": "
-                       << results.at(k).second.at(0) << " ("
-                       << results.at(k).second.at(1) << ")  ["
-                       << results.at(k).second.at(2) << "]"
-                       << "\n";
+                *e_read << results.at(k).first << ": "
+                        << results.at(k).second.at(0) << " ("
+                        << results.at(k).second.at(1) << ")  ["
+                        << results.at(k).second.at(2) << "]"
+                        << "\n";
 
-                e_read_net << results.at(k).first << ": "
-                           << results.at(k).second.at(0) << " ("
-                           << results.at(k).second.at(1) << ")  ["
-                           << results.at(k).second.at(2) << "]"
-                           << "\n";
-                e_read_all << results.at(k).first << ": "
-                           << results.at(k).second.at(0) << " ("
-                           << results.at(k).second.at(1) << ")  ["
-                           << results.at(k).second.at(2) << "]"
-                           << "\n";
+                *e_read_net << results.at(k).first << ": "
+                            << results.at(k).second.at(0) << " ("
+                            << results.at(k).second.at(1) << ")  ["
+                            << results.at(k).second.at(2) << "]"
+                            << "\n";
+                *e_read_all << results.at(k).first << ": "
+                            << results.at(k).second.at(0) << " ("
+                            << results.at(k).second.at(1) << ")  ["
+                            << results.at(k).second.at(2) << "]"
+                            << "\n";
             }
         }
     }

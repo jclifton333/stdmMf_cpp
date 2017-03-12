@@ -350,14 +350,14 @@ int main(int argc, char *argv[]) {
     const std::vector<double> eps_values({0.0, 0.1, 0.2, 0.3, 0.4, 0.5,
                                           0.6, 0.7, 0.8, 0.9, 1.0});
 
-    njm::data::Entry entry = tk->entry("inspectBrFn_results.csv");
-    entry << "seed, run_length, gs_step, sq_total_br, eps, orth_vector, "
-          << "br_" << num_obs_a << "_on_" << num_obs_a << ", "
-          << "br_" << num_obs_a << "_on_" << num_obs_b << ", "
-          << "br_" << num_obs_b << "_on_" << num_obs_a << ", "
-          << "br_" << num_obs_b << "_on_" << num_obs_b << ", "
-          << "br_" << num_obs_b << "_warm_on_" << num_obs_a << ", "
-          << "br_" << num_obs_b << "_warm_on_" << num_obs_b << "\n";
+    njm::data::Entry * entry = tk->entry("inspectBrFn_results.csv");
+    *entry << "seed, run_length, gs_step, sq_total_br, eps, orth_vector, "
+           << "br_" << num_obs_a << "_on_" << num_obs_a << ", "
+           << "br_" << num_obs_a << "_on_" << num_obs_b << ", "
+           << "br_" << num_obs_b << "_on_" << num_obs_a << ", "
+           << "br_" << num_obs_b << "_on_" << num_obs_b << ", "
+           << "br_" << num_obs_b << "_warm_on_" << num_obs_a << ", "
+           << "br_" << num_obs_b << "_warm_on_" << num_obs_b << "\n";
 
     e.start();
 
@@ -382,7 +382,7 @@ int main(int argc, char *argv[]) {
             // check number of factors
             CHECK_EQ(i, f.size());
 
-            njm::data::Entry * new_entry = & tk->entry(
+            njm::data::Entry * new_entry = tk->entry(
                     "inspectBrFn_results.csv");
 
             p.service().post([=]() {

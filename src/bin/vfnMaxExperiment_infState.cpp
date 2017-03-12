@@ -185,20 +185,20 @@ int main(int argc, char *argv[]) {
     CHECK_EQ(factors.size(), rep_number.size());
     njm::data::TrapperKeeper tk(argv[0],
             njm::info::project::PROJECT_ROOT_DIR + "/data");
-    njm::data::Entry & results_entry = tk.entry(
+    njm::data::Entry * results_entry = tk.entry(
             "vfnMaxExperiment_results.txt");
-    results_entry
+    *results_entry
         << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
         << "min_step_size\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
-        results_entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
-            << result_i.first << ", " << result_i.second;
+        *results_entry << factors_level.at(i) << ", " << rep_number.at(i)
+                       << ", " << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);
         for (uint32_t j = 0; j < f.size(); ++j) {
-            results_entry << ", " << f.at(j);
+            *results_entry << ", " << f.at(j);
         }
-        results_entry << "\n";
+        *results_entry << "\n";
     }
 
     return 0;
