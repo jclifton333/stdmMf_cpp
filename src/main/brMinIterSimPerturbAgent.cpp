@@ -100,7 +100,7 @@ std::vector<double> BrMinIterSimPerturbAgent<State>::train(
             num_obs += this->obs_per_iter_;
 
             const uint32_t num_advance =
-                std::max<unsigned long>(total_obs, num_obs);
+                std::min<unsigned long>(total_obs, num_obs);
 
             const std::vector<Transition<State> > partial_history(
                     history.begin(), history.begin() + num_advance);
