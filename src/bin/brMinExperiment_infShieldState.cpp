@@ -15,7 +15,7 @@
 #include "system.hpp"
 #include "agent.hpp"
 #include "infShieldStateNoImNoSoModel.hpp"
-#include "brMinSimPerturbAgent.hpp"
+#include "brMinIterSimPerturbAgent.hpp"
 #include "networkRunSymFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "randomAgent.hpp"
@@ -44,7 +44,7 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
         const bool & do_sweep,
         const bool & gs_step,
         const bool & sq_total_br,
-        const uint32_t & num_starts) {
+        const uint32_t & obs_per_iter) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->seed(seed);
 
@@ -137,8 +137,8 @@ void run_brmin(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     const std::vector<Transition<InfShieldState> > all_history(
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
-    BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, c, t, a, b, ell,
-            min_step_size, do_sweep, gs_step, sq_total_br, num_starts);
+    BrMinIterSimPerturbAgent<InfShieldState> brAgent(net, features, c, t, a, b,
+            ell, min_step_size, do_sweep, gs_step, sq_total_br, obs_per_iter);
     brAgent.rng(rng);
 
     // start timer
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({1})); // num_starts
+        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
     }
 
 
@@ -214,7 +214,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({1})); // num_starts
+        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
     }
 
     {
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({10})); // num_starts
+        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
     }
 
 
@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({10})); // num_starts
+        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
     }
 
 
@@ -299,7 +299,7 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_bool);
             const bool sq_total_br = f.at(i++).val.bool_val;
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
-            const uint32_t num_starts = static_cast<uint32_t>(
+            const uint32_t obs_per_iter = static_cast<uint32_t>(
                     f.at(i++).val.int_val);
 
             // check number of factors
@@ -313,7 +313,8 @@ int main(int argc, char *argv[]) {
             factors_level.push_back(level_num);
             p.service().post([=]() {
                 run_brmin(r, rep, num_reps, c, t, a, b, ell, min_step_size,
-                        run_length, do_sweep, gs_step, sq_total_br, num_starts);
+                        run_length, do_sweep, gs_step, sq_total_br,
+                        obs_per_iter);
                         progress->update();
                     });
 
@@ -336,7 +337,7 @@ int main(int argc, char *argv[]) {
     njm::data::Entry & entry = tk.entry("brMinExperiment_results.txt");
     entry << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
           << "min_step_size, run_length, do_sweep, gs_step, sq_total_br, "
-          << "num_starts\n";
+          << "obs_per_iter\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i)->get();
         entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
