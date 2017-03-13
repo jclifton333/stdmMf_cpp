@@ -33,12 +33,36 @@ using namespace stdmMf;
 using njm::data::Result;
 using njm::tools::mean_and_var;
 
+
+std::string history_to_csv_entry(const uint32_t & num_nodes,
+        const std::string & agent, const uint32_t & rep,
+        const std::vector<StateAndTrt<InfState> > & history) {
+    const uint32_t num_points = history.size();
+    std::stringstream ss;
+    for (uint32_t i = 0; i < num_points; ++i) {
+
+        const InfState & state(history.at(i).state);
+        const boost::dynamic_bitset<> & trt_bits(history.at(i).trt_bits);
+
+        for (uint32_t j = 0; j < num_nodes; ++j) {
+            const uint32_t j_inf(static_cast<uint32_t>(state.inf_bits.test(j)));
+            const uint32_t j_trt(static_cast<uint32_t>(trt_bits.test(j)));
+
+            ss << agent << ", " << rep << ", "
+               << i << ", " << j << ", " << j_inf << ", " << j_trt << "\n";
+        }
+    }
+    return ss.str();
+}
+
+
 std::vector<std::pair<std::string, std::vector<double> > >
 run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model<InfState> > & mod_system,
         const std::shared_ptr<Model<InfState> > & mod_agents,
         const uint32_t & num_reps,
-        const uint32_t & time_points) {
+        const uint32_t & time_points,
+        njm::data::Entry * const entry) {
 
     // Pool pool(std::min(num_reps, std::thread::hardware_concurrency()));
     njm::thread::Pool pool(std::thread::hardware_concurrency());
@@ -79,6 +103,12 @@ run(const std::shared_ptr<Network> & net,
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "none", i, history);
+
             progress->update();
         });
     }
@@ -113,6 +143,13 @@ run(const std::shared_ptr<Network> & net,
 
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
+
+
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "random", i, history);
 
             progress->update();
         });
@@ -150,6 +187,13 @@ run(const std::shared_ptr<Network> & net,
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "proximal", i, history);
+
+
             progress->update();
         });
     }
@@ -185,6 +229,13 @@ run(const std::shared_ptr<Network> & net,
 
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
+
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "myopic", i, history);
+
 
             progress->update();
         });
@@ -227,6 +278,14 @@ run(const std::shared_ptr<Network> & net,
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "vfn_len_1", i,
+                    history);
+
+
             progress->update();
         });
     }
@@ -267,6 +326,14 @@ run(const std::shared_ptr<Network> & net,
 
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
+
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "vfn_len_2", i,
+                    history);
+
 
             progress->update();
         });
@@ -309,6 +376,14 @@ run(const std::shared_ptr<Network> & net,
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "vfn_len_3", i,
+                    history);
+
+
             progress->update();
         });
     }
@@ -349,6 +424,14 @@ run(const std::shared_ptr<Network> & net,
 
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
+
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "br_len_1", i,
+                    history);
+
 
             progress->update();
         });
@@ -391,6 +474,14 @@ run(const std::shared_ptr<Network> & net,
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "br_len_2", i,
+                    history);
+
+
             progress->update();
         });
     }
@@ -431,6 +522,14 @@ run(const std::shared_ptr<Network> & net,
 
             r_time->set(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
+
+            // write history to csv
+            std::vector<StateAndTrt<InfState> > history(s.history());
+            history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+            *entry << history_to_csv_entry(net->size(), "br_len_3", i,
+                    history);
+
 
             progress->update();
         });
@@ -951,8 +1050,14 @@ int main(int argc, char *argv[]) {
             njm::data::Entry * e_read = tk.entry(
                     net->kind() + "_" + models.at(j).first + "_read.txt");
 
+            njm::data::Entry * e_history = tk.entry(
+                    "history_" + net->kind() + "_" + models.at(j).first
+                    + ".txt");
+            *e_history << "agent, rep, time, node, inf, trt\n";
+
             std::vector<std::pair<std::string, std::vector<double> > >
-                results = run(net, mp.first, mp.second, num_reps, time_points);
+                results = run(net, mp.first, mp.second, num_reps, time_points,
+                        e_history);
 
             std::cout << "=====================================" << std::endl
                       << "results for network " << net->kind()
