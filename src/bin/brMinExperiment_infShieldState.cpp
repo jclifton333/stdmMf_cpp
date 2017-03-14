@@ -15,7 +15,7 @@
 
 #include "system.hpp"
 #include "agent.hpp"
-#include "infShieldStatePosImNoSoModel.hpp"
+#include "infShieldStateNoImNoSoModel.hpp"
 #include "brMinIterSimPerturbAgent.hpp"
 #include "networkRunSymFeatures.hpp"
 #include "sweepAgent.hpp"
@@ -58,7 +58,7 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
 
     // model
     std::shared_ptr<Model<InfShieldState> > mod(
-            new InfShieldStatePosImNoSoModel(net));
+            new InfShieldStateNoImNoSoModel(net));
     mod->rng(rng);
 
     {
