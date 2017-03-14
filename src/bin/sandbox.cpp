@@ -14,7 +14,6 @@
 
 #include "objFns.hpp"
 
-#include <njm_cpp/data/result.hpp>
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include <njm_cpp/thread/pool.hpp>
@@ -29,7 +28,6 @@
 
 using namespace stdmMf;
 
-using njm::data::Result;
 using njm::tools::mean_and_var;
 
 void run(const std::shared_ptr<Network> & net,

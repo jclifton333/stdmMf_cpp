@@ -4,11 +4,11 @@
 #include <thread>
 
 #include <njm_cpp/data/trapperKeeper.hpp>
-#include <njm_cpp/data/result.hpp>
 #include <njm_cpp/thread/pool.hpp>
 #include <njm_cpp/info/project.hpp>
 #include <njm_cpp/optim/simPerturb.hpp>
 #include <njm_cpp/tools/experiment.hpp>
+#include <future>
 
 #include "system.hpp"
 #include "agent.hpp"
@@ -19,12 +19,10 @@
 
 using namespace stdmMf;
 
-using njm::data::Result;
 using njm::tools::Rng;
 using njm::tools::Experiment;
 
-void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
-        const uint32_t & seed,
+std::pair<double, double> run_vmax(const uint32_t & seed,
         const int & num_reps,
         const double & c,
         const double & t,
@@ -106,10 +104,10 @@ void run_vmax(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     }
     val /= 50.;
 
-    r->set(std::pair<double, double>(
-                    std::chrono::duration_cast<std::chrono::seconds>(
-                            elapsed).count(),
-                    val));
+    return std::pair<double, double>(
+            std::chrono::duration_cast<std::chrono::seconds>(
+                    elapsed).count(),
+            val);
 }
 
 
@@ -137,7 +135,9 @@ int main(int argc, char *argv[]) {
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
 
-    std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
+    typedef std::packaged_task<std::pair<double, double>()> package_type;
+
+    std::vector<std::future<std::pair<double, double> > > results;
     std::vector<Experiment::Factor> factors;
     std::vector<uint32_t> factors_level;
     std::vector<uint32_t> rep_number;
@@ -165,14 +165,15 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_double);
             const double min_step_size = f.at(i++).val.double_val;
 
-            std::shared_ptr<Result<std::pair<double, double> > >
-                r(new Result<std::pair<double, double> >);
-            results.push_back(r);
+            std::shared_ptr<package_type> task(new package_type(
+                            std::bind(&run_vmax, rep, num_reps, c, t, a, b,
+                                    ell, min_step_size)));
+
+            results.push_back(task->get_future());
             factors.push_back(f);
             rep_number.push_back(rep);
             factors_level.push_back(level_num);
-            p.service().post(std::bind(&run_vmax, r, rep, num_reps, c, t, a, b,
-                            ell, min_step_size));
+            p.service().post(std::bind(&package_type::operator(), task));
         }
 
         ++level_num;
@@ -191,7 +192,7 @@ int main(int argc, char *argv[]) {
         << "level_num, rep_num, elapsed, value, num_reps, c, t, a, b, ell, "
         << "min_step_size\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
-        const std::pair<double, double> result_i = results.at(i)->get();
+        const std::pair<double, double> result_i = results.at(i).get();
         *results_entry << factors_level.at(i) << ", " << rep_number.at(i)
                        << ", " << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);

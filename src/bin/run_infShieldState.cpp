@@ -15,7 +15,6 @@
 
 #include "objFns.hpp"
 
-#include <njm_cpp/data/result.hpp>
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include <njm_cpp/thread/pool.hpp>
@@ -24,13 +23,14 @@
 
 #include <njm_cpp/tools/progress.hpp>
 
+#include <future>
+
 #include <thread>
 
 #include <fstream>
 
 using namespace stdmMf;
 
-using njm::data::Result;
 using njm::tools::mean_and_var;
 
 
@@ -75,14 +75,18 @@ run(const std::shared_ptr<Network> & net,
     uint32_t total_sims = 0;
 
     // none
-    std::vector<std::shared_ptr<Result<double> > > none_val;
-    std::vector<std::shared_ptr<Result<double> > > none_time;
+    std::vector<std::future<double> > none_val;
+    std::vector<std::future<double> > none_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        none_val.push_back(r_val);
-        none_time.push_back(r_time);
+
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        none_val.push_back(promise_val->get_future());
+        none_time.push_back(promise_val->get_future());
 
         pool.service().post([=](){
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -96,13 +100,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -116,14 +120,17 @@ run(const std::shared_ptr<Network> & net,
     }
 
     // random
-    std::vector<std::shared_ptr<Result<double> > > random_val;
-    std::vector<std::shared_ptr<Result<double> > > random_time;
+    std::vector<std::future<double> > random_val;
+    std::vector<std::future<double> > random_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        random_val.push_back(r_val);
-        random_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        random_val.push_back(promise_val->get_future());
+        random_time.push_back(promise_time->get_future());
 
         pool.service().post([=](){
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -137,13 +144,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -159,14 +166,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // proximal
-    std::vector<std::shared_ptr<Result<double> > > proximal_val;
-    std::vector<std::shared_ptr<Result<double> > > proximal_time;
+    std::vector<std::future<double> > proximal_val;
+    std::vector<std::future<double> > proximal_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        proximal_val.push_back(r_val);
-        proximal_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        proximal_val.push_back(promise_val->get_future());
+        proximal_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -180,13 +190,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -202,14 +212,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // myopic
-    std::vector<std::shared_ptr<Result<double> > > myopic_val;
-    std::vector<std::shared_ptr<Result<double> > > myopic_time;
+    std::vector<std::future<double> > myopic_val;
+    std::vector<std::future<double> > myopic_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        myopic_val.push_back(r_val);
-        myopic_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        myopic_val.push_back(promise_val->get_future());
+        myopic_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -224,13 +237,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -246,14 +259,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // vfn max length 1
-    std::vector<std::shared_ptr<Result<double> > > vfn_len_1_val;
-    std::vector<std::shared_ptr<Result<double> > > vfn_len_1_time;
+    std::vector<std::future<double> > vfn_len_1_val;
+    std::vector<std::future<double> > vfn_len_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        vfn_len_1_val.push_back(r_val);
-        vfn_len_1_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        vfn_len_1_val.push_back(promise_val->get_future());
+        vfn_len_1_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -272,13 +288,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -294,14 +310,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // vfn max length 2
-    std::vector<std::shared_ptr<Result<double> > > vfn_len_2_val;
-    std::vector<std::shared_ptr<Result<double> > > vfn_len_2_time;
+    std::vector<std::future<double> > vfn_len_2_val;
+    std::vector<std::future<double> > vfn_len_2_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        vfn_len_2_val.push_back(r_val);
-        vfn_len_2_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        vfn_len_2_val.push_back(promise_val->get_future());
+        vfn_len_2_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -320,13 +339,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -343,14 +362,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // vfn max length 3
-    std::vector<std::shared_ptr<Result<double> > > vfn_len_3_val;
-    std::vector<std::shared_ptr<Result<double> > > vfn_len_3_time;
+    std::vector<std::future<double> > vfn_len_3_val;
+    std::vector<std::future<double> > vfn_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        vfn_len_3_val.push_back(r_val);
-        vfn_len_3_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        vfn_len_3_val.push_back(promise_val->get_future());
+        vfn_len_3_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -369,13 +391,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -392,14 +414,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // br min length 1
-    std::vector<std::shared_ptr<Result<double> > > br_len_1_val;
-    std::vector<std::shared_ptr<Result<double> > > br_len_1_time;
+    std::vector<std::future<double> > br_len_1_val;
+    std::vector<std::future<double> > br_len_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        br_len_1_val.push_back(r_val);
-        br_len_1_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        br_len_1_val.push_back(promise_val->get_future());
+        br_len_1_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -418,13 +443,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -441,14 +466,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // br min length 2
-    std::vector<std::shared_ptr<Result<double> > > br_len_2_val;
-    std::vector<std::shared_ptr<Result<double> > > br_len_2_time;
+    std::vector<std::future<double> > br_len_2_val;
+    std::vector<std::future<double> > br_len_2_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        br_len_2_val.push_back(r_val);
-        br_len_2_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        br_len_2_val.push_back(promise_val->get_future());
+        br_len_2_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -467,13 +495,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -490,14 +518,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // br min length 3
-    std::vector<std::shared_ptr<Result<double> > > br_len_3_val;
-    std::vector<std::shared_ptr<Result<double> > > br_len_3_time;
+    std::vector<std::future<double> > br_len_3_val;
+    std::vector<std::future<double> > br_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        br_len_3_val.push_back(r_val);
-        br_len_3_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        br_len_3_val.push_back(promise_val->get_future());
+        br_len_3_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -516,13 +547,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -539,14 +570,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // supp length 1
-    std::vector<std::shared_ptr<Result<double> > > supp_len_1_val;
-    std::vector<std::shared_ptr<Result<double> > > supp_len_1_time;
+    std::vector<std::future<double> > supp_len_1_val;
+    std::vector<std::future<double> > supp_len_1_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        supp_len_1_val.push_back(r_val);
-        supp_len_1_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        supp_len_1_val.push_back(promise_val->get_future());
+        supp_len_1_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -566,13 +600,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -589,14 +623,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // supp length 2
-    std::vector<std::shared_ptr<Result<double> > > supp_len_2_val;
-    std::vector<std::shared_ptr<Result<double> > > supp_len_2_time;
+    std::vector<std::future<double> > supp_len_2_val;
+    std::vector<std::future<double> > supp_len_2_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        supp_len_2_val.push_back(r_val);
-        supp_len_2_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        supp_len_2_val.push_back(promise_val->get_future());
+        supp_len_2_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -616,13 +653,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -639,14 +676,17 @@ run(const std::shared_ptr<Network> & net,
 
 
     // supp length 3
-    std::vector<std::shared_ptr<Result<double> > > supp_len_3_val;
-    std::vector<std::shared_ptr<Result<double> > > supp_len_3_time;
+    std::vector<std::future<double> > supp_len_3_val;
+    std::vector<std::future<double> > supp_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
-        std::shared_ptr<Result<double> > r_val(new Result<double>);
-        std::shared_ptr<Result<double> > r_time(new Result<double>);
-        supp_len_3_val.push_back(r_val);
-        supp_len_3_time.push_back(r_time);
+        std::shared_ptr<std::promise<double> > promise_val(
+                new std::promise<double>);
+        std::shared_ptr<std::promise<double> > promise_time(
+                new std::promise<double>);
+
+        supp_len_3_val.push_back(promise_val->get_future());
+        supp_len_3_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
@@ -666,13 +706,13 @@ run(const std::shared_ptr<Network> & net,
                 std::chrono::steady_clock> tick =
                 std::chrono::steady_clock::now();
 
-            r_val->set(runner(&s, &a, time_points, 1.0));
+            promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
             std::chrono::time_point<
                 std::chrono::steady_clock> tock =
                 std::chrono::steady_clock::now();
 
-            r_time->set(std::chrono::duration_cast<
+            promise_time->set_value(std::chrono::duration_cast<
                     std::chrono::seconds>(tock - tick).count());
 
             // write history to csv
@@ -699,156 +739,299 @@ run(const std::shared_ptr<Network> & net,
 
     {
         const std::string agent_name = "none";
-        const std::pair<double, double> none_stats = mean_and_var(
-                result_to_vec(none_val));
+        std::vector<double> val(num_reps);
+        std::transform(none_val.begin(), none_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(none_time.begin(), none_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> none_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {none_stats.first,
              std::sqrt(none_stats.second / num_reps),
-             mean_and_var(result_to_vec(none_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "random";
-        const std::pair<double, double> random_stats = mean_and_var(
-                result_to_vec(random_val));
+        std::vector<double> val(num_reps);
+        std::transform(random_val.begin(), random_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(random_time.begin(), random_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> random_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {random_stats.first,
              std::sqrt(random_stats.second / num_reps),
-             mean_and_var(result_to_vec(random_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "proximal";
-        const std::pair<double, double> proximal_stats = mean_and_var(
-                result_to_vec(proximal_val));
+        std::vector<double> val(num_reps);
+        std::transform(proximal_val.begin(), proximal_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(proximal_time.begin(), proximal_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> proximal_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {proximal_stats.first,
              std::sqrt(proximal_stats.second / num_reps),
-             mean_and_var(result_to_vec(proximal_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "myopic";
-        const std::pair<double, double> myopic_stats = mean_and_var(
-                result_to_vec(myopic_val));
+        std::vector<double> val(num_reps);
+        std::transform(myopic_val.begin(), myopic_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(myopic_time.begin(), myopic_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> myopic_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {myopic_stats.first,
              std::sqrt(myopic_stats.second / num_reps),
-             mean_and_var(result_to_vec(myopic_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "vfn_len_1";
-        const std::pair<double, double> vfn_len_1_stats = mean_and_var(
-                result_to_vec(vfn_len_1_val));
+        std::vector<double> val(num_reps);
+        std::transform(vfn_len_1_val.begin(), vfn_len_1_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(vfn_len_1_time.begin(), vfn_len_1_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> vfn_len_1_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {vfn_len_1_stats.first,
              std::sqrt(vfn_len_1_stats.second / num_reps),
-             mean_and_var(result_to_vec(vfn_len_1_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "vfn_len_2";
-        const std::pair<double, double> vfn_len_2_stats = mean_and_var(
-                result_to_vec(vfn_len_2_val));
+        std::vector<double> val(num_reps);
+        std::transform(vfn_len_2_val.begin(), vfn_len_2_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(vfn_len_2_time.begin(), vfn_len_2_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> vfn_len_2_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {vfn_len_2_stats.first,
              std::sqrt(vfn_len_2_stats.second / num_reps),
-             mean_and_var(result_to_vec(vfn_len_2_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "vfn_len_3";
-        const std::pair<double, double> vfn_len_3_stats = mean_and_var(
-                result_to_vec(vfn_len_3_val));
+        std::vector<double> val(num_reps);
+        std::transform(vfn_len_3_val.begin(), vfn_len_3_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(vfn_len_3_time.begin(), vfn_len_3_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> vfn_len_3_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {vfn_len_3_stats.first,
              std::sqrt(vfn_len_3_stats.second / num_reps),
-             mean_and_var(result_to_vec(vfn_len_3_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "br_len_1";
-        const std::pair<double, double> br_len_1_stats = mean_and_var(
-                result_to_vec(br_len_1_val));
+        std::vector<double> val(num_reps);
+        std::transform(br_len_1_val.begin(), br_len_1_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(br_len_1_time.begin(), br_len_1_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> br_len_1_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {br_len_1_stats.first,
              std::sqrt(br_len_1_stats.second / num_reps),
-             mean_and_var(result_to_vec(br_len_1_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "br_len_2";
-        const std::pair<double, double> br_len_2_stats = mean_and_var(
-                result_to_vec(br_len_2_val));
+        std::vector<double> val(num_reps);
+        std::transform(br_len_2_val.begin(), br_len_2_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(br_len_2_time.begin(), br_len_2_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> br_len_2_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {br_len_2_stats.first,
              std::sqrt(br_len_2_stats.second / num_reps),
-             mean_and_var(result_to_vec(br_len_2_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "br_len_3";
-        const std::pair<double, double> br_len_3_stats = mean_and_var(
-                result_to_vec(br_len_3_val));
+        std::vector<double> val(num_reps);
+        std::transform(br_len_3_val.begin(), br_len_3_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(br_len_3_time.begin(), br_len_3_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> br_len_3_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {br_len_3_stats.first,
              std::sqrt(br_len_3_stats.second / num_reps),
-             mean_and_var(result_to_vec(br_len_3_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "supp_len_1";
-        const std::pair<double, double> supp_len_1_stats = mean_and_var(
-                result_to_vec(supp_len_1_val));
+        std::vector<double> val(num_reps);
+        std::transform(supp_len_1_val.begin(), supp_len_1_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(supp_len_1_time.begin(), supp_len_1_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> supp_len_1_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {supp_len_1_stats.first,
              std::sqrt(supp_len_1_stats.second / num_reps),
-             mean_and_var(result_to_vec(supp_len_1_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "supp_len_2";
-        const std::pair<double, double> supp_len_2_stats = mean_and_var(
-                result_to_vec(supp_len_2_val));
+        std::vector<double> val(num_reps);
+        std::transform(supp_len_2_val.begin(), supp_len_2_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(supp_len_2_time.begin(), supp_len_2_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> supp_len_2_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {supp_len_2_stats.first,
              std::sqrt(supp_len_2_stats.second / num_reps),
-             mean_and_var(result_to_vec(supp_len_2_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
 
     {
         const std::string agent_name = "supp_len_3";
-        const std::pair<double, double> supp_len_3_stats = mean_and_var(
-                result_to_vec(supp_len_3_val));
+        std::vector<double> val(num_reps);
+        std::transform(supp_len_3_val.begin(), supp_len_3_val.end(),
+                val.begin(), val.begin(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        std::vector<double> time(num_reps);
+        std::transform(supp_len_3_time.begin(), supp_len_3_time.end(),
+                time.begin(), time.end(),
+                [](std::future<double> & a, const double & b) {
+                    return a.get();
+                });
+        const std::pair<double, double> supp_len_3_stats = mean_and_var(val);
         const std::vector<double> agent_res =
             {supp_len_3_stats.first,
              std::sqrt(supp_len_3_stats.second / num_reps),
-             mean_and_var(result_to_vec(supp_len_3_time)).first};
+             mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }

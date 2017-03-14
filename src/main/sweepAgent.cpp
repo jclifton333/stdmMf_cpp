@@ -5,13 +5,11 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <njm_cpp/data/result.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
+#include <future>
 #include "sweepAgent.hpp"
 
 namespace stdmMf {
-
-using njm::data::Result;
 
 template <typename State>
 SweepAgent<State>::SweepAgent(const std::shared_ptr<const Network> & network,
@@ -210,10 +208,8 @@ void SweepAgent<State>::set_new_treatment_parallel(
     std::condition_variable cv;
 
     auto fn = [this, &feat, &state, &trt_bits, &trt_bits_old, &best_val,
-            &best_nodes, &num_left, &finish_mtx, &cv] (
-                    const uint32_t & new_trt,
-                    const std::shared_ptr<Result<std::pair<double, uint32_t> > >
-                    & res) {
+            &best_nodes, &num_left, &finish_mtx, &cv]
+        (const uint32_t & new_trt) -> std::pair<double, uint32_t> {
 
         // copy as part of each job
         auto trt_bits_cpy(trt_bits);
@@ -227,25 +223,28 @@ void SweepAgent<State>::set_new_treatment_parallel(
 
         const double val = njm::linalg::dot_a_and_b(this->coef_, feat_cpy);
 
-        res->set(std::pair<double, uint32_t>(val, new_trt));
-
         // notify main thread
         std::lock_guard<std::mutex> lk(finish_mtx);
         --num_left;
         cv.notify_one();
+
+        return std::pair<double, uint32_t>(val, new_trt);
     };
 
-    std::vector<std::shared_ptr<Result<std::pair<double, uint32_t> > > >
-        all_res;
+    std::vector<std::future<std::pair<double, uint32_t> > > all_res;
+
+    typedef std::packaged_task<std::pair<double, uint32_t>()> package_type;
 
     CHECK_GT(not_trt.size(), 0);
     for (it = not_trt.begin(); it != end; ++it) {
         CHECK(!trt_bits.test(*it)) << "bit is already set";
 
+        std::shared_ptr<package_type> task(
+                new package_type(std::bind(fn, *it)));
 
-        all_res.emplace_back(new Result<std::pair<double, uint32_t> >);
-        this->pool_->service().post(boost::bind<void>(fn, *it,
-                        all_res.at(all_res.size() - 1)));
+        all_res.push_back(task->get_future());
+
+        this->pool_->service().post(std::bind(&package_type::operator(), task));
     }
 
 
@@ -254,7 +253,7 @@ void SweepAgent<State>::set_new_treatment_parallel(
     cv.wait(finish_lock, [&num_left]{return num_left == 0;});
 
     for (uint32_t i = 0; i < all_res.size(); ++i) {
-        const std::pair<double, uint32_t> & p = all_res.at(i)->get();
+        const std::pair<double, uint32_t> & p = all_res.at(i).get();
         if (p.first > best_val) {
             best_val = p.first;
             best_nodes.clear();

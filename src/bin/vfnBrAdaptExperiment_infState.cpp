@@ -3,7 +3,6 @@
 #include <fstream>
 #include <thread>
 
-#include <njm_cpp/data/result.hpp>
 #include <njm_cpp/thread/pool.hpp>
 #include <njm_cpp/optim/simPerturb.hpp>
 #include <njm_cpp/tools/experiment.hpp>
@@ -11,6 +10,7 @@
 #include <njm_cpp/tools/progress.hpp>
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/info/project.hpp>
+#include <future>
 
 #include "system.hpp"
 #include "agent.hpp"
@@ -27,12 +27,10 @@
 using namespace stdmMf;
 
 using njm::tools::Rng;
-using njm::data::Result;
 using njm::tools::Progress;
 using njm::tools::Experiment;
 
-void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
-        const uint32_t & seed,
+std::pair<double, double> run_adapt(const uint32_t & seed,
         const uint32_t & path_len,
         const uint32_t & num_reps_vfn,
         const double & c_vfn,
@@ -272,12 +270,12 @@ void run_adapt(const std::shared_ptr<Result<std::pair<double, double> > > & r,
     // };
     // const double br = bellman_residual_sq(history, &agent, 0.9, q_fn);
 
-    r->set(std::pair<double, double>(
-                    std::chrono::duration_cast<std::chrono::seconds>(
-                            elapsed).count(),
-                    val));
-
     progress->update();
+
+    return std::pair<double, double>(
+            std::chrono::duration_cast<std::chrono::seconds>(
+                    elapsed).count(),
+            val);
 }
 
 
@@ -373,7 +371,8 @@ int main(int argc, char *argv[]) {
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
 
-    std::vector<std::shared_ptr<Result<std::pair<double, double> > > > results;
+    typedef std::packaged_task<std::pair<double, double>()> package_type;
+    std::vector<std::future<std::pair<double, double> > > results;
     std::vector<Experiment::Factor> factors;
     std::vector<uint32_t> factors_level;
     std::vector<uint32_t> rep_number;
@@ -428,18 +427,20 @@ int main(int argc, char *argv[]) {
 
             CHECK_EQ(i, f.size());
 
-            std::shared_ptr<Result<std::pair<double, double> > >
-                r(new Result<std::pair<double, double> >);
-            results.push_back(r);
+
+            std::shared_ptr<package_type> task(new package_type(
+                            std::bind(&run_adapt, rep, path_len,
+                                    num_reps_vfn, c_vfn, t_vfn, a_vfn, b_vfn,
+                                    ell_vfn, min_step_size_vfn,
+                                    c_br, t_br, a_br, b_br,
+                                    ell_br, min_step_size_br,
+                                    step_scale_br, gamma_br, progress)));
+
+            results.push_back(task->get_future());
             factors.push_back(f);
             rep_number.push_back(rep);
             factors_level.push_back(level_num);
-            p.service().post(std::bind(&run_adapt, r, rep, path_len,
-                            num_reps_vfn, c_vfn, t_vfn, a_vfn, b_vfn,
-                            ell_vfn, min_step_size_vfn,
-                            c_br, t_br, a_br, b_br,
-                            ell_br, min_step_size_br,
-                            step_scale_br, gamma_br, progress));
+            p.service().post(std::bind(&package_type::operator(), task));
 
             ++num_jobs;
         }
@@ -470,7 +471,7 @@ int main(int argc, char *argv[]) {
         << "\n";
 
     for (uint32_t i = 0; i < results.size(); ++i) {
-        const std::pair<double, double> result_i = results.at(i)->get();
+        const std::pair<double, double> result_i = results.at(i).get();
         *results_entry << factors_level.at(i) << ", " << rep_number.at(i)
                        << ", " << result_i.first << ", " << result_i.second;
         Experiment::Factor f = factors.at(i);
