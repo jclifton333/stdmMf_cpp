@@ -34,7 +34,7 @@ BrMinIterSimPerturbAgent<State>::BrMinIterSimPerturbAgent(
       c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
       do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
       obs_per_iter_(obs_per_iter),
-      last_optim_par_(this->features_->num_features(), 0.0)) {
+      last_optim_par_(this->features_->num_features(), 0.0) {
 }
 
 
