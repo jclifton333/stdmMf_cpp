@@ -79,7 +79,7 @@ double InfShieldStateModel::ll(
         const std::vector<double> probs = this->probs(curr_state, curr_trt);
 
         // get bits for changes in infection
-        const boost::dynamic_bitset<> & change_inf = curr_inf ^ next_inf;
+        const boost::dynamic_bitset<> change_inf = curr_inf ^ next_inf;
 
         // convert bits to sets of indices
         const auto change_both_sets = njm::tools::both_sets(change_inf);
