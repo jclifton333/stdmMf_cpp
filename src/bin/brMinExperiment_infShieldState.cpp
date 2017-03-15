@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
+        g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
     }
 
 
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
+        g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
     }
 
     {
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
+        g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
     }
 
 
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({false, true})); // do_sweeps
         g->add_factor(std::vector<bool>({false, true})); // gs_step
         g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-        g->add_factor(std::vector<int>({0, 10})); // obs_per_iter
+        g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
     }
 
 
