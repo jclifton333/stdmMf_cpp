@@ -15,17 +15,17 @@ protected:
     const std::shared_ptr<Features<State> > features_;
     const std::shared_ptr<Model<State> > model_;
 
-    const double & c_;
-    const double & t_;
-    const double & a_;
-    const double & b_;
-    const double & ell_;
-    const double & min_step_size_;
-    const bool & do_sweep_;
-    const bool & gs_step_;
-    const bool & sq_total_br_;
-    const uint32_t & num_points_;
-    const uint32_t & obs_per_iter_;
+    const double c_;
+    const double t_;
+    const double a_;
+    const double b_;
+    const double ell_;
+    const double min_step_size_;
+    const bool do_sweep_;
+    const bool gs_step_;
+    const bool sq_total_br_;
+    const uint32_t num_points_;
+    const uint32_t obs_per_iter_;
 
     std::vector<double> last_optim_par_;
 
