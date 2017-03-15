@@ -83,13 +83,23 @@ boost::dynamic_bitset<> BrMinIterSimPerturbAgent<State>::apply_trt(
 template <typename State>
 std::vector<double> BrMinIterSimPerturbAgent<State>::train(
         const std::vector<Transition<State> > & history) {
+    const uint32_t num_features = this->features_->num_features();
+    const std::vector<double> starting_vals(num_features, 0.0);
+    return this->train(history, starting_vals);
+}
+
+
+template <typename State>
+std::vector<double> BrMinIterSimPerturbAgent<State>::train(
+        const std::vector<Transition<State> > & history,
+        const std::vector<double> & starting_vals) {
     BrMinSimPerturbAgent<State> agent (this->network_, this->features_,
             this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_, this->do_sweep_, this->gs_step_,
             this->sq_total_br_, 1);
     agent.rng(this->rng());
 
-    std::vector<double> optim_par(this->features_->num_features(), 0.0);
+    std::vector<double> optim_par(starting_vals);
 
     if (this->obs_per_iter_ > 0) {
 
