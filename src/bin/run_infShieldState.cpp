@@ -86,7 +86,7 @@ run(const std::shared_ptr<Network> & net,
                 new std::promise<double>);
 
         none_val.push_back(promise_val->get_future());
-        none_time.push_back(promise_val->get_future());
+        none_time.push_back(promise_time->get_future());
 
         pool.service().post([=](){
             System<InfShieldState> s(net->clone(), mod_system->clone());
