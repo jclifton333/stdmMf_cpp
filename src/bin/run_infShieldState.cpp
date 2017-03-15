@@ -113,7 +113,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "none", i, history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "none", i, history));
+            *entry << add_to_entry;
 
             progress->update();
         });
@@ -157,7 +159,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "random", i, history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "random", i, history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -203,7 +207,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "proximal", i, history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "proximal", i, history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -250,7 +256,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "myopic", i, history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "myopic", i, history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -301,8 +309,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "vfn_len_1", i,
-                    history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "vfn_len_1", i, history));
+            *entry << add_to_entry;
 
             progress->update();
         });
@@ -352,8 +361,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "vfn_len_2", i,
-                    history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "vfn_len_2", i, history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -404,8 +414,9 @@ run(const std::shared_ptr<Network> & net,
     //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
     //         history.emplace_back(s.state(),
     //                 boost::dynamic_bitset<>(net->size()));
-    //         *entry << history_to_csv_entry(net->size(), "vfn_len_3", i,
-    //                 history);
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "vfn_len_3", i, history));
+    //         *entry << add_to_entry;
 
 
     //         progress->update();
@@ -456,8 +467,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "br_len_1", i,
-                    history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "br_len_1", i, history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -508,8 +520,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "br_len_2", i,
-                    history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(), "br_len_2", i,
+                            history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -560,8 +573,9 @@ run(const std::shared_ptr<Network> & net,
     //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
     //         history.emplace_back(s.state(),
     //                 boost::dynamic_bitset<>(net->size()));
-    //         *entry << history_to_csv_entry(net->size(), "br_len_1", i,
-    //                 history);
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "br_len_1", i, history));
+    //         *entry << add_to_entry;
 
 
     //         progress->update();
@@ -613,8 +627,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "supp_len_1", i,
-                    history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "supp_len_1", i, history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -666,8 +681,9 @@ run(const std::shared_ptr<Network> & net,
             std::vector<StateAndTrt<InfShieldState> > history(s.history());
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
-            *entry << history_to_csv_entry(net->size(), "supp_len_2", i,
-                    history);
+            const std::string add_to_entry(history_to_csv_entry(net->size(),
+                            "supp_len_2", i, history));
+            *entry << add_to_entry;
 
 
             progress->update();
@@ -719,8 +735,9 @@ run(const std::shared_ptr<Network> & net,
     //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
     //         history.emplace_back(s.state(),
     //                 boost::dynamic_bitset<>(net->size()));
-    //         *entry << history_to_csv_entry(net->size(), "supp_len_3", i,
-    //                 history);
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "supp_len_3", i, history));
+    //         *entry << add_to_entry;
 
 
     //         progress->update();
