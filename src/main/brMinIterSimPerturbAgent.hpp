@@ -22,6 +22,8 @@ class BrMinIterSimPerturbAgent : public Agent<State> {
     const bool sq_total_br_;
     const uint32_t obs_per_iter_;
 
+    std::vector<double> last_optim_par_;
+
 public:
     BrMinIterSimPerturbAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features<State> > & features,

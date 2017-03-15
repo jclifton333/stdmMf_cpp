@@ -33,7 +33,8 @@ BrMinIterSimPerturbAgent<State>::BrMinIterSimPerturbAgent(
     : Agent<State>(network), features_(features),
       c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
       do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
-      obs_per_iter_(obs_per_iter) {
+      obs_per_iter_(obs_per_iter),
+      last_optim_par_(this->features_->num_features(), 0.0)) {
 }
 
 
@@ -44,7 +45,8 @@ BrMinIterSimPerturbAgent<State>::BrMinIterSimPerturbAgent(
       c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
       do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
-      sq_total_br_(other.sq_total_br_), obs_per_iter_(other.obs_per_iter_) {
+      sq_total_br_(other.sq_total_br_), obs_per_iter_(other.obs_per_iter_),
+      last_optim_par_(other.last_optim_par_) {
 }
 
 
@@ -83,9 +85,8 @@ boost::dynamic_bitset<> BrMinIterSimPerturbAgent<State>::apply_trt(
 template <typename State>
 std::vector<double> BrMinIterSimPerturbAgent<State>::train(
         const std::vector<Transition<State> > & history) {
-    const uint32_t num_features = this->features_->num_features();
-    const std::vector<double> starting_vals(num_features, 0.0);
-    return this->train(history, starting_vals);
+    this->last_optim_par_ = this->train(history, this->last_optim_par_);
+    return this->last_optim_par_;
 }
 
 
