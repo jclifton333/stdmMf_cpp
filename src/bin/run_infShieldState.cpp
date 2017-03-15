@@ -747,7 +747,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(none_time.begin(), none_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -770,7 +770,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(random_time.begin(), random_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -793,7 +793,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(proximal_time.begin(), proximal_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -816,7 +816,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(myopic_time.begin(), myopic_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -839,7 +839,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(vfn_len_1_time.begin(), vfn_len_1_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -862,7 +862,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(vfn_len_2_time.begin(), vfn_len_2_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -885,7 +885,7 @@ run(const std::shared_ptr<Network> & net,
     //             });
     //     std::vector<double> time(num_reps);
     //     std::transform(vfn_len_3_time.begin(), vfn_len_3_time.end(),
-    //             time.begin(), time.end(),
+    //             time.begin(), time.begin(),
     //             [](std::future<double> & a, const double & b) {
     //                 return a.get();
     //             });
@@ -908,7 +908,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(br_len_1_time.begin(), br_len_1_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -931,7 +931,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(br_len_2_time.begin(), br_len_2_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -954,7 +954,7 @@ run(const std::shared_ptr<Network> & net,
     //             });
     //     std::vector<double> time(num_reps);
     //     std::transform(br_len_3_time.begin(), br_len_3_time.end(),
-    //             time.begin(), time.end(),
+    //             time.begin(), time.begin(),
     //             [](std::future<double> & a, const double & b) {
     //                 return a.get();
     //             });
@@ -977,7 +977,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(supp_len_1_time.begin(), supp_len_1_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -1000,7 +1000,7 @@ run(const std::shared_ptr<Network> & net,
                 });
         std::vector<double> time(num_reps);
         std::transform(supp_len_2_time.begin(), supp_len_2_time.end(),
-                time.begin(), time.end(),
+                time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
@@ -1023,7 +1023,7 @@ run(const std::shared_ptr<Network> & net,
     //             });
     //     std::vector<double> time(num_reps);
     //     std::transform(supp_len_3_time.begin(), supp_len_3_time.end(),
-    //             time.begin(), time.end(),
+    //             time.begin(), time.begin(),
     //             [](std::future<double> & a, const double & b) {
     //                 return a.get();
     //             });
