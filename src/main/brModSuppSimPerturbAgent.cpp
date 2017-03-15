@@ -4,7 +4,7 @@
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
 #include "epsAgent.hpp"
-#include "brMinSimPerturbAgent.hpp"
+#include "brMinIterSimPerturbAgent.hpp"
 
 #include "system.hpp"
 
@@ -27,11 +27,13 @@ BrModSuppSimPerturbAgent<State>::BrModSuppSimPerturbAgent(
         const bool & do_sweep,
         const bool & gs_step,
         const bool & sq_total_br,
-        const uint32_t & num_points)
+        const uint32_t & num_points,
+        const uint32_t & obs_per_iter)
     : Agent<State>(network), features_(features), model_(model),
       c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
       do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
-      num_points_(num_points) {
+      num_points_(num_points), obs_per_iter_(obs_per_iter),
+      last_optim_par_(this->features_->num_features(), 0.0) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -44,7 +46,9 @@ BrModSuppSimPerturbAgent<State>::BrModSuppSimPerturbAgent(
       model_(other.model_->clone()), c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
       do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
-      sq_total_br_(other.sq_total_br_), num_points_(other.num_points_) {
+      sq_total_br_(other.sq_total_br_), num_points_(other.num_points_),
+      obs_per_iter_(other.obs_per_iter_),
+      last_optim_par_(other.last_optim_par_) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -71,6 +75,7 @@ boost::dynamic_bitset<> BrModSuppSimPerturbAgent<State>::apply_trt(
             Transition<State>::from_sequence(history, curr_state));
 
     const std::vector<double> optim_par = this->train(all_history);
+    this->last_optim_par_ = optim_par;
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
             this->do_sweep_);
@@ -101,7 +106,7 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
         std::shared_ptr<RandomAgent<State> > ra(
                 new RandomAgent<State>(this->network_));
         ra->rng(this->rng());
-        EpsAgent<State> ea(this->network_, pa, ra, 0.2);
+        EpsAgent<State> ea(this->network_, pa, ra, 0.5);
         ea.rng(this->rng());
 
         s.start();
@@ -124,13 +129,13 @@ std::vector<double> BrModSuppSimPerturbAgent<State>::train(
         CHECK_EQ(supp_history.size(), this->num_points_);
     }
 
-    BrMinSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
+    BrMinIterSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
             this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_, this->do_sweep_, this->gs_step_,
-            this->sq_total_br_, 1);
+            this->sq_total_br_, this->obs_per_iter_);
     brMinAgent.rng(this->rng());
 
-    return brMinAgent.train(supp_history);
+    return brMinAgent.train(supp_history, this->last_optim_par_);
 }
 
 

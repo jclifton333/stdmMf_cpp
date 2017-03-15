@@ -25,6 +25,9 @@ protected:
     const bool & gs_step_;
     const bool & sq_total_br_;
     const uint32_t & num_points_;
+    const uint32_t & obs_per_iter_;
+
+    std::vector<double> last_optim_par_;
 
 public:
     BrModSuppSimPerturbAgent(const std::shared_ptr<const Network> & network,
@@ -39,7 +42,8 @@ public:
             const bool & do_sweep,
             const bool & gs_step,
             const bool & sq_total_br,
-            const uint32_t & num_points);
+            const uint32_t & num_points,
+            const uint32_t & obs_per_iter);
 
     BrModSuppSimPerturbAgent(const BrModSuppSimPerturbAgent<State> & other);
 
