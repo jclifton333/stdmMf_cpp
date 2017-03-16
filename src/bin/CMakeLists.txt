@@ -30,6 +30,7 @@ SET(bin_file_names
 
   ## extra
   inspectBrFn
+  orthVecBrFn
   timeSweepAgent
   timeBrMinAgent
   sandbox)
