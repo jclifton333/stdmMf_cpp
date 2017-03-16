@@ -80,8 +80,14 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
 
     const std::vector<double> optim_par = this->train(all_history,
             this->last_optim_par_);
-    this->last_optim_par_ = optim_par;
 
+    // store parameter values and scale to norm 1 (don't need to scale
+    // optim_par as the policy is scale invariant)
+    this->last_optim_par_ = optim_par;
+    njm::linalg::mult_b_to_a(this->last_optim_par_,
+            1.0 / njm::linalg::l2_norm(this->last_optim_par_));
+
+    // sweep to get treatments
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
