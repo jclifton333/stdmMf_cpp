@@ -26,71 +26,18 @@
 
 #include <glog/logging.h>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
 
 using namespace stdmMf;
 
-std::vector<double> proj_a_on_b(const std::vector<double> & a,
-        const std::vector<double> & b) {
-    CHECK_EQ(a.size(), b.size());
-    const double numer = njm::linalg::dot_a_and_b(a, b);
-    const double denom = njm::linalg::dot_a_and_b(b, b);
-    std::vector<double> proj(b);
-    njm::linalg::mult_b_to_a(proj, numer / denom);
-    return proj;
-}
 
-
-std::vector<std::vector<double> > get_orth_vectors(const uint32_t & num_vec,
-        const uint32_t & vec_len) {
-    njm::tools::Rng rng;
-    rng.seed(0);
-
-    // generate
-    std::vector<std::vector<double> > orth_vectors(num_vec);
-    for (uint32_t i = 0; i < num_vec; ++i) {
-        // fill using standard normal
-        std::vector<double> & vec_i(orth_vectors.at(i));
-        vec_i.resize(vec_len);
-        std::generate(vec_i.begin(), vec_i.end(),
-                [&rng]() {
-                    return rng.rnorm_01();
-                });
-
-        // orthogonalize against previous vectors
-        std::vector<double> gs_adjust(vec_len, 0.0);
-        for (uint32_t j = 0; j < i; ++j) {
-            njm::linalg::add_b_to_a(gs_adjust,
-                    proj_a_on_b(vec_i, orth_vectors.at(j)));
-        }
-
-        njm::linalg::mult_b_to_a(gs_adjust, -1.0);
-
-        njm::linalg::add_b_to_a(vec_i, gs_adjust);
-
-        njm::linalg::mult_b_to_a(vec_i, 1.0 / njm::linalg::l2_norm(vec_i));
-    }
-
-
-    return orth_vectors;
-}
-
-
-
-void generate_jitters(const uint32_t & seed,
-        const uint32_t & run_length,
-        const uint32_t & num_obs_a,
-        const uint32_t & num_obs_b,
-        const bool & gs_step,
-        const bool & sq_total_br,
-        const std::vector<double> & eps_values,
-        const std::shared_ptr<const Network> & network,
+void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<InfShieldState> > & model,
-        njm::data::Entry * entry) {
-    CHECK_GT(num_obs_b, num_obs_a);
-
-    // set seed
-    std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng());
-    rng->seed(seed);
+        const uint32_t & num_obs,
+        njm::data::Entry * const entry) {
+    std::shared_ptr<njm::tools::Rng> rng;
+    rng->seed(rep);
 
     // system
     System<InfShieldState> s(network, model);
@@ -98,7 +45,7 @@ void generate_jitters(const uint32_t & seed,
 
     // features
     std::shared_ptr<Features<InfShieldState> > features(
-            new NetworkRunSymFeatures<InfShieldState>(network, run_length));
+            new NetworkRunSymFeatures<InfShieldState>(network, 1));
 
     // eps agent
     std::shared_ptr<ProximalAgent<InfShieldState> > pa(
@@ -110,11 +57,10 @@ void generate_jitters(const uint32_t & seed,
     EpsAgent<InfShieldState> ea(network, pa, ra, 0.2);
     ea.rng(rng);
 
-
     // set initial infections
     s.start();
-    // simulate history for obs_a
-    for (uint32_t i = 0; i < num_obs_a; ++i) {
+    // simulate history
+    for (uint32_t i = 0; i < num_obs; ++i) {
         const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.state(),
                 s.history());
 
@@ -123,135 +69,64 @@ void generate_jitters(const uint32_t & seed,
         s.turn_clock();
     }
 
-    const std::vector<Transition<InfShieldState> > history_a(
+    const std::vector<Transition<InfShieldState> > all_history(
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
-    CHECK_EQ(history_a.size(), num_obs_a);
 
-    // simulate history for obs_a
-    for (uint32_t i = 0; i < (num_obs_b - num_obs_a); ++i) {
-        const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.state(),
-                s.history());
-
-        s.trt_bits(trt_bits);
-
-        s.turn_clock();
-    }
-
-    const std::vector<Transition<InfShieldState> > history_b(
-            Transition<InfShieldState>::from_sequence(s.history(), s.state()));
-    CHECK_EQ(history_b.size(), num_obs_b);
-
-    // setup agent
-    BrMinSimPerturbAgent<InfShieldState> brAgent(network, features,
-            1e-1, 0.1, 1.41, 1, 0.85, 0.007150, false, gs_step, sq_total_br, 1);
+    BrMinSimPerturbAgent<InfShieldState> brAgent(network, features, 0.10, 0.25,
+            1.41, 1.0, 0.85, 0.00397, false, false, false);
     brAgent.rng(rng);
+    brAgent.record(true);
 
+    const std::vector<std::pair<double, std::vector<double> > > train_history(
+            brAgent.train_history());
+    const uint32_t train_size(train_history.size());
+    const uint32_t value_mc_reps(100);
 
-    // train using first num_obs_a observations
-    const std::vector<double> par_a = brAgent.train(history_a,
-            std::vector<double>(features->num_features(), 0.0));
+    typedef boost::accumulators::features<
+        boost::accumulators::tag::mean,
+        boost::accumulators::tag::variance> MeanVarFeatures;
+    typedef boost::accumulators::accumulator_set<double, MeanVarFeatures>
+        MeanVarAccumulator;
 
-    // train using first num_obs_a observations
-    const std::vector<double> par_b = brAgent.train(history_b,
-            std::vector<double>(features->num_features(), 0.0));
+    const std::vector<double> gamma({1.0, 0.95, 0.9});
 
-    // train using first num_obs_a observations
-    const std::vector<double> par_b_warm = brAgent.train(history_b, par_a);
+    for (uint32_t i = 0; i < train_size; ++i) {
+        const std::vector<double> & par(train_history.at(i).second);
+        const double & obj_fn(train_history.at(i).first);
 
+        // bellman residual
+        *entry << rep << ", "
+               << num_obs << ", "
+               << i << ", "
+               << "br" << ", "
+               << "NA" << ", "
+               << obj_fn << ", "
+               << "NA" << "\n";
 
-    // generate orthonogal vectors
-    const std::vector<std::vector<double> > orth_vectors(
-            get_orth_vectors(features->num_features(),
-                    features->num_features()));
+        SweepAgent<InfShieldState> agent(network->clone(), features->clone(),
+                par, 2, false);
+        agent.rng(rng);
+        for (uint32_t g = 0; g < gamma.size(); ++g) {
+            MeanVarAccumulator acc;
+            for (uint32_t rep = 0; rep < value_mc_reps; ++rep) {
+                rng->seed(rep);
+                acc(runner(&s, &agent, 100, gamma.at(g)));
+            }
 
-    // calculate objective functionn
-    for (uint32_t i = 0; i < eps_values.size(); ++i) {
-        const double & eps = eps_values.at(i);
-        for (uint32_t j = 0; j < orth_vectors.size(); ++j) {
-            // prepare parameter vectors
-            const std::vector<double> eps_orth_vec(
-                    njm::linalg::mult_a_and_b(orth_vectors.at(j), eps));
-
-            const double norm_a = njm::linalg::l2_norm(par_a);
-            const std::vector<double> par_a_eps(
-                    njm::linalg::add_a_and_b(
-                            njm::linalg::mult_a_and_b(par_a, 1.0 - eps),
-                            njm::linalg::mult_a_and_b(eps_orth_vec, norm_a)));
-
-            const double norm_b = njm::linalg::l2_norm(par_b);
-            const std::vector<double> par_b_eps(
-                    njm::linalg::add_a_and_b(
-                            njm::linalg::mult_a_and_b(par_b, 1.0 - eps),
-                            njm::linalg::mult_a_and_b(eps_orth_vec, norm_b)));
-
-            const double norm_b_warm = njm::linalg::l2_norm(par_b_warm);
-            const std::vector<double> par_b_warm_eps(
-                    njm::linalg::add_a_and_b(
-                            njm::linalg::mult_a_and_b(par_b_warm, 1.0 - eps),
-                            njm::linalg::mult_a_and_b(eps_orth_vec,
-                                    norm_b_warm)));
-
-
-            SweepAgent<InfShieldState> agent_a(network, features, par_a_eps, 2,
-                    false);
-            agent_a.rng(rng);
-            auto q_fn_a = [&](const InfShieldState & state_t,
-                    const boost::dynamic_bitset<> & trt_bits_t) {
-                              return njm::linalg::dot_a_and_b(par_a_eps,
-                                      features->get_features(state_t,
-                                              trt_bits_t));
-                          };
-            const double br_a_on_a = sq_bellman_residual<InfShieldState>(
-                    history_a, & agent_a, 0.9, q_fn_a, q_fn_a);
-
-            const double br_a_on_b = sq_bellman_residual<InfShieldState>(
-                    history_b, & agent_a, 0.9, q_fn_a, q_fn_a);
-
-
-
-            SweepAgent<InfShieldState> agent_b(network, features, par_b_eps, 2,
-                    false);
-            agent_b.rng(rng);
-            auto q_fn_b = [&](const InfShieldState & state_t,
-                    const boost::dynamic_bitset<> & trt_bits_t) {
-                              return njm::linalg::dot_a_and_b(par_b_eps,
-                                      features->get_features(state_t,
-                                              trt_bits_t));
-                          };
-            const double br_b_on_a = sq_bellman_residual<InfShieldState>(
-                    history_a, & agent_b, 0.9, q_fn_b, q_fn_b);
-
-            const double br_b_on_b = sq_bellman_residual<InfShieldState>(
-                    history_b, & agent_b, 0.9, q_fn_b, q_fn_b);
-
-
-
-            SweepAgent<InfShieldState> agent_b_warm(network, features,
-                    par_b_warm_eps, 2, false);
-            agent_b_warm.rng(rng);
-            auto q_fn_b_warm = [&](const InfShieldState & state_t,
-                    const boost::dynamic_bitset<> & trt_bits_t) {
-                                   return njm::linalg::dot_a_and_b(
-                                           par_b_warm_eps,
-                                           features->get_features(state_t,
-                                                   trt_bits_t));
-                               };
-            const double br_b_warm_on_a = sq_bellman_residual<InfShieldState>(
-                    history_a, & agent_b, 0.9, q_fn_b_warm, q_fn_b_warm);
-
-            const double br_b_warm_on_b = sq_bellman_residual<InfShieldState>(
-                    history_b, & agent_b, 0.9, q_fn_b_warm, q_fn_b_warm);
-
-
-            (*entry) << seed << ", " << run_length << ", " << gs_step << ", "
-                     << sq_total_br << ", " << eps << ", " << j << ", "
-                     << br_a_on_a << ", " << br_a_on_b << ", "
-                     << br_b_on_a << ", " << br_b_on_b << ", "
-                     << br_b_warm_on_a << ", " << br_b_warm_on_b << "\n";
+            // value function
+            *entry << rep << ", "
+                   << num_obs << ", "
+                   << i << ", "
+                   << "value" << ", "
+                   << gamma.at(g) << ", "
+                   << boost::accumulators::mean(acc) << ", "
+                   << boost::accumulators::variance(acc) << "\n";
         }
 
     }
 }
+
+
 
 
 int main(int argc, char *argv[]) {
@@ -327,37 +202,29 @@ int main(int argc, char *argv[]) {
 
     njm::tools::Experiment e;
 
+    {
+        njm::tools::Experiment::FactorGroup * g = e.add_group();
+
+        g->add_factor(std::vector<int>({5, 10, 50, 100})); // num_obs
+    }
+
     njm::thread::Pool p(std::thread::hardware_concurrency());
 
     std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
             new njm::tools::Progress<std::ostream>(&std::cout));
 
-    {
-        njm::tools::Experiment::FactorGroup * g = e.add_group();
+    njm::data::TrapperKeeper tk(argv[0],
+            njm::info::project::PROJECT_ROOT_DIR + "/data");
 
-        g->add_factor(std::vector<int>({1, 2, 3})); // run_length
-        g->add_factor(std::vector<bool>({false, true})); // gs_step
-        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
-    }
+    *tk.entry("inspectBrFn_results.csv")
+        << "rep, "
+        << "num_obs, "
+        << "iter, "
+        << "fn_type, "
+        << "gamma, "
+        << "fn_value, "
+        << "fn_error\n";
 
-
-    std::shared_ptr<njm::data::TrapperKeeper> tk(
-            new njm::data::TrapperKeeper(argv[0],
-                    njm::info::project::PROJECT_ROOT_DIR + "/data"));
-
-    const uint32_t num_obs_a = 10;
-    const uint32_t num_obs_b = 100;
-    const std::vector<double> eps_values({0.0, 0.1, 0.2, 0.3, 0.4, 0.5,
-                                          0.6, 0.7, 0.8, 0.9, 1.0});
-
-    njm::data::Entry * entry = tk->entry("inspectBrFn_results.csv");
-    *entry << "seed, run_length, gs_step, sq_total_br, eps, orth_vector, "
-           << "br_" << num_obs_a << "_on_" << num_obs_a << ", "
-           << "br_" << num_obs_a << "_on_" << num_obs_b << ", "
-           << "br_" << num_obs_b << "_on_" << num_obs_a << ", "
-           << "br_" << num_obs_b << "_on_" << num_obs_b << ", "
-           << "br_" << num_obs_b << "_warm_on_" << num_obs_a << ", "
-           << "br_" << num_obs_b << "_warm_on_" << num_obs_b << "\n";
 
     e.start();
 
@@ -370,26 +237,16 @@ int main(int argc, char *argv[]) {
             uint32_t i = 0;
             CHECK_EQ(f.at(i).type,
                     njm::tools::Experiment::FactorLevel::Type::is_int);
-            const uint32_t run_length = static_cast<uint32_t>(
+            const uint32_t num_obs = static_cast<uint32_t>(
                     f.at(i++).val.int_val);
-            CHECK_EQ(f.at(i).type,
-                    njm::tools::Experiment::FactorLevel::Type::is_bool);
-            const bool gs_step = f.at(i++).val.bool_val;
-            CHECK_EQ(f.at(i).type,
-                    njm::tools::Experiment::FactorLevel::Type::is_bool);
-            const bool sq_total_br = f.at(i++).val.bool_val;
 
-            // check number of factors
-            CHECK_EQ(i, f.size());
 
-            njm::data::Entry * new_entry = tk->entry(
+            njm::data::Entry * new_entry = tk.entry(
                     "inspectBrFn_results.csv");
 
             p.service().post([=]() {
-                generate_jitters(rep, run_length, num_obs_a, num_obs_b, gs_step,
-                        sq_total_br, eps_values, network->clone(),
-                        model->clone(), new_entry);
-
+                run(rep, network->clone(), model->clone(),
+                        num_obs, new_entry);
                 progress->update();
             });
 
@@ -403,7 +260,7 @@ int main(int argc, char *argv[]) {
     p.join();
     progress->done();
 
-    tk->finished();
+    tk.finished();
 
     return 0;
 }
