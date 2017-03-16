@@ -72,8 +72,9 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
     const std::vector<Transition<InfShieldState> > all_history(
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
-    BrMinSimPerturbAgent<InfShieldState> brAgent(network, features, 0.10, 0.25,
-            1.41, 1.0, 0.85, 0.00397, false, false, false);
+    BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
+            features->clone(), 0.10, 0.25, 1.41, 1.0, 0.85, 0.00397, false,
+            false, false);
     brAgent.rng(rng);
     brAgent.record(true);
 
