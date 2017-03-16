@@ -243,6 +243,8 @@ int main(int argc, char *argv[]) {
             const uint32_t num_obs = static_cast<uint32_t>(
                     f.at(i++).val.int_val);
 
+            CHECK_EQ(i, f.size());
+
 
             njm::data::Entry * new_entry = tk.entry(
                     "inspectBrFn_results.csv");
