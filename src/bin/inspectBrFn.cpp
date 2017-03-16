@@ -36,7 +36,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<InfShieldState> > & model,
         const uint32_t & num_obs,
         njm::data::Entry * const entry) {
-    std::shared_ptr<njm::tools::Rng> rng;
+    std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
     rng->seed(rep);
 
     // system
