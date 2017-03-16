@@ -78,6 +78,8 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
     brAgent.rng(rng);
     brAgent.record(true);
 
+    brAgent.train(all_history);
+
     const std::vector<std::pair<double, std::vector<double> > > train_history(
             brAgent.train_history());
     const uint32_t train_size(train_history.size());
