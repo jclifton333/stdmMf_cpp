@@ -97,7 +97,7 @@ std::vector<double> BrMinIterSimPerturbAgent<State>::train(
     BrMinSimPerturbAgent<State> agent (this->network_, this->features_,
             this->c_, this->t_, this->a_, this->b_, this->ell_,
             this->min_step_size_, this->do_sweep_, this->gs_step_,
-            this->sq_total_br_, 1);
+            this->sq_total_br_);
     agent.rng(this->rng());
 
     std::vector<double> optim_par(starting_vals);
