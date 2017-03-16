@@ -20,7 +20,9 @@ class BrMinSimPerturbAgent : public Agent<State> {
     const bool do_sweep_;
     const bool gs_step_;
     const bool sq_total_br_;
-    const uint32_t num_starts_;
+
+    bool record_;
+    std::vector<std::pair<double, std::vector<double> > > train_history_;
 
 public:
     BrMinSimPerturbAgent(const std::shared_ptr<const Network> & network,
@@ -33,8 +35,7 @@ public:
             const double & min_step_size,
             const bool & do_sweep,
             const bool & gs_step,
-            const bool & sq_total_br,
-            const uint32_t & num_starts);
+            const bool & sq_total_br);
 
     BrMinSimPerturbAgent(const BrMinSimPerturbAgent<State> & other);
 
@@ -52,6 +53,10 @@ public:
     std::vector<double> train(
             const std::vector<Transition<State> > & history,
             const std::vector<double> & starting_vals);
+
+    void record(const bool & record);
+
+    std::vector<std::pair<double, std::vector<double> > > train_history() const;
 
     using njm::tools::RngClass::rng;
     void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
