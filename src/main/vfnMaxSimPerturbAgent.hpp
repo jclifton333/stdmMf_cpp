@@ -26,6 +26,8 @@ protected:
     const double ell_;
     const double min_step_size_;
 
+    std::vector<double> last_optim_par_;
+
 public:
     VfnMaxSimPerturbAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features<State> > & features,

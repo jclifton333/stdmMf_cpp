@@ -30,7 +30,8 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
         const double & min_step_size)
     : Agent<State>(network), features_(features), model_(model),
       num_reps_(num_reps), final_t_(final_t), c_(c), t_(t), a_(a), b_(b),
-      ell_(ell), min_step_size_(min_step_size) {
+      ell_(ell), min_step_size_(min_step_size),
+      last_optim_par_(this->features_->num_features(), 0.0) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -43,7 +44,8 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
       features_(other.features_->clone()), model_(other.model_->clone()),
       num_reps_(other.num_reps_), final_t_(other.final_t_),
       c_(other.c_), t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
-      min_step_size_(other.min_step_size_) {
+      min_step_size_(other.min_step_size_) ,
+      last_optim_par_(other.last_optim_par_) {
     // share rng
     this->model_->rng(this->rng());
 }
@@ -77,7 +79,8 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
             Transition<State>::from_sequence(history, curr_state));
 
     const std::vector<double> optim_par = this->train(all_history,
-            std::vector<double>(this->features_->num_features(), 0.0));
+            this->last_optim_par_);
+    this->last_optim_par_ = optim_par;
 
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
     a.rng(this->rng());
