@@ -35,6 +35,9 @@ using namespace stdmMf;
 void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<InfShieldState> > & model,
         const uint32_t & num_obs,
+        const uint32_t & run_length,
+        const bool & gs_step,
+        const bool & sq_total_br,
         njm::data::Entry * const entry) {
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
     rng->seed(rep);
@@ -45,7 +48,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
 
     // features
     std::shared_ptr<Features<InfShieldState> > features(
-            new NetworkRunSymFeatures<InfShieldState>(network, 1));
+            new NetworkRunSymFeatures<InfShieldState>(network, run_length));
 
     // eps agent
     std::shared_ptr<ProximalAgent<InfShieldState> > pa(
@@ -74,7 +77,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
             features->clone(), 0.10, 0.25, 1.41, 1.0, 0.85, 0.00397, false,
-            false, false);
+            gs_step, sq_total_br);
     brAgent.rng(rng);
     brAgent.record(true);
 
@@ -210,6 +213,9 @@ int main(int argc, char *argv[]) {
         njm::tools::Experiment::FactorGroup * g = e.add_group();
 
         g->add_factor(std::vector<int>({5, 10, 50, 100, 500, 1000})); // num_obs
+        g->add_factor(std::vector<int>({1, 2})); // run_length
+        g->add_factor(std::vector<int>({false, true})); // gs_step
+        g->add_factor(std::vector<int>({false, true})); // sq_total_br
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
@@ -243,6 +249,16 @@ int main(int argc, char *argv[]) {
                     njm::tools::Experiment::FactorLevel::Type::is_int);
             const uint32_t num_obs = static_cast<uint32_t>(
                     f.at(i++).val.int_val);
+            CHECK_EQ(f.at(i).type,
+                    njm::tools::Experiment::FactorLevel::Type::is_int);
+            const uint32_t run_length = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
+            CHECK_EQ(f.at(i).type,
+                    njm::tools::Experiment::FactorLevel::Type::is_bool);
+            const bool gs_step = f.at(i++).val.bool_val;
+            CHECK_EQ(f.at(i).type,
+                    njm::tools::Experiment::FactorLevel::Type::is_bool);
+            const bool sq_total_br = f.at(i++).val.bool_val;
 
             CHECK_EQ(i, f.size());
 
@@ -252,7 +268,7 @@ int main(int argc, char *argv[]) {
 
             p.service().post([=]() {
                 run(rep, network->clone(), model->clone(),
-                        num_obs, new_entry);
+                        num_obs, run_length, gs_step, sq_total_br, new_entry);
                 progress->update();
             });
 
