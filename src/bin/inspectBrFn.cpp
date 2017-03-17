@@ -214,8 +214,8 @@ int main(int argc, char *argv[]) {
 
         g->add_factor(std::vector<int>({5, 10, 50, 100, 500, 1000})); // num_obs
         g->add_factor(std::vector<int>({1, 2})); // run_length
-        g->add_factor(std::vector<int>({false, true})); // gs_step
-        g->add_factor(std::vector<int>({false, true})); // sq_total_br
+        g->add_factor(std::vector<bool>({false, true})); // gs_step
+        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
