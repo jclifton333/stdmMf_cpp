@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
     {
         njm::tools::Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({5, 10, 50, 100})); // num_obs
+        g->add_factor(std::vector<int>({5, 10, 50, 100, 500, 1000})); // num_obs
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
