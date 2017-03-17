@@ -129,7 +129,7 @@ std::vector<std::pair<double, double> > bellman_residual_parts(
         // R
         const uint32_t num_inf = transition.next_state.inf_bits.count();
         const uint32_t num_nodes = transition.next_state.inf_bits.size();
-        const double r = static_cast<double>(num_inf)
+        const double r = - static_cast<double>(num_inf)
             / static_cast<double>(num_nodes);
 
         // Q(S, A)
