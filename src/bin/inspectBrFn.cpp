@@ -97,39 +97,40 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
     const std::vector<double> gamma({1.0, 0.95, 0.9});
 
     for (uint32_t i = 0; i < train_size; ++i) {
-        const std::vector<double> & par(train_history.at(i).second);
-        const double & obj_fn(train_history.at(i).first);
+        if (i % 10 == 0 || (i + 1 == train_size)) {
+            const std::vector<double> & par(train_history.at(i).second);
+            const double & obj_fn(train_history.at(i).first);
 
-        // bellman residual
-        *entry << rep << ", "
-               << num_obs << ", "
-               << i << ", "
-               << "br" << ", "
-               << "NA" << ", "
-               << obj_fn << ", "
-               << "NA" << "\n";
-
-        SweepAgent<InfShieldState> agent(network->clone(), features->clone(),
-                par, 2, false);
-        agent.rng(rng);
-        for (uint32_t g = 0; g < gamma.size(); ++g) {
-            MeanVarAccumulator acc;
-            for (uint32_t rep = 0; rep < value_mc_reps; ++rep) {
-                rng->seed(rep);
-                s.start();
-                acc(runner(&s, &agent, 100, gamma.at(g)));
-            }
-
-            // value function
+            // bellman residual
             *entry << rep << ", "
                    << num_obs << ", "
                    << i << ", "
-                   << "value" << ", "
-                   << gamma.at(g) << ", "
-                   << boost::accumulators::mean(acc) << ", "
-                   << boost::accumulators::variance(acc) << "\n";
-        }
+                   << "br" << ", "
+                   << "NA" << ", "
+                   << obj_fn << ", "
+                   << "NA" << "\n";
 
+            SweepAgent<InfShieldState> agent(network->clone(),
+                    features->clone(), par, 2, false);
+            agent.rng(rng);
+            for (uint32_t g = 0; g < gamma.size(); ++g) {
+                MeanVarAccumulator acc;
+                for (uint32_t rep = 0; rep < value_mc_reps; ++rep) {
+                    rng->seed(rep);
+                    s.start();
+                    acc(runner(&s, &agent, 100, gamma.at(g)));
+                }
+
+                // value function
+                *entry << rep << ", "
+                       << num_obs << ", "
+                       << i << ", "
+                       << "value" << ", "
+                       << gamma.at(g) << ", "
+                       << boost::accumulators::mean(acc) << ", "
+                       << boost::accumulators::variance(acc) << "\n";
+            }
+        }
     }
 }
 
