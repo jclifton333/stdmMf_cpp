@@ -97,7 +97,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
     const std::vector<double> gamma({1.0, 0.95, 0.9});
 
     for (uint32_t i = 0; i < train_size; ++i) {
-        if (i % 10 == 0 || (i + 1 == train_size)) {
+        if (i % 15 == 0 || (i + 1 == train_size)) {
             const std::vector<double> & par(train_history.at(i).second);
             const double & obj_fn(train_history.at(i).first);
 
