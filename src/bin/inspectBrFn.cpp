@@ -104,6 +104,9 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             // bellman residual
             *entry << rep << ", "
                    << num_obs << ", "
+                   << run_length << ", "
+                   << gs_step << ", "
+                   << sq_total_br << ", "
                    << i << ", "
                    << "br" << ", "
                    << "NA" << ", "
@@ -124,6 +127,9 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
                 // value function
                 *entry << rep << ", "
                        << num_obs << ", "
+                       << run_length << ", "
+                       << gs_step << ", "
+                       << sq_total_br << ", "
                        << i << ", "
                        << "value" << ", "
                        << gamma.at(g) << ", "
