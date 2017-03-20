@@ -219,10 +219,10 @@ int main(int argc, char *argv[]) {
     {
         njm::tools::Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({5, 10, 50, 100, 500, 1000})); // num_obs
-        g->add_factor(std::vector<int>({1, 2, 3})); // run_length
-        g->add_factor(std::vector<bool>({false, true})); // gs_step
-        g->add_factor(std::vector<bool>({false, true})); // sq_total_br
+        g->add_factor(std::vector<int>({5000, 10000})); // num_obs
+        g->add_factor(std::vector<int>({2, 3})); // run_length
+        g->add_factor(std::vector<bool>(true})); // gs_step
+        g->add_factor(std::vector<bool>(true})); // sq_total_br
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
