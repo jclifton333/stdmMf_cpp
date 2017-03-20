@@ -445,7 +445,7 @@ run(const std::shared_ptr<Network> & net,
                             new NetworkRunSymFeatures<InfShieldState>(
                                     net->clone(), 1)),
                     1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                    false, false, false);
+                    true, true, false);
             a.seed(i);
 
             s.start();
@@ -498,7 +498,7 @@ run(const std::shared_ptr<Network> & net,
                             new NetworkRunSymFeatures<InfShieldState>(
                                     net->clone(), 2)),
                     1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-                    false, false, false);
+                    true, true, false);
             a.seed(i);
 
             s.start();
@@ -530,62 +530,9 @@ run(const std::shared_ptr<Network> & net,
     }
 
 
-    // // br min length 3
-    // std::vector<std::future<double> > br_len_3_val;
-    // std::vector<std::future<double> > br_len_3_time;
-    // for (uint32_t i = 0; i < num_reps; ++i) {
-    //     ++total_sims;
-    //     std::shared_ptr<std::promise<double> > promise_val(
-    //             new std::promise<double>);
-    //     std::shared_ptr<std::promise<double> > promise_time(
-    //             new std::promise<double>);
-
-    //     br_len_3_val.push_back(promise_val->get_future());
-    //     br_len_3_time.push_back(promise_time->get_future());
-
-    //     pool.service().post([=]() {
-    //         System<InfShieldState> s(net->clone(), mod_system->clone());
-    //         s.seed(i);
-    //         BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
-    //                 std::shared_ptr<Features<InfShieldState> >(
-    //                         new NetworkRunSymFeatures<InfShieldState>(
-    //                                 net->clone(), 3)),
-    //                 1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
-    //                 false, false, false);
-    //         a.seed(i);
-
-    //         s.start();
-
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tick =
-    //             std::chrono::steady_clock::now();
-
-    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tock =
-    //             std::chrono::steady_clock::now();
-
-    //         promise_time->set_value(std::chrono::duration_cast<
-    //                 std::chrono::seconds>(tock - tick).count());
-
-    //         // write history to csv
-    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
-    //         history.emplace_back(s.state(),
-    //                 boost::dynamic_bitset<>(net->size()));
-    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
-    //                         "br_len_1", i, history));
-    //         *entry << add_to_entry;
-
-
-    //         progress->update();
-    //     });
-    // }
-
-
-    // iter length 1
-    std::vector<std::future<double> > iter_len_1_val;
-    std::vector<std::future<double> > iter_len_1_time;
+    // br min length 3
+    std::vector<std::future<double> > br_len_3_val;
+    std::vector<std::future<double> > br_len_3_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
         std::shared_ptr<std::promise<double> > promise_val(
@@ -593,18 +540,18 @@ run(const std::shared_ptr<Network> & net,
         std::shared_ptr<std::promise<double> > promise_time(
                 new std::promise<double>);
 
-        iter_len_1_val.push_back(promise_val->get_future());
-        iter_len_1_time.push_back(promise_time->get_future());
+        br_len_3_val.push_back(promise_val->get_future());
+        br_len_3_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
             s.seed(i);
-            BrMinIterSimPerturbAgent<InfShieldState> a(net->clone(),
+            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 1)),
-                    1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
-                    false, false, false, 0);
+                                    net->clone(), 3)),
+                    1e-1, 0.35, 1.41, 1, 0.85, 0.00397,
+                    true, true, false);
             a.seed(i);
 
             s.start();
@@ -627,120 +574,13 @@ run(const std::shared_ptr<Network> & net,
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
             const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "iter_len_1", i, history));
+                            "br_len_1", i, history));
             *entry << add_to_entry;
 
 
             progress->update();
         });
     }
-
-
-    // iter length 2
-    std::vector<std::future<double> > iter_len_2_val;
-    std::vector<std::future<double> > iter_len_2_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
-
-        iter_len_2_val.push_back(promise_val->get_future());
-        iter_len_2_time.push_back(promise_time->get_future());
-
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            BrMinIterSimPerturbAgent<InfShieldState> a(net->clone(),
-                    std::shared_ptr<Features<InfShieldState> >(
-                            new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 2)),
-                    1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
-                    false, false, false, 0);
-            a.seed(i);
-
-            s.start();
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
-
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "iter_len_2", i, history));
-            *entry << add_to_entry;
-
-
-            progress->update();
-        });
-    }
-
-
-    // // iter length 3
-    // std::vector<std::future<double> > iter_len_3_val;
-    // std::vector<std::future<double> > iter_len_3_time;
-    // for (uint32_t i = 0; i < num_reps; ++i) {
-    //     ++total_sims;
-    //     std::shared_ptr<std::promise<double> > promise_val(
-    //             new std::promise<double>);
-    //     std::shared_ptr<std::promise<double> > promise_time(
-    //             new std::promise<double>);
-
-    //     iter_len_3_val.push_back(promise_val->get_future());
-    //     iter_len_3_time.push_back(promise_time->get_future());
-
-    //     pool.service().post([=]() {
-    //         System<InfShieldState> s(net->clone(), mod_system->clone());
-    //         s.seed(i);
-    //         BrModIterSimPerturbAgent<InfShieldState> a(net->clone(),
-    //                 std::shared_ptr<Features<InfShieldState> >(
-    //                         new NetworkRunSymFeatures<InfShieldState>(
-    //                                 net->clone(), 3)),
-    //                 mod_agents->clone(),
-    //                 1e-1, 0.1, 1.41, 1, 0.85, 0.007150,
-    //                 false, false, false, 10, 10);
-    //         a.seed(i);
-
-    //         s.start();
-
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tick =
-    //             std::chrono::steady_clock::now();
-
-    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tock =
-    //             std::chrono::steady_clock::now();
-
-    //         promise_time->set_value(std::chrono::duration_cast<
-    //                 std::chrono::seconds>(tock - tick).count());
-
-    //         // write history to csv
-    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
-    //         history.emplace_back(s.state(),
-    //                 boost::dynamic_bitset<>(net->size()));
-    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
-    //                         "iter_len_3", i, history));
-    //         *entry << add_to_entry;
-
-
-    //         progress->update();
-    //     });
-    // }
 
 
     progress->total(total_sims);
@@ -959,97 +799,28 @@ run(const std::shared_ptr<Network> & net,
                 (agent_name, agent_res));
     }
 
-    // {
-    //     const std::string agent_name = "br_len_3";
-    //     std::vector<double> val(num_reps);
-    //     std::transform(br_len_3_val.begin(), br_len_3_val.end(),
-    //             val.begin(), val.begin(),
-    //             [](std::future<double> & a, const double & b) {
-    //                 return a.get();
-    //             });
-    //     std::vector<double> time(num_reps);
-    //     std::transform(br_len_3_time.begin(), br_len_3_time.end(),
-    //             time.begin(), time.begin(),
-    //             [](std::future<double> & a, const double & b) {
-    //                 return a.get();
-    //             });
-    //     const std::pair<double, double> br_len_3_stats = mean_and_var(val);
-    //     const std::vector<double> agent_res =
-    //         {br_len_3_stats.first,
-    //          std::sqrt(br_len_3_stats.second / num_reps),
-    //          mean_and_var(time).first};
-    //     all_results.push_back(std::pair<std::string, std::vector<double> >
-    //             (agent_name, agent_res));
-    // }
-
     {
-        const std::string agent_name = "iter_len_1";
+        const std::string agent_name = "br_len_3";
         std::vector<double> val(num_reps);
-        std::transform(iter_len_1_val.begin(), iter_len_1_val.end(),
+        std::transform(br_len_3_val.begin(), br_len_3_val.end(),
                 val.begin(), val.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
         std::vector<double> time(num_reps);
-        std::transform(iter_len_1_time.begin(), iter_len_1_time.end(),
+        std::transform(br_len_3_time.begin(), br_len_3_time.end(),
                 time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
-        const std::pair<double, double> iter_len_1_stats = mean_and_var(val);
+        const std::pair<double, double> br_len_3_stats = mean_and_var(val);
         const std::vector<double> agent_res =
-            {iter_len_1_stats.first,
-             std::sqrt(iter_len_1_stats.second / num_reps),
+            {br_len_3_stats.first,
+             std::sqrt(br_len_3_stats.second / num_reps),
              mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
     }
-
-    {
-        const std::string agent_name = "iter_len_2";
-        std::vector<double> val(num_reps);
-        std::transform(iter_len_2_val.begin(), iter_len_2_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(iter_len_2_time.begin(), iter_len_2_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> iter_len_2_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {iter_len_2_stats.first,
-             std::sqrt(iter_len_2_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
-
-    // {
-    //     const std::string agent_name = "iter_len_3";
-    //     std::vector<double> val(num_reps);
-    //     std::transform(iter_len_3_val.begin(), iter_len_3_val.end(),
-    //             val.begin(), val.begin(),
-    //             [](std::future<double> & a, const double & b) {
-    //                 return a.get();
-    //             });
-    //     std::vector<double> time(num_reps);
-    //     std::transform(iter_len_3_time.begin(), iter_len_3_time.end(),
-    //             time.begin(), time.begin(),
-    //             [](std::future<double> & a, const double & b) {
-    //                 return a.get();
-    //             });
-    //     const std::pair<double, double> iter_len_3_stats = mean_and_var(val);
-    //     const std::vector<double> agent_res =
-    //         {iter_len_3_stats.first,
-    //          std::sqrt(iter_len_3_stats.second / num_reps),
-    //          mean_and_var(time).first};
-    //     all_results.push_back(std::pair<std::string, std::vector<double> >
-    //             (agent_name, agent_res));
-    // }
 
     return all_results;
 }
