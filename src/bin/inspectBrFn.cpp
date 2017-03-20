@@ -36,6 +36,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<InfShieldState> > & model,
         const uint32_t & num_obs,
         const uint32_t & run_length,
+        const bool & do_sweep,
         const bool & gs_step,
         const bool & sq_total_br,
         njm::data::Entry * const entry) {
@@ -76,7 +77,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
-            features->clone(), 0.10, 0.25, 1.41, 1.0, 0.85, 0.00397, false,
+            features->clone(), 0.10, 0.10, 1.41, 1.0, 0.85, 0.01290, do_sweep,
             gs_step, sq_total_br);
     brAgent.rng(rng);
     brAgent.record(true);
@@ -105,6 +106,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             *entry << rep << ","
                    << num_obs << ","
                    << run_length << ","
+                   << do_sweep << ","
                    << gs_step << ","
                    << sq_total_br << ","
                    << i << ","
@@ -114,7 +116,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
                    << "NA" << "\n";
 
             SweepAgent<InfShieldState> agent(network->clone(),
-                    features->clone(), par, 2, false);
+                    features->clone(), par, 2, do_sweep);
             agent.rng(rng);
             for (uint32_t g = 0; g < gamma.size(); ++g) {
                 MeanVarAccumulator acc;
@@ -128,6 +130,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
                 *entry << rep << ","
                        << num_obs << ","
                        << run_length << ","
+                       << do_sweep << ","
                        << gs_step << ","
                        << sq_total_br << ","
                        << i << ","
@@ -221,6 +224,7 @@ int main(int argc, char *argv[]) {
 
         g->add_factor(std::vector<int>({5000, 10000})); // num_obs
         g->add_factor(std::vector<int>({2, 3})); // run_length
+        g->add_factor(std::vector<bool>({true})); // do_sweep
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({true})); // sq_total_br
     }
@@ -237,6 +241,7 @@ int main(int argc, char *argv[]) {
         << "rep,"
         << "num_obs,"
         << "run_length,"
+        << "do_sweep,"
         << "gs_step,"
         << "sq_total_br,"
         << "iter,"
@@ -265,6 +270,9 @@ int main(int argc, char *argv[]) {
                     f.at(i++).val.int_val);
             CHECK_EQ(f.at(i).type,
                     njm::tools::Experiment::FactorLevel::Type::is_bool);
+            const bool do_sweep = f.at(i++).val.bool_val;
+            CHECK_EQ(f.at(i).type,
+                    njm::tools::Experiment::FactorLevel::Type::is_bool);
             const bool gs_step = f.at(i++).val.bool_val;
             CHECK_EQ(f.at(i).type,
                     njm::tools::Experiment::FactorLevel::Type::is_bool);
@@ -278,7 +286,8 @@ int main(int argc, char *argv[]) {
 
             p.service().post([=]() {
                 run(rep, network->clone(), model->clone(),
-                        num_obs, run_length, gs_step, sq_total_br, new_entry);
+                        num_obs, run_length, do_sweep, gs_step, sq_total_br,
+                        new_entry);
                 progress->update();
             });
 
