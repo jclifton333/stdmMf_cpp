@@ -102,15 +102,15 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             const double & obj_fn(train_history.at(i).first);
 
             // bellman residual
-            *entry << rep << ", "
-                   << num_obs << ", "
-                   << run_length << ", "
-                   << gs_step << ", "
-                   << sq_total_br << ", "
-                   << i << ", "
-                   << "br" << ", "
-                   << "NA" << ", "
-                   << obj_fn << ", "
+            *entry << rep << ","
+                   << num_obs << ","
+                   << run_length << ","
+                   << gs_step << ","
+                   << sq_total_br << ","
+                   << i << ","
+                   << "br" << ","
+                   << "NA" << ","
+                   << obj_fn << ","
                    << "NA" << "\n";
 
             SweepAgent<InfShieldState> agent(network->clone(),
@@ -125,15 +125,15 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
                 }
 
                 // value function
-                *entry << rep << ", "
-                       << num_obs << ", "
-                       << run_length << ", "
-                       << gs_step << ", "
-                       << sq_total_br << ", "
-                       << i << ", "
-                       << "value" << ", "
-                       << gamma.at(g) << ", "
-                       << boost::accumulators::mean(acc) << ", "
+                *entry << rep << ","
+                       << num_obs << ","
+                       << run_length << ","
+                       << gs_step << ","
+                       << sq_total_br << ","
+                       << i << ","
+                       << "value" << ","
+                       << gamma.at(g) << ","
+                       << boost::accumulators::mean(acc) << ","
                        << boost::accumulators::variance(acc) << "\n";
             }
         }
@@ -234,15 +234,15 @@ int main(int argc, char *argv[]) {
             njm::info::project::PROJECT_ROOT_DIR + "/data");
 
     *tk.entry("inspectBrFn_results.csv")
-        << "rep, "
-        << "num_obs, "
-        << "run_length, "
-        << "gs_step, "
-        << "sq_total_br, "
-        << "iter, "
-        << "fn_type, "
-        << "gamma, "
-        << "fn_value, "
+        << "rep,"
+        << "num_obs,"
+        << "run_length,"
+        << "gs_step,"
+        << "sq_total_br,"
+        << "iter,"
+        << "fn_type,"
+        << "gamma,"
+        << "fn_value,"
         << "fn_error\n";
 
 
