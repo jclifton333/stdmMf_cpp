@@ -236,6 +236,9 @@ int main(int argc, char *argv[]) {
     *tk.entry("inspectBrFn_results.csv")
         << "rep, "
         << "num_obs, "
+        << "run_length, "
+        << "gs_step, "
+        << "sq_total_br, "
         << "iter, "
         << "fn_type, "
         << "gamma, "
