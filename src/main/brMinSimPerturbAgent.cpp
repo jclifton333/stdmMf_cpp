@@ -122,6 +122,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
         EpsAgent<State> ea(this->network_, pa, ra, 0.2);
         ea.rng(this->rng());
 
+        // start simulation from current state
         s.state(history.at(history.size() - 1).next_state);
         const uint32_t num_to_supp = this->num_supp_obs_ - supp_history.size();
         for (uint32_t i = 0; i < num_to_supp; i++) {
@@ -133,6 +134,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
             s.turn_clock();
         }
 
+        // append simulated history
         const std::vector<Transition<State> > trans_to_supp(
                 Transition<State>::from_sequence(s.history(), s.state()));
 
