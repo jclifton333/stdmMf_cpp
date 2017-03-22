@@ -106,6 +106,8 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
     std::vector<Transition<State> > supp_history(history);
     // supplement observations
     if (this->num_supp_obs_ > history.size()) {
+        LOG(FATAL) << "Should not be supplementing now.  "
+                   << "Currently only running experiments.";
         this->model_->est_par(history);
         System<State> s(this->network_, this->model_);
         s.rng(this->rng());
