@@ -35,7 +35,8 @@ int main(int argc, char *argv[]) {
     BrMinSimPerturbAgent<InfState> a(net->clone(),
             std::shared_ptr<Features<InfState> >(
                     new NetworkRunFeatures<InfState>(net->clone(), 4)),
-            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5, false, false, false);
+            mod->clone(),
+            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5, false, false, false, 0, 0);
     a.seed(0);
 
     s.start();

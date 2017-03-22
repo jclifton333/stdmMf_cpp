@@ -142,8 +142,9 @@ void generate_jitters(const uint32_t & seed,
     CHECK_EQ(history_b.size(), num_obs_b);
 
     // setup agent
-    BrMinSimPerturbAgent<InfShieldState> brAgent(network, features,
-            1e-1, 0.1, 1.41, 1, 0.85, 0.007150, false, gs_step, sq_total_br);
+    BrMinSimPerturbAgent<InfShieldState> brAgent(network, features, model,
+            1e-1, 0.1, 1.41, 1, 0.85, 0.007150, false, gs_step, sq_total_br, 0,
+            0);
     brAgent.rng(rng);
 
 

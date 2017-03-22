@@ -164,9 +164,9 @@ std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
     const double min_step_size = this->br_a_ /
         std::pow(num_steps + this->br_b_, this->br_ell_);
     BrMinSimPerturbAgent<State> brMinAgent(this->network_, this->features_,
-            this->br_c_, this->br_t_, this->br_a_, this->br_b_, this->br_ell_,
-            std::max(this->br_min_step_size_, min_step_size),
-            false, false, false);
+            this->model_, this->br_c_, this->br_t_, this->br_a_, this->br_b_,
+            this->br_ell_, std::max(this->br_min_step_size_, min_step_size),
+            false, false, false, 0, 0);
     brMinAgent.rng(this->rng());
     const std::vector<double> br_par = brMinAgent.train(history, vfn_par);
 

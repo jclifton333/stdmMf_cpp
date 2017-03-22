@@ -39,6 +39,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
         const bool & do_sweep,
         const bool & gs_step,
         const bool & sq_total_br,
+        const uint32_t & obs_per_iter,
         njm::data::Entry * const entry) {
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
     rng->seed(rep);
@@ -77,8 +78,8 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
-            features->clone(), 0.10, 0.10, 1.41, 1.0, 0.85, 0.01290, do_sweep,
-            gs_step, sq_total_br);
+            features->clone(), model->clone(), 0.10, 0.10, 1.41, 1.0, 0.85,
+            0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter);
     brAgent.rng(rng);
     brAgent.record(true);
 
@@ -222,11 +223,12 @@ int main(int argc, char *argv[]) {
     {
         njm::tools::Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({5000, 10000})); // num_obs
+        g->add_factor(std::vector<int>({1000, 5000, 10000})); // num_obs
         g->add_factor(std::vector<int>({2, 3})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweep
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({true})); // sq_total_br
+        g->add_factor(std::vector<int>({100, 500, 0})); // obs_per_iter
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
@@ -277,6 +279,10 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type,
                     njm::tools::Experiment::FactorLevel::Type::is_bool);
             const bool sq_total_br = f.at(i++).val.bool_val;
+            CHECK_EQ(f.at(i).type,
+                    njm::tools::Experiment::FactorLevel::Type::is_int);
+            const uint32_t obs_per_iter = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
 
             CHECK_EQ(i, f.size());
 
@@ -287,7 +293,7 @@ int main(int argc, char *argv[]) {
             p.service().post([=]() {
                 run(rep, network->clone(), model->clone(),
                         num_obs, run_length, do_sweep, gs_step, sq_total_br,
-                        new_entry);
+                        obs_per_iter, new_entry);
                 progress->update();
             });
 

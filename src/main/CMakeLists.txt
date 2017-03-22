@@ -28,8 +28,6 @@ add_library(stdmMf network.cpp system.cpp states.cpp
   epsAgent.cpp sweepAgent.cpp sweepAgentSlow.cpp
   vfnMaxSimPerturbAgent.cpp brMinSimPerturbAgent.cpp
   vfnBrAdaptSimPerturbAgent.cpp vfnBrStartSimPerturbAgent.cpp
-  brModSuppSimPerturbAgent.cpp brMinIterSimPerturbAgent.cpp
-  brMinStartsSimPerturbAgent.cpp
   lookupAgent.cpp
 
   ## features

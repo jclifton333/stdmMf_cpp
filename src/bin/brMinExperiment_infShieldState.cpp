@@ -16,8 +16,8 @@
 #include "system.hpp"
 #include "agent.hpp"
 #include "infShieldStateNoImNoSoModel.hpp"
-#include "brMinIterSimPerturbAgent.hpp"
 #include "networkRunSymFeatures.hpp"
+#include "brMinSimPerturbAgent.hpp"
 #include "sweepAgent.hpp"
 #include "randomAgent.hpp"
 #include "proximalAgent.hpp"
@@ -136,8 +136,9 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
     const std::vector<Transition<InfShieldState> > all_history(
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
-    BrMinIterSimPerturbAgent<InfShieldState> brAgent(net, features, c, t, a, b,
-            ell, min_step_size, do_sweep, gs_step, sq_total_br, obs_per_iter);
+    BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, mod->clone(),
+            c, t, a, b, ell, min_step_size, do_sweep, gs_step, sq_total_br, 0,
+            obs_per_iter);
     brAgent.rng(rng);
 
     // start timer
