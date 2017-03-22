@@ -6,6 +6,8 @@
 #include "objFns.hpp"
 
 #include "proximalAgent.hpp"
+#include "randomAgent.hpp"
+#include "epsAgent.hpp"
 
 #include <glog/logging.h>
 
@@ -18,6 +20,7 @@ template <typename State>
 BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Features<State> > & features,
+        const std::shared_ptr<Model<State> > & model,
         const double & c,
         const double & t,
         const double & a,
@@ -26,11 +29,15 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const double & min_step_size,
         const bool & do_sweep,
         const bool & gs_step,
-        const bool & sq_total_br)
-    : Agent<State>(network), features_(features),
+        const bool & sq_total_br,
+        const uint32_t & num_supp_obs,
+        const uint32_t & obs_per_iter)
+    : Agent<State>(network), features_(features), model_(model),
       c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
       do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
-      record_(false), train_history_() {
+      num_supp_obs_(num_supp_obs), obs_per_iter_(obs_per_iter),
+      last_optim_par_(this->features_->num_features(), 0.0), record_(false),
+      train_history_() {
 }
 
 
@@ -38,11 +45,13 @@ template <typename State>
 BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const BrMinSimPerturbAgent & other)
     : Agent<State>(other), features_(other.features_->clone()),
-      c_(other.c_), t_(other.t_), a_(other.a_),
+      model_(other.model_->clone()), c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
       do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
-      sq_total_br_(other.sq_total_br_), record_(other.record_),
-      train_history_(other.train_history_) {
+      sq_total_br_(other.sq_total_br_), num_supp_obs_(other.num_supp_obs_),
+      obs_per_iter_(other.obs_per_iter_),
+      last_optim_par_(this->features_->num_features(), 0.0),
+      record_(other.record_), train_history_(other.train_history_) {
 }
 
 
@@ -68,7 +77,10 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 
-    const std::vector<double> optim_par = this->train(all_history);
+    const std::vector<double> optim_par = this->train(all_history,
+            this->last_optim_par_);
+    this->last_optim_par_ = optim_par;
+
 
     // use sweep agent to determine treatment
     SweepAgent<State> a(this->network_, this->features_, optim_par, 2,
@@ -81,18 +93,79 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
 template <typename State>
 std::vector<double> BrMinSimPerturbAgent<State>::train(
         const std::vector<Transition<State> > & history) {
-    std::vector<double> starting_vals(this->features_->num_features(), 0.0);
-    const std::vector<double> optim_par = this->train(history,
-            starting_vals);
-
-    return optim_par;
+    return this->train(history,
+            std::vector<double>(this->features_->num_features(), 0.0));
 }
-
 
 
 
 template <typename State>
 std::vector<double> BrMinSimPerturbAgent<State>::train(
+        const std::vector<Transition<State> > & history,
+        const std::vector<double> & starting_vals) {
+    std::vector<Transition<State> > supp_history(history);
+    // supplement observations
+    if (this->num_supp_obs_ > history.size()) {
+        this->model_->est_par(history);
+        System<State> s(this->network_, this->model_);
+        s.rng(this->rng());
+
+        // eps agent
+        std::shared_ptr<ProximalAgent<State> > pa(
+                new ProximalAgent<State>(this->network_));
+        pa->rng(this->rng());
+        std::shared_ptr<RandomAgent<State> > ra(
+                new RandomAgent<State>(this->network_));
+        ra->rng(this->rng());
+        EpsAgent<State> ea(this->network_, pa, ra, 0.2);
+        ea.rng(this->rng());
+
+        s.state(history.at(history.size() - 1).next_state);
+        const uint32_t num_to_supp = this->num_supp_obs_ - supp_history.size();
+        for (uint32_t i = 0; i < num_to_supp; i++) {
+            const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.state(),
+                    s.history());
+
+            s.trt_bits(trt_bits);
+
+            s.turn_clock();
+        }
+
+        const std::vector<Transition<State> > trans_to_supp(
+                Transition<State>::from_sequence(s.history(), s.state()));
+
+        supp_history.insert(supp_history.end(), trans_to_supp.begin(),
+                trans_to_supp.end());
+
+        CHECK_EQ(supp_history.size(), this->num_supp_obs_);
+    }
+
+    // fit q-function
+    if (this->obs_per_iter_ > 0) {
+        // iteratively
+        std::vector<double> optim_par(starting_vals);
+        uint32_t num_obs(0);
+        const uint32_t total_obs(supp_history.size());
+        while (num_obs < total_obs) {
+            // add more observations
+            num_obs = std::min(num_obs + this->obs_per_iter_, total_obs);
+            const std::vector<Transition<State> > partial_history(
+                    supp_history.begin(), supp_history.begin() + num_obs);
+
+            // train
+            optim_par = this->train_iter(partial_history, optim_par);
+
+        }
+        return optim_par;
+    } else {
+        // train using all history at once
+        return this->train_iter(supp_history, starting_vals);
+    }
+}
+
+
+template <typename State>
+std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
         const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
 
@@ -202,6 +275,7 @@ template<typename State>
 void BrMinSimPerturbAgent<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
     this->njm::tools::RngClass::rng(rng);
+    this->model_->rng(rng);
 }
 
 
