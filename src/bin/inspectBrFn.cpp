@@ -223,12 +223,12 @@ int main(int argc, char *argv[]) {
     {
         njm::tools::Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({1000, 5000, 10000})); // num_obs
-        g->add_factor(std::vector<int>({2, 3})); // run_length
+        g->add_factor(std::vector<int>({100, 200, 500})); // num_obs
+        g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweep
         g->add_factor(std::vector<bool>({true})); // gs_step
-        g->add_factor(std::vector<bool>({true})); // sq_total_br
-        g->add_factor(std::vector<int>({100, 500, 0})); // obs_per_iter
+        g->add_factor(std::vector<bool>({false})); // sq_total_br
+        g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
