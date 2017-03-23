@@ -96,7 +96,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
     typedef boost::accumulators::accumulator_set<double, MeanVarFeatures>
         MeanVarAccumulator;
 
-    const std::vector<double> gamma({1.0, 0.95, 0.9});
+    const std::vector<double> gamma({1.0});
 
     for (uint32_t i = 0; i < train_size; ++i) {
         if (i % 15 == 0 || (i + 1 == train_size)) {
