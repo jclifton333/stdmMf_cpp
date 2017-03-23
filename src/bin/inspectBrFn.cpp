@@ -121,8 +121,8 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             agent.rng(rng);
             for (uint32_t g = 0; g < gamma.size(); ++g) {
                 MeanVarAccumulator acc;
-                for (uint32_t rep = 0; rep < value_mc_reps; ++rep) {
-                    rng->seed(rep);
+                for (uint32_t mc_rep = 0; mc_rep < value_mc_reps; ++mc_rep) {
+                    rng->seed(mc_rep);
                     s.start();
                     acc(runner(&s, &agent, 100, gamma.at(g)));
                 }
