@@ -1046,7 +1046,7 @@ int main(int argc, char *argv[]) {
 
             std::cout << "=====================================" << std::endl
                       << "results for network " << net->kind()
-                      << " and model pair " << j << std::endl;
+                      << " and model pair " << models.at(j).first << std::endl;
 
             *e_read << "=====================================" << "\n"
                     << "results for network " << net->kind()
