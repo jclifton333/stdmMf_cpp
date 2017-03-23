@@ -78,7 +78,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
-            features->clone(), model->clone(), 0.10, 0.10, 1.41, 1.0, 0.85,
+            features->clone(), model->clone(), 0.10, 0.20, 1.41, 1.0, 0.85,
             0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter);
     brAgent.rng(rng);
     brAgent.record(true);
@@ -88,7 +88,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
     const std::vector<std::pair<double, std::vector<double> > > train_history(
             brAgent.train_history());
     const uint32_t train_size(train_history.size());
-    const uint32_t value_mc_reps(100);
+    const uint32_t value_mc_reps(50);
 
     typedef boost::accumulators::features<
         boost::accumulators::tag::mean,
