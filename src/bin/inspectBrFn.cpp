@@ -79,7 +79,7 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
             features->clone(), model->clone(), 0.10, 0.20, 1.41, 1.0, 0.85,
-            0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter);
+            0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter, 0, 0);
     brAgent.rng(rng);
     brAgent.record(true);
 

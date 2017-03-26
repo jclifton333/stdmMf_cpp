@@ -446,7 +446,7 @@ run(const std::shared_ptr<Network> & net,
                                     net->clone(), 1)),
                     mod_agents->clone(),
                     0.1, 0.1, 1.41, 1, 0.85, 0.01290,
-                    true, true, false, 100, 5);
+                    true, true, false, 100, 5, 0, 0);
             a.seed(i);
 
             s.start();
@@ -500,7 +500,7 @@ run(const std::shared_ptr<Network> & net,
                                     net->clone(), 2)),
                     mod_agents->clone(),
                     0.1, 0.35, 1.41, 1, 0.85, 0.00397,
-                    true, true, false, 100, 5);
+                    true, true, false, 100, 5, 0, 0);
             a.seed(i);
 
             s.start();

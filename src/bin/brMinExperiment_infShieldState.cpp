@@ -138,7 +138,7 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, mod->clone(),
             c, t, a, b, ell, min_step_size, do_sweep, gs_step, sq_total_br, 0,
-            obs_per_iter);
+            obs_per_iter, 0, 0);
     brAgent.rng(rng);
 
     // start timer
