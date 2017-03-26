@@ -257,6 +257,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
 
     njm::optim::ErrorCode ec;
     do {
+        // optimization step
         ec = sp.step();
 
         if (this->record_) {
@@ -264,7 +265,9 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
         }
 
         // test if treatments have changed
-        if (this->max_same_trt_ > 0) {
+        if (this->max_same_trt_ > 0
+                && (sp.completed_steps()
+                        % this->steps_between_trt_test_ == 0)) {
             SweepAgent<State> a(this->network_, this->features_, sp.par(), 2,
                     this->do_sweep_);
             bool no_change = true;
@@ -272,11 +275,14 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
                 const boost::dynamic_bitset<> ra(a.apply_trt(
                                 random_states.at(i)));
                 if (ra != random_states_trt.at(i)) {
+                    // indicate change
                     no_change = false;
+                    // assign the new treatment
                     random_states_trt.at(i) = ra;
                 }
             }
 
+            // if no change, increment counter
             if (no_change) {
                 ++num_same;
             }
