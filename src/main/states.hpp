@@ -3,6 +3,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include <njm_cpp/tools/random.hpp>
+
 namespace stdmMf {
 
 struct InfState {
@@ -18,6 +20,9 @@ struct InfState {
     InfState(const boost::dynamic_bitset<> & inf_bits);
 
     void reset();
+
+    static InfState random(const uint32_t & num_nodes,
+            njm::tools::Rng & rng);
 };
 
 
@@ -36,6 +41,9 @@ struct InfShieldState {
             const std::vector<double> & shield);
 
     void reset();
+
+    static InfShieldState random(const uint32_t & num_nodes,
+            njm::tools::Rng & rng);
 };
 
 

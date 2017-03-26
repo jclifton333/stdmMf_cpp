@@ -20,6 +20,19 @@ void InfState::reset() {
 }
 
 
+InfState InfState::random(const uint32_t & num_nodes,
+        njm::tools::Rng & rng) {
+    InfState state(num_nodes);
+    for (uint32_t i = 0; i < num_nodes; ++i) {
+        if (rng.runif_01() < 0.5) {
+            state.inf_bits.flip();
+        }
+    }
+
+    return state;
+}
+
+
 // infection and shield state
 InfShieldState::InfShieldState(const uint32_t & num_nodes)
     : inf_bits(num_nodes), shield(num_nodes, 0.) {
@@ -35,6 +48,21 @@ InfShieldState::InfShieldState(const boost::dynamic_bitset<> & inf_bits,
 void InfShieldState::reset() {
     this->inf_bits.reset();
     std::fill(this->shield.begin(), this->shield.end(), 0.);
+}
+
+
+InfShieldState InfShieldState::random(const uint32_t & num_nodes,
+        njm::tools::Rng & rng) {
+    InfShieldState state(num_nodes);
+    for (uint32_t i = 0; i < num_nodes; ++i) {
+        if (rng.runif_01() < 0.5) {
+            state.inf_bits.flip();
+        }
+
+        state.shield.at(i) = rng.rnorm_01();
+    }
+
+    return state;
 }
 
 
