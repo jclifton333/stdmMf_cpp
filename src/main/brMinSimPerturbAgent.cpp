@@ -282,10 +282,11 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
             }
         }
     } while (ec == njm::optim::ErrorCode::CONTINUE
-            && num_same <= this->max_same_trt_);
+            && (this->max_same_trt_ == 0
+                    || num_same < this->max_same_trt_));
 
     // check convergence
-    if (num_same <= this->max_same_trt_) {
+    if (this->max_same_trt_ == 0 || num_same < this->max_same_trt_) {
         CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
             << std::endl
             << "seed: " << this->seed() << std::endl
