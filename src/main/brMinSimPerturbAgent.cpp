@@ -31,11 +31,15 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const bool & gs_step,
         const bool & sq_total_br,
         const uint32_t & num_supp_obs,
-        const uint32_t & obs_per_iter)
+        const uint32_t & obs_per_iter,
+        const uint32_t & max_same_trt,
+        const uint32_t & steps_between_trt_test)
     : Agent<State>(network), features_(features), model_(model),
       c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
       do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
       num_supp_obs_(num_supp_obs), obs_per_iter_(obs_per_iter),
+      max_same_trt_(max_same_trt),
+      steps_between_trt_test_(steps_between_trt_test),
       last_optim_par_(this->features_->num_features(), 0.0), record_(false),
       train_history_() {
 }
@@ -49,7 +53,8 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
       do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
       sq_total_br_(other.sq_total_br_), num_supp_obs_(other.num_supp_obs_),
-      obs_per_iter_(other.obs_per_iter_),
+      obs_per_iter_(other.obs_per_iter_), max_same_trt_(other.max_same_trt_),
+      steps_between_trt_test_(other.steps_between_trt_test_),
       last_optim_par_(this->features_->num_features(), 0.0),
       record_(other.record_), train_history_(other.train_history_) {
 }
@@ -235,6 +240,21 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
         this->train_history_.emplace_back(sp.obj_fn(), starting_vals);
     }
 
+    // generate random states and treatments
+    const uint32_t num_random_states = 5;
+    std::vector<State> random_states;
+    std::vector<boost::dynamic_bitset<> > random_states_trt;
+    uint32_t num_same = 0;
+    if (this->max_same_trt_ > 0) {
+        SweepAgent<State> a(this->network_, this->features_, starting_vals, 2,
+                this->do_sweep_);
+        for (uint32_t i = 0; i < num_random_states; ++i) {
+            State rs(State::random(this->num_nodes_, *this->rng()));
+            random_states.push_back(rs);
+            random_states_trt.push_back(a.apply_trt(rs));
+        }
+    }
+
     njm::optim::ErrorCode ec;
     do {
         ec = sp.step();
@@ -242,18 +262,40 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
         if (this->record_) {
             this->train_history_.emplace_back(sp.obj_fn(), sp.par());
         }
-    } while (ec == njm::optim::ErrorCode::CONTINUE);
+
+        // test if treatments have changed
+        if (this->max_same_trt_ > 0) {
+            SweepAgent<State> a(this->network_, this->features_, sp.par(), 2,
+                    this->do_sweep_);
+            bool no_change = true;
+            for (uint32_t i = 0; i < num_random_states; ++i) {
+                const boost::dynamic_bitset<> ra(a.apply_trt(
+                                random_states.at(i)));
+                if (ra != random_states_trt.at(i)) {
+                    no_change = false;
+                    random_states_trt.at(i) = ra;
+                }
+            }
+
+            if (no_change) {
+                ++num_same;
+            }
+        }
+    } while (ec == njm::optim::ErrorCode::CONTINUE
+            && num_same <= this->max_same_trt_);
 
     // check convergence
-    CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
-        << std::endl
-        << "seed: " << this->seed() << std::endl
-        << "steps: " << sp.completed_steps() << std::endl
-        << "c: " << this->c_ << std::endl
-        << "t: " << this->t_ << std::endl
-        << "a: " << this->a_ << std::endl
-        << "b: " << this->b_ << std::endl
-        << "ell: " << this->min_step_size_ << std::endl;
+    if (num_same <= this->max_same_trt_) {
+        CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
+            << std::endl
+            << "seed: " << this->seed() << std::endl
+            << "steps: " << sp.completed_steps() << std::endl
+            << "c: " << this->c_ << std::endl
+            << "t: " << this->t_ << std::endl
+            << "a: " << this->a_ << std::endl
+            << "b: " << this->b_ << std::endl
+            << "ell: " << this->min_step_size_ << std::endl;
+    }
 
     return sp.par();
 }
