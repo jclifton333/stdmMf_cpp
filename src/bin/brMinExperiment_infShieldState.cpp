@@ -43,7 +43,9 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
         const bool & do_sweep,
         const bool & gs_step,
         const bool & sq_total_br,
-        const uint32_t & obs_per_iter) {
+        const uint32_t & obs_per_iter,
+        const uint32_t & max_same_trt,
+        const uint32_t & steps_between_trt_test) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->seed(seed);
 
@@ -138,7 +140,7 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, mod->clone(),
             c, t, a, b, ell, min_step_size, do_sweep, gs_step, sq_total_br, 0,
-            obs_per_iter, 0, 0);
+            obs_per_iter, max_same_trt, steps_between_trt_test);
     brAgent.rng(rng);
 
     // start timer
@@ -183,38 +185,42 @@ int main(int argc, char *argv[]) {
     {
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({100, 200, 500})); // num_reps
+        g->add_factor(std::vector<int>({500})); // num_reps
         g->add_factor(std::vector<double>({0.1})); // c
         g->add_factor(std::vector<double>({0.2})); // t
         g->add_factor(std::vector<double>({1.41e-0})); // a
         g->add_factor(std::vector<double>({1})); // b
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
-            {7.15e-3})); // min_step_size (500, 1000)
-        g->add_factor(std::vector<int>({1, 2})); // run_length
+            {7.15e-3})); // min_step_size
+        g->add_factor(std::vector<int>({2})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweeps
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({false})); // sq_total_br
-        g->add_factor(std::vector<int>({0, 5, 10, 50})); // obs_per_iter
+        g->add_factor(std::vector<int>({5})); // obs_per_iter
+        g->add_factor(std::vector<int>({0})); // max_same_trt
+        g->add_factor(std::vector<int>({0})); // steps_between_trt_test
     }
 
 
     {
         Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({100, 200, 500})); // num_reps
+        g->add_factor(std::vector<int>({500})); // num_reps
         g->add_factor(std::vector<double>({0.1})); // c
         g->add_factor(std::vector<double>({0.2})); // t
         g->add_factor(std::vector<double>({1.41e-0})); // a
         g->add_factor(std::vector<double>({1})); // b
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
-            {0.0129})); // min_step_size (100, 250)
-        g->add_factor(std::vector<int>({1, 2})); // run_length
+            {7.15e-3})); // min_step_size
+        g->add_factor(std::vector<int>({2})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweeps
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({false})); // sq_total_br
-        g->add_factor(std::vector<int>({0, 5, 10, 50})); // obs_per_iter
+        g->add_factor(std::vector<int>({1, 2, 5, 10})); // max_same_trt
+        g->add_factor(std::vector<int>(
+            {0, 1, 2, 5, 10})); // steps_between_trt_test
     }
 
 
@@ -265,6 +271,12 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
             const uint32_t obs_per_iter = static_cast<uint32_t>(
                     f.at(i++).val.int_val);
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
+            const uint32_t max_same_trt = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
+            const uint32_t steps_between_trt_test = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
 
             // check number of factors
             CHECK_EQ(i, f.size());
@@ -272,7 +284,8 @@ int main(int argc, char *argv[]) {
             std::shared_ptr<package_type> task(new package_type([=]() {
                 auto ret = run_brmin(rep, num_reps, c, t, a, b, ell,
                         min_step_size, run_length, do_sweep, gs_step,
-                        sq_total_br, obs_per_iter);
+                        sq_total_br, obs_per_iter, max_same_trt,
+                        steps_between_trt_test);
                 progress->update();
                 return ret;
             }));
