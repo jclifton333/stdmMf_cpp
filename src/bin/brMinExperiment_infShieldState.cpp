@@ -218,6 +218,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<bool>({true})); // do_sweeps
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({false})); // sq_total_br
+        g->add_factor(std::vector<int>({5})); // obs_per_iter
         g->add_factor(std::vector<int>({1, 2, 5, 10})); // max_same_trt
         g->add_factor(std::vector<int>(
             {0, 1, 2, 5, 10})); // steps_between_trt_test
