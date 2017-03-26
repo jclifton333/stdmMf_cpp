@@ -42,6 +42,9 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
       steps_between_trt_test_(steps_between_trt_test),
       last_optim_par_(this->features_->num_features(), 0.0), record_(false),
       train_history_() {
+    if (this->max_same_trt_ > 0) {
+        CHECK_GT(this->steps_between_trt_test_, 0);
+    }
 }
 
 
