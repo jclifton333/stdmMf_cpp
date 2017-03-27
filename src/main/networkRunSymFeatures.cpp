@@ -64,6 +64,7 @@ NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
     this->increment_by_len_.resize(this->run_length_, 0);
     for (uint32_t i = 0; i < this->run_length_; ++i) {
         this->increment_by_len_.at(i) = 1.0 / this->num_runs_by_len_.at(i);
+        std::cout << this->increment_by_len_.at(i) << std::endl;
     }
 
     // set up path trt mask
@@ -455,12 +456,10 @@ void NetworkRunSymFeatures<InfShieldState>::update_features_async(
 
         if (mask_old < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(mask_old)) -=
-                1.0 / this->increment_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
     }
 }
-
-
 
 // END: Implementation for InfShieldState
 
