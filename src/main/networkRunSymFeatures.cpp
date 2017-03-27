@@ -61,6 +61,10 @@ NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
         const uint32_t run_len  = this->runs_.at(i).nodes.size();
         ++this->num_runs_by_len_.at(run_len - 1);
     }
+    this->increment_by_len_.resize(this->run_length_, 0);
+    for (uint32_t i = 0; i < this->run_length_; ++i) {
+        this->increment_by_len_.at(i) = 1.0 / this->num_runs_by_len_.at(i);
+    }
 
     // set up path trt mask
     this->masks_by_node_.resize(this->network_->size());
@@ -89,7 +93,8 @@ NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
       runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
       run_length_(other.run_length_), num_runs_(other.num_runs_),
       index_by_len_(other.index_by_len_), num_features_(other.num_features_),
-      num_runs_by_len_(other.num_runs_by_len_) {
+      num_runs_by_len_(other.num_runs_by_len_),
+      increment_by_len_(other.increment_by_len_) {
 
     // set up path trt mask
     this->masks_by_node_.resize(this->network_->size());
@@ -168,7 +173,7 @@ std::vector<double> NetworkRunSymFeatures<InfState>::get_features(
         const uint32_t max_mask = 1 << (run_len + run_len);
         if (mask < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(mask)) +=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
     }
 
@@ -208,7 +213,7 @@ void NetworkRunSymFeatures<InfState>::update_features(
         // update features for old masks
         if (cm < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(cm)) -=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
 
         // update masks
@@ -228,7 +233,7 @@ void NetworkRunSymFeatures<InfState>::update_features(
         // update features for new masks
         if (cm < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(cm)) +=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
 
     }
@@ -274,12 +279,12 @@ void NetworkRunSymFeatures<InfState>::update_features_async(
         const uint32_t max_mask = 1 << (run_len + run_len);
         if (mask_new < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(mask_new)) +=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
 
         if (mask_old < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(mask_old)) -=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
     }
 }
@@ -326,7 +331,7 @@ std::vector<double> NetworkRunSymFeatures<InfShieldState>::get_features(
         const uint32_t max_mask = 1 << (run_len * 3);
         if (mask < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(mask)) +=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
     }
 
@@ -370,7 +375,7 @@ void NetworkRunSymFeatures<InfShieldState>::update_features(
         // update features for old masks
         if (cm < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(cm)) -=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
 
         // update masks
@@ -393,7 +398,7 @@ void NetworkRunSymFeatures<InfShieldState>::update_features(
         // update features for new masks
         if (cm < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(cm)) +=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
 
     }
@@ -445,12 +450,12 @@ void NetworkRunSymFeatures<InfShieldState>::update_features_async(
         const uint32_t max_mask = 1 << (run_len * 3);
         if (mask_new < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(mask_new)) +=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                this->increment_by_len_.at(run_len - 1);
         }
 
         if (mask_old < (max_mask - 1)) {
             feat.at(this->index_by_len_.at(run_len - 1).at(mask_old)) -=
-                1.0 / this->num_runs_by_len_.at(run_len - 1);
+                1.0 / this->increment_by_len_.at(run_len - 1);
         }
     }
 }
