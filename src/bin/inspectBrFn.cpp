@@ -41,6 +41,8 @@ void run(const uint32_t & level_num, const uint32_t & rep,
         const bool & gs_step,
         const bool & sq_total_br,
         const uint32_t & obs_per_iter,
+        const uint32_t & max_same_trt,
+        const uint32_t & steps_between_trt_test,
         njm::data::Entry * const entry) {
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
     rng->seed(rep);
@@ -80,7 +82,8 @@ void run(const uint32_t & level_num, const uint32_t & rep,
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
             features->clone(), model->clone(), 0.10, 0.20, 1.41, 1.0, 0.85,
-            0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter, 0, 0);
+            0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter,
+            max_same_trt, steps_between_trt_test);
     brAgent.rng(rng);
     brAgent.record(true);
 
@@ -112,6 +115,9 @@ void run(const uint32_t & level_num, const uint32_t & rep,
                    << do_sweep << ","
                    << gs_step << ","
                    << sq_total_br << ","
+                   << obs_per_iter << ","
+                   << max_same_trt << ","
+                   << steps_between_trt_test << "<"
                    << i << ","
                    << "br" << ","
                    << "NA" << ","
@@ -137,6 +143,9 @@ void run(const uint32_t & level_num, const uint32_t & rep,
                        << do_sweep << ","
                        << gs_step << ","
                        << sq_total_br << ","
+                       << obs_per_iter << ","
+                       << max_same_trt << ","
+                       << steps_between_trt_test << "<"
                        << i << ","
                        << "value" << ","
                        << gamma.at(g) << ","
@@ -254,6 +263,9 @@ int main(int argc, char *argv[]) {
         << "do_sweep,"
         << "gs_step,"
         << "sq_total_br,"
+        << "obs_per_iter,"
+        << "max_same_trt,"
+        << "steps_between_trt_test,"
         << "iter,"
         << "fn_type,"
         << "gamma,"
@@ -292,6 +304,14 @@ int main(int argc, char *argv[]) {
                     njm::tools::Experiment::FactorLevel::Type::is_int);
             const uint32_t obs_per_iter = static_cast<uint32_t>(
                     f.at(i++).val.int_val);
+            CHECK_EQ(f.at(i).type,
+                    njm::tools::Experiment::FactorLevel::Type::is_int);
+            const uint32_t max_same_trt = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
+            CHECK_EQ(f.at(i).type,
+                    njm::tools::Experiment::FactorLevel::Type::is_int);
+            const uint32_t steps_between_trt_test = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
 
             CHECK_EQ(i, f.size());
 
@@ -302,7 +322,8 @@ int main(int argc, char *argv[]) {
             p.service().post([=]() {
                 run(level_num, rep, network->clone(), model->clone(),
                         num_obs, run_length, do_sweep, gs_step, sq_total_br,
-                        obs_per_iter, new_entry);
+                        obs_per_iter, max_same_trt, steps_between_trt_test,
+                        new_entry);
                 progress->update();
             });
 
