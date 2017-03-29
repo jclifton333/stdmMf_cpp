@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::shared_ptr<Model<InfShieldState> > model(
-            new InfShieldStateNoImNoSoModel(
+            new InfShieldStatePosImNoSoModel(
                     network));
 
     {
