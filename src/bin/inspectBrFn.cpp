@@ -32,7 +32,8 @@
 using namespace stdmMf;
 
 
-void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
+void run(const uint32_t & level_num, const uint32_t & rep,
+        const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<InfShieldState> > & model,
         const uint32_t & num_obs,
         const uint32_t & run_length,
@@ -104,7 +105,8 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
             const double & obj_fn(train_history.at(i).first);
 
             // bellman residual
-            *entry << rep << ","
+            *entry << level_num << ","
+                   << rep << ","
                    << num_obs << ","
                    << run_length << ","
                    << do_sweep << ","
@@ -128,7 +130,8 @@ void run(const uint32_t & rep, const std::shared_ptr<const Network> & network,
                 }
 
                 // value function
-                *entry << rep << ","
+                *entry << level_num << ","
+                       << rep << ","
                        << num_obs << ","
                        << run_length << ","
                        << do_sweep << ","
@@ -223,12 +226,16 @@ int main(int argc, char *argv[]) {
     {
         njm::tools::Experiment::FactorGroup * g = e.add_group();
 
-        g->add_factor(std::vector<int>({100, 200, 500})); // num_obs
+        g->add_factor(std::vector<int>({50, 100, 200, 500, 1000})); // num_obs
         g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweep
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({false})); // sq_total_br
         g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
+        g->add_factor(std::vector<int>({1, 2, 5, 10})); // max_same_trt
+        g->add_factor(std::vector<int>(
+            {1, 2, 5, 10})); // steps_between_trt_test
+
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
@@ -240,6 +247,7 @@ int main(int argc, char *argv[]) {
             njm::info::project::PROJECT_ROOT_DIR + "/data");
 
     *tk.entry("inspectBrFn_results.csv")
+        << "level_num,"
         << "rep,"
         << "num_obs,"
         << "run_length,"
@@ -256,6 +264,7 @@ int main(int argc, char *argv[]) {
     e.start();
 
     uint32_t num_jobs = 0;
+    uint32_t level_num = 0;
     do {
         const njm::tools::Experiment::Factor f = e.get();
 
@@ -291,7 +300,7 @@ int main(int argc, char *argv[]) {
                     "inspectBrFn_results.csv");
 
             p.service().post([=]() {
-                run(rep, network->clone(), model->clone(),
+                run(level_num, rep, network->clone(), model->clone(),
                         num_obs, run_length, do_sweep, gs_step, sq_total_br,
                         obs_per_iter, new_entry);
                 progress->update();
@@ -299,6 +308,8 @@ int main(int argc, char *argv[]) {
 
             ++num_jobs;
         }
+
+        ++level_num;
 
     } while (e.next());
 
