@@ -1,6 +1,6 @@
 #include "network.hpp"
 #include "model.hpp"
-#include "infShieldStateNoImNoSoModel.hpp"
+#include "infShieldStatePosImNoSoModel.hpp"
 #include "system.hpp"
 #include "features.hpp"
 #include "networkRunSymFeatures.hpp"
