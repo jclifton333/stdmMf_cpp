@@ -60,7 +60,7 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
 
     // model
     std::shared_ptr<Model<InfShieldState> > mod(
-            new InfShieldStateNoImNoSoModel(net));
+            new InfShieldStatePosImNoSoModel(net));
     mod->rng(rng);
 
     {
