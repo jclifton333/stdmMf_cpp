@@ -138,7 +138,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
 
 
-
+    CHECK_GT(this->final_t_, history.size());
     const uint32_t num_points = this->final_t_ - history.size();
 
     const State & curr_state = history.at(history.size() - 1).next_state;
