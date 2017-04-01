@@ -99,11 +99,8 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
         const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
 
-    std::cout << "est par start" << std::endl;
     this->model_->est_par(history);
-    std::cout << "est par done" << std::endl;
 
-    std::cout << "thompson sampling start" << std::endl;
     // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(history);
     njm::linalg::mult_b_to_a(hess, -1.0 * history.size());
@@ -134,7 +131,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     // set new parameters
     this->model_->par(par_samp);
-    std::cout << "thompson sampling done" << std::endl;
 
 
 
@@ -164,8 +160,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
                  return -val;
              };
 
-    std::cout << "vfn optim start" << std::endl;
-
     njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
             this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
@@ -176,8 +170,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     } while (ec == njm::optim::ErrorCode::CONTINUE);
 
     CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
-
-    std::cout << "vfn optim done" << std::endl;
 
     return sp.par();
 }

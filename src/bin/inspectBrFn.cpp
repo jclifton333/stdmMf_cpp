@@ -66,7 +66,6 @@ void run(const uint32_t & level_num, const uint32_t & rep,
     EpsAgent<InfShieldState> ea(network, pa, ra, 0.2);
     ea.rng(rng);
 
-    std::cout << "sim data start" << std::endl;
     // set initial infections
     s.start();
     // simulate history
@@ -78,7 +77,6 @@ void run(const uint32_t & level_num, const uint32_t & rep,
 
         s.turn_clock();
     }
-    std::cout << "sim data done" << std::endl;
 
     const std::vector<Transition<InfShieldState> > all_history(
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
@@ -86,14 +84,12 @@ void run(const uint32_t & level_num, const uint32_t & rep,
     // use vfn to get starting values
     std::vector<double> vfn_optim_par;
     {
-        std::cout << "vfn start" << std::endl;
         VfnMaxSimPerturbAgent<InfShieldState> vfnAgent(network->clone(),
                 features->clone(), model->clone(),
                 2, all_history.size() + 100, 10.0, 0.1, 5, 1, 0.4, 0.7);
         vfnAgent.rng(rng);
         vfn_optim_par = vfnAgent.train(all_history,
                 std::vector<double>(features->num_features(), 0.0));
-        std::cout << "vfn done" << std::endl;
 
         // find minimizing scalar for parameters
         SweepAgent<InfShieldState> sweepVfn(network->clone(), features->clone(),
@@ -107,7 +103,6 @@ void run(const uint32_t & level_num, const uint32_t & rep,
                                         trt_bits_t));
                     };
 
-        std::cout << "normalize start" << std::endl;
         const std::vector<std::pair<double, double> > parts =
             bellman_residual_parts<InfShieldState>(all_history, &sweepVfn, 0.9,
                     q_fn, q_fn);
@@ -133,11 +128,8 @@ void run(const uint32_t & level_num, const uint32_t & rep,
                     njm::linalg::l2_norm(vfn_optim_par));
         }
 
-        std::cout << "normalize done" << std::endl;
     }
 
-
-    std::cout << "br start" << std::endl;
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
             features->clone(), model->clone(), 0.10, 0.20, 1.41, 1.0, 0.85,
@@ -148,8 +140,6 @@ void run(const uint32_t & level_num, const uint32_t & rep,
 
     // starting values from vfn
     brAgent.train(all_history, vfn_optim_par);
-    // brAgent.train(all_history);
-    std::cout << "br done" << std::endl;
 
     const std::vector<std::pair<double, std::vector<double> > > train_history(
             brAgent.train_history());
@@ -164,7 +154,6 @@ void run(const uint32_t & level_num, const uint32_t & rep,
 
     const std::vector<double> gamma({1.0});
 
-    std::cout << "eval start" << std::endl;
     for (uint32_t i = 0; i < train_size; ++i) {
         if (i % 15 == 0 || (i + 1 == train_size)) {
             const std::vector<double> & par(train_history.at(i).second);
@@ -217,7 +206,6 @@ void run(const uint32_t & level_num, const uint32_t & rep,
             }
         }
     }
-    std::cout << "eval done" << std::endl;
 }
 
 
@@ -299,21 +287,12 @@ int main(int argc, char *argv[]) {
     {
         njm::tools::Experiment::FactorGroup * g = e.add_group();
 
-        // g->add_factor(std::vector<int>({50, 100, 200, 500, 1000})); // num_obs
-        // g->add_factor(std::vector<int>({1, 2})); // run_length
-        // g->add_factor(std::vector<bool>({true})); // do_sweep
-        // g->add_factor(std::vector<bool>({true})); // gs_step
-        // g->add_factor(std::vector<bool>({false})); // sq_total_br
-        // g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
-        // g->add_factor(std::vector<int>({0})); // max_same_trt
-        // g->add_factor(std::vector<int>({0})); // steps_between_trt_test
-
-        g->add_factor(std::vector<int>({1000})); // num_obs
-        g->add_factor(std::vector<int>({2})); // run_length
+        g->add_factor(std::vector<int>({50, 100, 200, 500, 1000})); // num_obs
+        g->add_factor(std::vector<int>({1, 2})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweep
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({false})); // sq_total_br
-        g->add_factor(std::vector<int>({5})); // obs_per_iter
+        g->add_factor(std::vector<int>({0, 5, 10})); // obs_per_iter
         g->add_factor(std::vector<int>({0})); // max_same_trt
         g->add_factor(std::vector<int>({0})); // steps_between_trt_test
     }
