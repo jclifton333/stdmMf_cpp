@@ -297,8 +297,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<int>({0})); // steps_between_trt_test
     }
 
-    // njm::thread::Pool p(std::thread::hardware_concurrency());
-    njm::thread::Pool p(1);
+    njm::thread::Pool p(std::thread::hardware_concurrency());
 
     std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
             new njm::tools::Progress<std::ostream>(&std::cout));
