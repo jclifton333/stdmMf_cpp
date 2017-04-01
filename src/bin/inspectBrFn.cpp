@@ -6,6 +6,7 @@
 #include "networkRunSymFeatures.hpp"
 #include "sweepAgent.hpp"
 #include "brMinSimPerturbAgent.hpp"
+#include "vfnMaxSimPerturbAgent.hpp"
 
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
@@ -80,6 +81,15 @@ void run(const uint32_t & level_num, const uint32_t & rep,
     const std::vector<Transition<InfShieldState> > all_history(
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
+    // use vfn to get starting values
+    VfnMaxSimPerturbAgent<InfShieldState> vfnAgent(network->clone(),
+            features->clone(), model->clone(),
+            2, 100, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    vfnAgent.rng(rng);
+    const std::vector<double> vfn_optim_par(vfnAgent.train(all_history,
+                    std::vector<double>(features->num_features(), 0.0)));
+
+
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
             features->clone(), model->clone(), 0.10, 0.20, 1.41, 1.0, 0.85,
             0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter,
@@ -87,7 +97,8 @@ void run(const uint32_t & level_num, const uint32_t & rep,
     brAgent.rng(rng);
     brAgent.record(true);
 
-    brAgent.train(all_history);
+    // starting values from vfn
+    brAgent.train(all_history, vfn_optim_par);
 
     const std::vector<std::pair<double, std::vector<double> > > train_history(
             brAgent.train_history());
