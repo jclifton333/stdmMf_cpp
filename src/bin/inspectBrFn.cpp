@@ -216,8 +216,8 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<Network> network;
     { // network 1
         NetworkInit init;
-        init.set_dim_x(5);
-        init.set_dim_y(5);
+        init.set_dim_x(10);
+        init.set_dim_y(10);
         init.set_wrap(false);
         init.set_type(NetworkInit_NetType_GRID);
         network = Network::gen_network(init);
