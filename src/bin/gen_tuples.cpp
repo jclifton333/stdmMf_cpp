@@ -7,9 +7,8 @@
 #include "myopicAgent.hpp"
 
 #include <njm_cpp/data/trapperKeeper.hpp>
-
 #include <njm_cpp/info/project.hpp>
-
+#include <njm_cpp/tools/progress.hpp>
 #include <njm_cpp/thread/pool.hpp>
 
 #include <thread>
@@ -162,6 +161,10 @@ int main(int argc, char *argv[]) {
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
 
+    std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
+            new njm::tools::Progress<std::ostream>(
+                    networks.size() * models.size(), &std::cout));
+
     for (uint32_t i = 0; i < networks.size(); ++i) {
         for (uint32_t j = 0; j < models.size(); ++j) {
             njm::data::Entry * new_entry(tk.entry(
@@ -172,11 +175,15 @@ int main(int argc, char *argv[]) {
                 gen_tuples(networks.at(i)->clone(),
                         models.at(j).second.at(i)->clone(),
                         num_starts, num_points, new_entry);
+
+                progress->update();
             });
         }
     }
 
     p.join();
+
+    progress->done();
 
     tk.finished();
 
