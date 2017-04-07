@@ -33,6 +33,7 @@ SET(bin_file_names
   orthVecBrFn
   timeSweepAgent
   timeBrMinAgent
+  gen_tuples
   sandbox)
 
 foreach(bin_file ${bin_file_names})
