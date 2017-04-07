@@ -38,7 +38,7 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
            << "curr_shield,"
            << "trt,"
            << "next_inf,"
-           << "next_shield\n"
+           << "next_shield\n";
 
     for (uint32_t i = 0; i < num_starts; ++i) {
         rng->seed(i);
