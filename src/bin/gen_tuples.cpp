@@ -61,7 +61,7 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
                 << static_cast<uint32_t>(next_state.inf_bits.test(n))
                << "," << next_state.shield.at(n) << "\n";
 
-
+            *entry << ss.str();
         }
     }
 }
