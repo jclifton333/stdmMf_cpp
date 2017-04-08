@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    const uint32_t num_starts(10000);
+    const uint32_t num_starts(1000);
     const uint32_t num_points(100);
 
     njm::data::TrapperKeeper tk(argv[0],
