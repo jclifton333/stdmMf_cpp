@@ -28,6 +28,7 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
     System<InfShieldState> s(network, model);
     s.rng(rng);
 
+    MyopicAgent<InfShieldState> myopic_agent(network, model->clone());
     ProximalAgent<InfShieldState> proximal_agent(network);
     RandomAgent<InfShieldState> random_agent(network);
 
@@ -36,10 +37,12 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
         const InfShieldState curr_state(s.state());
 
         boost::dynamic_bitset<> trt_bits;
-        const auto draw = rng->rint(0, 2);
+        const auto draw = rng->rint(0, 3);
         if (draw == 0) {
-            trt_bits = proximal_agent.apply_trt(s.state(), s.history());
+            trt_bits = myopic_agent.apply_trt(s.state(), s.history());
         } else if (draw == 1) {
+            trt_bits = proximal_agent.apply_trt(s.state(), s.history());
+        } else if (draw == 2) {
             trt_bits = random_agent.apply_trt(s.state(), s.history());
         }
 
