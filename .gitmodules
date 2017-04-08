@@ -4,3 +4,6 @@
 [submodule "njm_cpp"]
 	path = libs/njm_cpp
 	url = https://github.com/nickjmeyer/njm_cpp
+[submodule "caffe"]
+	path = libs/caffe
+	url = git:BVLC/caffe
