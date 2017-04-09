@@ -24,6 +24,6 @@ message SimData {
   repeated Observation rep = 3;
 }
 
-message AdaptData {
+message SimDataGroup {
   repeated SimData sim = 1;
 }

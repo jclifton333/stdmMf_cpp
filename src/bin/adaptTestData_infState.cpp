@@ -16,7 +16,7 @@
 
 #include <thread>
 
-#include "adaptTestData.pb.h"
+#include "sim_data.pb.h"
 
 #include <google/protobuf/text_format.h>
 
@@ -410,7 +410,7 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps = 100;
     const uint32_t num_points = 50;
 
-    AdaptData ad;
+    SimDataGroup ad;
 
     std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
             new njm::tools::Progress<std::ostream>(
