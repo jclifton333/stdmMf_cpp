@@ -17,13 +17,11 @@ using namespace stdmMf;
 
 void gen_tuples(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<InfShieldState> > & model,
-        const uint32_t & seed,
+        const uint32_t & num_starts,
         const uint32_t & num_points,
         njm::data::Entry * const entry) {
 
     std::shared_ptr<njm::tools::Rng> rng(new njm::tools::Rng);
-    rng->seed(seed);
-
 
     System<InfShieldState> s(network, model);
     s.rng(rng);
@@ -31,34 +29,46 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
     ProximalAgent<InfShieldState> proximal_agent(network);
     RandomAgent<InfShieldState> random_agent(network);
 
-    s.start();
-    for (uint32_t j = 0; j < num_points; ++j) {
-        const InfShieldState curr_state(s.state());
+    *entry << "rep,"
+           << "time,"
+           << "node,"
+           << "curr_inf,"
+           << "curr_shield,"
+           << "trt,"
+           << "next_inf,"
+           << "next_shield\n";
 
-        boost::dynamic_bitset<> trt_bits;
-        const auto draw = rng->rint(0, 2);
-        if (draw == 0) {
-            trt_bits = proximal_agent.apply_trt(s.state(), s.history());
-        } else if (draw == 1) {
-            trt_bits = random_agent.apply_trt(s.state(), s.history());
-        }
+    for (uint32_t i = 0; i < num_starts; ++i) {
+        rng->seed(i);
 
-        s.trt_bits(trt_bits);
+        s.start();
+        for (uint32_t j = 0; j < num_points; ++j) {
+            const InfShieldState curr_state(s.state());
 
-        s.turn_clock();
+            boost::dynamic_bitset<> trt_bits;
+            const auto draw = rng->rint(0, 3);
+            if (draw == 0) {
+                trt_bits = myopic_agent.apply_trt(s.state(), s.history());
+            } else if (draw == 1) {
+                trt_bits = proximal_agent.apply_trt(s.state(), s.history());
+            } else if (draw == 2) {
+                trt_bits = random_agent.apply_trt(s.state(), s.history());
+            }
 
-        const InfShieldState next_state(s.state());
+            s.trt_bits(trt_bits);
 
-        for (uint32_t n = 0; n < network->size(); ++n) {
-            std::stringstream ss;
-            ss << seed << "," << j << "," << n << ","
-               << static_cast<uint32_t>(curr_state.inf_bits.test(n))
-               << "," << curr_state.shield.at(n) << ","
-               << static_cast<uint32_t>(trt_bits.test(n)) << ","
-                << static_cast<uint32_t>(next_state.inf_bits.test(n))
-               << "," << next_state.shield.at(n) << "\n";
+            s.turn_clock();
 
-            *entry << ss.str();
+            const InfShieldState next_state(s.state());
+
+            for (uint32_t n = 0; n < network->size(); ++n) {
+                *entry << i << "," << j << "," << n << ","
+                       << static_cast<uint32_t>(curr_state.inf_bits.test(n))
+                       << "," << curr_state.shield.at(n) << ","
+                       << static_cast<uint32_t>(trt_bits.test(n)) << ","
+                    << static_cast<uint32_t>(next_state.inf_bits.test(n))
+                    << "," << next_state.shield.at(n) << "\n";
+            }
         }
     }
 }
@@ -98,7 +108,7 @@ int main(int argc, char *argv[]) {
             std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
             - intcp_inf;
 
-        //recovery
+        // recovery
         const double prob_rec = 0.25;
         const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
         const double trt_act_rec =
@@ -152,7 +162,7 @@ int main(int argc, char *argv[]) {
 
     std::shared_ptr<njm::tools::Progress<std::ostream> > progress(
             new njm::tools::Progress<std::ostream>(
-                    num_starts * networks.size() * models.size(), &std::cout));
+                    networks.size() * models.size(), &std::cout));
 
     for (uint32_t i = 0; i < networks.size(); ++i) {
         for (uint32_t j = 0; j < models.size(); ++j) {
@@ -160,25 +170,13 @@ int main(int argc, char *argv[]) {
                             "tuples_" + networks.at(i)->kind() + "_"
                             + models.at(j).first + ".txt"));
 
-            *new_entry << "rep,"
-                       << "time,"
-                       << "node,"
-                       << "curr_inf,"
-                       << "curr_shield,"
-                       << "trt,"
-                       << "next_inf,"
-                       << "next_shield\n";
+            p.service().post([=]() {
+                gen_tuples(networks.at(i)->clone(),
+                        models.at(j).second.at(i)->clone(),
+                        num_starts, num_points, new_entry);
 
-            for (uint32_t rep = 0; rep < num_starts; ++rep) {
-                p.service().post([=]() {
-                    gen_tuples(networks.at(i)->clone(),
-                            models.at(j).second.at(i)->clone(),
-                            rep, num_points, new_entry);
-
-                    progress->update();
-                });
-
-            }
+                progress->update();
+            });
         }
     }
 
