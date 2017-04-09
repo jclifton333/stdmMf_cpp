@@ -1,4 +1,4 @@
-#include "adaptTestData.pb.h"
+#include "sim_data.pb.h"
 
 #include "system.hpp"
 
@@ -205,7 +205,7 @@ std::shared_ptr<Model<InfShieldState> > get_model(
 
 int main(int argc, char *argv[]) {
     // read in data
-    AdaptData ad;
+    SimDataGroup ad;
     std::ifstream in(njm::info::project::PROJECT_ROOT_DIR +
             "/data/2017-02-08_18-19-53/adapt_data.txt");
     CHECK(in.good());
