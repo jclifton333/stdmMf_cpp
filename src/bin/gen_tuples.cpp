@@ -29,15 +29,6 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
     ProximalAgent<InfShieldState> proximal_agent(network);
     RandomAgent<InfShieldState> random_agent(network);
 
-    *entry << "rep,"
-           << "time,"
-           << "node,"
-           << "curr_inf,"
-           << "curr_shield,"
-           << "trt,"
-           << "next_inf,"
-           << "next_shield\n";
-
     for (uint32_t i = 0; i < num_starts; ++i) {
         rng->seed(i);
 
@@ -46,12 +37,10 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
             const InfShieldState curr_state(s.state());
 
             boost::dynamic_bitset<> trt_bits;
-            const auto draw = rng->rint(0, 3);
+            const auto draw = rng->rint(0, 2);
             if (draw == 0) {
-                trt_bits = myopic_agent.apply_trt(s.state(), s.history());
-            } else if (draw == 1) {
                 trt_bits = proximal_agent.apply_trt(s.state(), s.history());
-            } else if (draw == 2) {
+            } else if (draw == 1) {
                 trt_bits = random_agent.apply_trt(s.state(), s.history());
             }
 
@@ -60,15 +49,6 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
             s.turn_clock();
 
             const InfShieldState next_state(s.state());
-
-            for (uint32_t n = 0; n < network->size(); ++n) {
-                *entry << i << "," << j << "," << n << ","
-                       << static_cast<uint32_t>(curr_state.inf_bits.test(n))
-                       << "," << curr_state.shield.at(n) << ","
-                       << static_cast<uint32_t>(trt_bits.test(n)) << ","
-                    << static_cast<uint32_t>(next_state.inf_bits.test(n))
-                    << "," << next_state.shield.at(n) << "\n";
-            }
         }
     }
 }
