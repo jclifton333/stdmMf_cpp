@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
         for (uint32_t j = 0; j < models.size(); ++j) {
             njm::data::Entry * new_entry(tk.entry(
                             "tuples_" + networks.at(i)->kind() + "_"
-                            + models.at(j).first + ".txt"));
+                            + models.at(j).first + ".pb"));
 
             p.service().post([=]() {
                 gen_tuples(networks.at(i)->clone(),
