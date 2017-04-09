@@ -11,11 +11,14 @@
 #include <njm_cpp/tools/progress.hpp>
 #include <njm_cpp/thread/pool.hpp>
 
+#include "sim_data.pb.h"
+
 #include <thread>
 
 using namespace stdmMf;
 
 void gen_tuples(const std::shared_ptr<const Network> & network,
+        const std::string & model_kind,
         const std::shared_ptr<Model<InfShieldState> > & model,
         const uint32_t & num_starts,
         const uint32_t & num_points,
@@ -29,7 +32,13 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
     ProximalAgent<InfShieldState> proximal_agent(network);
     RandomAgent<InfShieldState> random_agent(network);
 
+    SimData sd;
+    sd.set_model(model_kind);
+    sd.set_network(network->kind());
+
     for (uint32_t i = 0; i < num_starts; ++i) {
+        Observation * obs(sd.add_rep());
+
         rng->seed(i);
 
         s.start();
@@ -49,8 +58,39 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
             s.turn_clock();
 
             const InfShieldState next_state(s.state());
+
+            TransitionPB * trans(obs->add_transition());
+            // curr inf bits
+            std::string curr_state_inf_bits_str;
+            boost::to_string(curr_state.inf_bits, curr_state_inf_bits_str);
+            trans->mutable_curr_state()->set_inf_bits(curr_state_inf_bits_str);
+
+            // curr shield
+            std::for_each(curr_state.shield.begin(), curr_state.shield.end(),
+                    [&] (const double & x) {
+                        trans->mutable_curr_state()->add_shield(x);
+                    });
+
+            // trt
+            std::string trt_bits_str;
+            boost::to_string(trt_bits, trt_bits_str);
+
+            // next inf bits
+            std::string next_state_inf_bits_str;
+            boost::to_string(next_state.inf_bits, next_state_inf_bits_str);
+            trans->mutable_next_state()->set_inf_bits(next_state_inf_bits_str);
+
+            // next shield
+            std::for_each(next_state.shield.begin(), next_state.shield.end(),
+                    [&] (const double & x) {
+                        trans->mutable_next_state()->add_shield(x);
+                    });
         }
     }
+
+    std::string output_str;
+    sd.SerializeToString(&output_str);
+    *entry << output_str;
 }
 
 
@@ -152,6 +192,7 @@ int main(int argc, char *argv[]) {
 
             p.service().post([=]() {
                 gen_tuples(networks.at(i)->clone(),
+                        models.at(j).first,
                         models.at(j).second.at(i)->clone(),
                         num_starts, num_points, new_entry);
 
