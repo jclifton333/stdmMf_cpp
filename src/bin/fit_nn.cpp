@@ -1,5 +1,9 @@
 #include "sim_data.pb.h"
 
+#include "states.hpp"
+
+#include "neuralNetwork.hpp"
+
 #include <caffe/caffe.hpp>
 #include <caffe/layer.hpp>
 #include <caffe/layers/memory_data_layer.hpp>
@@ -23,8 +27,8 @@ using namespace stdmMf;
 
 int main(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-    // google::InitGoogleLogging(argv[0]);
-    // google::SetCommandLineOption("GLOG_minloglevel", "2");
+    google::InitGoogleLogging(argv[0]);
+    google::SetCommandLineOption("GLOG_minloglevel", "2");
 
     // load data
     std::ifstream ifs(FLAGS_data_file);
@@ -36,8 +40,9 @@ int main(int argc, char *argv[]) {
     SimData sd;
     sd.ParseFromString(content);
 
-    std::vector<float> state_trt_data;
-    std::vector<float> reward_data;
+    // setup training data
+    std::vector<StateAndTrt<InfShieldState> > state_trt_data;
+    std::vector<double> reward_data;
 
     // extract into vectors
     uint32_t total = 0;
@@ -49,26 +54,21 @@ int main(int argc, char *argv[]) {
             const TransitionPB & trans(obs.transition(j));
             const uint32_t num_nodes(trans.curr_trt_bits().length());
             CHECK_EQ(num_nodes, 100);
-            // curr state
-            {
-                const boost::dynamic_bitset<> bits(
-                        trans.curr_state().inf_bits());
-                for (uint32_t k = 0; k < num_nodes; ++k) {
-                    state_trt_data.push_back(bits.test(k) ? 1 : 0);
-                }
-            }
 
-            for (uint32_t k = 0; k < num_nodes; ++k) {
-                state_trt_data.push_back(trans.curr_state().shield(k));
-            }
+
+            // curr state
+            const boost::dynamic_bitset<> inf_bits(
+                    trans.curr_state().inf_bits());
+            const std::vector<double> shield(
+                    trans.curr_state().shield().begin(),
+                    trans.curr_state().shield().end());
+            const InfShieldState curr_state(inf_bits, shield);
+
 
             // trt
-            {
-                const boost::dynamic_bitset<> bits(trans.curr_trt_bits());
-                for (uint32_t k = 0; k < num_nodes; ++k) {
-                    state_trt_data.push_back(bits.test(k) ? 1 : 0);
-                }
-            }
+            const boost::dynamic_bitset<> trt_bits(trans.curr_trt_bits());
+
+            state_trt_data.emplace_back(curr_state, trt_bits);
 
             // reward
             {
@@ -84,57 +84,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    CHECK_EQ(reward_data.size(), total);
-    CHECK_EQ(state_trt_data.size(), total * 3 * 100);
+    NeuralNetwork<InfShieldState> nn(FLAGS_model_file, FLAGS_solver_file,
+            100, 100);
+    nn.train_data(state_trt_data, reward_data);
 
-    caffe::SolverParameter solver_param;
-    caffe::ReadSolverParamsFromTextFileOrDie(FLAGS_solver_file, &solver_param);
-    solver_param.set_net(FLAGS_model_file);
+    nn.fit();
 
-    std::shared_ptr<caffe::Solver<float> > solver(
-            caffe::SolverRegistry<float>::CreateSolver(solver_param));
-
-    caffe::MemoryDataLayer<float> *input_data_layer =
-        (caffe::MemoryDataLayer<float> *) (
-                solver->net()->layer_by_name("input_data").get());
-
-    input_data_layer->Reset(state_trt_data.data(), reward_data.data(), total);
-
-    std::cout << "solving" << std::endl;
-    solver->Solve();
-    std::cout << "done" << std::endl;
-
-    solver->net()->Forward();
-
-    boost::shared_ptr<caffe::Blob<float> > input_layer(
-            solver->net()->blob_by_name("reward"));
-    boost::shared_ptr<caffe::Blob<float> > output_layer(
-            solver->net()->blob_by_name("fc3"));
-    CHECK_EQ(input_layer->count(), 200);
-    CHECK_EQ(output_layer->count(), 200);
-    for (uint32_t i = 0; i < 2; ++i) {
-        std::cout << input_layer->cpu_data()[i]
-                  << "  ==  "
-                  << output_layer->cpu_data()[i]
-                  << std::endl;
-    }
-
-
-    std::cout << "setup test net" << std::endl;
-    std::shared_ptr<caffe::Net<float> > testnet;
-    testnet.reset(new caffe::Net<float>(FLAGS_model_file, caffe::TEST));
-
-   testnet->ShareTrainedLayersWith(solver->net().get());
-
-    caffe::MemoryDataLayer<float> *input_test_data_layer =
-        (caffe::MemoryDataLayer<float> *) (
-                testnet->layer_by_name("input_data").get());
-    input_test_data_layer->Reset(state_trt_data.data(),
-            reward_data.data(), total);
-    testnet->Forward();
-    std::cout << testnet->blob_by_name("reward")->cpu_data()[0]
-              << "  ==  "
-              << testnet->blob_by_name("fc3")->cpu_data()[0]
+    std::cout << nn.eval(state_trt_data.at(0))
+              << " == "
+              << reward_data.at(0)
               << std::endl;
 
     return 0;
