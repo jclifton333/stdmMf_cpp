@@ -34,8 +34,7 @@ public:
             const uint32_t & batch_size,
             const uint32_t & num_nodes);
 
-    NeuralNetwork(const NeuralNetwork & other) = delete;
-    NeuralNetwork& operator=(const NeuralNetwork & other) = delete;
+    NeuralNetwork(const NeuralNetwork & other);
 
     virtual ~NeuralNetwork() = default;
 

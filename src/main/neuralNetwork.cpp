@@ -2,8 +2,6 @@
 
 namespace stdmMf {
 
-
-
 template <>
 const uint32_t NeuralNetwork<InfState>::num_input_per_node_ = 2;
 
@@ -72,6 +70,35 @@ NeuralNetwork<State>::NeuralNetwork(const std::string & model_file,
     // share layers from training model with evaluating model
     this->eval_net_->ShareTrainedLayersWith(this->solver_->net().get());
 }
+
+
+template <typename State>
+NeuralNetwork<State>::NeuralNetwork(const NeuralNetwork & other)
+    : batch_size_(other.batch_size_), num_nodes_(other.num_nodes_),
+      state_trt_train_data_(other.state_trt_train_data_),
+      outcome_train_data_(other.outcome_train_data_),
+      state_trt_eval_data_(other.state_trt_eval_data_),
+      outcome_eval_data_(other.outcome_eval_data_) {
+
+    // get solver proto from other's solver
+    caffe::SolverParameter solver_param(other.solver_->param());
+    // copy train proto from other's solver network (this will copy blobs)
+    other.solver_->net()->ToProto(solver_param.mutable_net_param());
+    // craete solver
+    this->solver_.reset(
+            caffe::SolverRegistry<double>::CreateSolver(solver_param));
+
+    // copy eval proto from other's eval network (this will copy blobs)
+    caffe::NetParameter net_param_eval;
+    other.eval_net_->ToProto(&net_param_eval);
+    // create eval net
+    this->eval_net_.reset(
+            new caffe::Net<double>(net_param_eval));
+
+    // share parameters between train and eval network
+    this->eval_net_->ShareTrainedLayersWith(this->solver_->net().get());
+}
+
 
 
 template <typename State>
