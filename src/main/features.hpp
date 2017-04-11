@@ -4,12 +4,13 @@
 #include <boost/dynamic_bitset.hpp>
 #include <vector>
 #include <memory>
+#include <njm_cpp/tools/random.hpp>
 
 namespace stdmMf {
 
 
 template <typename State>
-class Features {
+class Features : public njm::tools::RngClass {
 public:
     virtual ~Features() = default;
 
@@ -36,6 +37,9 @@ public:
             std::vector<double> & feat) const = 0;
 
     virtual uint32_t num_features() const = 0;
+
+    using njm::tools::RngClass::rng;
+    virtual void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 
