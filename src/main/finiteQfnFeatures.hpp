@@ -8,6 +8,7 @@
 
 namespace stdmMf {
 
+// TODO: write test cases for finite qfn features
 template <typename State>
 class FiniteQfnFeatures : public Features<State> {
 protected:
