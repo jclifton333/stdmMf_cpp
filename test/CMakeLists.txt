@@ -29,4 +29,5 @@ foreach(test_name ${test_src})
     ${CMAKE_THREAD_LIBS_INIT} ${GLOG_LIBRARIES} ${PROTOBUF_LIBRARIES}
     ${GSL_LIBRARIES} ${Boost_LIBRARIES})
   add_test(NAME ${test_name} COMMAND ${test_name})
+  add_dependencies(check ${test_name})
 endforeach(test_name)

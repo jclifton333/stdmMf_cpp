@@ -10,11 +10,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 
 add_subdirectory(libs/googletest)
-set(NJM_CPP_FORCE_BUILD_TEST YES)
 add_subdirectory(libs/njm_cpp)
 
 add_subdirectory(src/main)
 add_subdirectory(src/bin)
 
 include(CTest)
-add_subdirectory(test)
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+add_subdirectory(test EXCLUDE_FROM_ALL)
