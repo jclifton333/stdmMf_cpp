@@ -74,6 +74,7 @@ void gen_tuples(const std::shared_ptr<const Network> & network,
             // trt
             std::string trt_bits_str;
             boost::to_string(trt_bits, trt_bits_str);
+            trans->set_curr_trt_bits(trt_bits_str);
 
             // next inf bits
             std::string next_state_inf_bits_str;
