@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
                     sum_reward -= bits.test(k) ? 1. : 0.;
                 }
 
-                reward_data.push_back(10 * sum_reward / num_nodes);
+                reward_data.push_back(sum_reward / num_nodes);
             }
         }
     }
