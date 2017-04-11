@@ -1,0 +1,9 @@
+base_lr: 0.01
+lr_policy: "step"
+gamma: 0.9
+stepsize: 2000
+display: 2000
+max_iter: 20000
+solver_mode: CPU
+random_seed: 0
+snapshot_after_train: false

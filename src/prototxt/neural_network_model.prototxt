@@ -1,0 +1,142 @@
+name: "q_function"
+
+layer {
+  name: "input_data"
+  type: "MemoryData"
+  top: "state_trt"
+  top: "reward"
+  include {
+    phase: TRAIN
+  }
+  memory_data_param
+  {
+    batch_size: 200
+    channels: 1
+    height: 100
+    width: 3
+  }
+
+}
+
+layer {
+  name: "input_data"
+  type: "MemoryData"
+  top: "state_trt"
+  top: "reward"
+  include {
+    phase: TEST
+  }
+  memory_data_param
+  {
+    batch_size: 1
+    channels: 1
+    height: 100
+    width: 3
+  }
+}
+
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "state_trt"
+  top: "conv1"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    num_output: 3
+    kernel_h: 1
+    kernel_w: 3
+    stride: 1
+    pad: 0
+    weight_filler {
+      type: "gaussian" # initialize the filters from a Gaussian
+      std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+    bias_filler {
+      type: "constant" # initialize the biases to zero (0)
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "conv1relu"
+  bottom: "conv1"
+  top: "conv1"
+  type: "ReLU"
+}
+
+layer {
+  name: "fc1"
+  type: "InnerProduct"
+  bottom: "conv1"
+  top: "fc1"
+  inner_product_param {
+    num_output: 100
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "fc1relu"
+  bottom: "fc1"
+  top: "fc1"
+  type: "ReLU"
+}
+
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "fc1"
+  top: "fc2"
+  inner_product_param {
+    num_output: 100
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "fc2relu"
+  bottom: "fc2"
+  top: "fc2"
+  type: "ReLU"
+}
+
+layer {
+  name: "fc3"
+  type: "InnerProduct"
+  bottom: "fc2"
+  top: "fc3"
+  inner_product_param {
+    num_output: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "fc3"
+  bottom: "reward"
+  top: "loss"
+  # include {
+  #   phase: TRAIN
+  # }
+}
