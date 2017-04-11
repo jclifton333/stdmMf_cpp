@@ -186,7 +186,11 @@ double NeuralNetwork<InfState>::eval(
             this->outcome_eval_data_.data(), 1);
 
     this->eval_net_->Forward();
-    return this->eval_net_->blob_by_name("fc3")->cpu_data()[0];
+    const double outcome(this->eval_net_->blob_by_name("fc3")->cpu_data()[0]);
+
+    CHECK(std::isfinite(outcome));
+
+    return outcome;
 }
 
 
@@ -220,7 +224,11 @@ double NeuralNetwork<InfShieldState>::eval(
             this->outcome_eval_data_.data(), 1);
 
     this->eval_net_->Forward();
-    return this->eval_net_->blob_by_name("fc3")->cpu_data()[0];
+    const double outcome(this->eval_net_->blob_by_name("fc3")->cpu_data()[0]);
+
+    CHECK(std::isfinite(outcome));
+
+    return outcome;
 }
 
 
