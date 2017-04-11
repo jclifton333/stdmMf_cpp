@@ -19,9 +19,9 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include <njm_cpp/info/project.hpp>
+
 DEFINE_string(data_file, "", "Path to protobuf file");
-DEFINE_string(model_file, "", "Path to model file");
-DEFINE_string(solver_file, "", "Path to solver file");
 
 using namespace stdmMf;
 
@@ -84,7 +84,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    NeuralNetwork<InfShieldState> nn(FLAGS_model_file, FLAGS_solver_file,
+    NeuralNetwork<InfShieldState> nn(
+            (njm::info::project::PROJECT_ROOT_DIR
+                    + "/src/prototxt/neural_network_model.prototxt"),
+            (njm::info::project::PROJECT_ROOT_DIR
+                    + "/src/prototxt/neural_network_solver.prototxt"),
             100, 100);
     nn.train_data(state_trt_data, reward_data);
 
