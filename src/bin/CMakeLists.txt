@@ -4,10 +4,12 @@ find_package(Boost REQUIRED system thread filesystem)
 find_package(GSL REQUIRED)
 find_package(Armadillo REQUIRED)
 find_package(BLAS REQUIRED)
+set(Caffe_DIR "~/tools/share/Caffe")
 find_package(Caffe REQUIRED)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
   "${CMAKE_BINARY_DIR}/src/main" "${CMAKE_SOURCE_DIR}/src/main")
+
 
 SET(bin_file_names
   ## experiments
@@ -35,6 +37,7 @@ SET(bin_file_names
   timeSweepAgent
   timeBrMinAgent
   gen_tuples
+  fit_nn
   sandbox)
 
 foreach(bin_file ${bin_file_names})
