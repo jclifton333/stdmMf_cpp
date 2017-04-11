@@ -7,6 +7,7 @@ namespace stdmMf {
 template <>
 const uint32_t NeuralNetwork<InfState>::num_input_per_node_ = 2;
 
+
 template <>
 const uint32_t NeuralNetwork<InfShieldState>::num_input_per_node_ = 3;
 
@@ -23,7 +24,7 @@ NeuralNetwork<State>::NeuralNetwork(const std::string & model_file,
     // check input layer for training
     CHECK_EQ(net_param.name(), "q_learning");
     CHECK_EQ(net_param.layer(0).name(), "input_data");
-    CHECK_EQ(net_param.layer(0).phase(), "TRAIN");
+    CHECK_EQ(net_param.layer(0).phase(), caffe::TRAIN);
     CHECK_EQ(net_param.layer(0).type(), "MemoryData");
     CHECK(net_param.layer(0).has_memory_data_param());
     CHECK_EQ(net_param.layer(0).memory_data_param().channels(), 1);
@@ -39,7 +40,7 @@ NeuralNetwork<State>::NeuralNetwork(const std::string & model_file,
     // check input layer for evaluating
     CHECK_EQ(net_param.name(), "q_learning");
     CHECK_EQ(net_param.layer(1).name(), "input_data");
-    CHECK_EQ(net_param.layer(1).phase(), "TEST");
+    CHECK_EQ(net_param.layer(1).phase(), caffe::TEST);
     CHECK_EQ(net_param.layer(1).type(), "MemoryData");
     CHECK(net_param.layer(1).has_memory_data_param());
     CHECK_EQ(net_param.layer(1).memory_data_param().channels(), 1);
@@ -220,6 +221,9 @@ double NeuralNetwork<InfShieldState>::eval(
     return this->eval_net_->blob_by_name("fc3")->cpu_data()[0];
 }
 
+
+template class NeuralNetwork<InfState>;
+template class NeuralNetwork<InfShieldState>;
 
 
 
