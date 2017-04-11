@@ -4,6 +4,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <vector>
 #include <memory>
+#include "states.hpp"
+
 #include <njm_cpp/tools/random.hpp>
 
 namespace stdmMf {
@@ -15,6 +17,9 @@ public:
     virtual ~Features() = default;
 
     virtual std::shared_ptr<Features<State> > clone() const = 0;
+
+    virtual void update(const State & curr_state,
+            const std::vector<StateAndTrt<State> > & history) {};
 
     virtual std::vector<double> get_features(
             const State & state,
