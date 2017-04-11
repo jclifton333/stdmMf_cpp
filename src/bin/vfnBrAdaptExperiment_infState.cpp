@@ -113,7 +113,8 @@ std::pair<double, double> run_adapt(const uint32_t & seed,
 
         auto min_fn = [&](const std::vector<double> & par,
                 const std::vector<double> & par_orig) {
-            SweepAgent<InfState> agent(net, features, par, 2, true);
+                          SweepAgent<InfState> agent(net, features, par,
+                                  njm::linalg::dot_a_and_b, 2, true);
             agent.rng(rng);
             System<InfState> s(net, mod);
             s.rng(rng);
@@ -193,7 +194,8 @@ std::pair<double, double> run_adapt(const uint32_t & seed,
         // function for br min
         auto min_fn = [&](const std::vector<double> & par,
                 const std::vector<double> & par_orig) {
-            SweepAgent<InfState> agent(net, features, par, 2, true);
+                          SweepAgent<InfState> agent(net, features, par,
+                                  njm::linalg::dot_a_and_b, 2, true);
             agent.rng(rng);
 
             // q function
@@ -251,7 +253,8 @@ std::pair<double, double> run_adapt(const uint32_t & seed,
         std::shared_ptr<Features<InfState> > features(
                 new NetworkRunSymFeatures<InfState>(net, path_len));
 
-        SweepAgent<InfState> agent(net, features, optim_par, 2, true);
+        SweepAgent<InfState> agent(net, features, optim_par,
+                njm::linalg::dot_a_and_b, 2, true);
         agent.rng(rng);
 
         for (uint32_t i = 0; i < 50; ++i) {

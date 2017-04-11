@@ -193,8 +193,8 @@ void generate_jitters(const uint32_t & seed,
                                     norm_b_warm)));
 
 
-            SweepAgent<InfShieldState> agent_a(network, features, par_a_eps, 2,
-                    false);
+            SweepAgent<InfShieldState> agent_a(network, features, par_a_eps,
+                    njm::linalg::dot_a_and_b, 2, false);
             agent_a.rng(rng);
             auto q_fn_a = [&](const InfShieldState & state_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
@@ -210,8 +210,8 @@ void generate_jitters(const uint32_t & seed,
 
 
 
-            SweepAgent<InfShieldState> agent_b(network, features, par_b_eps, 2,
-                    false);
+            SweepAgent<InfShieldState> agent_b(network, features, par_b_eps,
+                    njm::linalg::dot_a_and_b, 2, false);
             agent_b.rng(rng);
             auto q_fn_b = [&](const InfShieldState & state_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {
@@ -228,7 +228,7 @@ void generate_jitters(const uint32_t & seed,
 
 
             SweepAgent<InfShieldState> agent_b_warm(network, features,
-                    par_b_warm_eps, 2, false);
+                    par_b_warm_eps, njm::linalg::dot_a_and_b, 2, false);
             agent_b_warm.rng(rng);
             auto q_fn_b_warm = [&](const InfShieldState & state_t,
                     const boost::dynamic_bitset<> & trt_bits_t) {

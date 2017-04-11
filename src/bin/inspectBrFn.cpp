@@ -93,7 +93,7 @@ void run(const uint32_t & level_num, const uint32_t & rep,
 
         // find minimizing scalar for parameters
         SweepAgent<InfShieldState> sweepVfn(network->clone(), features->clone(),
-                vfn_optim_par, 2, true);
+                vfn_optim_par, njm::linalg::dot_a_and_b, 2, true);
         sweepVfn.rng(rng);
 
         auto q_fn = [&](const InfShieldState & state_t,
@@ -177,7 +177,8 @@ void run(const uint32_t & level_num, const uint32_t & rep,
                    << "NA" << "\n";
 
             SweepAgent<InfShieldState> agent(network->clone(),
-                    features->clone(), par, 2, do_sweep);
+                    features->clone(), par, njm::linalg::dot_a_and_b, 2,
+                    do_sweep);
             agent.rng(rng);
             for (uint32_t g = 0; g < gamma.size(); ++g) {
                 MeanVarAccumulator acc;

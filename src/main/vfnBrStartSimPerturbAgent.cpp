@@ -96,7 +96,8 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
     const std::vector<double> optim_par = this->train(all_history,
             std::vector<double>(this->features_->num_features(), 0.0));
 
-    SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
+    SweepAgent<State> a(this->network_, this->features_, optim_par,
+            njm::linalg::dot_a_and_b, 2, false);
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }

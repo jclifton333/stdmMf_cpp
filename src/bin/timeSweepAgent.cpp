@@ -5,6 +5,7 @@
 #include <chrono>
 #include <fstream>
 #include <glog/logging.h>
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 
 using namespace stdmMf;
 
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]) {
                 x = rng->rnorm_01();
             });
 
-    SweepAgent<InfState> sa(net, f, coef, 2, true);
+    SweepAgent<InfState> sa(net, f, coef, njm::linalg::dot_a_and_b, 2, true);
     sa.rng(rng);
 
     boost::dynamic_bitset<> inf_bits(net->size());

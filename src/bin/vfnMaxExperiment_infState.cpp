@@ -3,6 +3,7 @@
 #include <fstream>
 #include <thread>
 
+#include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/thread/pool.hpp>
 #include <njm_cpp/info/project.hpp>
@@ -54,7 +55,8 @@ std::pair<double, double> run_vmax(const uint32_t & seed,
 
     auto min_fn = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
-        SweepAgent<InfState> agent(net, features, par, 2, true);
+                      SweepAgent<InfState> agent(net, features, par,
+                              njm::linalg::dot_a_and_b, 2, true);
         agent.rng(rng);
         System<InfState> s(net, mod);
         s.rng(rng);
@@ -91,7 +93,8 @@ std::pair<double, double> run_vmax(const uint32_t & seed,
 
     const std::vector<double> par = sp.par();
 
-    SweepAgent<InfState> agent(net, features, par, 2, true);
+    SweepAgent<InfState> agent(net, features, par,
+            njm::linalg::dot_a_and_b, 2, true);
     agent.rng(rng);
     System<InfState> s(net, mod);
     s.rng(rng);

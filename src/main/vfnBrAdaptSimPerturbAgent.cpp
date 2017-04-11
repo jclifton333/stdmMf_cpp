@@ -101,7 +101,8 @@ boost::dynamic_bitset<> VfnBrAdaptSimPerturbAgent<State>::apply_trt(
             std::vector<double>(this->features_->num_features(), 0.0));
 
 
-    SweepAgent<State> a(this->network_, this->features_, optim_par, 2, false);
+    SweepAgent<State> a(this->network_, this->features_, optim_par,
+            njm::linalg::dot_a_and_b, 2, false);
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }
@@ -123,7 +124,7 @@ std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
     // find minimizing scalar for parameters
     {
         SweepAgent<State> a(this->network_, this->features_, vfn_par,
-                2, false);
+                njm::linalg::dot_a_and_b, 2, false);
         a.rng(this->rng());
 
         auto q_fn = [&](const State & state_t,

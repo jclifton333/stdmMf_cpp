@@ -90,7 +90,8 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
 
     auto min_fn = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
-        SweepAgent<InfState> agent(net, features, par, 2, true);
+                      SweepAgent<InfState> agent(net, features, par,
+                              njm::linalg::dot_a_and_b, 2, true);
         agent.rng(rng);
 
         // q function
@@ -131,7 +132,8 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
 
     const std::vector<double> par = sp.par();
 
-    SweepAgent<InfState> agent(net, features, par, 2, true);
+    SweepAgent<InfState> agent(net, features, par,
+            njm::linalg::dot_a_and_b, 2, true);
     agent.rng(rng);
 
     double val = 0.0;

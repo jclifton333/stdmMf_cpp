@@ -88,7 +88,8 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
             1.0 / njm::linalg::l2_norm(this->last_optim_par_));
 
     // sweep to get treatments
-    SweepAgent<State> a(this->network_, this->features_, optim_par, 2, true);
+    SweepAgent<State> a(this->network_, this->features_, optim_par,
+            njm::linalg::dot_a_and_b, 2, true);
     a.rng(this->rng());
     return a.apply_trt(curr_state, history);
 }
@@ -143,7 +144,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
                  SweepAgent<State> a(this->network_, this->features_,
-                         par, 2, true);
+                         par, njm::linalg::dot_a_and_b, 2, true);
                  a.rng(this->rng());
                  System<State> s(this->network_, this->model_);
                  s.rng(this->rng());

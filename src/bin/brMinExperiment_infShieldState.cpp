@@ -157,7 +157,8 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
     const std::chrono::duration<double> elapsed = tock - tick;
 
 
-    SweepAgent<InfShieldState> agent(net, features, par, 2, do_sweep);
+    SweepAgent<InfShieldState> agent(net, features, par,
+            njm::linalg::dot_a_and_b, 2, do_sweep);
     agent.rng(rng);
 
     double val = 0.0;
