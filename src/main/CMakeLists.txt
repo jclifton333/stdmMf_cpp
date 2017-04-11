@@ -3,6 +3,9 @@ find_package(Protobuf REQUIRED)
 find_package(Boost REQUIRED system thread filesystem)
 find_package(GSL REQUIRED)
 find_package(Armadillo REQUIRED)
+set(Caffe_DIR "~/tools/share/Caffe")
+find_package(Caffe REQUIRED)
+
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
@@ -37,9 +40,10 @@ add_library(stdmMf network.cpp system.cpp states.cpp
   objFns.cpp polValIteration.cpp
 
   ## extra
+  neuralNetwork.cpp
   ${PROTO_SRCS})
 
-target_link_libraries(stdmMf njm_cpp)
+target_link_libraries(stdmMf njm_cpp ${Caffe_LIBRARIES})
 
 
 if (COMPILE_WITH_WARNINGS)
