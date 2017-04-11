@@ -22,9 +22,10 @@ NeuralNetwork<State>::NeuralNetwork(const std::string & model_file,
     caffe::NetParameter net_param;
     caffe::ReadNetParamsFromTextFileOrDie(model_file, &net_param);
     // check input layer for training
-    CHECK_EQ(net_param.name(), "q_learning");
+    CHECK_EQ(net_param.name(), "q_function");
     CHECK_EQ(net_param.layer(0).name(), "input_data");
-    CHECK_EQ(net_param.layer(0).phase(), caffe::TRAIN);
+    CHECK_EQ(net_param.layer(0).include_size(), 1);
+    CHECK_EQ(net_param.layer(0).include(0).phase(), caffe::TRAIN);
     CHECK_EQ(net_param.layer(0).type(), "MemoryData");
     CHECK(net_param.layer(0).has_memory_data_param());
     CHECK_EQ(net_param.layer(0).memory_data_param().channels(), 1);
@@ -38,9 +39,10 @@ NeuralNetwork<State>::NeuralNetwork(const std::string & model_file,
             this->num_input_per_node_);
 
     // check input layer for evaluating
-    CHECK_EQ(net_param.name(), "q_learning");
+    CHECK_EQ(net_param.name(), "q_function");
     CHECK_EQ(net_param.layer(1).name(), "input_data");
-    CHECK_EQ(net_param.layer(1).phase(), caffe::TEST);
+    CHECK_EQ(net_param.layer(1).include_size(), 1);
+    CHECK_EQ(net_param.layer(1).include(0).phase(), caffe::TEST);
     CHECK_EQ(net_param.layer(1).type(), "MemoryData");
     CHECK(net_param.layer(1).has_memory_data_param());
     CHECK_EQ(net_param.layer(1).memory_data_param().channels(), 1);
@@ -170,7 +172,7 @@ double NeuralNetwork<InfState>::eval(
                 state_trt.trt_bits.test(i) ? 1.0 : 0.0);
     }
 
-    CHECK_EQ(this->state_trt_train_data_.size(),
+    CHECK_EQ(this->state_trt_eval_data_.size(),
             this->num_input_per_node_ * this->num_nodes_);
 
     // setup eval output data (this is dummy data)
@@ -180,7 +182,7 @@ double NeuralNetwork<InfState>::eval(
     caffe::MemoryDataLayer<double> * input_data_layer(
             static_cast<caffe::MemoryDataLayer<double> *>(
                     this->eval_net_->layer_by_name("input_data").get()));
-    input_data_layer->Reset(this->state_trt_train_data_.data(),
+    input_data_layer->Reset(this->state_trt_eval_data_.data(),
             this->outcome_eval_data_.data(), 1);
 
     this->eval_net_->Forward();
@@ -204,7 +206,7 @@ double NeuralNetwork<InfShieldState>::eval(
                 state_trt.trt_bits.test(i) ? 1.0 : 0.0);
     }
 
-    CHECK_EQ(this->state_trt_train_data_.size(),
+    CHECK_EQ(this->state_trt_eval_data_.size(),
             this->num_input_per_node_ * this->num_nodes_);
 
     // setup eval output data (this is dummy data)
@@ -214,7 +216,7 @@ double NeuralNetwork<InfShieldState>::eval(
     caffe::MemoryDataLayer<double> * input_data_layer(
             static_cast<caffe::MemoryDataLayer<double> *>(
                     this->eval_net_->layer_by_name("input_data").get()));
-    input_data_layer->Reset(this->state_trt_train_data_.data(),
+    input_data_layer->Reset(this->state_trt_eval_data_.data(),
             this->outcome_eval_data_.data(), 1);
 
     this->eval_net_->Forward();
