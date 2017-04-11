@@ -12,6 +12,7 @@
 
 namespace stdmMf {
 
+// TODO: write some test cases
 template <typename State>
 class NeuralNetwork {
 protected:
