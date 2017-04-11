@@ -43,8 +43,6 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
 template <typename State>
 void FiniteQfnFeatures<State>::update(const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
-    // TODO: fit model to data and then generate more data to use.
-    // Right now this is just using the observed data.
     this->model_->est_par(history, curr_state);
     const std::vector<Transition<State> > sim_data(
             this->generate_data(100, 100));
@@ -129,8 +127,7 @@ void FiniteQfnFeatures<State>::fit_q_functions(
         outcome_plus_max.reserve(num_obs);
         // find max for next states and add to outcomes
         for (uint32_t j = 0; j < num_obs; ++j) {
-            // TODO: modify sweep agent to use a generic function then
-            // use a sweep agent with a neural network here
+            // TODO: need to calculate arg max of the neural network
             const boost::dynamic_bitset<> arg_max;
 
             const StateAndTrt<State> state_trt(obs.at(j).next_state, arg_max);
