@@ -15,10 +15,13 @@ template <typename State>
 SweepAgent<State>::SweepAgent(const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Features<State> > & features,
         const std::vector<double> & coef,
+        const std::function<double(const std::vector<double> &,
+                const std::vector<double> &)> & eval_fn,
         const uint32_t & max_sweeps,
         const bool & do_sweep)
     : Agent<State>(network), features_(features), coef_(coef),
-      max_sweeps_(max_sweeps), do_sweep_(do_sweep), do_parallel_(false) {
+      eval_fn_(eval_fn), max_sweeps_(max_sweeps), do_sweep_(do_sweep),
+      do_parallel_(false) {
 
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
@@ -28,8 +31,8 @@ template <typename State>
 SweepAgent<State>::SweepAgent(const SweepAgent & other)
     : Agent<State>(other),
     features_(other.features_->clone()), coef_(other.coef_),
-    max_sweeps_(other.max_sweeps_), do_sweep_(other.do_sweep_),
-    do_parallel_(other.do_parallel_),
+      eval_fn_(other.eval_fn_), max_sweeps_(other.max_sweeps_),
+      do_sweep_(other.do_sweep_), do_parallel_(other.do_parallel_),
     pool_(new njm::thread::Pool(*other.pool_)) {
 }
 
@@ -82,7 +85,7 @@ boost::dynamic_bitset<> SweepAgent<State>::apply_trt(
         this->set_new_treatment(trt_bits, not_trt, has_trt, state, feat);
     }
 
-    double best_val = njm::linalg::dot_a_and_b(this->coef_, feat);
+    double best_val = this->eval_fn_(this->coef_, feat);
 
     // sweep treatments
     if (this->do_sweep_) {
@@ -141,7 +144,7 @@ void SweepAgent<State>::set_new_treatment_serial(
         this->features_->update_features(*it, state, trt_bits,
                 state, trt_bits_old, feat);
 
-        const double val = njm::linalg::dot_a_and_b(this->coef_, feat);
+        const double val = this->eval_fn_(this->coef_, feat);
 
         // update features for removing treatment on *it
         this->features_->update_features(*it, state, trt_bits_old,
@@ -221,7 +224,7 @@ void SweepAgent<State>::set_new_treatment_parallel(
         this->features_->update_features_async(new_trt, state, trt_bits_cpy,
                 state, trt_bits_old, feat_cpy);
 
-        const double val = njm::linalg::dot_a_and_b(this->coef_, feat_cpy);
+        const double val = this->eval_fn_(this->coef_, feat_cpy);
 
         // notify main thread
         std::lock_guard<std::mutex> lk(finish_mtx);
@@ -344,7 +347,7 @@ bool SweepAgent<State>::sweep_treatments(
             this->features_->update_features(*not_it, state, trt_bits,
                     state, trt_bits_old, feat);
 
-            const double val = njm::linalg::dot_a_and_b(this->coef_, feat);
+            const double val = this->eval_fn_(this->coef_, feat);
 
             // update features for resetting *not_it
             this->features_->update_features(*not_it, state, trt_bits_old,

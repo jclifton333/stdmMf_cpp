@@ -17,6 +17,9 @@ protected:
     const std::shared_ptr<Features<State> > features_;
     const std::vector<double> coef_;
 
+    const std::function<double(const std::vector<double> & ,
+            const std::vector<double> &)> eval_fn_;
+
     const uint32_t max_sweeps_;
 
     const bool do_sweep_;
@@ -29,6 +32,8 @@ public:
     SweepAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features<State> > & features,
             const std::vector<double> & coef,
+            const std::function<double(const std::vector<double> &,
+                    const std::vector<double> &)> & eval_fn,
             const uint32_t & max_sweeps,
             const bool & do_sweep);
 
