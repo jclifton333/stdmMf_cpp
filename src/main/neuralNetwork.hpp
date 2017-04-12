@@ -10,11 +10,13 @@
 
 #include "states.hpp"
 
+#include <njm_cpp/tools/random.hpp>
+
 namespace stdmMf {
 
 // TODO: write some test cases
 template <typename State>
-class NeuralNetwork {
+class NeuralNetwork : public njm::tools::RngClass {
 protected:
     std::shared_ptr<caffe::Solver<double> > solver_;
     std::shared_ptr<caffe::Net<double> > eval_net_;
@@ -28,6 +30,8 @@ protected:
 
     std::vector<double> state_trt_eval_data_;
     std::vector<double> outcome_eval_data_;
+
+    const uint32_t max_sweeps_;
 
 public:
     NeuralNetwork(const std::string & model_file,
@@ -45,6 +49,24 @@ public:
     void fit();
 
     double eval(const StateAndTrt<State> & state_trt);
+
+    std::pair<boost::dynamic_bitset<>, double>
+    sweep_max(const State & state, const uint32_t & num_trt);
+
+    void set_new_treatment(boost::dynamic_bitset<> & trt_bits,
+            std::set<uint32_t> & not_trt,
+            std::set<uint32_t> & has_trt,
+            const State & state);
+
+    bool sweep_treatments(boost::dynamic_bitset<> & trt_bits,
+            double & best_val,
+            const uint32_t & num_trt,
+            std::set<uint32_t> & not_trt,
+            std::set<uint32_t> & has_trt,
+            const State & state);
+
+    using njm::tools::RngClass::rng;
+    virtual void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 
