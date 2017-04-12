@@ -26,6 +26,11 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
                         + "/src/prototxt/neural_network_solver.prototxt"),
                 100, this->network_->size());
     }
+
+    std::for_each(this->nn_.begin(), this->nn_.end(),
+            [this] (NeuralNetwork<State> & nn) {
+                nn.rng(this->rng());
+            });
     this->model_->rng(this->rng());
 }
 
@@ -36,6 +41,11 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
     : network_(other.network_->clone()), model_(other.model_->clone()),
       num_nodes_(other.num_nodes_), look_ahead_(other.look_ahead_),
       nn_(other.nn_) {
+
+    std::for_each(this->nn_.begin(), this->nn_.end(),
+            [this] (NeuralNetwork<State> & nn) {
+                nn.rng(this->rng());
+            });
     this->model_->rng(this->rng());
 }
 
@@ -146,6 +156,10 @@ template <typename State>
 void FiniteQfnFeatures<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
     this->RngClass::rng(rng);
+    std::for_each(this->nn_.begin(), this->nn_.end(),
+            [this] (NeuralNetwork<State> & nn) {
+                nn.rng(this->rng());
+            });
     this->model_->rng(rng);
 }
 
