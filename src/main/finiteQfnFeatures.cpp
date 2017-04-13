@@ -208,7 +208,7 @@ uint32_t FiniteQfnFeatures<State>::num_features() const {
 template <typename State>
 void FiniteQfnFeatures<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
     std::for_each(this->nn_.begin(), this->nn_.end(),
             [this] (NeuralNetwork<State> & nn) {
                 nn.rng(this->rng());
