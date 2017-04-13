@@ -75,13 +75,14 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(state, history);
     }
 
+    // update features
+    this->features_->update(curr_state, history, this->num_trt());
+
     const std::vector<Transition<State> > & all_history(
             Transition<State>::from_sequence(history, curr_state));
 
     const std::vector<double> optim_par = this->train(all_history,
             this->last_optim_par_);
-
-    this->features_->update(curr_state, history, this->num_trt());
 
     // store parameter values and scale to norm 1 (don't need to scale
     // optim_par as the policy is scale invariant)
