@@ -128,7 +128,7 @@ TEST(TestSweepAgent, TestEquality) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent<InfState> sa(n, f, coef, 2, true);
+        SweepAgent<InfState> sa(n, f, coef, njm::linalg::dot_a_and_b, 2, true);
         SweepAgentSlow<InfState> sas(n, f_slow, coef, 2);
 
         for (uint32_t j = 0; j < 5; ++j) {
@@ -181,7 +181,7 @@ TEST(TestSweepAgent, TestScaling) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent<InfState> sa(n, f, coef, 2, true);
+        SweepAgent<InfState> sa(n, f, coef, njm::linalg::dot_a_and_b, 2, true);
 
         const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits);
 
@@ -192,7 +192,8 @@ TEST(TestSweepAgent, TestScaling) {
                     x *= scalar;
                 });
 
-        SweepAgent<InfState> sa_scaled(n, f, coef, 2, true);
+        SweepAgent<InfState> sa_scaled(n, f, coef, njm::linalg::dot_a_and_b,
+                2, true);
 
         const boost::dynamic_bitset<> trt_bits_scaled = sa_scaled.apply_trt(
                 inf_bits);
@@ -232,11 +233,12 @@ TEST(TestSweepAgent, TestParallel) {
                     x = rng->rnorm_01();
                 });
 
-        SweepAgent<InfState> sa(n, f, coef, 0, false);
+        SweepAgent<InfState> sa(n, f, coef, njm::linalg::dot_a_and_b, 0, false);
 
         const boost::dynamic_bitset<> trt_bits = sa.apply_trt(inf_bits);
 
-        SweepAgent<InfState> sa_parallel(n, f, coef, 0, false);
+        SweepAgent<InfState> sa_parallel(n, f, coef, njm::linalg::dot_a_and_b,
+                0, false);
         sa_parallel.set_parallel(true, 1);
 
         const boost::dynamic_bitset<> trt_bits_parallel = sa_parallel.apply_trt(
