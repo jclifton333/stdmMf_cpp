@@ -19,7 +19,8 @@ public:
     virtual std::shared_ptr<Features<State> > clone() const = 0;
 
     virtual void update(const State & curr_state,
-            const std::vector<StateAndTrt<State> > & history) {};
+            const std::vector<StateAndTrt<State> > & history,
+            const uint32_t & num_trt) { /* do nothing by default */};
 
     virtual std::vector<double> get_features(
             const State & state,
