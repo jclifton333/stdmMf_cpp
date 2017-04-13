@@ -135,8 +135,10 @@ double ModelFit<State>::obj_fn(const gsl_vector * x, void * params){
     // penalty
     const double penalty = std::accumulate(par.begin(), par.end(), 0.0,
             [](const double & a, const double & b) {
-                if (std::abs(b) > 30) {
+                if (b > 30.0) {
                     return a + (b - 30) * (b - 30);
+                } else if (b < -30.0) {
+                    return a + (b + 30) * (b + 30);
                 } else {
                     return a;
                 }
@@ -164,9 +166,13 @@ void ModelFit<State>::obj_fn_grad(const gsl_vector * x, void * params,
             << pi << " with value " << par.at(pi)
             << " [seed = " << mf->model_->seed() << "]";
 
-        if (std::abs(par.at(pi)) > 30) {
+
+        if (par.at(pi) > 30) {
             gsl_vector_set(g, pi, - ll_grad.at(pi)
-                    + 2 * (std::abs(par.at(pi)) - 30));
+                    + 2 * (par.at(pi) - 30));
+        } else if (par.at(pi) < -30.0) {
+            gsl_vector_set(g, pi, - ll_grad.at(pi)
+                    + 2 * (par.at(pi) + 30));
         } else {
             gsl_vector_set(g, pi, - ll_grad.at(pi));
         }
