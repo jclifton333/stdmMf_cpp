@@ -51,6 +51,12 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
 
 
 template <typename State>
+std::shared_ptr<Features<State> >FiniteQfnFeatures<State>::clone() const {
+    return std::shared_ptr<Features<State> >(new FiniteQfnFeatures(*this));
+}
+
+
+template <typename State>
 void FiniteQfnFeatures<State>::update(const State & curr_state,
         const std::vector<StateAndTrt<State> > & history,
         const uint32_t & num_trt) {
@@ -87,6 +93,18 @@ void FiniteQfnFeatures<State>::update_features(
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) {
     feat = this->get_features(state_new, trt_bits_new);
+}
+
+
+template <typename State>
+void FiniteQfnFeatures<State>::update_features_async(
+        const uint32_t & changed_node,
+        const State & state_new,
+        const boost::dynamic_bitset<> & trt_bits_new,
+        const State & state_old,
+        const boost::dynamic_bitset<> & trt_bits_old,
+        std::vector<double> & feat) const {
+    LOG(FATAL) << "this is not implemented";
 }
 
 
