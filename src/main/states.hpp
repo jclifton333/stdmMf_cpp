@@ -77,6 +77,16 @@ struct Transition {
 };
 
 
+template <typename State>
+bool inf_has_changed(const State & curr_state,
+        const std::vector<StateAndTrt<State> > & sequence)  {
+    return std::any_of(sequence.begin(), sequence.end(),
+            [&curr_state] (const StateAndTrt<State> & state_trt) {
+                return state_trt.state.inf_bits != curr_state.inf_bits;
+            });
+}
+
+
 } // namespace stdmMf
 
 
