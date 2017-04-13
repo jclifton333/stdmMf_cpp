@@ -1,4 +1,5 @@
 #include "neuralNetwork.hpp"
+#include <cmath>
 
 namespace stdmMf {
 
@@ -408,7 +409,8 @@ double NeuralNetwork<InfState>::eval(
     this->eval_net_->Forward();
     const double outcome(this->eval_net_->blob_by_name("fc3")->cpu_data()[0]);
 
-    CHECK(std::isfinite(outcome));
+    CHECK(std::isfinite(outcome)) << "outcome: " << outcome;
+    CHECK(!std::isnan(outcome)) << "outcome: " << outcome;
 
     return outcome;
 }
@@ -446,7 +448,8 @@ double NeuralNetwork<InfShieldState>::eval(
     this->eval_net_->Forward();
     const double outcome(this->eval_net_->blob_by_name("fc3")->cpu_data()[0]);
 
-    CHECK(std::isfinite(outcome));
+    CHECK(std::isfinite(outcome))  << "outcome: " << outcome;
+    CHECK(!std::isnan(outcome)) << "outcome: " << outcome;
 
     return outcome;
 }
