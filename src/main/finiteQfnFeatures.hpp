@@ -31,13 +31,37 @@ public:
     virtual std::shared_ptr<Features<State> > clone() const override;
 
     virtual void update(const State & curr_state,
-            const std::vector<StateAndTrt<State> > & history) override;
+            const std::vector<StateAndTrt<State> > & history,
+            const uint32_t & num_trt) override;
+
+    virtual std::vector<double> get_features(
+            const State & state,
+            const boost::dynamic_bitset<> & trt_bits) override;
+
+    virtual void update_features(
+            const uint32_t & changed_node,
+            const State & state_new,
+            const boost::dynamic_bitset<> & trt_bits_new,
+            const State & state_old,
+            const boost::dynamic_bitset<> & trt_bits_old,
+            std::vector<double> & feat) override;
+
+    virtual void update_features_async(
+            const uint32_t & changed_node,
+            const State & state_new,
+            const boost::dynamic_bitset<> & trt_bits_new,
+            const State & state_old,
+            const boost::dynamic_bitset<> & trt_bits_old,
+            std::vector<double> & feat) const override;
+
+    virtual uint32_t num_features() const override;
 
     virtual std::vector<Transition<State> > generate_data(
             const uint32_t & num_episodes,
             const uint32_t & num_obs_per_episode);
 
-    virtual void fit_q_functions(const std::vector<Transition<State> > & obs);
+    virtual void fit_q_functions(const std::vector<Transition<State> > & obs,
+            const uint32_t & num_trt);
 
     using njm::tools::RngClass::rng;
     virtual void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;

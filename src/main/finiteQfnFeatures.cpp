@@ -52,12 +52,41 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
 
 template <typename State>
 void FiniteQfnFeatures<State>::update(const State & curr_state,
-        const std::vector<StateAndTrt<State> > & history) {
+        const std::vector<StateAndTrt<State> > & history,
+        const uint32_t & num_trt) {
     this->model_->est_par(history, curr_state);
     const std::vector<Transition<State> > sim_data(
             this->generate_data(100, 100));
 
-    this->fit_q_functions(sim_data);
+    this->fit_q_functions(sim_data, num_trt);
+}
+
+
+template <typename State>
+std::vector<double> FiniteQfnFeatures<State>::get_features(const State & state,
+        const boost::dynamic_bitset<> & trt_bits) {
+    std::vector<double> features;
+    features.reserve(this->num_features());
+    features.push_back(1.0);
+    for (uint32_t i = 0; i < this->look_ahead_; ++i) {
+        const double nn_value(this->nn_.at(i).eval(
+                        StateAndTrt<State>(state, trt_bits)));
+
+        features.push_back(nn_value);
+    }
+    return features;
+}
+
+
+template <typename State>
+void FiniteQfnFeatures<State>::update_features(
+        const uint32_t & changed_node,
+        const State & state_new,
+        const boost::dynamic_bitset<> & trt_bits_new,
+        const State & state_old,
+        const boost::dynamic_bitset<> & trt_bits_old,
+        std::vector<double> & feat) {
+    feat = this->get_features(state_new, trt_bits_new);
 }
 
 
@@ -111,7 +140,8 @@ std::vector<Transition<State> > FiniteQfnFeatures<State>::generate_data(
 
 template <typename State>
 void FiniteQfnFeatures<State>::fit_q_functions(
-        const std::vector<Transition<State> > & obs) {
+        const std::vector<Transition<State> > & obs,
+        const uint32_t & num_trt) {
     const uint32_t num_obs(obs.size());
     std::vector<StateAndTrt<State> > state_trt_data;
     state_trt_data.reserve(num_obs);
@@ -138,11 +168,11 @@ void FiniteQfnFeatures<State>::fit_q_functions(
         // find max for next states and add to outcomes
         for (uint32_t j = 0; j < num_obs; ++j) {
             // TODO: need to calculate arg max of the neural network
-            const boost::dynamic_bitset<> arg_max;
+            const std::pair<boost::dynamic_bitset<>, double> arg_max(
+                    this->nn_.at(i - 1).sweep_max(
+                            obs.at(j).next_state, num_trt));
 
-            const StateAndTrt<State> state_trt(obs.at(j).next_state, arg_max);
-            outcome_plus_max.push_back(
-                    outcomes.at(j) + this->nn_.at(i-1).eval(state_trt));
+            outcome_plus_max.push_back(outcomes.at(j) + arg_max.second);
         }
 
         // train neural network
