@@ -183,6 +183,11 @@ void FiniteQfnFeatures<State>::fit_q_functions(
 
 
 template <typename State>
+uint32_t FiniteQfnFeatures<State>::num_features() {
+    return this->look_ahead_ + 1;
+}
+
+template <typename State>
 void FiniteQfnFeatures<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
     this->RngClass::rng(rng);
