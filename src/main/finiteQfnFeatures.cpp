@@ -6,6 +6,8 @@
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
 
+#include <cmath>
+
 namespace stdmMf {
 
 
@@ -21,7 +23,7 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
     for (uint32_t i = 0; i < this->look_ahead_; ++i) {
         this->nn_.emplace_back(
                 (njm::info::project::PROJECT_ROOT_DIR
-                        + "/src/prototxt/neural_network_model.protoxt"),
+                        + "/src/prototxt/neural_network_model.prototxt"),
                 (njm::info::project::PROJECT_ROOT_DIR
                         + "/src/prototxt/neural_network_solver.prototxt"),
                 100, this->network_->size());
@@ -77,7 +79,6 @@ std::vector<double> FiniteQfnFeatures<State>::get_features(const State & state,
     for (uint32_t i = 0; i < this->look_ahead_; ++i) {
         const double nn_value(this->nn_.at(i).eval(
                         StateAndTrt<State>(state, trt_bits)));
-
         features.push_back(nn_value);
     }
     return features;
@@ -92,7 +93,9 @@ void FiniteQfnFeatures<State>::update_features(
         const State & state_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) {
-    feat = this->get_features(state_new, trt_bits_new);
+    const std::vector<double> new_feat(
+            this->get_features(state_new, trt_bits_new));
+    feat.assign(new_feat.begin(), new_feat.end());
 }
 
 
