@@ -161,7 +161,7 @@ void SweepAgent<State>::set_new_treatment_serial(
         }
     }
 
-    CHECK_GT(best_nodes.size(), 0);
+    CHECK_GT(best_nodes.size(), 0) << "seed: " << this->rng()->seed();
     uint32_t best_node;
     if (best_nodes.size() == 1) {
         // unique best node
