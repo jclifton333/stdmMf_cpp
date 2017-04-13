@@ -90,6 +90,8 @@ boost::dynamic_bitset<> VfnBrStartSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(inf_bits, history);
     }
 
+    this->features_->update(curr_state, history, this->num_trt());
+
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
 

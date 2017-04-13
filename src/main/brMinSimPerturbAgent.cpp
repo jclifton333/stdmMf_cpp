@@ -81,6 +81,8 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
         return a.apply_trt(curr_state, history);
     }
 
+    this->features_->update(curr_state, history, this->num_trt());
+
     // use transition form
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
