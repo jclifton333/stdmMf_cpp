@@ -104,16 +104,6 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
             njm::linalg::dot_a_and_b, 2, true);
     a.rng(this->rng());
 
-    std::cout << "coef:";
-    std::for_each(optim_par.begin(), optim_par.end(),
-            [] (const double & x_) {
-                std::cout << " " << x_;
-            });
-    std::cout << std::endl;
-    if (history.size() == 3) {
-        LOG(FATAL);
-    }
-
     return a.apply_trt(curr_state, history);
 }
 
