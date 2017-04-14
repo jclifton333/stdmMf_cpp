@@ -2,6 +2,7 @@
 #include <njm_cpp/tools/bitManip.hpp>
 #include <glog/logging.h>
 #include <iostream>
+#include <numeric>
 #include <cmath>
 
 namespace stdmMf {

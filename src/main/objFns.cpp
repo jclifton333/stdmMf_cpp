@@ -1,5 +1,6 @@
 #include "objFns.hpp"
 #include <glog/logging.h>
+#include <numeric>
 
 namespace stdmMf {
 

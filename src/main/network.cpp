@@ -1,5 +1,6 @@
 #include "network.hpp"
 #include <algorithm>
+#include <numeric>
 #include <glog/logging.h>
 #include <njm_cpp/tools/random.hpp>
 

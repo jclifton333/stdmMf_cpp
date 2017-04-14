@@ -7,6 +7,7 @@
 #include <thread>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include <future>
+#include <numeric>
 #include "sweepAgent.hpp"
 
 namespace stdmMf {
