@@ -74,6 +74,11 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     MyopicAgent<State> ma(this->network_, this->model_->clone());
         //     return ma.apply_trt(state, history);
     }
+    std::cout << "time: " << history.size() << std::endl;
+    std::string inf_bits_str;
+    boost::to_string(curr_state.inf_bits, inf_bits_str);
+    std::cout << "inf bits: " << inf_bits_str << std::endl;
+
 
     // update features
     this->features_->update(curr_state, history, this->num_trt());
@@ -146,13 +151,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
-                 std::cout << "par:";
-                 std::for_each(par.begin(), par.end(),
-                         [] (const double & x) {
-                             std::cout << " " << x;
-                         });
-                 std::cout << std::endl;
-
                  SweepAgent<State> a(this->network_, this->features_,
                          par, njm::linalg::dot_a_and_b, 2, true);
                  a.rng(this->rng());
@@ -168,7 +166,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
                  val /= this->num_reps_;
 
                  // return negative since optim minimizes functions
-                 std::cout << "val: " << -val << std::endl;
                  return -val;
              };
 
@@ -178,9 +175,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     njm::optim::ErrorCode ec;
     do {
-        std::cout << "step start" << std::endl;
         ec = sp.step();
-        std::cout << "step done" << std::endl;
     } while (ec == njm::optim::ErrorCode::CONTINUE);
 
     CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
