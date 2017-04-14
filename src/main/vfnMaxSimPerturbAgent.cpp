@@ -76,11 +76,6 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     MyopicAgent<State> ma(this->network_, this->model_->clone());
         //     return ma.apply_trt(state, history);
     }
-    std::cout << "##############################" << std::endl;
-    std::cout << "time: " << history.size() << std::endl;
-    std::string inf_bits_str;
-    boost::to_string(curr_state.inf_bits, inf_bits_str);
-    std::cout << "inf bits: " << inf_bits_str << std::endl;
 
     // update features
     this->features_->update(curr_state, history, this->num_trt());
@@ -115,23 +110,12 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     this->model_->est_par(history);
 
-    const std::vector<double> par_orig(this->model_->par());
-    std::cout << "model par:";
-    std::for_each(par_orig.begin(), par_orig.end(),
-            [] (const double & x) {
-                std::cout << " " << x;
-            });
-    std::cout << std::endl;
-
-
     // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(history);
     njm::linalg::mult_b_to_a(hess, -1.0 * history.size());
 
     const arma::mat hess_mat(hess.data(), this->model_->par_size(),
             this->model_->par_size());
-    std::cout << "hess mat: " << std::endl
-              << hess_mat << std::endl;
     arma::mat eigvec;
     arma::vec eigval;
     arma::eig_sym(eigval, eigvec, hess_mat);
@@ -155,16 +139,11 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
         }
     }
 
-    std::cout << "var sqrt: " << std::endl
-              << var_sqrt << std::endl;
-
     // sample new parameters
     arma::vec std_norm(this->model_->par_size());
     for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
         std_norm(i) = this->rng_->rnorm_01();
     }
-    std::cout << "std_norm: " << std::endl
-              << std_norm.t() << std::endl;
     const std::vector<double> par_samp(
             njm::linalg::add_a_and_b(this->model_->par(),
                     arma::conv_to<std::vector<double> >::from(
@@ -177,12 +156,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     // set new parameters
     this->model_->par(par_samp);
-    std::cout << "model samp:";
-    std::for_each(par_samp.begin(), par_samp.end(),
-            [] (const double & x) {
-                std::cout << " " << x;
-            });
-    std::cout << std::endl;
 
     CHECK_GT(this->final_t_, history.size());
     const uint32_t num_points = this->final_t_ - history.size();
