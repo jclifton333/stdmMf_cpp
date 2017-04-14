@@ -141,7 +141,12 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
         else
             eigval(i) = 0.0;
     }
-    const arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
+    arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
+    for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
+        if (*it < 1e-3) {
+            *it = 0.0;
+        }
+    }
 
     std::cout << "var sqrt: " << std::endl
               << var_sqrt << std::endl;
