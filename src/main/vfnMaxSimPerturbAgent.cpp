@@ -94,8 +94,10 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
     // store parameter values and scale to norm 1 (don't need to scale
     // optim_par as the policy is scale invariant)
     this->last_optim_par_ = optim_par;
-    njm::linalg::mult_b_to_a(this->last_optim_par_,
-            1.0 / njm::linalg::l2_norm(this->last_optim_par_));
+    const double norm(njm::linalg::l2_norm(this->last_optim_par_));
+    if (norm > 1e-10) {
+        njm::linalg::mult_b_to_a(this->last_optim_par_, 1.0 / norm);
+    }
 
     // sweep to get treatments
     SweepAgent<State> a(this->network_, this->features_, optim_par,
