@@ -55,6 +55,32 @@ void run(const std::shared_ptr<Network> & net,
             Transition<InfShieldState>::from_sequence(s.history(),
                     s.state()));
 
+    CHECK_EQ(transitions.size() == 1);
+    std::string bits_str;
+    boost::to_string(transitions.at(0).curr_state.inf_bits, bits_str);
+    std::cout << "inf_bits: " << bits_str << std::endl
+              << "shield:";
+    std::for_each(transitions.at(0).curr_state.shield.begin(),
+            transitions.at(0).curr_state.shield.end(),
+            [] (const double & x_) {
+                std::cout << " " << x_;
+            });
+    std::cout << std::endl;
+
+    boost::to_string(transitions.at(0).curr_trt_bits, bits_str);
+    std::cout << "trt_bits: " << bits_str << std::endl;
+
+    boost::to_string(transitions.at(0).next_state.inf_bits, bits_str);
+    std::cout << "inf_bits: " << bits_str << std::endl
+              << "shield:";
+    std::for_each(transitions.at(0).next_state.shield.begin(),
+            transitions.at(0).next_state.shield.end(),
+            [] (const double & x_) {
+                std::cout << " " << x_;
+            });
+    std::cout << std::endl;
+
+
     std::vector<double> par(mod_agents->par_size(), 0.0);
     mod_agents->par(par);
 
