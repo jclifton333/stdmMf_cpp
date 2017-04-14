@@ -270,7 +270,7 @@ run(const std::shared_ptr<Network> & net,
     // vfn max length 1
     std::vector<std::future<double> > vfn_len_1_val;
     std::vector<std::future<double> > vfn_len_1_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
+    for (uint32_t i = 21; i < 22; ++i) {
         ++total_sims;
         std::shared_ptr<std::promise<double> > promise_val(
                 new std::promise<double>);
