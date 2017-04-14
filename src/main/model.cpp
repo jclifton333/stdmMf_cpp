@@ -143,6 +143,8 @@ double ModelFit<State>::obj_fn(const gsl_vector * x, void * params){
                     return a;
                 }
             });
+    std::cout << "ll: " << -ll << std::endl
+              << "penalty: " << penalty << std::endl;
     return - ll + penalty;
 }
 
