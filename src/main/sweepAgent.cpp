@@ -161,7 +161,17 @@ void SweepAgent<State>::set_new_treatment_serial(
         }
     }
 
-    CHECK_GT(best_nodes.size(), 0) << "seed: " << this->rng()->seed();
+    CHECK_GT(best_nodes.size(), 0)
+        << "seed: " << this->rng()->seed() << std::endl
+        << "coef:" << std::accumulate(this->coef_.begin(), this->coef_.end(),
+                std::string(), [] (const std::string & a, const double & x) {
+                    return a + " " + std::to_string(x);
+                }) << std::endl
+        << "feat: " << std::accumulate(feat.begin(), feat.end(),
+                std::string(), [] (const std::string & a, const double & x) {
+                    return a + " " + std::to_string(x);
+                }) << std::endl;
+
     uint32_t best_node;
     if (best_nodes.size() == 1) {
         // unique best node
