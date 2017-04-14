@@ -984,6 +984,10 @@ run(const std::shared_ptr<Network> & net,
 
 
 int main(int argc, char *argv[]) {
+    gflags::ParseCommandLineFlags(&argc, &argv, true);
+    google::SetCommandLineOption("GLOG_minloglevel", "2");
+    google::InitGoogleLogging(argv[0]);
+
     // setup networks
     std::vector<std::shared_ptr<Network> > networks;
     { // network 1
