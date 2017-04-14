@@ -168,9 +168,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
             });
     std::cout << std::endl;
 
-    LOG(FATAL);
-
-
     CHECK_GT(this->final_t_, history.size());
     const uint32_t num_points = this->final_t_ - history.size();
 
