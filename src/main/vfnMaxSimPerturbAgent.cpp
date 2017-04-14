@@ -111,6 +111,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     this->model_->est_par(history);
 
     const std::vector<double> par_orig(this->model_->par());
+    std::cout << "##############################" << std::endl;
     std::cout << "model par:";
     std::for_each(par_orig.begin(), par_orig.end(),
             [] (const double & x) {
@@ -125,6 +126,8 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     const arma::mat hess_mat(hess.data(), this->model_->par_size(),
             this->model_->par_size());
+    std::cout << "hess mat: " << std::endl
+              << hess_mat << std::endl;
     arma::mat eigvec;
     arma::vec eigval;
     arma::eig_sym(eigval, eigvec, hess_mat);
@@ -136,12 +139,17 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     }
     const arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
 
+    std::cout << "var sqrt: " << std::endl
+              << var_sqrt << std::endl;
+
     // sample new parameters
     arma::vec std_norm(this->model_->par_size());
     for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
         std_norm(i) = this->rng_->rnorm_01();
         LOG_IF(FATAL, !std::isfinite(std_norm(i)));
     }
+    std::cout << "std_norm: " << std::endl
+              << std_norm.t() << std::endl;
     const std::vector<double> par_samp(
             njm::linalg::add_a_and_b(this->model_->par(),
                     arma::conv_to<std::vector<double> >::from(
