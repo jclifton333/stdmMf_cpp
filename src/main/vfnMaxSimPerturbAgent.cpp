@@ -101,6 +101,15 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
     SweepAgent<State> a(this->network_, this->features_, optim_par,
             njm::linalg::dot_a_and_b, 2, true);
     a.rng(this->rng());
+
+    std::cout << "coef:";
+    std::for_each(optim_par.begin(), optim_par.end(),
+            [] (const double & x_) {
+                std::cout << " " << x_;
+            });
+    std::cout << std::endl;
+    LOG(FATAL);
+
     return a.apply_trt(curr_state, history);
 }
 
