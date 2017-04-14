@@ -55,7 +55,7 @@ void run(const std::shared_ptr<Network> & net,
             Transition<InfShieldState>::from_sequence(s.history(),
                     s.state()));
 
-    CHECK_EQ(transitions.size() == 1);
+    CHECK_EQ(transitions.size(), 1);
     std::string bits_str;
     boost::to_string(transitions.at(0).curr_state.inf_bits, bits_str);
     std::cout << "inf_bits: " << bits_str << std::endl
