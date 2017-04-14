@@ -146,7 +146,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     arma::vec std_norm(this->model_->par_size());
     for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
         std_norm(i) = this->rng_->rnorm_01();
-        LOG_IF(FATAL, !std::isfinite(std_norm(i)));
     }
     std::cout << "std_norm: " << std::endl
               << std_norm.t() << std::endl;
@@ -154,6 +153,11 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
             njm::linalg::add_a_and_b(this->model_->par(),
                     arma::conv_to<std::vector<double> >::from(
                             var_sqrt * std_norm)));
+    // check for finite values
+    std::for_each(par_samp.begin(), par_samp.end(),
+            [] (const double & x_) {
+                LOG_IF(FATAL, !std::isfinite(x_));
+            });
 
     // set new parameters
     this->model_->par(par_samp);
