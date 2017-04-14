@@ -39,14 +39,13 @@ void run(const std::shared_ptr<Network> & net,
         const uint32_t & num_reps,
         const uint32_t & time_points) {
     njm::tools::Rng rng;
-    rng.seed(0);
     std::cout << rng.runif_01() << std::endl
               << rng.runif_01() << std::endl
               << rng.runif_01() << std::endl;
     rng.seed(0);
-    std::cout << rng.rnorm_01() << std::endl
-              << rng.rnorm_01() << std::endl
-              << rng.rnorm_01() << std::endl;
+    std::cout << rng.runif_01() << std::endl
+              << rng.runif_01() << std::endl
+              << rng.runif_01() << std::endl;
     // // vfn max length 2
     // System<InfShieldState> s(net->clone(), mod_system->clone());
     // RandomAgent<InfShieldState> ra(net->clone());
