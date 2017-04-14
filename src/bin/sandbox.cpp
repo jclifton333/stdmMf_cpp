@@ -38,26 +38,27 @@ void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model<InfShieldState> > & mod_agents,
         const uint32_t & num_reps,
         const uint32_t & time_points) {
-    njm::tools::Rng rng;
-    rng.seed(0);
-    for (uint32_t i = 0; i < 25; ++i) {
-        rng.runif_01();
-    }
-    for (uint32_t i = 0; i < 10; ++i) {
-        rng.rnorm_01();
-    }
-    // const uint32_t i(0);
-    // System<InfShieldState> s(net->clone(), mod_system->clone());
-    // s.seed(i);
-    // VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-    //         std::shared_ptr<Features<InfShieldState> >(
-    //                 new NetworkRunSymFeatures<InfShieldState>(
-    //                         net->clone(), 1)),
-    //         mod_agents->clone(),
-    //         2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    // a.seed(i);
+    // njm::tools::Rng rng;
+    // rng.seed(0);
+    // for (uint32_t i = 0; i < 25; ++i) {
+    //     rng.runif_01();
+    // }
+    // for (uint32_t i = 0; i < 10; ++i) {
+    //     rng.rnorm_01();
+    // }
 
-    // runner(&s, &a, time_points, 1.0);
+    const uint32_t i(0);
+    System<InfShieldState> s(net->clone(), mod_system->clone());
+    s.seed(i);
+    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+            std::shared_ptr<Features<InfShieldState> >(
+                    new NetworkRunSymFeatures<InfShieldState>(
+                            net->clone(), 1)),
+            mod_agents->clone(),
+            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    a.seed(i);
+
+    runner(&s, &a, time_points, 1.0);
 
     // njm::tools::Rng rng;
     // for (uint32_t i = 0; i < 10; ++i) {
