@@ -129,7 +129,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     arma::vec eigval;
     arma::eig_sym(eigval, eigvec, hess_mat);
     for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        if (eigval(i) > 0.0)
+        if (eigval(i) > 1e-6)
             eigval(i) = std::sqrt(1.0 / eigval(i));
         else
             eigval(i) = 0.0;
