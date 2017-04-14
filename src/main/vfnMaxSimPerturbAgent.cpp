@@ -146,6 +146,13 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     auto f = [&](const std::vector<double> & par,
             const std::vector<double> & par_orig) {
+                 std::cout << "par:";
+                 std::for_each(par.begin(), par.end(),
+                         [] (const double & x) {
+                             std::cout << " " << x;
+                         });
+                 std::cout << std::endl;
+
                  SweepAgent<State> a(this->network_, this->features_,
                          par, njm::linalg::dot_a_and_b, 2, true);
                  a.rng(this->rng());
@@ -170,7 +177,9 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     njm::optim::ErrorCode ec;
     do {
+        std::cout << "step start" << std::endl;
         ec = sp.step();
+        std::cout << "step done" << std::endl;
     } while (ec == njm::optim::ErrorCode::CONTINUE);
 
     CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
