@@ -40,20 +40,25 @@ void run(const std::shared_ptr<Network> & net,
         const uint32_t & time_points) {
 
     // vfn max length 2
-    const uint32_t i = 0;
     System<InfShieldState> s(net->clone(), mod_system->clone());
-    s.seed(i);
-    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-            std::shared_ptr<Features<InfShieldState> >(
-                    new FiniteQfnFeatures<InfShieldState>(net->clone(),
-                            mod_agents->clone(), 3)),
-            mod_agents->clone(),
-            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    a.seed(i);
-
+    RandomAgent<InfShieldState> ra(net->clone());
     s.start();
+    for (uint32_t i = 0; i < 2; ++i) {
+        const auto trt_bits(ra.apply_trt(s.state(), s.history()));
 
-    runner(&s, &a, time_points, 1.0);
+        s.trt_bits(trt_bits);
+
+        s.turn_clock();
+    }
+
+    mod_agents->est_par(s.history(), s.state());
+    const std::vector<double> par(mod_agents->par());
+    std::cout << "par:";
+    std::for_each(par.begin(), par.end(),
+            [] (const double & x) {
+                std::cout << " " << x;
+            });
+    std::cout << std::endl;
 }
 
 
@@ -67,8 +72,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::shared_ptr<Network> > networks;
     { // network 1
         NetworkInit init;
-        init.set_dim_x(4);
-        init.set_dim_y(4);
+        init.set_dim_x(5);
+        init.set_dim_y(5);
         init.set_wrap(false);
         init.set_type(NetworkInit_NetType_GRID);
         networks.push_back(Network::gen_network(init));
