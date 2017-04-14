@@ -49,7 +49,7 @@ void run(const std::shared_ptr<Network> & net,
             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
     a.seed(i);
 
-    runner(&s, &a, 2, 1.0);
+    runner(&s, &a, time_points, 1.0);
 
     // njm::tools::Rng rng;
     // for (uint32_t i = 0; i < 10; ++i) {
