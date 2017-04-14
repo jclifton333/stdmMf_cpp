@@ -38,14 +38,28 @@ void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model<InfShieldState> > & mod_agents,
         const uint32_t & num_reps,
         const uint32_t & time_points) {
-    njm::tools::Rng rng;
-    for (uint32_t i = 0; i < 10; ++i) {
-        rng.seed(i);
-        std::cout << "seed: " << i << std::endl;
-        for (uint32_t j = 0; j < 3; ++j) {
-            std::cout << j << ": " << rng.rnorm_01() << std::endl;
-        }
-    }
+    const uint32_t i(0);
+    System<InfShieldState> s(net->clone(), mod_system->clone());
+    s.seed(i);
+    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+            std::shared_ptr<Features<InfShieldState> >(
+                    new NetworkRunSymFeatures<InfShieldState>(
+                            net->clone(), 1)),
+            mod_agents->clone(),
+            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    a.seed(i);
+
+    runner(&s, &a, 2, 1.0);
+
+    // njm::tools::Rng rng;
+    // for (uint32_t i = 0; i < 10; ++i) {
+    //     rng.seed(i);
+    //     std::cout << "seed: " << i << std::endl;
+    //     for (uint32_t j = 0; j < 3; ++j) {
+    //         std::cout << j << ": " << rng.rnorm_01() << std::endl;
+    //     }
+    // }
+
     // njm::tools::Rng rng;
     // for (uint32_t i = 0; i < 10; ++i) {
     //     std::cout << i << ": " << rng.rnorm_01() << std::endl;
