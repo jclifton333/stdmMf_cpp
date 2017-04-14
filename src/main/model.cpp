@@ -143,15 +143,6 @@ double ModelFit<State>::obj_fn(const gsl_vector * x, void * params){
                     return a;
                 }
             });
-    std::cout << "objfn" << std::endl;
-    std::cout << "par:";
-    std::for_each(par.begin(), par.end(),
-            [] (const double & x_) {
-                std::cout << " " << x_;
-            });
-    std::cout << std::endl;
-    std::cout << "ll: " << ll << std::endl
-              << "penalty: " << penalty << std::endl;
     return - ll + penalty;
 }
 
@@ -166,15 +157,6 @@ void ModelFit<State>::obj_fn_grad(const gsl_vector * x, void * params,
 
     mf->model_->par(par);
 
-    std::cout << "objfn grad" << std::endl;
-    std::cout << "par:";
-    std::for_each(par.begin(), par.end(),
-            [] (const double & x_) {
-                std::cout << " " << x_;
-            });
-    std::cout << std::endl;
-
-
     const std::vector<double> ll_grad = mf->model_->ll_grad(mf->history_);
     for(uint32_t pi = 0; pi < mf->model_->par_size(); ++pi){
         // assign the negative of the gradient value
@@ -186,21 +168,12 @@ void ModelFit<State>::obj_fn_grad(const gsl_vector * x, void * params,
 
 
         if (par.at(pi) > 30) {
-            std::cout << "par: " << pi << std::endl
-                      << "grad: " << ll_grad.at(pi) << std::endl
-                      << "penalty: " << 2 * (par.at(pi) - 30) << std::endl;
             gsl_vector_set(g, pi, - ll_grad.at(pi)
                     + 2 * (par.at(pi) - 30));
         } else if (par.at(pi) < -30.0) {
-            std::cout << "par: " << pi << std::endl
-                      << "grad: " << ll_grad.at(pi) << std::endl
-                      << "penalty: " << 2 * (par.at(pi) + 30) << std::endl;
             gsl_vector_set(g, pi, - ll_grad.at(pi)
                     + 2 * (par.at(pi) + 30));
         } else {
-            std::cout << "par: " << pi << std::endl
-                      << "grad: " << ll_grad.at(pi) << std::endl
-                      << "penalty: " << 0.0 << std::endl;
             gsl_vector_set(g, pi, - ll_grad.at(pi));
         }
     }
@@ -217,18 +190,8 @@ void ModelFit<State>::obj_fn_both(const gsl_vector * x, void * params,
 
     mf->model_->par(par);
 
-    std::cout << "objfn both" << std::endl;
-    std::cout << "par:";
-    std::for_each(par.begin(), par.end(),
-            [] (const double & x_) {
-                std::cout << " " << x_;
-            });
-    std::cout << std::endl;
-
     const double ll_value = mf->model_->ll(mf->history_);
     const std::vector<double> ll_grad = mf->model_->ll_grad(mf->history_);
-
-    std::cout << "ll: " << ll_value << std::endl;
 
     // log ll
     CHECK(std::isfinite(ll_value));
@@ -257,21 +220,12 @@ void ModelFit<State>::obj_fn_both(const gsl_vector * x, void * params,
         gsl_vector_set(g, pi, -ll_grad.at(pi));
 
         if (par.at(pi) > 30) {
-            std::cout << "par: " << pi << std::endl
-                      << "grad: " << ll_grad.at(pi) << std::endl
-                      << "penalty: " << 2 * (par.at(pi) - 30) << std::endl;
             gsl_vector_set(g, pi, - ll_grad.at(pi)
                     + 2 * (par.at(pi) - 30));
         } else if (par.at(pi) < -30.0) {
-            std::cout << "par: " << pi << std::endl
-                      << "grad: " << ll_grad.at(pi) << std::endl
-                      << "penalty: " << 2 * (par.at(pi) + 30) << std::endl;
             gsl_vector_set(g, pi, - ll_grad.at(pi)
                     + 2 * (par.at(pi) + 30));
         } else {
-            std::cout << "par: " << pi << std::endl
-                      << "grad: " << ll_grad.at(pi) << std::endl
-                      << "penalty: " << 0.0 << std::endl;
             gsl_vector_set(g, pi, - ll_grad.at(pi));
         }
     }
