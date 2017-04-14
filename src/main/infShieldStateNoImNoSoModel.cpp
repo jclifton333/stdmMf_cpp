@@ -236,13 +236,8 @@ std::vector<double> InfShieldStateNoImNoSoModel::rec_b_hess(
 
 double InfShieldStateNoImNoSoModel::shield_draw(
         const uint32_t & loc, const InfShieldState & curr_state) const {
-    const double r(this->rng_->rnorm_01());
-    std::cout << "shield for " << loc << std::endl
-              << "curr: " << curr_state.shield.at(loc) << std::endl
-              << "coef: " << this->shield_coef_ << std::endl
-              << "rand: " << r << std::endl;
     return curr_state.shield.at(loc) * this->shield_coef_
-        + r;
+        + this->rng_->rnorm_01();
 }
 
 
