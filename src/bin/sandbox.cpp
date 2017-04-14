@@ -38,68 +38,77 @@ void run(const std::shared_ptr<Network> & net,
         const std::shared_ptr<Model<InfShieldState> > & mod_agents,
         const uint32_t & num_reps,
         const uint32_t & time_points) {
-    System<InfShieldState> s(net->clone(), mod_system->clone());
-    RandomAgent<InfShieldState> ra(net->clone());
-    s.start();
-    for (uint32_t i = 0; i < 1; ++i) {
-        const auto trt_bits(ra.apply_trt(s.state(), s.history()));
-
-        s.trt_bits(trt_bits);
-
-        s.turn_clock();
+    njm::tools::Rng rng;
+    for (uint32_t i = 0; i < 10; ++i) {
+        std::cout << i << ": " << rng.rnorm_01() << std::endl;
     }
-
-    const std::vector<Transition<InfShieldState> > transitions(
-            Transition<InfShieldState>::from_sequence(s.history(),
-                    s.state()));
-
-    CHECK_EQ(transitions.size(), 1);
-    std::string bits_str;
-    boost::to_string(transitions.at(0).curr_state.inf_bits, bits_str);
-    std::cout << "inf_bits: " << bits_str << std::endl
-              << "shield:";
-    std::for_each(transitions.at(0).curr_state.shield.begin(),
-            transitions.at(0).curr_state.shield.end(),
-            [] (const double & x_) {
-                std::cout << " " << x_;
-            });
     std::cout << std::endl;
-
-    boost::to_string(transitions.at(0).curr_trt_bits, bits_str);
-    std::cout << "trt_bits: " << bits_str << std::endl;
-
-    boost::to_string(transitions.at(0).next_state.inf_bits, bits_str);
-    std::cout << "inf_bits: " << bits_str << std::endl
-              << "shield:";
-    std::for_each(transitions.at(0).next_state.shield.begin(),
-            transitions.at(0).next_state.shield.end(),
-            [] (const double & x_) {
-                std::cout << " " << x_;
-            });
-    std::cout << std::endl;
-
-
-    std::vector<double> par(mod_agents->par_size(), 0.0);
-    mod_agents->par(par);
-
-    std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
-    for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
-        std::fill(par.begin(), par.end(), 0.0);
-        par.at(i) = 1.0;
-        mod_agents->par(par);
-        std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
-                  << std::endl;
+    rng.seed(0);
+    for (uint32_t i = 0; i < 10; ++i) {
+        std::cout << i << ": " << rng.rnorm_01() << std::endl;
     }
+    // System<InfShieldState> s(net->clone(), mod_system->clone());
+    // RandomAgent<InfShieldState> ra(net->clone());
+    // s.start();
+    // for (uint32_t i = 0; i < 1; ++i) {
+    //     const auto trt_bits(ra.apply_trt(s.state(), s.history()));
 
-    std::fill(par.begin(), par.end(), 0.0);
-    std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
-    for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
-        std::fill(par.begin(), par.end(), 0.0);
-        par.at(i) = 1.0;
-        mod_agents->par(par);
-        std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
-                  << std::endl;
-    }
+    //     s.trt_bits(trt_bits);
+
+    //     s.turn_clock();
+    // }
+
+    // const std::vector<Transition<InfShieldState> > transitions(
+    //         Transition<InfShieldState>::from_sequence(s.history(),
+    //                 s.state()));
+
+    // CHECK_EQ(transitions.size(), 1);
+    // std::string bits_str;
+    // boost::to_string(transitions.at(0).curr_state.inf_bits, bits_str);
+    // std::cout << "inf_bits: " << bits_str << std::endl
+    //           << "shield:";
+    // std::for_each(transitions.at(0).curr_state.shield.begin(),
+    //         transitions.at(0).curr_state.shield.end(),
+    //         [] (const double & x_) {
+    //             std::cout << " " << x_;
+    //         });
+    // std::cout << std::endl;
+
+    // boost::to_string(transitions.at(0).curr_trt_bits, bits_str);
+    // std::cout << "trt_bits: " << bits_str << std::endl;
+
+    // boost::to_string(transitions.at(0).next_state.inf_bits, bits_str);
+    // std::cout << "inf_bits: " << bits_str << std::endl
+    //           << "shield:";
+    // std::for_each(transitions.at(0).next_state.shield.begin(),
+    //         transitions.at(0).next_state.shield.end(),
+    //         [] (const double & x_) {
+    //             std::cout << " " << x_;
+    //         });
+    // std::cout << std::endl;
+
+
+    // std::vector<double> par(mod_agents->par_size(), 0.0);
+    // mod_agents->par(par);
+
+    // std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
+    // for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
+    //     std::fill(par.begin(), par.end(), 0.0);
+    //     par.at(i) = 1.0;
+    //     mod_agents->par(par);
+    //     std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
+    //               << std::endl;
+    // }
+
+    // std::fill(par.begin(), par.end(), 0.0);
+    // std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
+    // for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
+    //     std::fill(par.begin(), par.end(), 0.0);
+    //     par.at(i) = 1.0;
+    //     mod_agents->par(par);
+    //     std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
+    //               << std::endl;
+    // }
 }
 
 
