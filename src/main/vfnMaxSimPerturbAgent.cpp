@@ -168,6 +168,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
                  val /= this->num_reps_;
 
                  // return negative since optim minimizes functions
+                 std::cout << "val: " << -val << std::endl;
                  return -val;
              };
 
