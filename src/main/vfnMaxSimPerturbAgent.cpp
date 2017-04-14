@@ -110,6 +110,15 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     this->model_->est_par(history);
 
+    const std::vector<double> par_orig(this->model_->par());
+    std::cout << "model par:";
+    std::for_each(par_orig.begin(), par_orig.end(),
+            [] (const double & x) {
+                std::cout << " " << x;
+            });
+    std::cout << std::endl;
+
+
     // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(history);
     njm::linalg::mult_b_to_a(hess, -1.0 * history.size());
@@ -140,6 +149,12 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
 
     // set new parameters
     this->model_->par(par_samp);
+    std::cout << "model samp:";
+    std::for_each(par_samp.begin(), par_samp.end(),
+            [] (const double & x) {
+                std::cout << " " << x;
+            });
+    std::cout << std::endl;
 
 
 
