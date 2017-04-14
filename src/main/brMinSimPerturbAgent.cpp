@@ -334,6 +334,7 @@ void BrMinSimPerturbAgent<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
     this->njm::tools::RngClass::rng(rng);
     this->model_->rng(rng);
+    this->features_->rng(rng);
 }
 
 
