@@ -75,196 +75,196 @@ run(const std::shared_ptr<Network> & net,
 
     uint32_t total_sims = 0;
 
-    // none
-    std::vector<std::future<double> > none_val;
-    std::vector<std::future<double> > none_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
+    // // none
+    // std::vector<std::future<double> > none_val;
+    // std::vector<std::future<double> > none_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
 
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
 
-        none_val.push_back(promise_val->get_future());
-        none_time.push_back(promise_time->get_future());
+    //     none_val.push_back(promise_val->get_future());
+    //     none_time.push_back(promise_time->get_future());
 
-        pool.service().post([=](){
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            NoTrtAgent<InfShieldState> a(net->clone());
-            a.seed(i);
+    //     pool.service().post([=](){
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         NoTrtAgent<InfShieldState> a(net->clone());
+    //         a.seed(i);
 
-            s.start();
+    //         s.start();
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
 
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "none", i, history));
-            *entry << add_to_entry;
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "none", i, history));
+    //         *entry << add_to_entry;
 
-            progress->update();
-        });
-    }
+    //         progress->update();
+    //     });
+    // }
 
-    // random
-    std::vector<std::future<double> > random_val;
-    std::vector<std::future<double> > random_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
+    // // random
+    // std::vector<std::future<double> > random_val;
+    // std::vector<std::future<double> > random_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
 
-        random_val.push_back(promise_val->get_future());
-        random_time.push_back(promise_time->get_future());
+    //     random_val.push_back(promise_val->get_future());
+    //     random_time.push_back(promise_time->get_future());
 
-        pool.service().post([=](){
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            RandomAgent<InfShieldState> a(net->clone());
-            a.seed(i);
+    //     pool.service().post([=](){
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         RandomAgent<InfShieldState> a(net->clone());
+    //         a.seed(i);
 
-            s.start();
+    //         s.start();
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
 
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "random", i, history));
-            *entry << add_to_entry;
-
-
-            progress->update();
-        });
-    }
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "random", i, history));
+    //         *entry << add_to_entry;
 
 
-    // proximal
-    std::vector<std::future<double> > proximal_val;
-    std::vector<std::future<double> > proximal_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
-
-        proximal_val.push_back(promise_val->get_future());
-        proximal_time.push_back(promise_time->get_future());
-
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            ProximalAgent<InfShieldState> a(net->clone());
-            a.seed(i);
-
-            s.start();
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
-
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "proximal", i, history));
-            *entry << add_to_entry;
+    //         progress->update();
+    //     });
+    // }
 
 
-            progress->update();
-        });
-    }
+    // // proximal
+    // std::vector<std::future<double> > proximal_val;
+    // std::vector<std::future<double> > proximal_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
+
+    //     proximal_val.push_back(promise_val->get_future());
+    //     proximal_time.push_back(promise_time->get_future());
+
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         ProximalAgent<InfShieldState> a(net->clone());
+    //         a.seed(i);
+
+    //         s.start();
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
+
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "proximal", i, history));
+    //         *entry << add_to_entry;
 
 
-    // myopic
-    std::vector<std::future<double> > myopic_val;
-    std::vector<std::future<double> > myopic_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
-
-        myopic_val.push_back(promise_val->get_future());
-        myopic_time.push_back(promise_time->get_future());
-
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            MyopicAgent<InfShieldState> a(net->clone(),
-                    mod_agents->clone());
-            a.seed(i);
-
-            s.start();
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
-
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "myopic", i, history));
-            *entry << add_to_entry;
+    //         progress->update();
+    //     });
+    // }
 
 
-            progress->update();
-        });
-    }
+    // // myopic
+    // std::vector<std::future<double> > myopic_val;
+    // std::vector<std::future<double> > myopic_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
+
+    //     myopic_val.push_back(promise_val->get_future());
+    //     myopic_time.push_back(promise_time->get_future());
+
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         MyopicAgent<InfShieldState> a(net->clone(),
+    //                 mod_agents->clone());
+    //         a.seed(i);
+
+    //         s.start();
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
+
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "myopic", i, history));
+    //         *entry << add_to_entry;
+
+
+    //         progress->update();
+    //     });
+    // }
 
 
     // vfn max length 1
@@ -319,271 +319,271 @@ run(const std::shared_ptr<Network> & net,
     }
 
 
-    // vfn max length 2
-    std::vector<std::future<double> > vfn_len_2_val;
-    std::vector<std::future<double> > vfn_len_2_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
+    // // vfn max length 2
+    // std::vector<std::future<double> > vfn_len_2_val;
+    // std::vector<std::future<double> > vfn_len_2_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
 
-        vfn_len_2_val.push_back(promise_val->get_future());
-        vfn_len_2_time.push_back(promise_time->get_future());
+    //     vfn_len_2_val.push_back(promise_val->get_future());
+    //     vfn_len_2_time.push_back(promise_time->get_future());
 
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-                    std::shared_ptr<Features<InfShieldState> >(
-                            new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 2)),
-                    mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-            a.seed(i);
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+    //                 std::shared_ptr<Features<InfShieldState> >(
+    //                         new NetworkRunSymFeatures<InfShieldState>(
+    //                                 net->clone(), 2)),
+    //                 mod_agents->clone(),
+    //                 2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    //         a.seed(i);
 
-            s.start();
+    //         s.start();
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
 
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "vfn_len_2", i, history));
-            *entry << add_to_entry;
-
-
-            progress->update();
-        });
-    }
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "vfn_len_2", i, history));
+    //         *entry << add_to_entry;
 
 
-    // vfn max length 3
-    std::vector<std::future<double> > vfn_len_3_val;
-    std::vector<std::future<double> > vfn_len_3_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
-
-        vfn_len_3_val.push_back(promise_val->get_future());
-        vfn_len_3_time.push_back(promise_time->get_future());
-
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-                    std::shared_ptr<Features<InfShieldState> >(
-                            new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 3)),
-                    mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-            a.seed(i);
-
-            s.start();
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
-
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "vfn_len_3", i, history));
-            *entry << add_to_entry;
+    //         progress->update();
+    //     });
+    // }
 
 
-            progress->update();
-        });
-    }
+    // // vfn max length 3
+    // std::vector<std::future<double> > vfn_len_3_val;
+    // std::vector<std::future<double> > vfn_len_3_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
+
+    //     vfn_len_3_val.push_back(promise_val->get_future());
+    //     vfn_len_3_time.push_back(promise_time->get_future());
+
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+    //                 std::shared_ptr<Features<InfShieldState> >(
+    //                         new NetworkRunSymFeatures<InfShieldState>(
+    //                                 net->clone(), 3)),
+    //                 mod_agents->clone(),
+    //                 2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    //         a.seed(i);
+
+    //         s.start();
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
+
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "vfn_len_3", i, history));
+    //         *entry << add_to_entry;
 
 
-    // vfn max nn
-    std::vector<std::future<double> > vfn_nn_val;
-    std::vector<std::future<double> > vfn_nn_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
-
-        vfn_nn_val.push_back(promise_val->get_future());
-        vfn_nn_time.push_back(promise_time->get_future());
-
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-                    std::shared_ptr<Features<InfShieldState> >(
-                            new FiniteQfnFeatures<InfShieldState>(net->clone(),
-                                    mod_agents->clone(), 3)),
-                    mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-            a.seed(i);
-
-            s.start();
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
-
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "vfn_nn", i, history));
-            *entry << add_to_entry;
+    //         progress->update();
+    //     });
+    // }
 
 
-            progress->update();
-        });
-    }
+    // // vfn max nn
+    // std::vector<std::future<double> > vfn_nn_val;
+    // std::vector<std::future<double> > vfn_nn_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
+
+    //     vfn_nn_val.push_back(promise_val->get_future());
+    //     vfn_nn_time.push_back(promise_time->get_future());
+
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+    //                 std::shared_ptr<Features<InfShieldState> >(
+    //                         new FiniteQfnFeatures<InfShieldState>(net->clone(),
+    //                                 mod_agents->clone(), 3)),
+    //                 mod_agents->clone(),
+    //                 2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    //         a.seed(i);
+
+    //         s.start();
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
+
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "vfn_nn", i, history));
+    //         *entry << add_to_entry;
 
 
-    // br min length 1
-    std::vector<std::future<double> > br_len_1_val;
-    std::vector<std::future<double> > br_len_1_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
-
-        br_len_1_val.push_back(promise_val->get_future());
-        br_len_1_time.push_back(promise_time->get_future());
-
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
-                    std::shared_ptr<Features<InfShieldState> >(
-                            new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 1)),
-                    mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 500, 0, 0, 0);
-            a.seed(i);
-
-            s.start();
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
-
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "br_len_1", i, history));
-            *entry << add_to_entry;
+    //         progress->update();
+    //     });
+    // }
 
 
-            progress->update();
-        });
-    }
+    // // br min length 1
+    // std::vector<std::future<double> > br_len_1_val;
+    // std::vector<std::future<double> > br_len_1_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
+
+    //     br_len_1_val.push_back(promise_val->get_future());
+    //     br_len_1_time.push_back(promise_time->get_future());
+
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+    //                 std::shared_ptr<Features<InfShieldState> >(
+    //                         new NetworkRunSymFeatures<InfShieldState>(
+    //                                 net->clone(), 1)),
+    //                 mod_agents->clone(),
+    //                 0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+    //                 true, true, false, 500, 0, 0, 0);
+    //         a.seed(i);
+
+    //         s.start();
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
+
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "br_len_1", i, history));
+    //         *entry << add_to_entry;
 
 
-    // br min length 2
-    std::vector<std::future<double> > br_len_2_val;
-    std::vector<std::future<double> > br_len_2_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
-
-        br_len_2_val.push_back(promise_val->get_future());
-        br_len_2_time.push_back(promise_time->get_future());
-
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
-                    std::shared_ptr<Features<InfShieldState> >(
-                            new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 2)),
-                    mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 500, 0, 0, 0);
-            a.seed(i);
-
-            s.start();
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
-
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "br_len_2", i, history));
-            *entry << add_to_entry;
+    //         progress->update();
+    //     });
+    // }
 
 
-            progress->update();
-        });
-    }
+    // // br min length 2
+    // std::vector<std::future<double> > br_len_2_val;
+    // std::vector<std::future<double> > br_len_2_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
+
+    //     br_len_2_val.push_back(promise_val->get_future());
+    //     br_len_2_time.push_back(promise_time->get_future());
+
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+    //                 std::shared_ptr<Features<InfShieldState> >(
+    //                         new NetworkRunSymFeatures<InfShieldState>(
+    //                                 net->clone(), 2)),
+    //                 mod_agents->clone(),
+    //                 0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+    //                 true, true, false, 500, 0, 0, 0);
+    //         a.seed(i);
+
+    //         s.start();
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
+
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
+
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "br_len_2", i, history));
+    //         *entry << add_to_entry;
+
+
+    //         progress->update();
+    //     });
+    // }
 
 
     // // br min length 3
@@ -640,58 +640,58 @@ run(const std::shared_ptr<Network> & net,
     // }
 
 
-    // br min nn
-    std::vector<std::future<double> > br_nn_val;
-    std::vector<std::future<double> > br_nn_time;
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        ++total_sims;
-        std::shared_ptr<std::promise<double> > promise_val(
-                new std::promise<double>);
-        std::shared_ptr<std::promise<double> > promise_time(
-                new std::promise<double>);
+    // // br min nn
+    // std::vector<std::future<double> > br_nn_val;
+    // std::vector<std::future<double> > br_nn_time;
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     ++total_sims;
+    //     std::shared_ptr<std::promise<double> > promise_val(
+    //             new std::promise<double>);
+    //     std::shared_ptr<std::promise<double> > promise_time(
+    //             new std::promise<double>);
 
-        br_nn_val.push_back(promise_val->get_future());
-        br_nn_time.push_back(promise_time->get_future());
+    //     br_nn_val.push_back(promise_val->get_future());
+    //     br_nn_time.push_back(promise_time->get_future());
 
-        pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
-            s.seed(i);
-            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
-                    std::shared_ptr<Features<InfShieldState> >(
-                            new FiniteQfnFeatures<InfShieldState>(net->clone(),
-                                    mod_agents->clone(), 3)),
-                    mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 500, 0, 0, 0);
-            a.seed(i);
+    //     pool.service().post([=]() {
+    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         s.seed(i);
+    //         BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+    //                 std::shared_ptr<Features<InfShieldState> >(
+    //                         new FiniteQfnFeatures<InfShieldState>(net->clone(),
+    //                                 mod_agents->clone(), 3)),
+    //                 mod_agents->clone(),
+    //                 0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+    //                 true, true, false, 500, 0, 0, 0);
+    //         a.seed(i);
 
-            s.start();
+    //         s.start();
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            promise_val->set_value(runner(&s, &a, time_points, 1.0));
+    //         promise_val->set_value(runner(&s, &a, time_points, 1.0));
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            promise_time->set_value(std::chrono::duration_cast<
-                    std::chrono::seconds>(tock - tick).count());
+    //         promise_time->set_value(std::chrono::duration_cast<
+    //                 std::chrono::seconds>(tock - tick).count());
 
-            // write history to csv
-            std::vector<StateAndTrt<InfShieldState> > history(s.history());
-            history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-            const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "br_nn", i, history));
-            *entry << add_to_entry;
+    //         // write history to csv
+    //         std::vector<StateAndTrt<InfShieldState> > history(s.history());
+    //         history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+    //         const std::string add_to_entry(history_to_csv_entry(net->size(),
+    //                         "br_nn", i, history));
+    //         *entry << add_to_entry;
 
 
-            progress->update();
-        });
-    }
+    //         progress->update();
+    //     });
+    // }
 
 
     progress->total(total_sims);
@@ -703,97 +703,97 @@ run(const std::shared_ptr<Network> & net,
     std::vector<std::pair<std::string, std::vector<double> > > all_results;
 
 
-    {
-        const std::string agent_name = "none";
-        std::vector<double> val(num_reps);
-        std::transform(none_val.begin(), none_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(none_time.begin(), none_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> none_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {none_stats.first,
-             std::sqrt(none_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "none";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(none_val.begin(), none_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(none_time.begin(), none_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> none_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {none_stats.first,
+    //          std::sqrt(none_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
-    {
-        const std::string agent_name = "random";
-        std::vector<double> val(num_reps);
-        std::transform(random_val.begin(), random_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(random_time.begin(), random_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> random_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {random_stats.first,
-             std::sqrt(random_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "random";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(random_val.begin(), random_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(random_time.begin(), random_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> random_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {random_stats.first,
+    //          std::sqrt(random_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
-    {
-        const std::string agent_name = "proximal";
-        std::vector<double> val(num_reps);
-        std::transform(proximal_val.begin(), proximal_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(proximal_time.begin(), proximal_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> proximal_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {proximal_stats.first,
-             std::sqrt(proximal_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "proximal";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(proximal_val.begin(), proximal_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(proximal_time.begin(), proximal_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> proximal_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {proximal_stats.first,
+    //          std::sqrt(proximal_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
-    {
-        const std::string agent_name = "myopic";
-        std::vector<double> val(num_reps);
-        std::transform(myopic_val.begin(), myopic_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(myopic_time.begin(), myopic_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> myopic_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {myopic_stats.first,
-             std::sqrt(myopic_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "myopic";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(myopic_val.begin(), myopic_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(myopic_time.begin(), myopic_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> myopic_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {myopic_stats.first,
+    //          std::sqrt(myopic_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
     {
         const std::string agent_name = "vfn_len_1";
@@ -818,120 +818,120 @@ run(const std::shared_ptr<Network> & net,
                 (agent_name, agent_res));
     }
 
-    {
-        const std::string agent_name = "vfn_len_2";
-        std::vector<double> val(num_reps);
-        std::transform(vfn_len_2_val.begin(), vfn_len_2_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(vfn_len_2_time.begin(), vfn_len_2_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> vfn_len_2_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {vfn_len_2_stats.first,
-             std::sqrt(vfn_len_2_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "vfn_len_2";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(vfn_len_2_val.begin(), vfn_len_2_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(vfn_len_2_time.begin(), vfn_len_2_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> vfn_len_2_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {vfn_len_2_stats.first,
+    //          std::sqrt(vfn_len_2_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
-    {
-        const std::string agent_name = "vfn_len_3";
-        std::vector<double> val(num_reps);
-        std::transform(vfn_len_3_val.begin(), vfn_len_3_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(vfn_len_3_time.begin(), vfn_len_3_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> vfn_len_3_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {vfn_len_3_stats.first,
-             std::sqrt(vfn_len_3_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "vfn_len_3";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(vfn_len_3_val.begin(), vfn_len_3_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(vfn_len_3_time.begin(), vfn_len_3_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> vfn_len_3_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {vfn_len_3_stats.first,
+    //          std::sqrt(vfn_len_3_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
-    {
-        const std::string agent_name = "vfn_nn";
-        std::vector<double> val(num_reps);
-        std::transform(vfn_nn_val.begin(), vfn_nn_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(vfn_nn_time.begin(), vfn_nn_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> vfn_nn_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {vfn_nn_stats.first,
-             std::sqrt(vfn_nn_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "vfn_nn";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(vfn_nn_val.begin(), vfn_nn_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(vfn_nn_time.begin(), vfn_nn_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> vfn_nn_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {vfn_nn_stats.first,
+    //          std::sqrt(vfn_nn_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
-    {
-        const std::string agent_name = "br_len_1";
-        std::vector<double> val(num_reps);
-        std::transform(br_len_1_val.begin(), br_len_1_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(br_len_1_time.begin(), br_len_1_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> br_len_1_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {br_len_1_stats.first,
-             std::sqrt(br_len_1_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "br_len_1";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(br_len_1_val.begin(), br_len_1_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(br_len_1_time.begin(), br_len_1_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> br_len_1_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {br_len_1_stats.first,
+    //          std::sqrt(br_len_1_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
-    {
-        const std::string agent_name = "br_len_2";
-        std::vector<double> val(num_reps);
-        std::transform(br_len_2_val.begin(), br_len_2_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(br_len_2_time.begin(), br_len_2_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> br_len_2_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {br_len_2_stats.first,
-             std::sqrt(br_len_2_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "br_len_2";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(br_len_2_val.begin(), br_len_2_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(br_len_2_time.begin(), br_len_2_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> br_len_2_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {br_len_2_stats.first,
+    //          std::sqrt(br_len_2_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
     // {
     //     const std::string agent_name = "br_len_3";
@@ -956,28 +956,28 @@ run(const std::shared_ptr<Network> & net,
     //             (agent_name, agent_res));
     // }
 
-    {
-        const std::string agent_name = "br_nn";
-        std::vector<double> val(num_reps);
-        std::transform(br_nn_val.begin(), br_nn_val.end(),
-                val.begin(), val.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        std::vector<double> time(num_reps);
-        std::transform(br_nn_time.begin(), br_nn_time.end(),
-                time.begin(), time.begin(),
-                [](std::future<double> & a, const double & b) {
-                    return a.get();
-                });
-        const std::pair<double, double> br_nn_stats = mean_and_var(val);
-        const std::vector<double> agent_res =
-            {br_nn_stats.first,
-             std::sqrt(br_nn_stats.second / num_reps),
-             mean_and_var(time).first};
-        all_results.push_back(std::pair<std::string, std::vector<double> >
-                (agent_name, agent_res));
-    }
+    // {
+    //     const std::string agent_name = "br_nn";
+    //     std::vector<double> val(num_reps);
+    //     std::transform(br_nn_val.begin(), br_nn_val.end(),
+    //             val.begin(), val.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     std::vector<double> time(num_reps);
+    //     std::transform(br_nn_time.begin(), br_nn_time.end(),
+    //             time.begin(), time.begin(),
+    //             [](std::future<double> & a, const double & b) {
+    //                 return a.get();
+    //             });
+    //     const std::pair<double, double> br_nn_stats = mean_and_var(val);
+    //     const std::vector<double> agent_res =
+    //         {br_nn_stats.first,
+    //          std::sqrt(br_nn_stats.second / num_reps),
+    //          mean_and_var(time).first};
+    //     all_results.push_back(std::pair<std::string, std::vector<double> >
+    //             (agent_name, agent_res));
+    // }
 
     return all_results;
 }
