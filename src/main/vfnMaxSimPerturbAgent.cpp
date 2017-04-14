@@ -141,7 +141,14 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
         else
             eigval(i) = 0.0;
     }
+    // threshold eigen vectors
+    for (auto it = eigvec.begin(); it != eigvec.end(); ++it) {
+        if (std::abs(*it) < 1e-3) {
+            *it = 0.0;
+        }
+    }
     arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
+    // threshold sqrt matrix
     for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
         if (*it < 1e-3) {
             *it = 0.0;
