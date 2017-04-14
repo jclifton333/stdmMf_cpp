@@ -23,6 +23,7 @@ SweepAgent<State>::SweepAgent(const std::shared_ptr<const Network> & network,
     : Agent<State>(network), features_(features), coef_(coef),
       eval_fn_(eval_fn), max_sweeps_(max_sweeps), do_sweep_(do_sweep),
       do_parallel_(false) {
+    this->features_->rng(this->rng());
 
     CHECK_EQ(this->coef_.size(), this->features_->num_features());
 }
@@ -35,6 +36,7 @@ SweepAgent<State>::SweepAgent(const SweepAgent & other)
       eval_fn_(other.eval_fn_), max_sweeps_(other.max_sweeps_),
       do_sweep_(other.do_sweep_), do_parallel_(other.do_parallel_),
     pool_(new njm::thread::Pool(*other.pool_)) {
+    this->features_->rng(this->rng());
 }
 
 

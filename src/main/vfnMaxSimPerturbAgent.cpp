@@ -34,6 +34,7 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
       last_optim_par_(this->features_->num_features(), 0.0) {
     // share rng
     this->model_->rng(this->rng());
+    this->features_->rng(this->rng());
 }
 
 
@@ -48,6 +49,7 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
       last_optim_par_(other.last_optim_par_) {
     // share rng
     this->model_->rng(this->rng());
+    this->features_->rng(this->rng());
 }
 
 
@@ -74,11 +76,11 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     MyopicAgent<State> ma(this->network_, this->model_->clone());
         //     return ma.apply_trt(state, history);
     }
+    std::cout << "##############################" << std::endl;
     std::cout << "time: " << history.size() << std::endl;
     std::string inf_bits_str;
     boost::to_string(curr_state.inf_bits, inf_bits_str);
     std::cout << "inf bits: " << inf_bits_str << std::endl;
-
 
     // update features
     this->features_->update(curr_state, history, this->num_trt());
@@ -111,7 +113,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     this->model_->est_par(history);
 
     const std::vector<double> par_orig(this->model_->par());
-    std::cout << "##############################" << std::endl;
     std::cout << "model par:";
     std::for_each(par_orig.begin(), par_orig.end(),
             [] (const double & x) {

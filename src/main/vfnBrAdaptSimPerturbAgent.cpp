@@ -50,6 +50,7 @@ VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
     step_cap_mult_(step_cap_mult) {
     // share rng
     this->model_->rng(this->rng());
+    this->features_->rng(this->rng());
 }
 
 
@@ -71,6 +72,7 @@ VfnBrAdaptSimPerturbAgent<State>::VfnBrAdaptSimPerturbAgent(
     step_cap_mult_(other.step_cap_mult_) {
     // share rng
     this->model_->rng(this->rng());
+    this->features_->rng(this->rng());
 }
 
 
