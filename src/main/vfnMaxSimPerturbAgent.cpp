@@ -164,6 +164,7 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
             });
     std::cout << std::endl;
 
+    LOG(FATAL);
 
 
     CHECK_GT(this->final_t_, history.size());
