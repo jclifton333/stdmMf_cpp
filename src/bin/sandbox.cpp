@@ -43,7 +43,7 @@ void run(const std::shared_ptr<Network> & net,
     System<InfShieldState> s(net->clone(), mod_system->clone());
     RandomAgent<InfShieldState> ra(net->clone());
     s.start();
-    for (uint32_t i = 0; i < 2; ++i) {
+    for (uint32_t i = 0; i < 1; ++i) {
         const auto trt_bits(ra.apply_trt(s.state(), s.history()));
 
         s.trt_bits(trt_bits);
@@ -51,14 +51,31 @@ void run(const std::shared_ptr<Network> & net,
         s.turn_clock();
     }
 
-    mod_agents->est_par(s.history(), s.state());
-    const std::vector<double> par(mod_agents->par());
-    std::cout << "par:";
-    std::for_each(par.begin(), par.end(),
-            [] (const double & x) {
-                std::cout << " " << x;
-            });
-    std::cout << std::endl;
+    const std::vector<Transition<InfShieldState> > transitions(
+            Transition<InfShieldState>::from_sequence(s.history(),
+                    s.state()));
+
+    std::vector<double> par(mod_agents->par_size(), 0.0);
+    mod_agents->par(par);
+
+    std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
+    for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
+        std::fill(par.begin(), par.end(), 0.0);
+        par.at(i) = 1.0;
+        mod_agents->par(par);
+        std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
+                  << std::endl;
+    }
+
+    std::fill(par.begin(), par.end(), 0.0);
+    std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
+    for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
+        std::fill(par.begin(), par.end(), 0.0);
+        par.at(i) = 1.0;
+        mod_agents->par(par);
+        std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
+                  << std::endl;
+    }
 }
 
 
