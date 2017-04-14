@@ -108,7 +108,9 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
                 std::cout << " " << x_;
             });
     std::cout << std::endl;
-    LOG(FATAL);
+    if (history.size() == 3) {
+        LOG(FATAL);
+    }
 
     return a.apply_trt(curr_state, history);
 }
