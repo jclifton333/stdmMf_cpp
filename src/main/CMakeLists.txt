@@ -35,7 +35,7 @@ add_library(stdmMf network.cpp system.cpp states.cpp
 
   ## features
   features.cpp networkRunFeatures.cpp networkRunSymFeatures.cpp
-  finiteQfnNnFeatures.cpp
+  finiteQfnFeatures.cpp finiteQfnNnFeatures.cpp
 
   ## optimization
   objFns.cpp polValIteration.cpp
