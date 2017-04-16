@@ -11,7 +11,7 @@
 #include "vfnBrStartSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
-#include "finiteQfnNnFeatures.hpp"
+#include "finiteQfnFeatures.hpp"
 
 #include "objFns.hpp"
 
@@ -114,13 +114,18 @@ int main(int argc, char *argv[]) {
         }
 
 
-        const auto finiteQfnFeat(
-                std::make_shared<FiniteQfnNnFeatures<InfShieldState> >(
-                        net->clone(), mod_agents->clone(), 3));
+        // const auto finiteQfnFeat(
+        //         std::make_shared<FiniteQfnNnFeatures<InfShieldState> >(
+        //                 net->clone(), mod_agents->clone(), 3));
 
         const auto networkRunFeat(
                 std::make_shared<NetworkRunSymFeatures<InfShieldState> >(
                         net->clone(), 3));
+
+        const auto finiteQfnFeat(
+                std::make_shared<FiniteQfnFeatures<InfShieldState> >(
+                        net->clone(), mod_agents->clone(),
+                        networkRunFeat->clone(), 3));
 
         SweepAgent<InfShieldState> saFiniteQfn(net, finiteQfnFeat,
                 std::vector<double>(finiteQfnFeat->num_features(), 1.0),
