@@ -29,323 +29,155 @@
 
 #include <glog/logging.h>
 
+#include <chrono>
+
 using namespace stdmMf;
-
-using njm::tools::mean_and_var;
-
-void run(const std::shared_ptr<Network> & net,
-        const std::shared_ptr<Model<InfShieldState> > & mod_system,
-        const std::shared_ptr<Model<InfShieldState> > & mod_agents,
-        const uint32_t & num_reps,
-        const uint32_t & time_points) {
-    // njm::tools::Rng rng;
-    // rng.seed(0);
-    // for (uint32_t i = 0; i < 25; ++i) {
-    //     rng.runif_01();
-    // }
-    // for (uint32_t i = 0; i < 10; ++i) {
-    //     rng.rnorm_01();
-    // }
-
-    const uint32_t i(0);
-    System<InfShieldState> s(net->clone(), mod_system->clone());
-    s.seed(i);
-    VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
-            std::shared_ptr<Features<InfShieldState> >(
-                    new NetworkRunSymFeatures<InfShieldState>(
-                            net->clone(), 1)),
-            mod_agents->clone(),
-            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    a.seed(i);
-
-    runner(&s, &a, time_points, 1.0);
-
-    // njm::tools::Rng rng;
-    // for (uint32_t i = 0; i < 10; ++i) {
-    //     rng.seed(i);
-    //     std::cout << "seed: " << i << std::endl;
-    //     for (uint32_t j = 0; j < 3; ++j) {
-    //         std::cout << j << ": " << rng.rnorm_01() << std::endl;
-    //     }
-    // }
-
-    // njm::tools::Rng rng;
-    // for (uint32_t i = 0; i < 10; ++i) {
-    //     std::cout << i << ": " << rng.rnorm_01() << std::endl;
-    // }
-    // std::cout << std::endl;
-    // rng.seed(0);
-    // for (uint32_t i = 0; i < 10; ++i) {
-    //     std::cout << i << ": " << rng.rnorm_01() << std::endl;
-    // }
-    // System<InfShieldState> s(net->clone(), mod_system->clone());
-    // RandomAgent<InfShieldState> ra(net->clone());
-    // s.start();
-    // for (uint32_t i = 0; i < 1; ++i) {
-    //     const auto trt_bits(ra.apply_trt(s.state(), s.history()));
-
-    //     s.trt_bits(trt_bits);
-
-    //     s.turn_clock();
-    // }
-
-    // const std::vector<Transition<InfShieldState> > transitions(
-    //         Transition<InfShieldState>::from_sequence(s.history(),
-    //                 s.state()));
-
-    // CHECK_EQ(transitions.size(), 1);
-    // std::string bits_str;
-    // boost::to_string(transitions.at(0).curr_state.inf_bits, bits_str);
-    // std::cout << "inf_bits: " << bits_str << std::endl
-    //           << "shield:";
-    // std::for_each(transitions.at(0).curr_state.shield.begin(),
-    //         transitions.at(0).curr_state.shield.end(),
-    //         [] (const double & x_) {
-    //             std::cout << " " << x_;
-    //         });
-    // std::cout << std::endl;
-
-    // boost::to_string(transitions.at(0).curr_trt_bits, bits_str);
-    // std::cout << "trt_bits: " << bits_str << std::endl;
-
-    // boost::to_string(transitions.at(0).next_state.inf_bits, bits_str);
-    // std::cout << "inf_bits: " << bits_str << std::endl
-    //           << "shield:";
-    // std::for_each(transitions.at(0).next_state.shield.begin(),
-    //         transitions.at(0).next_state.shield.end(),
-    //         [] (const double & x_) {
-    //             std::cout << " " << x_;
-    //         });
-    // std::cout << std::endl;
-
-
-    // std::vector<double> par(mod_agents->par_size(), 0.0);
-    // mod_agents->par(par);
-
-    // std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
-    // for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
-    //     std::fill(par.begin(), par.end(), 0.0);
-    //     par.at(i) = 1.0;
-    //     mod_agents->par(par);
-    //     std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
-    //               << std::endl;
-    // }
-
-    // std::fill(par.begin(), par.end(), 0.0);
-    // std::cout << "ll: " << mod_agents->ll(transitions) << std::endl;
-    // for (uint32_t i = 0; i < mod_agents->par_size(); ++i) {
-    //     std::fill(par.begin(), par.end(), 0.0);
-    //     par.at(i) = 1.0;
-    //     mod_agents->par(par);
-    //     std::cout << "ll(" << i << "):" << mod_agents->ll(transitions)
-    //               << std::endl;
-    // }
-}
-
 
 int main(int argc, char *argv[]) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     google::SetCommandLineOption("GLOG_minloglevel", "2");
     google::InitGoogleLogging(argv[0]);
 
+    // latent infections
+    const double prob_inf_latent = 0.01;
+    const double intcp_inf_latent =
+        std::log(1. / (1. - prob_inf_latent) - 1);
 
-    // setup networks
-    std::vector<std::shared_ptr<Network> > networks;
-    { // network 1
+    // neighbor infections
+    const double prob_inf = 0.5;
+    const uint32_t prob_num_neigh = 3;
+    const double intcp_inf =
+        std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
+
+    const double trt_act_inf =
+        std::log(std::pow(1. - prob_inf * 0.25, -1. / prob_num_neigh) - 1.)
+        - intcp_inf;
+
+    const double trt_pre_inf =
+        std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
+        - intcp_inf;
+
+    // recovery
+    const double prob_rec = 0.25;
+    const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
+    const double trt_act_rec =
+        std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
+
+    // shield
+    const double shield_coef = 0.9;
+
+
+    std::vector<double> par =
+        {intcp_inf_latent,
+         intcp_inf,
+         intcp_rec,
+         trt_act_inf,
+         trt_act_rec,
+         trt_pre_inf,
+         shield_coef};
+
+    std::cout << std::right << std::setw(16)
+              << "network size"
+              << std::right << std::setw(16)
+              << "nn fitting"
+              << std::right << std::setw(16)
+              << "nn argmax"
+              << std::right << std::setw(16)
+              << "runs argmax"
+              << std::endl;
+
+    const std::vector<uint32_t> net_sizes({2, 3, 4, 5, 6, 7, 8, 9, 10});
+    for (uint32_t i = 0; i < net_sizes.size(); ++i) {
         NetworkInit init;
-        init.set_dim_x(5);
-        init.set_dim_y(5);
+        init.set_dim_x(net_sizes.at(i));
+        init.set_dim_y(net_sizes.at(i));
         init.set_wrap(false);
         init.set_type(NetworkInit_NetType_GRID);
-        networks.push_back(Network::gen_network(init));
-    }
+        const auto net(Network::gen_network(init));
 
-    // { // network 2
-    //     NetworkInit init;
-    //     init.set_size(100);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+        const auto mod_system(std::shared_ptr<Model<InfShieldState> >(
+                        new InfShieldStateNoImNoSoModel(net)));
+        mod_system->par(par);
 
-    // { // network 3
-    //     NetworkInit init;
-    //     init.set_dim_x(25);
-    //     init.set_dim_y(20);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+        const auto mod_agents(std::shared_ptr<Model<InfShieldState> >(
+                        new InfShieldStateNoImNoSoModel(net)));
 
-    // { // network 4
-    //     NetworkInit init;
-    //     init.set_size(500);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+        System<InfShieldState> s(net->clone(), mod_system->clone());
+        RandomAgent<InfShieldState> ra(net->clone());
+        s.start();
+        for (uint32_t j = 0; j < 20; ++j) {
+            const auto trt_bits(ra.apply_trt(s.state(), s.history()));
 
-    // { // network 5
-    //     NetworkInit init;
-    //     init.set_dim_x(25);
-    //     init.set_dim_y(40);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+            s.trt_bits(trt_bits);
 
-    // { // network 6
-    //     NetworkInit init;
-    //     init.set_size(1000);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
-
-    // double vector since model depends on network
-    typedef std::pair<std::shared_ptr<Model<InfShieldState> >,
-                      std::shared_ptr<Model<InfShieldState> > > ModelPair;
-    std::vector<std::pair<std::string,
-                          std::vector<ModelPair> > > models;
-    { // models
-        // latent infections
-        const double prob_inf_latent = 0.01;
-        const double intcp_inf_latent =
-            std::log(1. / (1. - prob_inf_latent) - 1);
-
-        // neighbor infections
-        const double prob_inf = 0.5;
-        const uint32_t prob_num_neigh = 3;
-        const double intcp_inf =
-            std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
-
-        const double trt_act_inf =
-            std::log(std::pow(1. - prob_inf * 0.25, -1. / prob_num_neigh) - 1.)
-            - intcp_inf;
-
-        const double trt_pre_inf =
-            std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
-            - intcp_inf;
-
-        // recovery
-        const double prob_rec = 0.25;
-        const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
-        const double trt_act_rec =
-            std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
-
-        // shield
-        const double shield_coef = 0.9;
+            s.turn_clock();
+        }
 
 
-        std::vector<double> par =
-            {intcp_inf_latent,
-             intcp_inf,
-             intcp_rec,
-             trt_act_inf,
-             trt_act_rec,
-             trt_pre_inf,
-             shield_coef};
+        const auto finiteQfnFeat(
+                std::make_shared<FiniteQfnFeatures<InfShieldState> >(
+                        net->clone(), mod_agents->clone(), 3));
 
-        std::vector<double> par_sep =
-            {intcp_inf_latent,
-             intcp_inf,
-             intcp_rec,
-             trt_act_inf,
-             -trt_act_inf,
-             trt_act_rec,
-             -trt_act_rec,
-             trt_pre_inf,
-             -trt_pre_inf,
-             shield_coef};
+        const auto networkRunFeat(
+                std::make_shared<NetworkRunSymFeatures<InfShieldState> >(
+                        net->clone(), 3));
 
+        SweepAgent<InfShieldState> saFiniteQfn(net, finiteQfnFeat,
+                std::vector<double>(finiteQfnFeat->num_features(), 1.0),
+                njm::linalg::dot_a_and_b, 2, true);
 
-        { // Correct: NoIm NoSo,  Postulated: NoIm NoSo
-            std::vector<ModelPair> models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
-                                new InfShieldStateNoImNoSoModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model<InfShieldState> >(
-                                new InfShieldStateNoImNoSoModel(
-                                        networks.at(i))));
-                mp.first->par(par);
-                mp.second->par(par);
+        SweepAgent<InfShieldState> saNetworkRun(net, networkRunFeat,
+                std::vector<double>(networkRunFeat->num_features(), 1.0),
+                njm::linalg::dot_a_and_b, 2, true);
 
-                models_add.push_back(mp);
+        std::cout << std::setw(16) << net_sizes.at(i) * net_sizes.at(i);
+
+        { // time the update for the neural network
+            const auto tick(std::chrono::high_resolution_clock::now());
+            finiteQfnFeat->update(s.state(), s.history(),
+                    saFiniteQfn.num_trt());
+
+            const auto tock(std::chrono::high_resolution_clock::now());
+
+            const auto elapsed(std::chrono::duration_cast<
+                    std::chrono::duration<double> >(tock - tick));
+
+            std::cout << std::fixed << std::setw(16) << std::setprecision(6)
+                      << elapsed.count();
+
+        }
+
+        { // time the arg max of the neural network features using sweep
+            const auto tick(std::chrono::high_resolution_clock::now());
+            for (uint32_t r = 0; r < 100; r++) {
+                saFiniteQfn.apply_trt(s.state());
             }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Model_NoImNoSo_NoImNoSo",
-                            models_add));
+            const auto tock(std::chrono::high_resolution_clock::now());
+
+            const auto elapsed(std::chrono::duration_cast<
+                    std::chrono::duration<double> >(tock - tick));
+
+            std::cout << std::fixed << std::setw(16) << std::setprecision(6)
+                      << elapsed.count() / 100.0;
         }
 
-        // { // Correct: PosIm NoSo,  Postulated: PosIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStatePosImNoSoModel(
-        //                                 networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStatePosImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.first->par(par);
-        //         mp.second->par(par);
+        { // time the arg max of the network run features using sweep
+            networkRunFeat->update(s.state(), s.history(),
+                    saNetworkRun.num_trt());
+            const auto tick(std::chrono::high_resolution_clock::now());
+            for (uint32_t r = 0; r < 100; ++r) {
+                saNetworkRun.apply_trt(s.state());
+            }
+            const auto tock(std::chrono::high_resolution_clock::now());
 
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("Model_PosImNoSo_PosImNoSo",
-        //                     models_add));
-        // }
+            const auto elapsed(std::chrono::duration_cast<
+                    std::chrono::duration<double> >(tock - tick));
 
-        // { // Correct: PosIm NoSo,  Postulated: NoIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStatePosImNoSoModel(
-        //                                 networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.first->par(par);
-        //         mp.second->par(par);
-
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("Model_PosImNoSo_NoImNoSo",
-        //                     models_add));
-        // }
-
-        // { // Correct: NoIm NoSo,  Postulated: PosIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStatePosImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.first->par(par);
-        //         mp.second->par(par);
-
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("Model_NoImNoSo_PosImNoSo",
-        //                     models_add));
-        // }
-    }
-
-    const uint32_t num_reps = 50;
-    const uint32_t time_points = 100;
-
-
-    for (uint32_t i = 0; i < networks.size(); ++i) {
-        const std::shared_ptr<Network> & net = networks.at(i);
-
-        for (uint32_t j = 0; j < models.size(); ++j) {
-            ModelPair & mp(models.at(j).second.at(i));
-
-            run(net, mp.first, mp.second, num_reps, time_points);
-
+            std::cout << std::fixed << std::setw(16) << std::setprecision(6)
+                      << elapsed.count() / 100.0 << std::endl;
         }
+
+
     }
 
     return 0;
