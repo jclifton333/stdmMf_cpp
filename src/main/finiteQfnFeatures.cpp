@@ -161,6 +161,7 @@ std::vector<Transition<State> > FiniteQfnFeatures<State>::generate_data(
     return transitions;
 }
 
+
 template <typename State>
 void FiniteQfnFeatures<State>::fit_q_functions(
         const std::vector<Transition<State> > & obs) {
@@ -241,6 +242,7 @@ void FiniteQfnFeatures<State>::fit_q_functions(
                 state_trt_test, outcome_plus_max_test);
     }
 }
+
 
 template <typename State>
 void FiniteQfnFeatures<State>::fit_model(const uint32_t & model_index,
@@ -338,6 +340,7 @@ template <typename State>
 uint32_t FiniteQfnFeatures<State>::num_features() const {
     return this->look_ahead_ + 1;
 }
+
 
 template <typename State>
 void FiniteQfnFeatures<State>::rng(
