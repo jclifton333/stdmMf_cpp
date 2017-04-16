@@ -11,7 +11,7 @@
 #include "vfnBrStartSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
-#include "finiteQfnFeatures.hpp"
+#include "finiteQfnNnFeatures.hpp"
 
 #include "objFns.hpp"
 
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 
 
         const auto finiteQfnFeat(
-                std::make_shared<FiniteQfnFeatures<InfShieldState> >(
+                std::make_shared<FiniteQfnNnFeatures<InfShieldState> >(
                         net->clone(), mod_agents->clone(), 3));
 
         const auto networkRunFeat(

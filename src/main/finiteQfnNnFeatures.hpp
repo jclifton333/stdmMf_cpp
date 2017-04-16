@@ -1,5 +1,5 @@
-#ifndef FINITE_QFN_FEATURES_HPP
-#define FINITE_QFN_FEATURES_HPP
+#ifndef FINITE_QFN_NN_FEATURES_HPP
+#define FINITE_QFN_NN_FEATURES_HPP
 
 
 #include "model.hpp"
@@ -10,7 +10,7 @@ namespace stdmMf {
 
 // TODO: write test cases for finite qfn features
 template <typename State>
-class FiniteQfnFeatures : public Features<State> {
+class FiniteQfnNnFeatures : public Features<State> {
 protected:
     const std::shared_ptr<const Network> network_;
     const std::shared_ptr<Model<State> > model_;
@@ -20,13 +20,13 @@ protected:
     std::vector<NeuralNetwork<State> > nn_;
 
 public:
-    FiniteQfnFeatures(const std::shared_ptr<const Network> & network,
+    FiniteQfnNnFeatures(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Model<State> > & model,
             const uint32_t & look_ahead);
 
-    FiniteQfnFeatures(const FiniteQfnFeatures<State> & other);
+    FiniteQfnNnFeatures(const FiniteQfnNnFeatures<State> & other);
 
-    virtual ~FiniteQfnFeatures() = default;
+    virtual ~FiniteQfnNnFeatures() = default;
 
     virtual std::shared_ptr<Features<State> > clone() const override;
 

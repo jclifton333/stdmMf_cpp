@@ -12,7 +12,7 @@
 #include "brMinIterSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
-#include "finiteQfnFeatures.hpp"
+#include "finiteQfnNnFeatures.hpp"
 
 #include "objFns.hpp"
 
@@ -443,8 +443,8 @@ run(const std::shared_ptr<Network> & net,
             s.seed(i);
             VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
-                            new FiniteQfnFeatures<InfShieldState>(net->clone(),
-                                    mod_agents->clone(), 3)),
+                            new FiniteQfnNnFeatures<InfShieldState>(
+                                    net->clone(), mod_agents->clone(), 3)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -658,8 +658,8 @@ run(const std::shared_ptr<Network> & net,
             s.seed(i);
             BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
-                            new FiniteQfnFeatures<InfShieldState>(net->clone(),
-                                    mod_agents->clone(), 3)),
+                            new FiniteQfnNnFeatures<InfShieldState>(
+                                    net->clone(), mod_agents->clone(), 3)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
                     true, true, false, 500, 0, 0, 0);

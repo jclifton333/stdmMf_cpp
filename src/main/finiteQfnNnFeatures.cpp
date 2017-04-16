@@ -1,4 +1,4 @@
-#include "finiteQfnFeatures.hpp"
+#include "finiteQfnNnFeatures.hpp"
 
 #include <njm_cpp/info/project.hpp>
 
@@ -12,7 +12,7 @@ namespace stdmMf {
 
 
 template <typename State>
-FiniteQfnFeatures<State>::FiniteQfnFeatures(
+FiniteQfnNnFeatures<State>::FiniteQfnNnFeatures(
         const std::shared_ptr<const Network> & network,
         const std::shared_ptr<Model<State> > & model,
         const uint32_t & look_ahead)
@@ -38,8 +38,8 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
 
 
 template <typename State>
-FiniteQfnFeatures<State>::FiniteQfnFeatures(
-        const FiniteQfnFeatures<State> & other)
+FiniteQfnNnFeatures<State>::FiniteQfnNnFeatures(
+        const FiniteQfnNnFeatures<State> & other)
     : network_(other.network_->clone()), model_(other.model_->clone()),
       num_nodes_(other.num_nodes_), look_ahead_(other.look_ahead_),
       nn_(other.nn_) {
@@ -53,13 +53,13 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
 
 
 template <typename State>
-std::shared_ptr<Features<State> >FiniteQfnFeatures<State>::clone() const {
-    return std::shared_ptr<Features<State> >(new FiniteQfnFeatures(*this));
+std::shared_ptr<Features<State> >FiniteQfnNnFeatures<State>::clone() const {
+    return std::shared_ptr<Features<State> >(new FiniteQfnNnFeatures(*this));
 }
 
 
 template <typename State>
-void FiniteQfnFeatures<State>::update(const State & curr_state,
+void FiniteQfnNnFeatures<State>::update(const State & curr_state,
         const std::vector<StateAndTrt<State> > & history,
         const uint32_t & num_trt) {
     this->model_->est_par(history, curr_state);
@@ -71,7 +71,8 @@ void FiniteQfnFeatures<State>::update(const State & curr_state,
 
 
 template <typename State>
-std::vector<double> FiniteQfnFeatures<State>::get_features(const State & state,
+std::vector<double> FiniteQfnNnFeatures<State>::get_features(
+        const State & state,
         const boost::dynamic_bitset<> & trt_bits) {
     std::vector<double> features;
     features.reserve(this->num_features());
@@ -86,7 +87,7 @@ std::vector<double> FiniteQfnFeatures<State>::get_features(const State & state,
 
 
 template <typename State>
-void FiniteQfnFeatures<State>::update_features(
+void FiniteQfnNnFeatures<State>::update_features(
         const uint32_t & changed_node,
         const State & state_new,
         const boost::dynamic_bitset<> & trt_bits_new,
@@ -100,7 +101,7 @@ void FiniteQfnFeatures<State>::update_features(
 
 
 template <typename State>
-void FiniteQfnFeatures<State>::update_features_async(
+void FiniteQfnNnFeatures<State>::update_features_async(
         const uint32_t & changed_node,
         const State & state_new,
         const boost::dynamic_bitset<> & trt_bits_new,
@@ -112,7 +113,7 @@ void FiniteQfnFeatures<State>::update_features_async(
 
 
 template <typename State>
-std::vector<Transition<State> > FiniteQfnFeatures<State>::generate_data(
+std::vector<Transition<State> > FiniteQfnNnFeatures<State>::generate_data(
         const uint32_t & num_episodes, const uint32_t & num_obs_per_episode) {
     // setup return container
     std::vector<Transition<State> > transitions;
@@ -160,7 +161,7 @@ std::vector<Transition<State> > FiniteQfnFeatures<State>::generate_data(
 }
 
 template <typename State>
-void FiniteQfnFeatures<State>::fit_q_functions(
+void FiniteQfnNnFeatures<State>::fit_q_functions(
         const std::vector<Transition<State> > & obs,
         const uint32_t & num_trt) {
     const uint32_t num_obs(obs.size());
@@ -204,12 +205,12 @@ void FiniteQfnFeatures<State>::fit_q_functions(
 
 
 template <typename State>
-uint32_t FiniteQfnFeatures<State>::num_features() const {
+uint32_t FiniteQfnNnFeatures<State>::num_features() const {
     return this->look_ahead_ + 1;
 }
 
 template <typename State>
-void FiniteQfnFeatures<State>::rng(
+void FiniteQfnNnFeatures<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
     this->njm::tools::RngClass::rng(rng);
     std::for_each(this->nn_.begin(), this->nn_.end(),
@@ -220,7 +221,7 @@ void FiniteQfnFeatures<State>::rng(
 }
 
 
-template class FiniteQfnFeatures<InfState>;
-template class FiniteQfnFeatures<InfShieldState>;
+template class FiniteQfnNnFeatures<InfState>;
+template class FiniteQfnNnFeatures<InfShieldState>;
 
 } // namespace stdmMf
