@@ -312,8 +312,8 @@ void FiniteQfnFeatures<State>::fit_model(const uint32_t & model_index,
 
         // forward solve then backward solve
         const arma::vec beta(arma::solve(arma::trimatu(r_train),
-                                arma::solve(arma::trimatl(r_train.t()),
-                                        xty_train)));
+                        arma::solve(arma::trimatl(r_train.t()),
+                                xty_train)));
 
         const double ss_test(arma::norm(y_test - (beta.t() * xt_test).t(), 2));
 
