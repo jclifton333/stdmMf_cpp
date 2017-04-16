@@ -12,7 +12,7 @@
 #include "brMinIterSimPerturbAgent.hpp"
 
 #include "networkRunSymFeatures.hpp"
-#include "finiteQfnNnFeatures.hpp"
+#include "finiteQfnFeatures.hpp"
 
 #include "objFns.hpp"
 
@@ -425,9 +425,9 @@ run(const std::shared_ptr<Network> & net,
     }
 
 
-    // vfn max nn
-    std::vector<std::future<double> > vfn_nn_val;
-    std::vector<std::future<double> > vfn_nn_time;
+    // vfn max finite q
+    std::vector<std::future<double> > vfn_finite_q_val;
+    std::vector<std::future<double> > vfn_finite_q_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
         std::shared_ptr<std::promise<double> > promise_val(
@@ -435,16 +435,20 @@ run(const std::shared_ptr<Network> & net,
         std::shared_ptr<std::promise<double> > promise_time(
                 new std::promise<double>);
 
-        vfn_nn_val.push_back(promise_val->get_future());
-        vfn_nn_time.push_back(promise_time->get_future());
+        vfn_finite_q_val.push_back(promise_val->get_future());
+        vfn_finite_q_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
             s.seed(i);
             VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
-                            new FiniteQfnNnFeatures<InfShieldState>(
-                                    net->clone(), mod_agents->clone(), 3)),
+                            new FiniteQfnFeatures<InfShieldState>(
+                                    net->clone(), mod_agents->clone(),
+                                    std::shared_ptr<Features<InfShieldState> >(
+                                            new NetworkRunSymFeatures
+                                            <InfShieldState>(
+                                                    net->clone(), 3)), 3)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -469,7 +473,7 @@ run(const std::shared_ptr<Network> & net,
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
             const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "vfn_nn", i, history));
+                            "vfn_finite_q", i, history));
             *entry << add_to_entry;
 
 
@@ -640,9 +644,9 @@ run(const std::shared_ptr<Network> & net,
     // }
 
 
-    // br min nn
-    std::vector<std::future<double> > br_nn_val;
-    std::vector<std::future<double> > br_nn_time;
+    // br min finite q
+    std::vector<std::future<double> > br_finite_q_val;
+    std::vector<std::future<double> > br_finite_q_time;
     for (uint32_t i = 0; i < num_reps; ++i) {
         ++total_sims;
         std::shared_ptr<std::promise<double> > promise_val(
@@ -650,16 +654,20 @@ run(const std::shared_ptr<Network> & net,
         std::shared_ptr<std::promise<double> > promise_time(
                 new std::promise<double>);
 
-        br_nn_val.push_back(promise_val->get_future());
-        br_nn_time.push_back(promise_time->get_future());
+        br_finite_q_val.push_back(promise_val->get_future());
+        br_finite_q_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
             s.seed(i);
             BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
-                            new FiniteQfnNnFeatures<InfShieldState>(
-                                    net->clone(), mod_agents->clone(), 3)),
+                            new FiniteQfnFeatures<InfShieldState>(
+                                    net->clone(), mod_agents->clone(),
+                                    std::shared_ptr<Features<InfShieldState> >(
+                                            new NetworkRunSymFeatures<
+                                            InfShieldState>(
+                                                    net->clone(), 3)), 3)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
                     true, true, false, 500, 0, 0, 0);
@@ -685,7 +693,7 @@ run(const std::shared_ptr<Network> & net,
             history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
             const std::string add_to_entry(history_to_csv_entry(net->size(),
-                            "br_nn", i, history));
+                            "br_finite_q", i, history));
             *entry << add_to_entry;
 
 
@@ -865,23 +873,23 @@ run(const std::shared_ptr<Network> & net,
     }
 
     {
-        const std::string agent_name = "vfn_nn";
+        const std::string agent_name = "vfn_finite_q";
         std::vector<double> val(num_reps);
-        std::transform(vfn_nn_val.begin(), vfn_nn_val.end(),
+        std::transform(vfn_finite_q_val.begin(), vfn_finite_q_val.end(),
                 val.begin(), val.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
         std::vector<double> time(num_reps);
-        std::transform(vfn_nn_time.begin(), vfn_nn_time.end(),
+        std::transform(vfn_finite_q_time.begin(), vfn_finite_q_time.end(),
                 time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
-        const std::pair<double, double> vfn_nn_stats = mean_and_var(val);
+        const std::pair<double, double> vfn_finite_q_stats = mean_and_var(val);
         const std::vector<double> agent_res =
-            {vfn_nn_stats.first,
-             std::sqrt(vfn_nn_stats.second / num_reps),
+            {vfn_finite_q_stats.first,
+             std::sqrt(vfn_finite_q_stats.second / num_reps),
              mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
@@ -957,23 +965,23 @@ run(const std::shared_ptr<Network> & net,
     // }
 
     {
-        const std::string agent_name = "br_nn";
+        const std::string agent_name = "br_finite_q";
         std::vector<double> val(num_reps);
-        std::transform(br_nn_val.begin(), br_nn_val.end(),
+        std::transform(br_finite_q_val.begin(), br_finite_q_val.end(),
                 val.begin(), val.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
         std::vector<double> time(num_reps);
-        std::transform(br_nn_time.begin(), br_nn_time.end(),
+        std::transform(br_finite_q_time.begin(), br_finite_q_time.end(),
                 time.begin(), time.begin(),
                 [](std::future<double> & a, const double & b) {
                     return a.get();
                 });
-        const std::pair<double, double> br_nn_stats = mean_and_var(val);
+        const std::pair<double, double> br_finite_q_stats = mean_and_var(val);
         const std::vector<double> agent_res =
-            {br_nn_stats.first,
-             std::sqrt(br_nn_stats.second / num_reps),
+            {br_finite_q_stats.first,
+             std::sqrt(br_finite_q_stats.second / num_reps),
              mean_and_var(time).first};
         all_results.push_back(std::pair<std::string, std::vector<double> >
                 (agent_name, agent_res));
