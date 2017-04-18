@@ -13,16 +13,17 @@ class FiniteQfnFeatures : public Features<State> {
 protected:
     const std::shared_ptr<const Network> network_;
     const uint32_t num_nodes_;
-    const std::shared_ptr<Model<State> > model_;
+    const std::vector<std::shared_ptr<Model<State> > > models_;
+    const uint32_t num_models_;
     const std::shared_ptr<Features<State> > features_;
     const uint32_t look_ahead_;
-    std::vector<std::vector<double> > coef_;
+    std::vector<std::vector<std::vector<double> > > coef_;
 
     std::vector<double> last_feat_;
 
 public:
     FiniteQfnFeatures(const std::shared_ptr<const Network> & network,
-            const std::shared_ptr<Model<State> > & model,
+            const std::vector<std::shared_ptr<Model<State> > > & model,
             const std::shared_ptr<Features<State> > & features,
             const uint32_t & look_ahead);
 
@@ -58,17 +59,19 @@ public:
 
     virtual uint32_t num_features() const override;
 
-    virtual std::vector<Transition<State> > generate_data(
+    virtual std::vector<std::vector<Transition<State> > > generate_data(
             const uint32_t & num_episodes,
             const uint32_t & num_obs_per_episode);
 
-    virtual void fit_model(const uint32_t & model_index,
+    virtual void fit_q_function(const uint32_t & qfn_index,
+            const uint32_t & model_index,
             const std::vector<StateAndTrt<State> > & state_trt_train,
             const std::vector<double> & outcomes_train,
             const std::vector<StateAndTrt<State> > & state_trt_test,
             const std::vector<double> & outcomes_test);
 
-    virtual void fit_q_functions(const std::vector<Transition<State> > & obs);
+    virtual void fit_q_functions(
+            const std::vector<std::vector<Transition<State> > > & obs);
 
     using njm::tools::RngClass::rng;
     virtual void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;

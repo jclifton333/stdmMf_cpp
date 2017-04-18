@@ -8,6 +8,8 @@
 #include "randomAgent.hpp"
 #include "sweepAgent.hpp"
 
+#include "utilities.hpp"
+
 #include <cmath>
 #include <glog/logging.h>
 #include <armadillo>
@@ -20,18 +22,28 @@ namespace stdmMf {
 template <typename State>
 FiniteQfnFeatures<State>::FiniteQfnFeatures(
         const std::shared_ptr<const Network> & network,
-        const std::shared_ptr<Model<State> > & model,
+        const std::vector<std::shared_ptr<Model<State> > > & models,
         const std::shared_ptr<Features<State> > & features,
         const uint32_t & look_ahead)
-    : network_(network), num_nodes_(this->network_->size()), model_(model),
-      features_(features), look_ahead_(look_ahead),
-      coef_(look_ahead_,
-              std::vector<double>(this->features_->num_features(), 0.0)){
+    : network_(network), num_nodes_(this->network_->size()), models_(models),
+      num_models_(this->models_.size()), features_(features),
+      look_ahead_(look_ahead), coef_(this->num_models_) {
 
     CHECK_GT(this->look_ahead_, 0);
 
-    this->model_->rng(this->rng());
+    std::for_each(this->models_.begin(), this->models_.end(),
+            [this] (const std::shared_ptr<Model<State> > & m_) {
+                m_->rng(this->rng());
+            });
     this->features_->rng(this->rng());
+
+    // resize coefficients
+    std::for_each(this->coef_.begin(), this->coef_.end(),
+            [this] (std::vector<std::vector<double> > & c_) {
+                c_.resize(this->look_ahead_,
+                        std::vector<double>(0.0,
+                                this->features_->num_features()));
+            });
 }
 
 
@@ -39,11 +51,15 @@ template <typename State>
 FiniteQfnFeatures<State>::FiniteQfnFeatures(
         const FiniteQfnFeatures<State> & other)
     : network_(other.network_->clone()),  num_nodes_(other.num_nodes_),
-      model_(other.model_->clone()), features_(other.features_->clone()),
+      models_(clone_vec(other.models_)), num_models_(other.num_models_),
+      features_(other.features_->clone()),
       look_ahead_(other.look_ahead_), coef_(other.coef_),
       last_feat_(other.last_feat_) {
 
-    this->model_->rng(this->rng());
+    std::for_each(this->models_.begin(), this->models_.end(),
+            [this] (const std::shared_ptr<Model<State> > & m_) {
+                m_->rng(this->rng());
+            });
     this->features_->rng(this->rng());
 }
 
@@ -58,8 +74,10 @@ template <typename State>
 void FiniteQfnFeatures<State>::update(const State & curr_state,
         const std::vector<StateAndTrt<State> > & history,
         const uint32_t & num_trt) {
-    this->model_->est_par(history, curr_state);
-    const std::vector<Transition<State> > sim_data(
+    for (uint32_t m = 0; m < this->num_models_; ++m) {
+        this->models_.at(m)->est_par(history, curr_state);
+    }
+    const std::vector<std::vector<Transition<State> > > sim_data(
             this->generate_data(100, 100));
 
     this->fit_q_functions(sim_data);
@@ -76,9 +94,11 @@ std::vector<double> FiniteQfnFeatures<State>::get_features(
 
     this->last_feat_ = this->features_->get_features(state, trt_bits);
 
-    for (uint32_t i = 0; i < this->look_ahead_; ++i) {
-        features.push_back(njm::linalg::dot_a_and_b(
-                        this->last_feat_, this->coef_.at(i)));
+    for (uint32_t m = 0; m < this->num_models_; ++m) {
+        for (uint32_t i = 0; i < this->look_ahead_; ++i) {
+            features.push_back(njm::linalg::dot_a_and_b(
+                            this->last_feat_, this->coef_.at(m).at(i)));
+        }
     }
     return features;
 }
@@ -94,9 +114,11 @@ void FiniteQfnFeatures<State>::update_features(
         std::vector<double> & feat) {
     this->features_->update_features(changed_node, state_new, trt_bits_new,
             state_old, trt_bits_old, this->last_feat_);
-    for (uint32_t i = 0; i < this->look_ahead_; ++i) {
-        feat.at(i + 1) = njm::linalg::dot_a_and_b(
-                this->last_feat_, this->coef_.at(i));
+    for (uint32_t m = 0; m < this->num_models_; ++m) {
+        for (uint32_t i = 0; i < this->look_ahead_; ++i) {
+            feat.at(i + 1) = njm::linalg::dot_a_and_b(
+                    this->last_feat_, this->coef_.at(m).at(i));
+        }
     }
 }
 
@@ -114,138 +136,159 @@ void FiniteQfnFeatures<State>::update_features_async(
 
 
 template <typename State>
-std::vector<Transition<State> > FiniteQfnFeatures<State>::generate_data(
+std::vector<std::vector<Transition<State> > >
+FiniteQfnFeatures<State>::generate_data(
         const uint32_t & num_episodes, const uint32_t & num_obs_per_episode) {
     // setup return container
-    std::vector<Transition<State> > transitions;
-    transitions.reserve(num_episodes * num_obs_per_episode);
+    std::vector<std::vector<Transition<State> > > transitions(
+            this->num_models_);
+    std::for_each(transitions.begin(), transitions.end(),
+            [&] (std::vector<Transition<State> > & t_) {
+                t_.reserve(num_episodes * num_obs_per_episode);
+            });
 
-    // system
-    System<State> s(this->network_, this->model_);
-    s.rng(this->rng());
+    for (uint32_t m = 0; m < this->num_models_; ++m) {
+        // system
+        System<State> s(this->network_, this->models_.at(m));
+        s.rng(this->rng());
 
-    // agents
-    ProximalAgent<State> proximal_agent(this->network_);
-    proximal_agent.rng(this->rng());
-    RandomAgent<State> random_agent(this->network_);
-    proximal_agent.rng(this->rng());
+        // agents
+        ProximalAgent<State> proximal_agent(this->network_);
+        proximal_agent.rng(this->rng());
+        RandomAgent<State> random_agent(this->network_);
+        proximal_agent.rng(this->rng());
 
-    // simualate data
-    for (uint32_t i = 0; i < num_episodes; ++i) {
-        s.start();
-        for (uint32_t j = 0; j < num_obs_per_episode; ++j) {
-            // save initial state
-            const State curr_state(s.state());
+        // simualate data
+        for (uint32_t i = 0; i < num_episodes; ++i) {
+            s.start();
+            for (uint32_t j = 0; j < num_obs_per_episode; ++j) {
+                // save initial state
+                const State curr_state(s.state());
 
-            // randomly pick between proximal and random
-            boost::dynamic_bitset<> trt_bits;
-            const auto draw = this->rng()->rint(0, 2);
-            if (draw == 0) {
-                trt_bits = proximal_agent.apply_trt(s.state(), s.history());
-            } else if (draw == 1) {
-                trt_bits = random_agent.apply_trt(s.state(), s.history());
+                // randomly pick between proximal and random
+                boost::dynamic_bitset<> trt_bits;
+                const auto draw = this->rng()->rint(0, 2);
+                if (draw == 0) {
+                    trt_bits = proximal_agent.apply_trt(s.state(), s.history());
+                } else if (draw == 1) {
+                    trt_bits = random_agent.apply_trt(s.state(), s.history());
+                }
+
+                // simualate
+                s.trt_bits(trt_bits);
+                s.turn_clock();
+
+                // save next state
+                const State next_state(s.state());
+
+                // save transition
+                transitions.at(m).emplace_back(curr_state, trt_bits,
+                        next_state);
             }
-
-            // simualate
-            s.trt_bits(trt_bits);
-            s.turn_clock();
-
-            // save next state
-            const State next_state(s.state());
-
-            // save transition
-            transitions.emplace_back(curr_state, trt_bits, next_state);
         }
     }
-
     return transitions;
 }
 
 
 template <typename State>
 void FiniteQfnFeatures<State>::fit_q_functions(
-        const std::vector<Transition<State> > & obs) {
-    const uint32_t num_obs(obs.size());
-    std::vector<uint32_t> train_index, test_index;
-    train_index.reserve(num_obs);
-    test_index.reserve(num_obs);
-    std::vector<StateAndTrt<State> > state_trt_train, state_trt_test;
-    state_trt_train.reserve(num_obs);
-    state_trt_test.reserve(num_obs);
-    std::vector<double> outcomes_train, outcomes_test;
-    outcomes_train.reserve(num_obs);
-    outcomes_test.reserve(num_obs);
+        const std::vector<std::vector<Transition<State> > > & obs) {
+    for (uint32_t m = 0; m < this->num_models_; ++m) {
+        const uint32_t num_obs(obs.at(m).size());
+        std::vector<uint32_t> train_index, test_index;
+        train_index.reserve(num_obs);
+        test_index.reserve(num_obs);
+        std::vector<StateAndTrt<State> > state_trt_train, state_trt_test;
+        state_trt_train.reserve(num_obs);
+        state_trt_test.reserve(num_obs);
+        std::vector<double> outcomes_train, outcomes_test;
+        outcomes_train.reserve(num_obs);
+        outcomes_test.reserve(num_obs);
 
-    // outcomes from history except first observation
-    for (uint32_t i = 0; i < num_obs; ++i) {
-        if (this->rng()->runif_01() < 0.2) {
-            // test sets
-            test_index.push_back(i);
-            state_trt_test.emplace_back(obs.at(i).curr_state,
-                    obs.at(i).curr_trt_bits);
-            outcomes_test.push_back(
-                    - static_cast<float>(obs.at(i).next_state.inf_bits.count())
-                    / static_cast<float>(this->num_nodes_));
-        } else {
-            // train sets
-            train_index.push_back(i);
-            state_trt_train.emplace_back(obs.at(i).curr_state,
-                    obs.at(i).curr_trt_bits);
-            outcomes_train.push_back(
-                    - static_cast<float>(obs.at(i).next_state.inf_bits.count())
-                    / static_cast<float>(this->num_nodes_));
+        // outcomes from history except first observation
+        for (uint32_t i = 0; i < num_obs; ++i) {
+            if (this->rng()->runif_01() < 0.2) {
+                // test sets
+                test_index.push_back(i);
+                state_trt_test.emplace_back(obs.at(m).at(i).curr_state,
+                        obs.at(m).at(i).curr_trt_bits);
+                const uint32_t num_inf(
+                        obs.at(m).at(i).next_state.inf_bits.count());
+                outcomes_test.push_back(
+                        - static_cast<float>(num_inf)
+                        / static_cast<float>(this->num_nodes_));
+            } else {
+                // train sets
+                train_index.push_back(i);
+                state_trt_train.emplace_back(obs.at(m).at(i).curr_state,
+                        obs.at(m).at(i).curr_trt_bits);
+                const uint32_t num_inf(
+                        obs.at(m).at(i).next_state.inf_bits.count());
+                outcomes_train.push_back(
+                        - static_cast<float>(num_inf)
+                        / static_cast<float>(this->num_nodes_));
+            }
         }
-    }
-    const uint32_t num_train(state_trt_train.size());
-    const uint32_t num_test(state_trt_test.size());
+        const uint32_t num_train(state_trt_train.size());
+        const uint32_t num_test(state_trt_test.size());
 
-    // train first neural network using outcomes
-    this->fit_model(0, state_trt_train, outcomes_train,
-            state_trt_test, outcomes_test);
+        // train first neural network using outcomes
+        this->fit_q_function(0, m, state_trt_train, outcomes_train,
+                state_trt_test, outcomes_test);
 
-    // train remaining neural networks using outcome plus arg max of
-    // previous networks
-    for (uint32_t i = 1; i < this->look_ahead_; ++i) {
-        std::vector<double> outcome_plus_max_train, outcome_plus_max_test;
-        outcome_plus_max_train.reserve(num_obs);
-        outcome_plus_max_test.reserve(num_obs);
+        // train remaining neural networks using outcome plus arg max of
+        // previous networks
+        for (uint32_t i = 1; i < this->look_ahead_; ++i) {
+            std::vector<double> outcome_plus_max_train, outcome_plus_max_test;
+            outcome_plus_max_train.reserve(num_obs);
+            outcome_plus_max_test.reserve(num_obs);
 
-        SweepAgent<State> sa(this->network_, this->features_,
-                this->coef_.at(i - 1), njm::linalg::dot_a_and_b, 2, true);
+            SweepAgent<State> sa(this->network_, this->features_,
+                    this->coef_.at(m).at(i - 1), njm::linalg::dot_a_and_b,
+                    2, true);
 
-        // find max for next states and add to outcomes
-        for (uint32_t j = 0; j < num_train; ++j) {
-            const auto & next_state(obs.at(train_index.at(j)).next_state);
-            const boost::dynamic_bitset<> trt_bits(sa.apply_trt(next_state));
+            // find max for next states and add to outcomes
+            for (uint32_t j = 0; j < num_train; ++j) {
+                const auto & next_state(
+                        obs.at(m).at(train_index.at(j)).next_state);
+                const boost::dynamic_bitset<> trt_bits(
+                        sa.apply_trt(next_state));
 
-            const std::vector<double> feat(
-                    this->features_->get_features(next_state, trt_bits));
+                const std::vector<double> feat(
+                        this->features_->get_features(next_state, trt_bits));
 
-            outcome_plus_max_train.push_back(outcomes_train.at(j)
-                    + njm::linalg::dot_a_and_b(feat, this->coef_.at(i - 1)));
+                outcome_plus_max_train.push_back(outcomes_train.at(j)
+                        + njm::linalg::dot_a_and_b(feat,
+                                this->coef_.at(m).at(i - 1)));
+            }
+
+            // find max for next states and add to outcomes
+            for (uint32_t j = 0; j < num_test; ++j) {
+                const auto & next_state(
+                        obs.at(m).at(test_index.at(j)).next_state);
+                const boost::dynamic_bitset<> trt_bits(
+                        sa.apply_trt(next_state));
+
+                const std::vector<double> feat(
+                        this->features_->get_features(next_state, trt_bits));
+
+                outcome_plus_max_test.push_back(outcomes_test.at(j)
+                        + njm::linalg::dot_a_and_b(feat,
+                                this->coef_.at(m).at(i - 1)));
+            }
+
+            // train neural network
+            this->fit_q_function(i, m, state_trt_train, outcome_plus_max_train,
+                    state_trt_test, outcome_plus_max_test);
         }
-
-        // find max for next states and add to outcomes
-        for (uint32_t j = 0; j < num_test; ++j) {
-            const auto & next_state(obs.at(test_index.at(j)).next_state);
-            const boost::dynamic_bitset<> trt_bits(sa.apply_trt(next_state));
-
-            const std::vector<double> feat(
-                    this->features_->get_features(next_state, trt_bits));
-
-            outcome_plus_max_test.push_back(outcomes_test.at(j)
-                    + njm::linalg::dot_a_and_b(feat, this->coef_.at(i - 1)));
-        }
-
-        // train neural network
-        this->fit_model(i, state_trt_train, outcome_plus_max_train,
-                state_trt_test, outcome_plus_max_test);
     }
 }
 
 
 template <typename State>
-void FiniteQfnFeatures<State>::fit_model(const uint32_t & model_index,
+void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
+        const uint32_t & model_index,
         const std::vector<StateAndTrt<State> > & state_trt_train,
         const std::vector<double> & outcomes_train,
         const std::vector<StateAndTrt<State> > & state_trt_test,
@@ -326,8 +369,8 @@ void FiniteQfnFeatures<State>::fit_model(const uint32_t & model_index,
     CHECK(std::isfinite(best_ss));
 
     { // assign coefficient values
-        coef_.at(model_index).resize(num_features);
-        auto coef_it(coef_.at(model_index).begin());
+        coef_.at(model_index).at(qfn_index).resize(num_features);
+        auto coef_it(coef_.at(model_index).at(qfn_index).begin());
         auto beta_it(best_beta.begin());
         for (uint32_t i = 0; i < num_features; ++i, ++coef_it, ++beta_it) {
             *coef_it = *beta_it;
@@ -346,7 +389,10 @@ template <typename State>
 void FiniteQfnFeatures<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
     this->njm::tools::RngClass::rng(rng);
-    this->model_->rng(rng);
+    std::for_each(this->models_.begin(), this->models_.end(),
+            [this] (const std::shared_ptr<Model<State> > & m_) {
+                m_->rng(this->rng());
+            });
     this->features_->rng(rng);
 }
 
