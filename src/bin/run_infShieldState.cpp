@@ -660,10 +660,16 @@ run(const std::shared_ptr<Network> & net,
         pool.service().post([=]() {
             System<InfShieldState> s(net->clone(), mod_system->clone());
             s.seed(i);
+
+            std::shared_ptr<Model<InfShieldState> > modNoIm(
+                    new InfShieldStateNoImNoSoModel(net->clone()));
+            std::shared_ptr<Model<InfShieldState> > modPosIm(
+                    new InfShieldStatePosImNoSoModel(net->clone()));
+
             BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
                             new FiniteQfnFeatures<InfShieldState>(
-                                    net->clone(), {mod_agents->clone()},
+                                    net->clone(), {modNoIm, modPosIm},
                                     std::shared_ptr<Features<InfShieldState> >(
                                             new NetworkRunSymFeatures<
                                             InfShieldState>(
