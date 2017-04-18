@@ -123,9 +123,10 @@ int main(int argc, char *argv[]) {
                         net->clone(), 3));
 
         const auto finiteQfnFeat(
-                std::make_shared<FiniteQfnFeatures<InfShieldState> >(
-                        net->clone(), mod_agents->clone(),
-                        networkRunFeat->clone(), 3));
+                std::shared_ptr<FiniteQfnFeatures<InfShieldState> >(
+                        new FiniteQfnFeatures<InfShieldState>(
+                                net->clone(), {mod_agents->clone()},
+                                networkRunFeat->clone(), 3)));
 
         SweepAgent<InfShieldState> saFiniteQfn(net, finiteQfnFeat,
                 std::vector<double>(finiteQfnFeat->num_features(), 1.0),

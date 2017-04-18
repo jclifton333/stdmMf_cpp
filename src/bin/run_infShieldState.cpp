@@ -444,7 +444,7 @@ run(const std::shared_ptr<Network> & net,
             VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
                             new FiniteQfnFeatures<InfShieldState>(
-                                    net->clone(), mod_agents->clone(),
+                                    net->clone(), {mod_agents->clone()},
                                     std::shared_ptr<Features<InfShieldState> >(
                                             new NetworkRunSymFeatures
                                             <InfShieldState>(
@@ -663,7 +663,7 @@ run(const std::shared_ptr<Network> & net,
             BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
                     std::shared_ptr<Features<InfShieldState> >(
                             new FiniteQfnFeatures<InfShieldState>(
-                                    net->clone(), mod_agents->clone(),
+                                    net->clone(), {mod_agents->clone()},
                                     std::shared_ptr<Features<InfShieldState> >(
                                             new NetworkRunSymFeatures<
                                             InfShieldState>(
