@@ -12,7 +12,7 @@ Agent<State>::Agent(const std::shared_ptr<const Network> & network)
 
 template <typename State>
 Agent<State>::Agent(const Agent<State> & other)
-    : RngClass(other), network_(other.network_->clone()),
+    : RngClass(other), network_(other.network_),
       num_nodes_(other.num_nodes_), num_trt_(other.num_trt_) {
 }
 

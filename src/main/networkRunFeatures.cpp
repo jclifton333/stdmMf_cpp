@@ -51,7 +51,7 @@ NetworkRunFeatures<InfState>::NetworkRunFeatures(
 template<>
 NetworkRunFeatures<InfState>::NetworkRunFeatures(
         const NetworkRunFeatures<InfState> & other)
-    : network_(other.network_->clone()), runs_(other.runs_),
+    : network_(other.network_), runs_(other.runs_),
       runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
       run_length_(other.run_length_), num_runs_(other.num_runs_),
       offset_(other.offset_), num_features_(other.num_features_),

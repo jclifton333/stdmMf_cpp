@@ -89,7 +89,7 @@ NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
 template<typename State>
 NetworkRunSymFeatures<State>::NetworkRunSymFeatures(
         const NetworkRunSymFeatures<State> & other)
-    : network_(other.network_->clone()), runs_(other.runs_),
+    : network_(other.network_), runs_(other.runs_),
       runs_by_node_(other.runs_by_node_), num_nodes_(other.num_nodes_),
       run_length_(other.run_length_), num_runs_(other.num_runs_),
       index_by_len_(other.index_by_len_), num_features_(other.num_features_),

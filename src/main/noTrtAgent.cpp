@@ -11,7 +11,7 @@ NoTrtAgent<State>::NoTrtAgent(const std::shared_ptr<const Network> & network)
 
 template<typename State>
 NoTrtAgent<State>::NoTrtAgent(const NoTrtAgent<State> & other)
-    : Agent<State>(other.network_->clone()) {
+    : Agent<State>(other.network_) {
 }
 
 

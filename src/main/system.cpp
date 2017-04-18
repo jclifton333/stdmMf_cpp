@@ -16,7 +16,7 @@ System<State>::System(const std::shared_ptr<const Network> & network,
 
 template <typename State>
 System<State>::System(const System<State> & other)
-    : RngClass(other), network_(other.network_->clone()),
+    : RngClass(other), network_(other.network_),
       model_(other.model_->clone()), num_nodes_(other.num_nodes_),
       state_(other.state_), trt_bits_(other.trt_bits_),
       history_(other.history_), time_(other.time_) {

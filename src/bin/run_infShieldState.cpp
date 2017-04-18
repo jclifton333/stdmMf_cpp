@@ -59,7 +59,7 @@ std::string history_to_csv_entry(const uint32_t & num_nodes,
 
 
 std::vector<std::pair<std::string, std::vector<double> > >
-run(const std::shared_ptr<Network> & net,
+run(const std::shared_ptr<const Network> & net,
         const std::shared_ptr<Model<InfShieldState> > & mod_system,
         const std::shared_ptr<Model<InfShieldState> > & mod_agents,
         const uint32_t & num_reps,
@@ -90,9 +90,9 @@ run(const std::shared_ptr<Network> & net,
         none_time.push_back(promise_time->get_future());
 
         pool.service().post([=](){
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            NoTrtAgent<InfShieldState> a(net->clone());
+            NoTrtAgent<InfShieldState> a(net);
             a.seed(i);
 
             s.start();
@@ -136,9 +136,9 @@ run(const std::shared_ptr<Network> & net,
         random_time.push_back(promise_time->get_future());
 
         pool.service().post([=](){
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            RandomAgent<InfShieldState> a(net->clone());
+            RandomAgent<InfShieldState> a(net);
             a.seed(i);
 
             s.start();
@@ -184,9 +184,9 @@ run(const std::shared_ptr<Network> & net,
         proximal_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            ProximalAgent<InfShieldState> a(net->clone());
+            ProximalAgent<InfShieldState> a(net);
             a.seed(i);
 
             s.start();
@@ -232,9 +232,9 @@ run(const std::shared_ptr<Network> & net,
         myopic_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            MyopicAgent<InfShieldState> a(net->clone(),
+            MyopicAgent<InfShieldState> a(net,
                     mod_agents->clone());
             a.seed(i);
 
@@ -281,12 +281,12 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_1_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+            VfnMaxSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 1)),
+                                    net, 1)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -333,12 +333,12 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_2_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+            VfnMaxSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 2)),
+                                    net, 2)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -386,12 +386,12 @@ run(const std::shared_ptr<Network> & net,
         vfn_len_3_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+            VfnMaxSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 3)),
+                                    net, 3)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -439,16 +439,16 @@ run(const std::shared_ptr<Network> & net,
         vfn_finite_q_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            VfnMaxSimPerturbAgent<InfShieldState> a(net->clone(),
+            VfnMaxSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new FiniteQfnFeatures<InfShieldState>(
-                                    net->clone(), {mod_agents->clone()},
+                                    net, {mod_agents->clone()},
                                     std::shared_ptr<Features<InfShieldState> >(
                                             new NetworkRunSymFeatures
                                             <InfShieldState>(
-                                                    net->clone(), 3)), 3)),
+                                                    net, 3)), 3)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -496,12 +496,12 @@ run(const std::shared_ptr<Network> & net,
         br_len_1_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+            BrMinSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 1)),
+                                    net, 1)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
                     true, true, false, 500, 0, 0, 0);
@@ -550,12 +550,12 @@ run(const std::shared_ptr<Network> & net,
         br_len_2_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
-            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+            BrMinSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures<InfShieldState>(
-                                    net->clone(), 2)),
+                                    net, 2)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
                     true, true, false, 500, 0, 0, 0);
@@ -604,12 +604,12 @@ run(const std::shared_ptr<Network> & net,
     //     br_len_3_time.push_back(promise_time->get_future());
 
     //     pool.service().post([=]() {
-    //         System<InfShieldState> s(net->clone(), mod_system->clone());
+    //         System<InfShieldState> s(net, mod_system->clone());
     //         s.seed(i);
-    //         BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+    //         BrMinSimPerturbAgent<InfShieldState> a(net,
     //                 std::shared_ptr<Features<InfShieldState> >(
     //                         new NetworkRunSymFeatures<InfShieldState>(
-    //                                 net->clone(), 3)),
+    //                                 net, 3)),
     //                 mod_agents->clone(),
     //                 0.1, 0.35, 1.41, 1, 0.85, 0.00397,
     //                 true, true, false, 500, 0, 5, 5);
@@ -658,22 +658,22 @@ run(const std::shared_ptr<Network> & net,
         br_finite_q_time.push_back(promise_time->get_future());
 
         pool.service().post([=]() {
-            System<InfShieldState> s(net->clone(), mod_system->clone());
+            System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
 
             std::shared_ptr<Model<InfShieldState> > modNoIm(
-                    new InfShieldStateNoImNoSoModel(net->clone()));
+                    new InfShieldStateNoImNoSoModel(net));
             std::shared_ptr<Model<InfShieldState> > modPosIm(
-                    new InfShieldStatePosImNoSoModel(net->clone()));
+                    new InfShieldStatePosImNoSoModel(net));
 
-            BrMinSimPerturbAgent<InfShieldState> a(net->clone(),
+            BrMinSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new FiniteQfnFeatures<InfShieldState>(
-                                    net->clone(), {modNoIm, modPosIm},
+                                    net, {modNoIm, modPosIm},
                                     std::shared_ptr<Features<InfShieldState> >(
                                             new NetworkRunSymFeatures<
                                             InfShieldState>(
-                                                    net->clone(), 3)), 3)),
+                                                    net, 3)), 3)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
                     true, true, false, 500, 0, 0, 0);

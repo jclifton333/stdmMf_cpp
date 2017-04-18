@@ -40,7 +40,7 @@ FiniteQfnNnFeatures<State>::FiniteQfnNnFeatures(
 template <typename State>
 FiniteQfnNnFeatures<State>::FiniteQfnNnFeatures(
         const FiniteQfnNnFeatures<State> & other)
-    : network_(other.network_->clone()), model_(other.model_->clone()),
+    : network_(other.network_), model_(other.model_->clone()),
       num_nodes_(other.num_nodes_), look_ahead_(other.look_ahead_),
       nn_(other.nn_) {
 
