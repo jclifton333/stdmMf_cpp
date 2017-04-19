@@ -381,7 +381,7 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
 
 template <typename State>
 uint32_t FiniteQfnFeatures<State>::num_features() const {
-    return this->look_ahead_ + 1;
+    return this->look_ahead_ * this->num_models_ + 1;
 }
 
 
