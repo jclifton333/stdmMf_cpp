@@ -24,6 +24,8 @@
 #include "epsAgent.hpp"
 #include "objFns.hpp"
 
+#include "networkRunSymFeatures.hpp"
+#include "finiteQfnFeatures.hpp"
 
 
 using namespace stdmMf;
@@ -45,7 +47,8 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
         const bool & sq_total_br,
         const uint32_t & obs_per_iter,
         const uint32_t & max_same_trt,
-        const uint32_t & steps_between_trt_test) {
+        const uint32_t & steps_between_trt_test,
+        const uint32_t & look_ahead) {
     std::shared_ptr<Rng> rng(new Rng);
     rng->seed(seed);
 
@@ -109,8 +112,15 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
     s.rng(rng);
 
     // features
+    // std::shared_ptr<Features<InfShieldState> > features(
+    //         new NetworkRunSymFeatures<InfShieldState>(net, run_length));
     std::shared_ptr<Features<InfShieldState> > features(
-            new NetworkRunSymFeatures<InfShieldState>(net, run_length));
+            new FiniteQfnFeatures<InfShieldState>(
+                    net, {mod->clone()},
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new NetworkRunSymFeatures
+                            <InfShieldState>(
+                                    net, run_length)), look_ahead));
 
     // eps agent
     std::shared_ptr<ProximalAgent<InfShieldState> > pa(
@@ -194,37 +204,15 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
             {7.15e-3})); // min_step_size
-        g->add_factor(std::vector<int>({2})); // run_length
+        g->add_factor(std::vector<int>({1, 2, 3, 4})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweeps
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({false})); // sq_total_br
         g->add_factor(std::vector<int>({5})); // obs_per_iter
         g->add_factor(std::vector<int>({0})); // max_same_trt
         g->add_factor(std::vector<int>({0})); // steps_between_trt_test
+        g->add_factor(std::vector<int>({1, 2, 3, 4, 5})); // look_ahead
     }
-
-
-    {
-        Experiment::FactorGroup * g = e.add_group();
-
-        g->add_factor(std::vector<int>({500})); // num_reps
-        g->add_factor(std::vector<double>({0.1})); // c
-        g->add_factor(std::vector<double>({0.2})); // t
-        g->add_factor(std::vector<double>({1.41e-0})); // a
-        g->add_factor(std::vector<double>({1})); // b
-        g->add_factor(std::vector<double>({0.85})); // ell
-        g->add_factor(std::vector<double>(
-            {7.15e-3})); // min_step_size
-        g->add_factor(std::vector<int>({2})); // run_length
-        g->add_factor(std::vector<bool>({true})); // do_sweeps
-        g->add_factor(std::vector<bool>({true})); // gs_step
-        g->add_factor(std::vector<bool>({false})); // sq_total_br
-        g->add_factor(std::vector<int>({5})); // obs_per_iter
-        g->add_factor(std::vector<int>({1, 2, 5, 10})); // max_same_trt
-        g->add_factor(std::vector<int>(
-            {1, 2, 5, 10})); // steps_between_trt_test
-    }
-
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
 
@@ -279,6 +267,9 @@ int main(int argc, char *argv[]) {
             CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
             const uint32_t steps_between_trt_test = static_cast<uint32_t>(
                     f.at(i++).val.int_val);
+            CHECK_EQ(f.at(i).type, Experiment::FactorLevel::Type::is_int);
+            const uint32_t look_ahead = static_cast<uint32_t>(
+                    f.at(i++).val.int_val);
 
             // check number of factors
             CHECK_EQ(i, f.size());
@@ -287,7 +278,7 @@ int main(int argc, char *argv[]) {
                 auto ret = run_brmin(rep, num_reps, c, t, a, b, ell,
                         min_step_size, run_length, do_sweep, gs_step,
                         sq_total_br, obs_per_iter, max_same_trt,
-                        steps_between_trt_test);
+                        steps_between_trt_test, look_ahead);
                 progress->update();
                 return ret;
             }));
@@ -317,7 +308,8 @@ int main(int argc, char *argv[]) {
     njm::data::Entry * entry = tk.entry("brMinExperiment_results.txt");
     *entry << "level_num,rep_num,elapsed,value,num_reps,c,t,a,b,ell,"
            << "min_step_size,run_length,do_sweep,gs_step,sq_total_br,"
-           << "obs_per_iter,max_same_trt,steps_between_trt_test\n";
+           << "obs_per_iter,max_same_trt,steps_between_trt_test,"
+           << "look_ahead\n";
     for (uint32_t i = 0; i < results.size(); ++i) {
         const std::pair<double, double> result_i = results.at(i).get();
         *entry << factors_level.at(i) << ", " << rep_number.at(i) << ", "
