@@ -16,6 +16,7 @@
 #include "system.hpp"
 #include "agent.hpp"
 #include "infShieldStateNoImNoSoModel.hpp"
+#include "infShieldStatePosImNoSoModel.hpp"
 #include "networkRunSymFeatures.hpp"
 #include "brMinSimPerturbAgent.hpp"
 #include "sweepAgent.hpp"
@@ -62,9 +63,12 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
     std::shared_ptr<Network> net = Network::gen_network(init);
 
     // model
-    std::shared_ptr<Model<InfShieldState> > mod(
+    std::shared_ptr<Model<InfShieldState> > mod_pos(
+            new InfShieldStatePosImNoSoModel(net));
+    std::shared_ptr<Model<InfShieldState> > mod_no(
             new InfShieldStateNoImNoSoModel(net));
-    mod->rng(rng);
+    mod_pos->rng(rng);
+    mod_no->rng(rng);
 
     {
         // latent infections
@@ -104,11 +108,14 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
              trt_act_rec,
              trt_pre_inf,
              shield_coef};
-        mod->par(par);
+
+        mod_pos->par(par);
+
+        mod_no->par(par);
     }
 
     // system
-    System<InfShieldState> s(net, mod);
+    System<InfShieldState> s(net, mod_pos);
     s.rng(rng);
 
     // features
@@ -116,7 +123,7 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
     //         new NetworkRunSymFeatures<InfShieldState>(net, run_length));
     std::shared_ptr<Features<InfShieldState> > features(
             new FiniteQfnFeatures<InfShieldState>(
-                    net, {mod->clone()},
+                    net, {mod_no->clone(), mod_pos->clone()},
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures
                             <InfShieldState>(
@@ -148,7 +155,8 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
     const std::vector<Transition<InfShieldState> > all_history(
             Transition<InfShieldState>::from_sequence(s.history(), s.state()));
 
-    BrMinSimPerturbAgent<InfShieldState> brAgent(net, features, mod->clone(),
+    BrMinSimPerturbAgent<InfShieldState> brAgent(net, features,
+            mod_pos->clone(),
             c, t, a, b, ell, min_step_size, do_sweep, gs_step, sq_total_br, 0,
             obs_per_iter, max_same_trt, steps_between_trt_test);
     brAgent.rng(rng);
