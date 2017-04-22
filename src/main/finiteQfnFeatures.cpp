@@ -346,12 +346,16 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
                                            250.0, 500.0, 1000.0});
     double best_ss = std::numeric_limits<double>::infinity();
     arma::vec best_beta;
+
+    arma::mat pen_eye(arma::eye(num_features, num_features));
+    pen_eye(0, 0) = 0.0;
+
     for (uint32_t i = 0; i < lambda_vals.size(); ++i) {
         const double & lambda(lambda_vals.at(i));
 
-        // cholesky on xtx + lamba * I
-        const arma::mat r_train(arma::chol(xtx_train
-                        + arma::eye(num_features, num_features) * lambda));
+        // cholesky on xtx + lamba * pen_eye, where pen_eye is the
+        // identity with a zero in the top left element
+        const arma::mat r_train(arma::chol(xtx_train + pen_eye * lambda));
 
         // forward solve then backward solve
         const arma::vec beta(arma::solve(arma::trimatu(r_train),
