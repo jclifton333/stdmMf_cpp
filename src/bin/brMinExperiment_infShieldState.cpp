@@ -166,6 +166,7 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
         std::chrono::steady_clock::now();
 
     // train
+    features->update(s.state(), s.history(), brAgent.num_trt());
     const std::vector<double> par = brAgent.train(all_history);
 
     // end timer
