@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<double>({0.85})); // ell
         g->add_factor(std::vector<double>(
             {7.15e-3})); // min_step_size
-        g->add_factor(std::vector<int>({1, 2, 3, 4})); // run_length
+        g->add_factor(std::vector<int>({1, 2, 3})); // run_length
         g->add_factor(std::vector<bool>({true})); // do_sweeps
         g->add_factor(std::vector<bool>({true})); // gs_step
         g->add_factor(std::vector<bool>({false})); // sq_total_br
