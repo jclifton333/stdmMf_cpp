@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
         g->add_factor(std::vector<int>({5})); // obs_per_iter
         g->add_factor(std::vector<int>({0})); // max_same_trt
         g->add_factor(std::vector<int>({0})); // steps_between_trt_test
-        g->add_factor(std::vector<int>({1, 2, 4, 6, 8, 10})); // look_ahead
+        g->add_factor(std::vector<int>({1, 2, 4, 6, 8})); // look_ahead
     }
 
     njm::thread::Pool p(std::thread::hardware_concurrency());
