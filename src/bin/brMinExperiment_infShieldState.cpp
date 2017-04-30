@@ -55,8 +55,8 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
 
     // setup network
     NetworkInit init;
-    init.set_dim_x(10);
-    init.set_dim_y(10);
+    init.set_dim_x(4);
+    init.set_dim_y(4);
     init.set_wrap(false);
     init.set_type(NetworkInit_NetType_GRID);
 
