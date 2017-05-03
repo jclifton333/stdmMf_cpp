@@ -1006,8 +1006,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::shared_ptr<Network> > networks;
     { // network 1
         NetworkInit init;
-        init.set_dim_x(4);
-        init.set_dim_y(4);
+        init.set_dim_x(10);
+        init.set_dim_y(10);
         init.set_wrap(false);
         init.set_type(NetworkInit_NetType_GRID);
         networks.push_back(Network::gen_network(init));
