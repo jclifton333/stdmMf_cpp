@@ -23,7 +23,7 @@ const Node & Network::get_node(const uint32_t index) const {
 }
 
 
-uint32_t Network::calc_dist(const uint32_t & a, const uint32_t & b) {
+uint32_t Network::calc_dist(const uint32_t & a, const uint32_t & b) const {
     // initialize candidates
     std::set<uint32_t> history;
     std::set<uint32_t> previous;
@@ -58,13 +58,19 @@ uint32_t Network::calc_dist(const uint32_t & a, const uint32_t & b) {
 }
 
 
-const std::vector<std::vector<uint32_t> > & Network::dist() const {
-    return this->dist_;
-}
+std::vector<std::vector<uint32_t> > Network::dist() const {
+    // fill distance matrix
+    std::vector<std::vector<uint32_t> > dist_mat;
+    dist_mat.resize(this->size());
+    for (uint32_t i = 0; i < this->size(); ++i) {
+        std::vector<uint32_t> & dist = dist_mat.at(i);
+        dist.clear();
+        for (uint32_t j = 0; j < this->size(); ++j) {
+            dist.push_back(this->calc_dist(i, j));
+        }
+    }
 
-
-uint32_t Network::dist(const uint32_t & a, const uint32_t & b) const {
-    return this->dist_.at(a).at(b);
+    return dist_mat;
 }
 
 
@@ -209,16 +215,6 @@ std::shared_ptr<Network> Network::gen_network(
         LOG(FATAL) << "Don't know how to initialize network of type "
                    << init.type() << ".";
         break;
-    }
-
-    // fill distance matrix
-    network->dist_.resize(network->size());
-    for (uint32_t i = 0; i < network->size(); ++i) {
-        std::vector<uint32_t> & dist = network->dist_.at(i);
-        dist.clear();
-        for (uint32_t j = 0; j < network->size(); ++j) {
-            dist.push_back(network->calc_dist(i, j));
-        }
     }
 
     return network;
