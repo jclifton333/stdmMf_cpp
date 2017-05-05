@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         if (it->type() == NetworkInit_NetType_GRID) {
             *tk.entry(network->kind() + ".csv") << grid_to_csv(network);
         } else if(it->type() == NetworkInit_NetType_BARABASI) {
-            *tk.entry(network->kind() + ".csv") << grid_to_csv(network);
+            *tk.entry(network->kind() + ".csv") << barabasi_to_csv(network);
         }
         std::cout << "saved " << network->kind() << std::endl;
     }
