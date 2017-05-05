@@ -290,8 +290,8 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
         while (draw > current_tot) {
             current_tot += edge_deg.at(++connect_to);
         }
-        network->adj(i, connect_to);
-        network->adj(connect_to, i);
+        network->adj(i, connect_to) = 1;
+        network->adj(connect_to, i) = 1;
 
         n->add_neigh(connect_to);
 
