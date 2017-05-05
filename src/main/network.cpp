@@ -160,7 +160,7 @@ std::shared_ptr<Network> Network::gen_network(
         break;
     }
     default:
-        LOG(ERROR) << "Don't know how to initialize network of type "
+        LOG(FATAL) << "Don't know how to initialize network of type "
                    << init.type() << ".";
         break;
     }
