@@ -157,6 +157,7 @@ std::shared_ptr<Network> Network::gen_network(
         CHECK(init.has_size()) << "barabasi requires a size";
 
         network = Network::gen_barabasi(init.size());
+        break;
     }
     default:
         LOG(ERROR) << "Don't know how to initialize network of type "
