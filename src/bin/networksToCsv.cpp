@@ -28,13 +28,14 @@ std::string barabasi_to_csv(const std::shared_ptr<Network> & network) {
     std::stringstream ss;
     ss << "index_a,index_b,dist\n";
     const auto edges(network->edges());
+    const auto dist_mat(network->dist());
     for (auto it = edges.begin(); it != edges.end(); ++it) {
         const Node & node_a(network->get_node(it->first));
         const Node & node_b(network->get_node(it->second));
 
         ss << node_a.index() << ","
            << node_b.index() << ","
-           << network->dist(node_a.index(), node_b.index()) << "\n";
+           << dist_mat.at(node_a.index()).at(node_b.index()) << "\n";
     }
 
     return ss.str();
