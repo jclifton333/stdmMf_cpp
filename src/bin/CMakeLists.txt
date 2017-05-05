@@ -38,6 +38,7 @@ SET(bin_file_names
   timeBrMinAgent
   gen_tuples
   fit_nn
+  networksToCsv
   sandbox)
 
 foreach(bin_file ${bin_file_names})
