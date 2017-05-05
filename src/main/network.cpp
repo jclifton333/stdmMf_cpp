@@ -123,6 +123,19 @@ std::vector<std::vector<NetworkRun> > Network::split_by_node(
 }
 
 
+std::vector<std::pair<uint32_t, uint32_t> > Network::edges() const {
+    std::vector<std::pair<uint32_t, uint32_t> > edges;
+    for (uint32_t i = 0; i < this->num_nodes; ++i) {
+        for (uint32_t j = (i + 1); j < this->num_nodes; ++j) {
+            if (this->adj(i,j) != 0) {
+                edges.emplace_back(i, j);
+            }
+        }
+    }
+    return edges;
+}
+
+
 
 std::shared_ptr<Network> Network::gen_network(
         const NetworkInit & init) {

@@ -58,6 +58,9 @@ public:
     std::vector<std::vector<NetworkRun> > split_by_node(
             const std::vector<NetworkRun> & runs) const;
 
+    // edge pairs
+    std::vector<std::pair<uint32_t, uint32_t> > edges() const;
+
     // generate a network from NetworkInit data
     static std::shared_ptr<Network> gen_network(const NetworkInit & init);
 
