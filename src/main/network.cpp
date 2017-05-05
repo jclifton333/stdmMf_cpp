@@ -22,6 +22,52 @@ const Node & Network::get_node(const uint32_t index) const {
     return this->node_list.nodes(index);
 }
 
+
+uint32_t Network::calc_dist(const uint32_t & a, const uint32_t & b) {
+    // initialize candidates
+    std::set<uint32_t> history;
+    std::set<uint32_t> previous;
+    std::set<uint32_t> current;
+    current.insert(a);
+
+    uint32_t dist = 0;
+    while (current.count(b) == 0) {
+        // update record keeping
+        history.insert(current.begin(), current.end());
+        previous.clear();
+        previous.insert(current.begin(), current.end());
+
+        // update current
+        current.clear();
+        std::set<uint32_t>::const_iterator it, end;
+        end = previous.end();
+        for (it = previous.begin(); it != end; ++it) {
+            const Node & node = this->get_node(*it);
+            for (auto neigh = node.neigh().begin(); neigh != node.neigh().end();
+                 ++neigh) {
+                if (history.count(*neigh) == 0) {
+                    current.insert(*neigh);
+                }
+            }
+        }
+
+        ++dist;
+    }
+
+    return dist;
+}
+
+
+const std::vector<std::vector<uint32_t> > & Network::dist() const {
+    return this->dist_;
+}
+
+
+uint32_t Network::dist(const uint32_t & a, const uint32_t & b) const {
+    return this->dist_.at(a).at(b);
+}
+
+
 // Retrieve the adjacency matrix
 boost::numeric::ublas::mapped_matrix<int> Network::get_adj() const {
     return this->adj;
@@ -163,6 +209,16 @@ std::shared_ptr<Network> Network::gen_network(
         LOG(FATAL) << "Don't know how to initialize network of type "
                    << init.type() << ".";
         break;
+    }
+
+    // fill distance matrix
+    network->dist_.resize(network->size());
+    for (uint32_t i = 0; i < network->size(); ++i) {
+        std::vector<uint32_t> & dist = network->dist_.at(i);
+        dist.clear();
+        for (uint32_t j = 0; j < network->size(); ++j) {
+            dist.push_back(network->calc_dist(i, j));
+        }
     }
 
     return network;

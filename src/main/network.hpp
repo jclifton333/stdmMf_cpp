@@ -29,6 +29,12 @@ private:
     // row to column
     boost::numeric::ublas::mapped_matrix<uint32_t> adj;
 
+    // distance between nodes
+    std::vector<std::vector<uint32_t> > dist_;
+
+    // calculate distance from a to b
+    uint32_t calc_dist(const uint32_t & a, const uint32_t & b);
+
     void runs_of_len_helper(std::vector<NetworkRun> & runs,
             const std::vector<uint32_t> & curr_run,
             const uint32_t & curr_len, const uint32_t & target_len) const;
@@ -47,6 +53,10 @@ public:
 
     // Retrieve the adjacency matrix
     boost::numeric::ublas::mapped_matrix<int> get_adj() const;
+
+    const std::vector<std::vector<uint32_t> > & dist() const;
+
+    uint32_t dist(const uint32_t & a, const uint32_t & b) const;
 
     // runs of length run_length
     std::vector<NetworkRun> runs_of_len(const uint32_t & run_length) const;
