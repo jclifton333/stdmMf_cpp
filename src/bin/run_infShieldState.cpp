@@ -1218,20 +1218,16 @@ int main(int argc, char *argv[]) {
                 results = run(net, mp.first, mp.second, num_reps, time_points,
                         e_history);
 
-            std::cout << "=====================================" << std::endl
-                      << "results for network " << net->kind()
+            std::cout << "results for network " << net->kind()
                       << " and model pair " << models.at(j).first << std::endl;
 
-            *e_read << "=====================================" << "\n"
-                    << "results for network " << net->kind()
+            *e_read << "results for network " << net->kind()
                     << " and model pair " << models.at(j).first << "\n";
 
-            *e_read_net << "=====================================" << "\n"
-                        << "results for network " << net->kind()
+            *e_read_net << "results for network " << net->kind()
                         << " and model pair " << models.at(j).first << "\n";
 
-            *e_read_all << "=====================================" << "\n"
-                        << "results for network " << net->kind()
+            *e_read_all << "results for network " << net->kind()
                         << " and model pair " << models.at(j).first << "\n";
 
             for (uint32_t k = 0; k < results.size(); ++k) {
@@ -1265,6 +1261,16 @@ int main(int argc, char *argv[]) {
                             << results.at(k).second.at(2) << "]"
                             << "\n";
             }
+
+            // line separators
+            std::cout << "=====================================" << std::endl;
+
+            *e_read << "=====================================" << "\n";
+
+            *e_read_net << "=====================================" << "\n";
+
+            *e_read_all << "=====================================" << "\n";
+
         }
     }
 
