@@ -1006,53 +1006,53 @@ int main(int argc, char *argv[]) {
 
     // setup networks
     std::vector<std::shared_ptr<Network> > networks;
-    { // network 1
+    { // grid network 100
         NetworkInit init;
-        init.set_dim_x(25);
-        init.set_dim_y(20);
+        init.set_dim_x(10);
+        init.set_dim_y(10);
         init.set_wrap(false);
         init.set_type(NetworkInit_NetType_GRID);
         networks.push_back(Network::gen_network(init));
     }
 
-    // { // network 2
-    //     NetworkInit init;
-    //     init.set_size(100);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 100
+        NetworkInit init;
+        init.set_size(100);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // network 3
-    //     NetworkInit init;
-    //     init.set_dim_x(25);
-    //     init.set_dim_y(20);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 500
+        NetworkInit init;
+        init.set_dim_x(20);
+        init.set_dim_y(25);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // network 4
-    //     NetworkInit init;
-    //     init.set_size(500);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 500
+        NetworkInit init;
+        init.set_size(500);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // network 5
-    //     NetworkInit init;
-    //     init.set_dim_x(25);
-    //     init.set_dim_y(40);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 1000
+        NetworkInit init;
+        init.set_dim_x(40);
+        init.set_dim_y(25);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // network 6
-    //     NetworkInit init;
-    //     init.set_size(1000);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 1000
+        NetworkInit init;
+        init.set_size(1000);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
     // double vector since model depends on network
     typedef std::pair<std::shared_ptr<Model<InfShieldState> >,
