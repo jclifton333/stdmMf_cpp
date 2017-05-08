@@ -30,6 +30,8 @@
 
 #include <fstream>
 
+#include <chrono>
+
 using namespace stdmMf;
 
 using njm::tools::mean_and_var;
@@ -998,8 +1000,8 @@ run(const std::shared_ptr<const Network> & net,
 
 
 int main(int argc, char *argv[]) {
-    gflags::ParseCommandLineFlags(&argc, &argv, true);
-    google::SetCommandLineOption("GLOG_minloglevel", "2");
+    // gflags::ParseCommandLineFlags(&argc, &argv, true);
+    // google::SetCommandLineOption("GLOG_minloglevel", "2");
     google::InitGoogleLogging(argv[0]);
 
     // setup networks
