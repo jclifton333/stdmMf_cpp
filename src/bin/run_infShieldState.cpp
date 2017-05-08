@@ -1188,7 +1188,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    const uint32_t num_reps = 48;
+    const uint32_t num_reps = 50;
     const uint32_t time_points = 25;
 
     njm::data::TrapperKeeper tk(argv[0],
