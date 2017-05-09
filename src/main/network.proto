@@ -27,6 +27,7 @@ message NetworkInit {
   enum NetType {
     GRID = 0;
     BARABASI = 1;
+    RANDOM = 2;
   }
 
   optional NetType type = 1;

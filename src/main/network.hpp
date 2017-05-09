@@ -61,6 +61,7 @@ public:
 
     // split runs by node
     std::vector<std::vector<NetworkRun> > split_by_node(
+
             const std::vector<NetworkRun> & runs) const;
 
     // edge pairs
@@ -72,6 +73,9 @@ public:
     // generate a grid type network
     static std::shared_ptr<Network> gen_grid(
             const uint32_t dim_x, const uint32_t dim_y, const bool wrap);
+    // generate a grid type network
+    static std::shared_ptr<Network> gen_random(const uint32_t size);
+
 
     // generate a barabasi type network
     static std::shared_ptr<Network> gen_barabasi(const uint32_t size);
