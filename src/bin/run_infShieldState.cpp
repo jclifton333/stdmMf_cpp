@@ -1038,21 +1038,21 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
-    // { // grid network 1000
-    //     NetworkInit init;
-    //     init.set_dim_x(40);
-    //     init.set_dim_y(25);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 1000
+        NetworkInit init;
+        init.set_dim_x(40);
+        init.set_dim_y(25);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // barabasi 1000
-    //     NetworkInit init;
-    //     init.set_size(1000);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 1000
+        NetworkInit init;
+        init.set_size(1000);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
     // double vector since model depends on network
     typedef std::pair<std::shared_ptr<Model<InfShieldState> >,
