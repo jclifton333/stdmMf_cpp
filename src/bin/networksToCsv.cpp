@@ -6,43 +6,6 @@
 using namespace stdmMf;
 
 
-std::string grid_to_csv(const std::shared_ptr<Network> & network) {
-    std::stringstream ss;
-    ss << "index_a,index_b,x_a,y_a,x_b,y_b\n";
-    const auto edges(network->edges());
-    for (auto it = edges.begin(); it != edges.end(); ++it) {
-        const Node & node_a(network->get_node(it->first));
-        const Node & node_b(network->get_node(it->second));
-
-        ss << node_a.index() << ","
-           << node_b.index() << ","
-           << node_a.x() << ","
-           << node_a.y() << ","
-           << node_b.x() << ","
-           << node_b.y() << "\n";
-    }
-    return ss.str();
-}
-
-std::string barabasi_to_csv(const std::shared_ptr<Network> & network) {
-    std::stringstream ss;
-    ss << "index_a,index_b,dist\n";
-    const auto dist_mat(network->dist());
-    for (uint32_t i = 0; i < network->size(); ++i) {
-        for (uint32_t j = 0; j < network->size(); ++j) {
-            const Node & node_a(network->get_node(i));
-            const Node & node_b(network->get_node(j));
-
-            ss << node_a.index() << ","
-               << node_b.index() << ","
-               << dist_mat.at(node_a.index()).at(node_b.index()) << "\n";
-        }
-    }
-
-    return ss.str();
-}
-
-
 int main(int argc, char *argv[])
 {
 
@@ -102,11 +65,9 @@ int main(int argc, char *argv[])
     // write networks to csv
     for (auto it = inits.begin(); it != inits.end(); ++it) {
         const auto network(Network::gen_network(*it));
-        if (it->type() == NetworkInit_NetType_GRID) {
-            *tk.entry(network->kind() + ".csv") << grid_to_csv(network);
-        } else if(it->type() == NetworkInit_NetType_BARABASI) {
-            *tk.entry(network->kind() + ".csv") << barabasi_to_csv(network);
-        }
+        std::string str;
+        network->node_list().SerializeToString(&str);
+        *tk.entry(network->kind() + ".pb") << str;
         std::cout << "saved " << network->kind() << std::endl;
     }
 
