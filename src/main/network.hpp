@@ -21,13 +21,13 @@ private:
     std::string kind_;
 
     // number of nodes
-    uint32_t num_nodes;
+    uint32_t num_nodes_;
     // list of nodes
-    NodeList node_list;
+    NodeList node_list_;
 
     // adjacency matrix
     // row to column
-    boost::numeric::ublas::mapped_matrix<uint32_t> adj;
+    boost::numeric::ublas::mapped_matrix<uint32_t> adj_;
 
     // calculate distance from a to b
     uint32_t calc_dist(const uint32_t & a, const uint32_t & b) const;

@@ -17,11 +17,11 @@ std::string Network::kind() const {
 }
 
 uint32_t Network::size() const {
-    return this->num_nodes;
+    return this->num_nodes_;
 }
 
 const Node & Network::get_node(const uint32_t index) const {
-    return this->node_list.nodes(index);
+    return this->node_list_.nodes(index);
 }
 
 
@@ -78,7 +78,7 @@ std::vector<std::vector<uint32_t> > Network::dist() const {
 
 // Retrieve the adjacency matrix
 boost::numeric::ublas::mapped_matrix<int> Network::get_adj() const {
-    return this->adj;
+    return this->adj_;
 }
 
 
@@ -179,9 +179,9 @@ std::vector<std::vector<NetworkRun> > Network::split_by_node(
 
 std::vector<std::pair<uint32_t, uint32_t> > Network::edges() const {
     std::vector<std::pair<uint32_t, uint32_t> > edges;
-    for (uint32_t i = 0; i < this->num_nodes; ++i) {
-        for (uint32_t j = (i + 1); j < this->num_nodes; ++j) {
-            if (this->adj(i,j) != 0) {
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+        for (uint32_t j = (i + 1); j < this->num_nodes_; ++j) {
+            if (this->adj_(i,j) != 0) {
                 edges.emplace_back(i, j);
             }
         }
@@ -230,13 +230,13 @@ std::shared_ptr<Network> Network::gen_grid(
     // iterate through grid column first
     network->kind_ = "grid_" + std::to_string(dim_x) + "x"
         + std::to_string(dim_y);
-    network->num_nodes = dim_x * dim_y;
-    network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
-            network->num_nodes,network->num_nodes);
+    network->num_nodes_ = dim_x * dim_y;
+    network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
+            network->num_nodes_,network->num_nodes_);
 
     for (uint32_t x = 0, i = 0; x < dim_x; ++x) {
         for (uint32_t y = 0; y < dim_y; ++y, ++i) {
-            Node * n = network->node_list.add_nodes();
+            Node * n = network->node_list_.add_nodes();
             n->set_index(i);
 
             if (dim_x > 1) {
@@ -255,44 +255,44 @@ std::shared_ptr<Network> Network::gen_grid(
             if (y > 0) {
                 const uint32_t neigh = i-1;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             } else if(wrap) {
                 const uint32_t neigh = i + dim_y - 1;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             }
 
             // down
             if (y < (dim_y - 1)) {
                 const uint32_t neigh = i + 1;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             } else if (wrap) {
                 const uint32_t neigh = i - dim_y + 1;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             }
 
             // left
             if (x > 0) {
                 const uint32_t neigh = i - dim_y;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             } else if (wrap) {
-                const uint32_t neigh = network->num_nodes - dim_y + y;
+                const uint32_t neigh = network->num_nodes_ - dim_y + y;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             }
 
             // right
             if (x < (dim_x - 1)) {
                 const uint32_t neigh = i + dim_y;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             } else if (wrap) {
                 const uint32_t neigh = y;
                 n->add_neigh(neigh);
-                network->adj(i,neigh) = 1;
+                network->adj_(i,neigh) = 1;
             }
         }
 
@@ -309,22 +309,22 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
 
     // init adjacency matrix
     network->kind_ = "barabasi_" + std::to_string(size);
-    network->num_nodes = size;
-    network->adj = boost::numeric::ublas::mapped_matrix<uint32_t>(
-            network->num_nodes, network->num_nodes);
+    network->num_nodes_ = size;
+    network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
+            network->num_nodes_, network->num_nodes_);
 
     // add the first two nodes
     {
-        Node * const n0 = network->node_list.add_nodes();
-        Node * const n1 = network->node_list.add_nodes();
+        Node * const n0 = network->node_list_.add_nodes();
+        Node * const n1 = network->node_list_.add_nodes();
         n0->set_index(0);
         n1->set_index(1);
 
         n0->add_neigh(1);
         n1->add_neigh(0);
 
-        network->adj(0,1) = 1;
-        network->adj(1,0) = 1;
+        network->adj_(0,1) = 1;
+        network->adj_(1,0) = 1;
     }
 
     njm::tools::Rng rng;
@@ -332,7 +332,7 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
     std::vector<uint32_t> edge_deg(2, 1);
 
     for (uint32_t i = 2; i < size; ++i) {
-        Node * const n = network->node_list.add_nodes();
+        Node * const n = network->node_list_.add_nodes();
         n->set_index(i);
 
         const uint32_t total_deg = std::accumulate(edge_deg.begin(),
@@ -344,12 +344,12 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
         while (draw > current_tot) {
             current_tot += edge_deg.at(++connect_to);
         }
-        network->adj(i, connect_to) = 1;
-        network->adj(connect_to, i) = 1;
+        network->adj_(i, connect_to) = 1;
+        network->adj_(connect_to, i) = 1;
 
         n->add_neigh(connect_to);
 
-        network->node_list.mutable_nodes(connect_to)->add_neigh(i);
+        network->node_list_.mutable_nodes(connect_to)->add_neigh(i);
 
         ++edge_deg.at(connect_to);
         edge_deg.push_back(1);
@@ -369,7 +369,7 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
     njm::tools::Rng rng;
 
     for (uint32_t i = 0; i < size; ++i) {
-        Node * const n = network->node_list.add_nodes();
+        Node * const n = network->node_list_.add_nodes();
         n->set_index(i);
 
         n->set_x(rng.runif_01());
@@ -380,7 +380,7 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
     std::map<uint32_t, uint32_t> subnet_by_node;
 
     for (uint32_t i = 0; i < size; ++i) {
-        Node * const node_i(network->node_list.mutable_nodes(i));
+        Node * const node_i(network->node_list_.mutable_nodes(i));
         std::priority_queue<std::pair<double, uint32_t> > neighs;
         for (uint32_t j = 0; j < size; ++j) {
             if (i == j)
@@ -399,12 +399,12 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
             const uint32_t new_neigh(neighs.top().second);
 
             // adjacency matrix
-            network->adj(i, new_neigh) = 1;
-            network->adj(new_neigh, i) = 1;
+            network->adj_(i, new_neigh) = 1;
+            network->adj_(new_neigh, i) = 1;
 
             // neighbor list
             node_i->add_neigh(new_neigh);
-            network->node_list.mutable_nodes(new_neigh)->add_neigh(i);
+            network->node_list_.mutable_nodes(new_neigh)->add_neigh(i);
 
             if (new_neigh < i) {
                 const uint32_t new_neigh_subnet(subnet_by_node.at(new_neigh));
@@ -491,12 +491,12 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
         }
 
         // set adjancey
-        network->adj(curr_index, next_index) = 1;
-        network->adj(next_index, curr_index) = 1;
+        network->adj_(curr_index, next_index) = 1;
+        network->adj_(next_index, curr_index) = 1;
 
         // add neighbors
-        network->node_list.mutable_nodes(curr_index)->add_neigh(next_index);
-        network->node_list.mutable_nodes(next_index)->add_neigh(curr_index);
+        network->node_list_.mutable_nodes(curr_index)->add_neigh(next_index);
+        network->node_list_.mutable_nodes(next_index)->add_neigh(curr_index);
 
         // combine subnets
         curr.insert(subnets.at(subnet_index).begin(),
