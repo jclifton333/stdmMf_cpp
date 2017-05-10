@@ -62,6 +62,27 @@ int main(int argc, char *argv[])
         inits.push_back(init);
     }
 
+    {// random 100
+        NetworkInit init;
+        init.set_type(NetworkInit_NetType_RANDOM);
+        init.set_size(100);
+        inits.push_back(init);
+    }
+
+    {// random 500
+        NetworkInit init;
+        init.set_type(NetworkInit_NetType_RANDOM);
+        init.set_size(500);
+        inits.push_back(init);
+    }
+
+    {// random 1000
+        NetworkInit init;
+        init.set_type(NetworkInit_NetType_RANDOM);
+        init.set_size(1000);
+        inits.push_back(init);
+    }
+
     // write networks to csv
     for (auto it = inits.begin(); it != inits.end(); ++it) {
         const auto network(Network::gen_network(*it));
