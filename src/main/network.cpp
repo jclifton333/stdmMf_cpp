@@ -213,6 +213,12 @@ std::shared_ptr<Network> Network::gen_network(
         network = Network::gen_barabasi(init.size());
         break;
     }
+    case NetworkInit_NetType_RANDOM: {
+        CHECK(init.has_size()) << "random requires a size";
+
+        network = Network::gen_random(init.size());
+        break;
+    }
     default:
         LOG(FATAL) << "Don't know how to initialize network of type "
                    << init.type() << ".";
