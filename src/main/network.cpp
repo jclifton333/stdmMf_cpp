@@ -368,6 +368,9 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
 std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
     std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
 
+    network->kind_ = "random_" + std::to_string(size);
+    network->num_nodes_ = size;
+
     const uint32_t num_neigh(3);
 
     CHECK_GE(size, std::max(2u, num_neigh));
