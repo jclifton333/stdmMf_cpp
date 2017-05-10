@@ -9,7 +9,7 @@ find_package(Armadillo REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
   network.proto sim_data.proto)
-protobuf_generate_py(PROTO_PY network.proto sim_data.proto)
+protobuf_generate_python(PROTO_PY network.proto sim_data.proto)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(njm_cpp)
