@@ -38,7 +38,7 @@ SET(bin_file_names
   timeBrMinAgent
   gen_tuples
   # fit_nn
-  networksToCsv
+  networksToFile
   # sandbox
   )
 
