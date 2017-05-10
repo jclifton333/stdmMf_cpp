@@ -509,4 +509,9 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
 }
 
 
+const NodeList & Network::node_list() const {
+    return this->node_list_;
+}
+
+
 } // namespace stdmMf
