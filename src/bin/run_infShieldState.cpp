@@ -1022,6 +1022,13 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
+    { // random 100
+        NetworkInit init;
+        init.set_size(100);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
+
     { // grid network 500
         NetworkInit init;
         init.set_dim_x(20);
@@ -1038,6 +1045,13 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
+    { // random 500
+        NetworkInit init;
+        init.set_size(500);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
+
     { // grid network 1000
         NetworkInit init;
         init.set_dim_x(40);
@@ -1051,6 +1065,13 @@ int main(int argc, char *argv[]) {
         NetworkInit init;
         init.set_size(1000);
         init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
+
+    { // random 1000
+        NetworkInit init;
+        init.set_size(1000);
+        init.set_type(NetworkInit_NetType_RANDOM);
         networks.push_back(Network::gen_network(init));
     }
 
