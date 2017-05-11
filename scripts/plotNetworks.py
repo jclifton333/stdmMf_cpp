@@ -31,17 +31,19 @@ def form_adjacency(node_list):
     else:
         return adj, coords
 
-def plot_network(node_list):
+def plot_network(node_list, save_name):
     adj, layout = form_adjacency(node_list)
 
     graph = igraph.Graph.Adjacency(adj).as_undirected()
 
     if layout is None:
         igraph.plot(graph, layout = "fr",
-                    vertex_size = 4, vertex_color = "#000000")
+                    vertex_size = 4, vertex_color = "#000000",
+                    target = save_name)
     else:
         igraph.plot(graph, layout = layout,
-                    vertex_size = 4, vertex_color = "#000000")
+                    vertex_size = 4, vertex_color = "#000000",
+                    target = save_name)
 
 
 def main(data_dir):
@@ -59,7 +61,11 @@ def main(data_dir):
         node_list = network_pb2.NodeList()
         with open(os.path.join(data_dir, net_file), "r") as f:
             node_list.ParseFromString(f.read())
-        plot_network(node_list)
+
+        save_name = os.path.join(data_dir,
+                                 os.path.splitext(net_file)[0] + ".png")
+        plot_network(node_list, save_name)
+        print "saved %s" % os.path.basename(save_name)
 
 
 if __name__ == "__main__":
