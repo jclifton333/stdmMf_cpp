@@ -406,6 +406,7 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
         bool linked(false);
         for (uint32_t j = 0; j < num_neigh; ++j) {
             const uint32_t new_neigh(neighs.top().second);
+            neighs.pop();
 
             // adjacency matrix
             network->adj_(i, new_neigh) = 1;
