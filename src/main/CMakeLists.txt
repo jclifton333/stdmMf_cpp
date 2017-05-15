@@ -16,7 +16,7 @@ include_directories(njm_cpp)
 add_library(stdmMf network.cpp system.cpp states.cpp
 
   ## model
-  model.cpp
+  model.cpp mixtureModel.cpp
 
   ## inf state models
   infStateModel.cpp infStateNoSoModel.cpp infStateOrSoModel.cpp
