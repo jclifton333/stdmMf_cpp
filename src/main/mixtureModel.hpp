@@ -2,6 +2,7 @@
 #define MIXTURE_MODEL_HPP
 
 #include "model.hpp"
+#include <njm_cpp/tools/random.hpp>
 
 namespace stdmMf {
 
