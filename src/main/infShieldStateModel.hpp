@@ -3,7 +3,6 @@
 
 #include "states.hpp"
 #include "model.hpp"
-#include "mixtureModel.hpp"
 
 namespace stdmMf {
 
@@ -105,8 +104,6 @@ public:
 
     virtual InfShieldState turn_clock(const InfShieldState & curr_state,
             const boost::dynamic_bitset<> & trt_bits) const override;
-
-    friend MixtureModel<InfShieldState, InfShieldStateModel>;
 };
 
 
