@@ -157,6 +157,7 @@ void MixtureModel<State, Mod>::rng(
 }
 
 
+template class MixtureModel<InfState, InfStateModel>;
 template class MixtureModel<InfShieldState, InfShieldStateModel>;
 
 
