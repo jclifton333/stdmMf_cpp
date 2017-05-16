@@ -152,7 +152,7 @@ InfShieldState MixtureModel<InfShieldState, InfShieldStateModel>::turn_clock(
 template <typename State, typename Mod>
 void MixtureModel<State, Mod>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
-    this->RngClass::rng(rng);
+    this->njm::tools::RngClass::rng(rng);
     std::for_each(this->models_.begin(), this->models_.end(),
             [&rng] (const std::shared_ptr<Mod > & mod_) {
                 mod_->rng(rng);
