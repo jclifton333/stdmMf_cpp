@@ -64,6 +64,21 @@ void MixtureModel<State, Mod>::par(const std::vector<double> & par) {
 
 
 template <typename State, typename Mod>
+std::vector<double> MixtureModel<State, Mod>::probs(
+        const State & curr_state,
+        const boost::dynamic_bitset<> & trt_bits) const {
+    std::vector<double> weighted_probs(this->network_->size(), 0.0);
+    for (uint32_t i = 0; i < this->num_models_; ++i) {
+        std::vector<double> probs_i(
+                this->models_.at(i)->probs(curr_state, trt_bits));
+        njm::linalg::mult_b_to_a(probs_i, this->weights_.at(i));
+        njm::linalg::add_b_to_a(weighted_probs, probs_i);
+    }
+    return weighted_probs;
+}
+
+
+template <typename State, typename Mod>
 double MixtureModel<State, Mod>::ll(
         const std::vector<Transition<State> > & history) const {
     LOG(FATAL) << "NOT IMPLEMENTED";
@@ -91,13 +106,7 @@ template <>
 InfState MixtureModel<InfState, InfStateModel>::turn_clock(
         const InfState & curr_state,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::vector<double> probs(this->network_->size(), 0.0);
-    for (uint32_t i = 0; i < this->num_models_; ++i) {
-        std::vector<double> probs_i(
-                this->models_.at(i)->probs(curr_state, trt_bits));
-        njm::linalg::mult_b_to_a(probs_i, this->weights_.at(i));
-        njm::linalg::add_b_to_a(probs, probs_i);
-    }
+    const std::vector<double> probs(this->probs(curr_state, trt_bits));
 
     InfState next_state(curr_state);
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
@@ -117,13 +126,7 @@ template <>
 InfShieldState MixtureModel<InfShieldState, InfShieldStateModel>::turn_clock(
         const InfShieldState & curr_state,
         const boost::dynamic_bitset<> & trt_bits) const {
-    std::vector<double> probs(this->network_->size(), 0.0);
-    for (uint32_t i = 0; i < this->num_models_; ++i) {
-        std::vector<double> probs_i(
-                this->models_.at(i)->probs(curr_state, trt_bits));
-        njm::linalg::mult_b_to_a(probs_i, this->weights_.at(i));
-        njm::linalg::add_b_to_a(probs, probs_i);
-    }
+    const std::vector<double> probs(this->probs(curr_state, trt_bits));
 
     InfShieldState next_state(curr_state);
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
