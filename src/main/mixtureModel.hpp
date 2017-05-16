@@ -6,16 +6,16 @@
 namespace stdmMf {
 
 
-template <typename State>
+template <typename State, typename Mod>
 class MixtureModel : public Model<State> {
 protected:
-    const std::vector<std::shared_ptr<Model<State> > > models_;
+    const std::vector<std::shared_ptr<Mod> > models_;
+    const uint32_t num_models_;
 
     const std::vector<double> weights_;
 
-
 public:
-    MixtureModel(const std::vector<std::shared_ptr<Model<State> > > & models,
+    MixtureModel(const std::vector<std::shared_ptr<Mod> > & models,
             const std::vector<double> & weights,
             const std::shared_ptr<const Network> & network);
 
