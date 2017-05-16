@@ -85,6 +85,8 @@ public:
 
     virtual void par(const std::vector<double> & par) override = 0;
 
+    virtual double shield_coef() const = 0;
+
     std::vector<double> probs(
             const InfShieldState & state,
             const boost::dynamic_bitset<> & trt_status) const override;

@@ -95,6 +95,8 @@ public:
     std::vector<double> par() const override;
 
     void par(const std::vector<double> & par) override;
+
+    double shield_coef() const override {return this->shield_coef_;};
 };
 
 
