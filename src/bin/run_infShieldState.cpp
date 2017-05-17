@@ -1030,51 +1030,51 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
-    // { // grid network 500
-    //     NetworkInit init;
-    //     init.set_dim_x(20);
-    //     init.set_dim_y(25);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 500
+        NetworkInit init;
+        init.set_dim_x(20);
+        init.set_dim_y(25);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // barabasi 500
-    //     NetworkInit init;
-    //     init.set_size(500);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 500
+        NetworkInit init;
+        init.set_size(500);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // random 500
-    //     NetworkInit init;
-    //     init.set_size(500);
-    //     init.set_type(NetworkInit_NetType_RANDOM);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // random 500
+        NetworkInit init;
+        init.set_size(500);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // grid network 1000
-    //     NetworkInit init;
-    //     init.set_dim_x(40);
-    //     init.set_dim_y(25);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 1000
+        NetworkInit init;
+        init.set_dim_x(40);
+        init.set_dim_y(25);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // barabasi 1000
-    //     NetworkInit init;
-    //     init.set_size(1000);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 1000
+        NetworkInit init;
+        init.set_size(1000);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // random 1000
-    //     NetworkInit init;
-    //     init.set_size(1000);
-    //     init.set_type(NetworkInit_NetType_RANDOM);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // random 1000
+        NetworkInit init;
+        init.set_size(1000);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
 
     // double vector since model depends on network
     typedef std::pair<std::shared_ptr<Model<InfShieldState> >,
@@ -1234,7 +1234,7 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Model_Mixture-00-100_PosImNoSo",
+                    std::vector<ModelPair> >("Model_Mixture-00-100_NoImNoSo",
                             models_add));
         }
 
@@ -1263,7 +1263,7 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Model_Mixture-25-75_PosImNoSo",
+                    std::vector<ModelPair> >("Model_Mixture-25-75_NoImNoSo",
                             models_add));
         }
 
@@ -1292,7 +1292,7 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Model_Mixture-50-50_PosImNoSo",
+                    std::vector<ModelPair> >("Model_Mixture-50-50_NoImNoSo",
                             models_add));
         }
 
@@ -1321,7 +1321,7 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Model_Mixture-75-25_PosImNoSo",
+                    std::vector<ModelPair> >("Model_Mixture-75-25_NoImNoSo",
                             models_add));
         }
 
@@ -1350,7 +1350,7 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Model_Mixture-100-00_PosImNoSo",
+                    std::vector<ModelPair> >("Model_Mixture-100-00_NoImNoSo",
                             models_add));
         }
     }
