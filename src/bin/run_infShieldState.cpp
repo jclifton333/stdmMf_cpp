@@ -1438,6 +1438,9 @@ int main(int argc, char *argv[]) {
 
             *e_read_all << "=====================================" << "\n";
 
+            // flush trapper keeper
+            tk.flush();
+
         }
     }
 
