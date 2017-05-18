@@ -74,9 +74,61 @@ template <typename State>
 void FiniteQfnFeatures<State>::update(const State & curr_state,
         const std::vector<StateAndTrt<State> > & history,
         const uint32_t & num_trt) {
+    const std::vector<Transition<State> > all_history(
+            Transition<State>::from_sequence(history, curr_state));
     for (uint32_t m = 0; m < this->num_models_; ++m) {
-        this->models_.at(m)->est_par(history, curr_state);
+        // fit model
+        this->models_.at(m)->est_par(all_history);
+
+        // thompson sampling
+        // get information matrix and take inverse sqrt
+        std::vector<double> hess = this->models_.at(m)->ll_hess(all_history);
+        njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
+
+        const arma::mat hess_mat(hess.data(), this->models_.at(m)->par_size(),
+                this->models_.at(m)->par_size());
+        arma::mat eigvec;
+        arma::vec eigval;
+        arma::eig_sym(eigval, eigvec, hess_mat);
+        for (uint32_t i = 0; i < this->models_.at(m)->par_size(); ++i) {
+            if (eigval(i) > 0.1)
+                eigval(i) = std::sqrt(1.0 / eigval(i));
+            else
+                eigval(i) = 0.0;
+        }
+        // threshold eigen vectors
+        for (auto it = eigvec.begin(); it != eigvec.end(); ++it) {
+            if (std::abs(*it) < 1e-3) {
+                *it = 0.0;
+            }
+        }
+        arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
+        // threshold sqrt matrix
+        for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
+            if (*it < 1e-3) {
+                *it = 0.0;
+            }
+        }
+
+        // sample new parameters
+        arma::vec std_norm(this->models_.at(m)->par_size());
+        for (uint32_t i = 0; i < this->models_.at(m)->par_size(); ++i) {
+            std_norm(i) = this->rng_->rnorm_01();
+        }
+        const std::vector<double> par_samp(
+                njm::linalg::add_a_and_b(this->models_.at(m)->par(),
+                        arma::conv_to<std::vector<double> >::from(
+                                var_sqrt * std_norm)));
+        // check for finite values
+        std::for_each(par_samp.begin(), par_samp.end(),
+                [] (const double & x_) {
+                    LOG_IF(FATAL, !std::isfinite(x_));
+                });
+
+        // set new parameters
+        this->models_.at(m)->par(par_samp);
     }
+
     const std::vector<std::vector<Transition<State> > > sim_data(
             this->generate_data(100, 100));
 
