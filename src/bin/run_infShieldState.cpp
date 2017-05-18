@@ -12,6 +12,8 @@
 #include "vfnBrStartSimPerturbAgent.hpp"
 #include "brMinIterSimPerturbAgent.hpp"
 
+#include "brMinWtdSimPerturbAgent.hpp"
+
 #include "networkRunSymFeatures.hpp"
 #include "finiteQfnFeatures.hpp"
 
@@ -733,7 +735,7 @@ run(const std::shared_ptr<const Network> & net,
             std::shared_ptr<Model<InfShieldState> > modPosIm(
                     new InfShieldStatePosImNoSoModel(net));
 
-            BrMinSimPerturbAgent<InfShieldState> a(net,
+            BrMinWtdSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new FiniteQfnFeatures<InfShieldState>(
                                     net, {modNoIm, modPosIm},
@@ -743,7 +745,7 @@ run(const std::shared_ptr<const Network> & net,
                                                     net, 2)), 1)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0);
+                    true, true, false, 0, 0, 0);
             a.seed(i);
 
             s.start();
