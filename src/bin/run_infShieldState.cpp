@@ -745,7 +745,7 @@ run(const std::shared_ptr<const Network> & net,
                                                     net, 2)), 1)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0);
+                    true, true, false, 100, 10, 0);
             a.seed(i);
 
             s.start();
