@@ -730,15 +730,10 @@ run(const std::shared_ptr<const Network> & net,
             System<InfShieldState> s(net, mod_system->clone());
             s.seed(i);
 
-            std::shared_ptr<Model<InfShieldState> > modNoIm(
-                    new InfShieldStateNoImNoSoModel(net));
-            std::shared_ptr<Model<InfShieldState> > modPosIm(
-                    new InfShieldStatePosImNoSoModel(net));
-
             BrMinWtdSimPerturbAgent<InfShieldState> a(net,
                     std::shared_ptr<Features<InfShieldState> >(
                             new FiniteQfnFeatures<InfShieldState>(
-                                    net, {modNoIm, modPosIm},
+                                    net, {mod_agents->clone()},
                                     std::shared_ptr<Features<InfShieldState> >(
                                             new NetworkRunSymFeatures<
                                             InfShieldState>(
