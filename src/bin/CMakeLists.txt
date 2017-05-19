@@ -39,7 +39,7 @@ SET(bin_file_names
   gen_tuples
   # fit_nn
   networksToFile
-  # sandbox
+  sandbox
   )
 
 foreach(bin_file ${bin_file_names})

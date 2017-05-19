@@ -10,6 +10,9 @@
 #include "vfnBrAdaptSimPerturbAgent.hpp"
 #include "vfnBrStartSimPerturbAgent.hpp"
 
+#include "brMinWtdSimPerturbAgent.hpp"
+
+
 #include "networkRunSymFeatures.hpp"
 #include "finiteQfnFeatures.hpp"
 
@@ -34,9 +37,12 @@
 using namespace stdmMf;
 
 int main(int argc, char *argv[]) {
-    gflags::ParseCommandLineFlags(&argc, &argv, true);
-    google::SetCommandLineOption("GLOG_minloglevel", "2");
-    google::InitGoogleLogging(argv[0]);
+    NetworkInit init;
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
+    auto network(Network::gen_network(init));
 
     // latent infections
     const double prob_inf_latent = 0.01;
@@ -76,115 +82,37 @@ int main(int argc, char *argv[]) {
          trt_pre_inf,
          shield_coef};
 
-    std::cout << std::right << std::setw(16)
-              << "network size"
-              << std::right << std::setw(16)
-              << "nn fitting"
-              << std::right << std::setw(16)
-              << "nn argmax"
-              << std::right << std::setw(16)
-              << "runs argmax"
-              << std::endl;
+    const uint32_t time_points(25);
 
-    const std::vector<uint32_t> net_sizes({2, 3, 4, 5, 6, 7, 8, 9, 10});
-    for (uint32_t i = 0; i < net_sizes.size(); ++i) {
-        NetworkInit init;
-        init.set_dim_x(net_sizes.at(i));
-        init.set_dim_y(net_sizes.at(i));
-        init.set_wrap(false);
-        init.set_type(NetworkInit_NetType_GRID);
-        const auto net(Network::gen_network(init));
-
-        const auto mod_system(std::shared_ptr<Model<InfShieldState> >(
-                        new InfShieldStateNoImNoSoModel(net)));
-        mod_system->par(par);
-
-        const auto mod_agents(std::shared_ptr<Model<InfShieldState> >(
-                        new InfShieldStateNoImNoSoModel(net)));
-
-        System<InfShieldState> s(net->clone(), mod_system->clone());
-        RandomAgent<InfShieldState> ra(net->clone());
-        s.start();
-        for (uint32_t j = 0; j < 20; ++j) {
-            const auto trt_bits(ra.apply_trt(s.state(), s.history()));
-
-            s.trt_bits(trt_bits);
-
-            s.turn_clock();
-        }
+    auto mod_system(std::shared_ptr<Model<InfShieldState> >(
+                    new InfShieldStateNoImNoSoModel(
+                            network)));
+    auto mod_agents(std::shared_ptr<Model<InfShieldState> >(
+                    new InfShieldStateNoImNoSoModel(
+                            network)));
+    mod_system->par(par);
+    mod_agents->par(par);
 
 
-        // const auto finiteQfnFeat(
-        //         std::make_shared<FiniteQfnNnFeatures<InfShieldState> >(
-        //                 net->clone(), mod_agents->clone(), 3));
+    System<InfShieldState> s(network, mod_system->clone());
+    s.seed(0);
 
-        const auto networkRunFeat(
-                std::make_shared<NetworkRunSymFeatures<InfShieldState> >(
-                        net->clone(), 3));
+    BrMinWtdSimPerturbAgent<InfShieldState> a(network,
+            std::shared_ptr<Features<InfShieldState> >(
+                    new FiniteQfnFeatures<InfShieldState>(
+                            network, {mod_agents->clone()},
+                            std::shared_ptr<Features<InfShieldState> >(
+                                    new NetworkRunSymFeatures<
+                                    InfShieldState>(
+                                            network, 2)), 1)),
+            mod_agents->clone(),
+            0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+            true, true, false, 100, 10, 0);
+    a.seed(0);
 
-        const auto finiteQfnFeat(
-                std::shared_ptr<FiniteQfnFeatures<InfShieldState> >(
-                        new FiniteQfnFeatures<InfShieldState>(
-                                net->clone(), {mod_agents->clone()},
-                                networkRunFeat->clone(), 3)));
+    s.start();
 
-        SweepAgent<InfShieldState> saFiniteQfn(net, finiteQfnFeat,
-                std::vector<double>(finiteQfnFeat->num_features(), 1.0),
-                njm::linalg::dot_a_and_b, 2, true);
-
-        SweepAgent<InfShieldState> saNetworkRun(net, networkRunFeat,
-                std::vector<double>(networkRunFeat->num_features(), 1.0),
-                njm::linalg::dot_a_and_b, 2, true);
-
-        std::cout << std::setw(16) << net_sizes.at(i) * net_sizes.at(i);
-
-        { // time the update for the neural network
-            const auto tick(std::chrono::high_resolution_clock::now());
-            finiteQfnFeat->update(s.state(), s.history(),
-                    saFiniteQfn.num_trt());
-
-            const auto tock(std::chrono::high_resolution_clock::now());
-
-            const auto elapsed(std::chrono::duration_cast<
-                    std::chrono::duration<double> >(tock - tick));
-
-            std::cout << std::fixed << std::setw(16) << std::setprecision(6)
-                      << elapsed.count();
-
-        }
-
-        { // time the arg max of the neural network features using sweep
-            const auto tick(std::chrono::high_resolution_clock::now());
-            for (uint32_t r = 0; r < 100; r++) {
-                saFiniteQfn.apply_trt(s.state());
-            }
-            const auto tock(std::chrono::high_resolution_clock::now());
-
-            const auto elapsed(std::chrono::duration_cast<
-                    std::chrono::duration<double> >(tock - tick));
-
-            std::cout << std::fixed << std::setw(16) << std::setprecision(6)
-                      << elapsed.count() / 100.0;
-        }
-
-        { // time the arg max of the network run features using sweep
-            networkRunFeat->update(s.state(), s.history(),
-                    saNetworkRun.num_trt());
-            const auto tick(std::chrono::high_resolution_clock::now());
-            for (uint32_t r = 0; r < 100; ++r) {
-                saNetworkRun.apply_trt(s.state());
-            }
-            const auto tock(std::chrono::high_resolution_clock::now());
-
-            const auto elapsed(std::chrono::duration_cast<
-                    std::chrono::duration<double> >(tock - tick));
-
-            std::cout << std::fixed << std::setw(16) << std::setprecision(6)
-                      << elapsed.count() / 100.0 << std::endl;
-        }
-
-
-    }
+    runner(&s, &a, time_points, 1.0);
 
     return 0;
 }
