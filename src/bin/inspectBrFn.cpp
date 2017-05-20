@@ -133,7 +133,7 @@ void run(const uint32_t & level_num, const uint32_t & rep,
 
     BrMinSimPerturbAgent<InfShieldState> brAgent(network->clone(),
             features->clone(), model->clone(), 0.10, 0.20, 1.41, 1.0, 0.85,
-            0.01290, do_sweep, gs_step, sq_total_br, 0, obs_per_iter,
+            0.01290, do_sweep, gs_step, sq_total_br, 0, 0, obs_per_iter,
             max_same_trt, steps_between_trt_test);
     brAgent.rng(rng);
     brAgent.record(true);
