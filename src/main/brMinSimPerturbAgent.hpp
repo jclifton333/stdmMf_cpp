@@ -21,6 +21,7 @@ class BrMinSimPerturbAgent : public Agent<State> {
     const bool do_sweep_;
     const bool gs_step_;
     const bool sq_total_br_;
+    const uint32_t num_supp_eps_;
     const uint32_t num_supp_obs_;
     const uint32_t obs_per_iter_;
     const uint32_t max_same_trt_;
@@ -49,6 +50,7 @@ public:
             const bool & do_sweep,
             const bool & gs_step,
             const bool & sq_total_br,
+            const uint32_t & num_supp_eps,
             const uint32_t & num_supp_obs,
             const uint32_t & obs_per_iter,
             const uint32_t & max_same_trt,

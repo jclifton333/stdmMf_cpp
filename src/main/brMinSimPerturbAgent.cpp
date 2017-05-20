@@ -30,6 +30,7 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const bool & do_sweep,
         const bool & gs_step,
         const bool & sq_total_br,
+        const uint32_t & num_supp_eps,
         const uint32_t & num_supp_obs,
         const uint32_t & obs_per_iter,
         const uint32_t & max_same_trt,
@@ -37,8 +38,8 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
     : Agent<State>(network), features_(features), model_(model),
       c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
       do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
-      num_supp_obs_(num_supp_obs), obs_per_iter_(obs_per_iter),
-      max_same_trt_(max_same_trt),
+      num_supp_eps_(num_supp_eps), num_supp_obs_(num_supp_obs),
+      obs_per_iter_(obs_per_iter), max_same_trt_(max_same_trt),
       steps_between_trt_test_(steps_between_trt_test),
       last_optim_par_(this->features_->num_features(), 0.0), record_(false),
       train_history_() {
@@ -57,7 +58,8 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
       model_(other.model_->clone()), c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
       do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
-      sq_total_br_(other.sq_total_br_), num_supp_obs_(other.num_supp_obs_),
+      sq_total_br_(other.sq_total_br_), num_supp_eps_(other.num_supp_eps_),
+      num_supp_obs_(other.num_supp_obs_),
       obs_per_iter_(other.obs_per_iter_), max_same_trt_(other.max_same_trt_),
       steps_between_trt_test_(other.steps_between_trt_test_),
       last_optim_par_(this->features_->num_features(), 0.0),
@@ -119,7 +121,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
         const std::vector<double> & starting_vals) {
     std::vector<Transition<State> > supp_history(history);
     // supplement observations
-    if (this->num_supp_obs_ > history.size()) {
+    if (this->num_supp_eps_ > 0 && this->num_supp_obs_ > 0) {
         this->model_->est_par(history);
         System<State> s(this->network_, this->model_);
         s.rng(this->rng());
@@ -136,14 +138,16 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
 
         // start simulation from current state
         s.state(history.at(history.size() - 1).next_state);
-        const uint32_t num_to_supp = this->num_supp_obs_ - supp_history.size();
-        for (uint32_t i = 0; i < num_to_supp; i++) {
-            const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.state(),
-                    s.history());
+        for (uint32_t eps = 0; eps < this->num_supp_eps_; ++eps) {
+            s.state(history.at(history.size() - 1).next_state);
+            for (uint32_t obs = 0; obs < this->num_supp_obs_; ++obs) {
+                const boost::dynamic_bitset<> trt_bits = ea.apply_trt(s.state(),
+                        s.history());
 
-            s.trt_bits(trt_bits);
+                s.trt_bits(trt_bits);
 
-            s.turn_clock();
+                s.turn_clock();
+            }
         }
 
         // append simulated history
@@ -153,7 +157,8 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
         supp_history.insert(supp_history.end(), trans_to_supp.begin(),
                 trans_to_supp.end());
 
-        CHECK_EQ(supp_history.size(), this->num_supp_obs_);
+        CHECK_EQ(supp_history.size(),
+                this->num_supp_eps_ * this->num_supp_obs_ + history.size());
     }
 
     // fit q-function
