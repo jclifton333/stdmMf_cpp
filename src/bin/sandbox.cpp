@@ -97,14 +97,10 @@ int main(int argc, char *argv[]) {
     System<InfShieldState> s(network, mod_system->clone());
     s.seed(23);
 
-    BrMinWtdSimPerturbAgent<InfShieldState> a(network,
+    BrMinWtdSimPerturbAgent<InfShieldState> a(net,
             std::shared_ptr<Features<InfShieldState> >(
-                    new FiniteQfnFeatures<InfShieldState>(
-                            network, {mod_agents->clone()},
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<
-                                    InfShieldState>(
-                                            network, 2)), 1)),
+                    new NetworkRunSymFeatures<InfShieldState>(
+                            net, 2)),
             mod_agents->clone(),
             0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
             true, true, false, 100, 10, 0);
