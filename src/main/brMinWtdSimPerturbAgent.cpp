@@ -298,7 +298,10 @@ std::vector<double> BrMinWtdSimPerturbAgent<State>::train_iter(
         << "t: " << this->t_ << std::endl
         << "a: " << this->a_ << std::endl
         << "b: " << this->b_ << std::endl
-        << "ell: " << this->min_step_size_ << std::endl;
+        << "ell: " << this->min_step_size_ << std::endl
+        << "sv: " << std::accumulate(starting_vals.begin(),
+                starting_vals.end(), 0.0) << std::endl;
+
 
     return sp.par();
 }
