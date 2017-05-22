@@ -185,7 +185,7 @@ std::vector<double> BrMinWtdSimPerturbAgent<State>::train(
         sum_weights += std::abs(new_weight);
     }
     CHECK_GT(sum_weights, 0.0);
-    njm::linalg::mult_b_to_a(weights, 1.0 / sum_weights);
+    njm::linalg::mult_b_to_a(weights, weights.size() / sum_weights);
     CHECK_EQ(weights.size(), sim_history.size());
 
 
