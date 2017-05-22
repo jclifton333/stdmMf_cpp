@@ -173,14 +173,19 @@ std::vector<double> BrMinWtdSimPerturbAgent<State>::train(
     typename std::vector<Transition<State> >::const_iterator it, end;
     end = sim_history.end();
     // dot product of probabilities for current state and all simulated states
+    double sum_weights(0.0);
     for (it = sim_history.begin(); it != end; ++it) {
         const State & sim_state(it->curr_state);
         const std::vector<double> sim_probs(this->model_->probs(sim_state,
                         weight_agent->apply_trt(sim_state)));
 
-        weights.push_back(njm::linalg::dot_a_and_b(curr_probs, sim_probs));
+        const double new_weight(
+                njm::linalg::dot_a_and_b(curr_probs, sim_probs));
+        weights.push_back(new_weight);
+        sum_weights += std::abs(new_weight);
     }
-    njm::linalg::mult_b_to_a(weights, 1.0 / njm::linalg::l2_norm(weights));
+    CHECK_GT(sum_weights, 0.0);
+    njm::linalg::mult_b_to_a(weights, 1.0 / sum_weights);
     CHECK_EQ(weights.size(), sim_history.size());
 
 
