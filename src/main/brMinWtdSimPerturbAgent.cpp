@@ -180,6 +180,7 @@ std::vector<double> BrMinWtdSimPerturbAgent<State>::train(
 
         weights.push_back(njm::linalg::dot_a_and_b(curr_probs, sim_probs));
     }
+    njm::linalg::mult_b_to_a(weights, 1.0 / njm::linalg::l2_norm(weights));
     CHECK_EQ(weights.size(), sim_history.size());
 
 
