@@ -1088,28 +1088,28 @@ int main(int argc, char *argv[]) {
 
     // setup networks
     std::vector<std::shared_ptr<Network> > networks;
-    { // grid network 25
-        NetworkInit init;
-        init.set_dim_x(5);
-        init.set_dim_y(5);
-        init.set_wrap(false);
-        init.set_type(NetworkInit_NetType_GRID);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // grid network 25
+    //     NetworkInit init;
+    //     init.set_dim_x(5);
+    //     init.set_dim_y(5);
+    //     init.set_wrap(false);
+    //     init.set_type(NetworkInit_NetType_GRID);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
-    { // barabasi 25
-        NetworkInit init;
-        init.set_size(25);
-        init.set_type(NetworkInit_NetType_BARABASI);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // barabasi 25
+    //     NetworkInit init;
+    //     init.set_size(25);
+    //     init.set_type(NetworkInit_NetType_BARABASI);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
-    { // random 25
-        NetworkInit init;
-        init.set_size(25);
-        init.set_type(NetworkInit_NetType_RANDOM);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // random 25
+    //     NetworkInit init;
+    //     init.set_size(25);
+    //     init.set_type(NetworkInit_NetType_RANDOM);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     // { // grid network 100
     //     NetworkInit init;
