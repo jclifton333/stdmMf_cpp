@@ -1111,28 +1111,28 @@ int main(int argc, char *argv[]) {
     //     networks.push_back(Network::gen_network(init));
     // }
 
-    // { // grid network 100
-    //     NetworkInit init;
-    //     init.set_dim_x(10);
-    //     init.set_dim_y(10);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 100
+        NetworkInit init;
+        init.set_dim_x(10);
+        init.set_dim_y(10);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // barabasi 100
-    //     NetworkInit init;
-    //     init.set_size(100);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 100
+        NetworkInit init;
+        init.set_size(100);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // random 100
-    //     NetworkInit init;
-    //     init.set_size(100);
-    //     init.set_type(NetworkInit_NetType_RANDOM);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // random 100
+        NetworkInit init;
+        init.set_size(100);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
 
     // { // grid network 500
     //     NetworkInit init;
