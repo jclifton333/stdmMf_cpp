@@ -819,8 +819,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    const uint32_t num_reps = 2;
-    const uint32_t time_points = 2;
+    const uint32_t num_reps = 50;
+    const uint32_t time_points = 25;
 
     // set up results containers
     const std::vector<std::string> agent_names({
