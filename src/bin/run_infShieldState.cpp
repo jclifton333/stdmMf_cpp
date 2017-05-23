@@ -547,58 +547,58 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
-    // { // random 100
-    //     NetworkInit init;
-    //     init.set_size(100);
-    //     init.set_type(NetworkInit_NetType_RANDOM);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // random 100
+        NetworkInit init;
+        init.set_size(100);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // grid network 500
-    //     NetworkInit init;
-    //     init.set_dim_x(20);
-    //     init.set_dim_y(25);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 500
+        NetworkInit init;
+        init.set_dim_x(20);
+        init.set_dim_y(25);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // barabasi 500
-    //     NetworkInit init;
-    //     init.set_size(500);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 500
+        NetworkInit init;
+        init.set_size(500);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // random 500
-    //     NetworkInit init;
-    //     init.set_size(500);
-    //     init.set_type(NetworkInit_NetType_RANDOM);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // random 500
+        NetworkInit init;
+        init.set_size(500);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // grid network 1000
-    //     NetworkInit init;
-    //     init.set_dim_x(40);
-    //     init.set_dim_y(25);
-    //     init.set_wrap(false);
-    //     init.set_type(NetworkInit_NetType_GRID);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // grid network 1000
+        NetworkInit init;
+        init.set_dim_x(40);
+        init.set_dim_y(25);
+        init.set_wrap(false);
+        init.set_type(NetworkInit_NetType_GRID);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // barabasi 1000
-    //     NetworkInit init;
-    //     init.set_size(1000);
-    //     init.set_type(NetworkInit_NetType_BARABASI);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // barabasi 1000
+        NetworkInit init;
+        init.set_size(1000);
+        init.set_type(NetworkInit_NetType_BARABASI);
+        networks.push_back(Network::gen_network(init));
+    }
 
-    // { // random 1000
-    //     NetworkInit init;
-    //     init.set_size(1000);
-    //     init.set_type(NetworkInit_NetType_RANDOM);
-    //     networks.push_back(Network::gen_network(init));
-    // }
+    { // random 1000
+        NetworkInit init;
+        init.set_size(1000);
+        init.set_type(NetworkInit_NetType_RANDOM);
+        networks.push_back(Network::gen_network(init));
+    }
 
     // double vector since model depends on network
     std::vector<std::pair<std::string,
@@ -693,130 +693,130 @@ int main(int argc, char *argv[]) {
                             models_add));
         }
 
-        // { // Correct: PosIm NoSo,  Postulated: NoIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStatePosImNoSoModel(
-        //                                 networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.first->par(par);
-        //         mp.second->par(par);
+        { // Correct: PosIm NoSo,  Postulated: NoIm NoSo
+            std::vector<ModelPair> models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStatePosImNoSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStateNoImNoSoModel(
+                                        networks.at(i))));
+                mp.first->par(par);
+                mp.second->par(par);
 
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("PosImNoSo-NoImNoSo",
-        //                     models_add));
-        // }
+                models_add.push_back(mp);
+            }
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("PosImNoSo-NoImNoSo",
+                            models_add));
+        }
 
-        // { // Correct: NoIm NoSo,  Postulated: PosIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStatePosImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.first->par(par);
-        //         mp.second->par(par);
+        { // Correct: NoIm NoSo,  Postulated: PosIm NoSo
+            std::vector<ModelPair> models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStateNoImNoSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStatePosImNoSoModel(
+                                        networks.at(i))));
+                mp.first->par(par);
+                mp.second->par(par);
 
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("NoImNoSo-PosImNoSo",
-        //                     models_add));
-        // }
+                models_add.push_back(mp);
+            }
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("NoImNoSo-PosImNoSo",
+                            models_add));
+        }
 
-        // { // Correct: 0.25 NoIm NoSo + 0.75 PosIm NoSo,  Postulated: NoIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         // set par in advance because mixture model doesn't
-        //         // implement par functionality
-        //         auto mod_one(std::make_shared<InfShieldStateNoImNoSoModel>(
-        //                         networks.at(i)));
-        //         mod_one->par(par);
-        //         auto mod_two(std::make_shared<InfShieldStatePosImNoSoModel>(
-        //                         networks.at(i)));
-        //         mod_two->par(par);
-        //         ModelPair mp (std::shared_ptr<MixtureModel<InfShieldState,
-        //                 InfShieldStateModel> >(
-        //                         new MixtureModel<InfShieldState,
-        //                         InfShieldStateModel>(
-        //                         {mod_one, mod_two}, {0.25, 0.75},
-        //                         networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.second->par(par);
+        { // Correct: 0.25 NoIm NoSo + 0.75 PosIm NoSo,  Postulated: NoIm NoSo
+            std::vector<ModelPair> models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                // set par in advance because mixture model doesn't
+                // implement par functionality
+                auto mod_one(std::make_shared<InfShieldStateNoImNoSoModel>(
+                                networks.at(i)));
+                mod_one->par(par);
+                auto mod_two(std::make_shared<InfShieldStatePosImNoSoModel>(
+                                networks.at(i)));
+                mod_two->par(par);
+                ModelPair mp (std::shared_ptr<MixtureModel<InfShieldState,
+                        InfShieldStateModel> >(
+                                new MixtureModel<InfShieldState,
+                                InfShieldStateModel>(
+                                {mod_one, mod_two}, {0.25, 0.75},
+                                networks.at(i))),
+                        std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStateNoImNoSoModel(
+                                        networks.at(i))));
+                mp.second->par(par);
 
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("Mixture-25-75-NoImNoSo-PosImNoSo",
-        //                     models_add));
-        // }
+                models_add.push_back(mp);
+            }
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("Mixture-25-75-NoImNoSo-PosImNoSo",
+                            models_add));
+        }
 
-        // { // Correct: 0.50 NoIm NoSo + 0.50 PosIm NoSo,  Postulated: NoIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         // set par in advance because mixture model doesn't
-        //         // implement par functionality
-        //         auto mod_one(std::make_shared<InfShieldStateNoImNoSoModel>(
-        //                         networks.at(i)));
-        //         mod_one->par(par);
-        //         auto mod_two(std::make_shared<InfShieldStatePosImNoSoModel>(
-        //                         networks.at(i)));
-        //         mod_two->par(par);
-        //         ModelPair mp (std::shared_ptr<MixtureModel<InfShieldState,
-        //                 InfShieldStateModel> >(
-        //                         new MixtureModel<InfShieldState,
-        //                         InfShieldStateModel>(
-        //                         {mod_one, mod_two}, {0.50, 0.50},
-        //                         networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.second->par(par);
+        { // Correct: 0.50 NoIm NoSo + 0.50 PosIm NoSo,  Postulated: NoIm NoSo
+            std::vector<ModelPair> models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                // set par in advance because mixture model doesn't
+                // implement par functionality
+                auto mod_one(std::make_shared<InfShieldStateNoImNoSoModel>(
+                                networks.at(i)));
+                mod_one->par(par);
+                auto mod_two(std::make_shared<InfShieldStatePosImNoSoModel>(
+                                networks.at(i)));
+                mod_two->par(par);
+                ModelPair mp (std::shared_ptr<MixtureModel<InfShieldState,
+                        InfShieldStateModel> >(
+                                new MixtureModel<InfShieldState,
+                                InfShieldStateModel>(
+                                {mod_one, mod_two}, {0.50, 0.50},
+                                networks.at(i))),
+                        std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStateNoImNoSoModel(
+                                        networks.at(i))));
+                mp.second->par(par);
 
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("Mixture-50-50-NoImNoSo-PosImNoSo",
-        //                     models_add));
-        // }
+                models_add.push_back(mp);
+            }
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("Mixture-50-50-NoImNoSo-PosImNoSo",
+                            models_add));
+        }
 
-        // { // Correct: 0.75 NoIm NoSo + 0.25 PosIm NoSo,  Postulated: NoIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         // set par in advance because mixture model doesn't
-        //         // implement par functionality
-        //         auto mod_one(std::make_shared<InfShieldStateNoImNoSoModel>(
-        //                         networks.at(i)));
-        //         mod_one->par(par);
-        //         auto mod_two(std::make_shared<InfShieldStatePosImNoSoModel>(
-        //                         networks.at(i)));
-        //         mod_two->par(par);
-        //         ModelPair mp (std::shared_ptr<MixtureModel<InfShieldState,
-        //                 InfShieldStateModel> >(
-        //                         new MixtureModel<InfShieldState,
-        //                         InfShieldStateModel>(
-        //                         {mod_one, mod_two}, {0.75, 0.25},
-        //                         networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.second->par(par);
+        { // Correct: 0.75 NoIm NoSo + 0.25 PosIm NoSo,  Postulated: NoIm NoSo
+            std::vector<ModelPair> models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                // set par in advance because mixture model doesn't
+                // implement par functionality
+                auto mod_one(std::make_shared<InfShieldStateNoImNoSoModel>(
+                                networks.at(i)));
+                mod_one->par(par);
+                auto mod_two(std::make_shared<InfShieldStatePosImNoSoModel>(
+                                networks.at(i)));
+                mod_two->par(par);
+                ModelPair mp (std::shared_ptr<MixtureModel<InfShieldState,
+                        InfShieldStateModel> >(
+                                new MixtureModel<InfShieldState,
+                                InfShieldStateModel>(
+                                {mod_one, mod_two}, {0.75, 0.25},
+                                networks.at(i))),
+                        std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStateNoImNoSoModel(
+                                        networks.at(i))));
+                mp.second->par(par);
 
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("Mixture-75-25-NoImNoSo-PosImNoSo",
-        //                     models_add));
-        // }
+                models_add.push_back(mp);
+            }
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("Mixture-75-25-NoImNoSo-PosImNoSo",
+                            models_add));
+        }
     }
 
     const uint32_t num_reps = 2;
