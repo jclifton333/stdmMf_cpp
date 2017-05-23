@@ -392,7 +392,8 @@ void queue_all_sims(
 
 void process_results(
         njm::data::TrapperKeeper & tk,
-        AllResults<std::future> & all_results) {
+        AllResults<std::future> & all_results,
+        const std::vector<std::string> & agent_names) {
 
     njm::data::Entry * const e_read_all = tk.entry("read.txt");
     njm::data::Entry * const e_raw_all = tk.entry("raw.txt");
@@ -448,14 +449,16 @@ void process_results(
                         << " and model pair " << model_kind << "\n";
 
             Results<std::future> & r(mr.results);
-            Results<std::future>::iterator it;
-            for (it = r.begin(); it != r.end(); ++it) {
-                const std::string agent_kind(it->first);
+            std::vector<std::string>::const_iterator it;
+            for (it = agent_names.begin(); it != agent_names.end(); ++it) {
+                const std::string agent_kind(*it);
+
+                OutcomeReps<std::future> & reps(r.at(agent_kind));
 
                 accumulator_set<double, stats<tag::mean, tag::variance> >
                     values, times;
-                for (uint32_t k = 0; k < it->second.size(); ++k) {
-                    const Outcome & outcome (it->second.at(k).get());
+                for (uint32_t k = 0; k < reps.size(); ++k) {
+                    const Outcome & outcome (reps.at(k).get());
                     values(outcome.value);
                     times(outcome.time);
 
@@ -463,11 +466,11 @@ void process_results(
                                     agent_kind, k, outcome.history));
                     *e_history << history_str;
                 }
-                CHECK_GT(it->second.size(), 1);
+                CHECK_GT(reps.size(), 1);
 
                 const double value_mean(mean(values));
-                const double re_scale(static_cast<double>(it->second.size())
-                        / (it->second.size() - 1));
+                const double re_scale(static_cast<double>(reps.size())
+                        / (reps.size() - 1));
                 const double value_ssd(std::sqrt(variance(values) * re_scale));
                 const double time_mean(mean(times));
 
@@ -882,7 +885,7 @@ int main(int argc, char *argv[]) {
             networks, models, num_reps, time_points);
 
     // process results
-    process_results(tk, future_results);
+    process_results(tk, future_results, agent_names);
 
     progress.done();
 
