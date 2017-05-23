@@ -22,7 +22,6 @@ SET(bin_file_names
   ## sims
   run_infState
   run_infShieldState
-  run_infShieldState_fast
 
 
   ## adaptive testing
