@@ -234,7 +234,7 @@ std::shared_ptr<Network> Network::gen_grid(
     std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
 
     // iterate through grid column first
-    network->kind_ = "grid_" + std::to_string(dim_x) + "x"
+    network->kind_ = "grid-" + std::to_string(dim_x) + "x"
         + std::to_string(dim_y);
     network->num_nodes_ = dim_x * dim_y;
     network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
@@ -314,7 +314,7 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
     CHECK_GE(size, 2);
 
     // init adjacency matrix
-    network->kind_ = "barabasi_" + std::to_string(size);
+    network->kind_ = "barabasi-" + std::to_string(size);
     network->num_nodes_ = size;
     network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
             network->num_nodes_, network->num_nodes_);
@@ -368,7 +368,7 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
 std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
     std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
 
-    network->kind_ = "random_" + std::to_string(size);
+    network->kind_ = "random-" + std::to_string(size);
     network->num_nodes_ = size;
 
     const uint32_t num_neigh(3);
