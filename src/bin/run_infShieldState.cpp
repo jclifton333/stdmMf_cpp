@@ -462,7 +462,6 @@ void process_results(
                     const std::string history_str(history_to_csv_entry(
                                     agent_kind, k, outcome.history));
                     *e_history << history_str;
-
                 }
                 CHECK_GT(it->second.size(), 1);
 
