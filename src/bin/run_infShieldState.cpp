@@ -861,7 +861,7 @@ int main(int argc, char *argv[]) {
                 future_reps.reserve(num_reps);
                 for (uint32_t r = 0; r < num_reps; ++r) {
                     future_reps.emplace_back(
-                            std::move(promise_reps.at(r).get_future()));
+                            promise_reps.at(r).get_future());
                 }
             }
         }
