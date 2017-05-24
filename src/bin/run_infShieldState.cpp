@@ -759,7 +759,8 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Mixture-25-75-NoImNoSo-PosImNoSo",
+                    std::vector<ModelPair> >(
+                            "Mixture-NoImNoSo-25-PosImNoSo-75-NoImNoSo",
                             models_add));
         }
 
@@ -788,7 +789,8 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Mixture-50-50-NoImNoSo-PosImNoSo",
+                    std::vector<ModelPair> >(
+                            "Mixture-NoImNoSo-50-PosImNoSo-50-NoImNoSo",
                             models_add));
         }
 
@@ -817,7 +819,8 @@ int main(int argc, char *argv[]) {
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Mixture-75-25-NoImNoSo-PosImNoSo",
+                    std::vector<ModelPair> >(
+                            "Mixture-NoImNoSo-75-PosImNoSo-25-NoImNoSo",
                             models_add));
         }
     }
