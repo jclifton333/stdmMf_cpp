@@ -471,7 +471,8 @@ void process_results(
                 const double value_mean(mean(values));
                 const double re_scale(static_cast<double>(reps.size())
                         / (reps.size() - 1));
-                const double value_ssd(std::sqrt(variance(values) * re_scale));
+                const double value_sse(std::sqrt(variance(values) * re_scale)
+                        / std::sqrt(static_cast<double>(reps.size())));
                 const double time_mean(mean(times));
 
                 std::stringstream raw_ss;
@@ -479,7 +480,7 @@ void process_results(
                        << model_kind << ","
                        << agent_kind << ","
                        << std::to_string(value_mean) << ","
-                       << std::to_string(value_ssd) << ","
+                       << std::to_string(value_sse) << ","
                        << std::to_string(time_mean) << "\n";
 
                 std::stringstream read_ss;
@@ -490,7 +491,7 @@ void process_results(
                         << value_mean << " ("
                         << std::setw(8) << std::right
                         << std::setprecision(4) << std::fixed
-                        << value_ssd << ")  ["
+                        << value_sse << ")  ["
                         << std::setw(8) << std::setprecision(0)
                         << time_mean << "]"
                         << "\n";
