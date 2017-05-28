@@ -616,14 +616,20 @@ int main(int argc, char *argv[]) {
         const double prob_inf = 0.5;
         const uint32_t prob_num_neigh = 3;
         const double intcp_inf =
-            std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
+            std::log(std::pow((1. - prob_inf) / (1. - prob_inf_latent),
+                            -1. / prob_num_neigh)
+                    - 1.);
 
         const double trt_act_inf =
-            std::log(std::pow(1. - prob_inf * 0.25, -1. / prob_num_neigh) - 1.)
+            std::log(std::pow((1. - prob_inf * 0.25) / (1. - prob_inf_latent),
+                            -1. / prob_num_neigh)
+                    - 1.)
             - intcp_inf;
 
         const double trt_pre_inf =
-            std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
+            std::log(std::pow((1. - prob_inf * 0.75) / (1. - prob_inf_latent),
+                            -1. / prob_num_neigh)
+                    - 1.)
             - intcp_inf;
 
         // recovery
