@@ -1,5 +1,8 @@
 rm(list=ls(all=TRUE))
 
+## download data and code for Ebola paper from
+## http://datadryad.org/resource/doi:10.5061/dryad.k95j3.2
+
 data_dir = "~/Downloads/DataAndCode/DataAndcode"
 
 polygons = readRDS(paste(data_dir, "WestAfricaCountyPolygons.rds", sep="/"))
