@@ -294,3 +294,6 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+stdmMf_cpp-vs.vcxproj.filters
+stdmMf_cpp-vs.sln
+stdmMf_cpp-vs.vcxproj
