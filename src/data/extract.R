@@ -66,5 +66,6 @@ ebola$outbreak = ifelse(is.na(ebola$outbreak),
 
 ## write to files
 for(n in names(ebola)) {
-  write.table(ebola[[n]], file = paste("ebola_", n, ".txt", sep=""))
+  write.table(ebola[[n]], file = paste("ebola_", n, ".txt", sep=""),
+              row.names = FALSE, col.names = FALSE, quote = FALSE)
 }
