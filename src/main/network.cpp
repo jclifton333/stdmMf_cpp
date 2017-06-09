@@ -25,54 +25,56 @@ const Node & Network::get_node(const uint32_t index) const {
 }
 
 
-uint32_t Network::calc_dist(const uint32_t & a, const uint32_t & b) const {
-    // initialize candidates
-    std::set<uint32_t> history;
-    std::set<uint32_t> previous;
-    std::set<uint32_t> current;
-    current.insert(a);
+std::vector<std::vector<double> > Network::calc_dist() const{
+    CHECK_EQ(this->adj_.size1(), this->num_nodes_);
+    CHECK_EQ(this->adj_.size2(), this->num_nodes_);
 
-    uint32_t dist = 0;
-    while (current.count(b) == 0) {
-        // update record keeping
-        history.insert(current.begin(), current.end());
-        previous.clear();
-        previous.insert(current.begin(), current.end());
+    boost::numeric::ublas::mapped_matrix<uint32_t> adj_pow(this->adj_);
+    std::vector<std::vector<double> > dist(this->num_nodes_,
+            std::vector<double>(this->num_nodes_, 0.0));
+    std::set<std::pair<uint32_t, uint32_t> > pairs_left;
+    // add all pairs that are not itself and not direct neighbors
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+        for (uint32_t j = i + 1; j < this->num_nodes_; ++j) {
+            if (adj_pow(i,j) == 1) {
+                CHECK_EQ(adj_pow(j,i), 1);
+                dist.at(i).at(j) = dist.at(j).at(i) = 1;
+            } else {
+                pairs_left.emplace(i, j);
+            }
+        }
+    }
 
-        // update current
-        current.clear();
-        std::set<uint32_t>::const_iterator it, end;
-        end = previous.end();
-        for (it = previous.begin(); it != end; ++it) {
-            const Node & node = this->get_node(*it);
-            for (auto neigh = node.neigh().begin(); neigh != node.neigh().end();
-                 ++neigh) {
-                if (history.count(*neigh) == 0) {
-                    current.insert(*neigh);
-                }
+    uint32_t curr_dist = 1;
+    while(pairs_left.size() > 0) {
+        adj_pow = boost::numeric::ublas::prod(adj_pow, this->adj_);
+        ++curr_dist;
+
+        std::set<std::pair<uint32_t, uint32_t> >::const_iterator it;
+        const std::set<std::pair<uint32_t, uint32_t> >::const_iterator end(
+                pairs_left.end());
+        std::set<std::pair<uint32_t, uint32_t> > not_done;
+        for (it = pairs_left.begin(); it != end; ++it) {
+            if (adj_pow(it->first, it->second) > 0) {
+                dist.at(it->first).at(it->second) =
+                    dist.at(it->second).at(it->first) = curr_dist;
+
+                CHECK_EQ(adj_pow(it->second, it->first),
+                        adj_pow(it->first, it->second));
+            } else {
+                not_done.insert(*it);
             }
         }
 
-        ++dist;
+        pairs_left.swap(not_done);
     }
 
     return dist;
 }
 
 
-std::vector<std::vector<uint32_t> > Network::dist() const {
-    // fill distance matrix
-    std::vector<std::vector<uint32_t> > dist_mat;
-    dist_mat.resize(this->size());
-    for (uint32_t i = 0; i < this->size(); ++i) {
-        std::vector<uint32_t> & dist = dist_mat.at(i);
-        dist.clear();
-        for (uint32_t j = 0; j < this->size(); ++j) {
-            dist.push_back(this->calc_dist(i, j));
-        }
-    }
-
-    return dist_mat;
+const std::vector<std::vector<double> > & Network::dist() const {
+    return this->dist_;
 }
 
 
