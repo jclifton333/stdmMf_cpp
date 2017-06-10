@@ -27,7 +27,7 @@ add_library(stdmMf network.cpp system.cpp states.cpp
   infShieldStatePosImNoSoModel.cpp
 
   ## ebola state models
-  ebolaStateModel.cpp
+  ebolaStateModel.cpp ebolaStateGravityModel.cpp
 
   ## agents
   agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
