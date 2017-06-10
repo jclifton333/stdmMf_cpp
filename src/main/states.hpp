@@ -55,6 +55,8 @@ struct EbolaState {
 
     EbolaState();
 
+    EbolaState(const uint32_t & num_nodes);
+
     EbolaState(const EbolaState & other) = default;
 
     EbolaState(const boost::dynamic_bitset<> & inf_bits);
@@ -62,6 +64,8 @@ struct EbolaState {
     void reset();
 
     static EbolaState random(njm::tools::Rng & rng);
+
+    EbolaState& operator=(const EbolaState &rhs);
 };
 
 
