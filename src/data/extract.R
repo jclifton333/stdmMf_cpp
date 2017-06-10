@@ -1,5 +1,7 @@
 rm(list=ls(all=TRUE))
 
+require(PBSmapping)
+
 ## download data and code for Ebola paper from
 ## http://datadryad.org/resource/doi:10.5061/dryad.k95j3.2
 
@@ -9,7 +11,7 @@ data_dir = "~/Downloads/DataAndCode/DataAndcode"
 
 ## polygon data set
 polygons = readRDS(paste(data_dir, "WestAfricaCountyPolygons.rds", sep="/"))
-
+centroids = calcCentroid(SpatialPolygons2PolySet(polygons), rollup = 1)
 
 ## outbreaks data set
 outbreaks = readRDS(paste(data_dir,
@@ -39,24 +41,9 @@ ebola = data.frame(county = ids$county,
                    loc = ids$loc,
                    outbreak = outbreaks$infection_date,
                    population = polygons$pop.size,
-                   x = 0, y = 0 ## temporary
+                   x = centroids$X,
+                   y = centroids$Y
                    )
-
-## get x and y
-for(i in 1:nrow(ebola)) {
-  ## extract to and from that matches ebola location code
-  from_vals = admn[which(admn$from_loc == ebola$loc[i]), ]
-  to_vals = admn[which(admn$to_loc == ebola$loc[i]), ]
-  ## pull out x and y
-  x_vals = c(from_vals$from_x, to_vals$to_x)
-  y_vals = c(from_vals$from_y, to_vals$to_y)
-  ## make sure they are unique
-  stopifnot(length(unique(x_vals)) == 1)
-  stopifnot(length(unique(y_vals)) == 1)
-  ## assign to ebola data set
-  ebola$x[i] = unique(x_vals)
-  ebola$y[i] = unique(y_vals)
-}
 
 ## need to change date of outbreak to days
 first_date = min(ebola$outbreak, na.rm = TRUE)
