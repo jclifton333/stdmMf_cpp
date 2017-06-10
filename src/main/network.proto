@@ -28,6 +28,7 @@ message NetworkInit {
     GRID = 0;
     BARABASI = 1;
     RANDOM = 2;
+    EBOLA = 3;
   }
 
   optional NetType type = 1;

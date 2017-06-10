@@ -208,6 +208,10 @@ std::shared_ptr<Network> Network::gen_network(
         network = Network::gen_random(init.size());
         break;
     }
+    case NetworkInit_NetType_EBOLA: {
+        network = Network::gen_ebola();
+        break;
+    }
     default:
         LOG(FATAL) << "Don't know how to initialize network of type "
                    << init.type() << ".";
