@@ -29,44 +29,29 @@ std::vector<std::vector<double> > Network::calc_dist() const{
     CHECK_EQ(this->adj_.size1(), this->num_nodes_);
     CHECK_EQ(this->adj_.size2(), this->num_nodes_);
 
-    boost::numeric::ublas::mapped_matrix<uint32_t> adj_pow(this->adj_);
     std::vector<std::vector<double> > dist(this->num_nodes_,
-            std::vector<double>(this->num_nodes_, 0.0));
-    std::set<std::pair<uint32_t, uint32_t> > pairs_left;
-    // add all pairs that are not itself and not direct neighbors
+            std::vector<double>(this->num_nodes_,
+                    std::numeric_limits<double>::infinity()));
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
-        for (uint32_t j = i + 1; j < this->num_nodes_; ++j) {
-            if (adj_pow(i,j) == 1) {
-                CHECK_EQ(adj_pow(j,i), 1);
-                dist.at(i).at(j) = dist.at(j).at(i) = 1;
-            } else {
-                pairs_left.emplace(i, j);
+        dist.at(i).at(i) = 0.0;
+        for (uint32_t j = 0; j < this->num_nodes_; ++j) {
+            if (this->adj_(i,j) == 1 && i != j) {
+                dist.at(i).at(j) = 1.0;
             }
         }
     }
 
-    uint32_t curr_dist = 1;
-    while(pairs_left.size() > 0) {
-        adj_pow = boost::numeric::ublas::prod(adj_pow, this->adj_);
-        ++curr_dist;
-
-        std::set<std::pair<uint32_t, uint32_t> >::const_iterator it;
-        const std::set<std::pair<uint32_t, uint32_t> >::const_iterator end(
-                pairs_left.end());
-        std::set<std::pair<uint32_t, uint32_t> > not_done;
-        for (it = pairs_left.begin(); it != end; ++it) {
-            if (adj_pow(it->first, it->second) > 0) {
-                dist.at(it->first).at(it->second) =
-                    dist.at(it->second).at(it->first) = curr_dist;
-
-                CHECK_EQ(adj_pow(it->second, it->first),
-                        adj_pow(it->first, it->second));
-            } else {
-                not_done.insert(*it);
+    for (uint32_t i = 0; i < this->num_nodes_; ++i) {
+        for (uint32_t j = 0; j < this->num_nodes_; ++j) {
+            double & direct(dist.at(i).at(j));
+            for (uint32_t k = 0; k < this->num_nodes_; ++k) {
+                const double & step_one(dist.at(i).at(k));
+                const double & step_two(dist.at(k).at(j));
+                if (direct > (step_one + step_two)) {
+                    direct = step_one + step_two;
+                }
             }
         }
-
-        pairs_left.swap(not_done);
     }
 
     return dist;
