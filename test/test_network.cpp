@@ -292,8 +292,8 @@ TEST(TestNetwork, Runs3X3) {
 }
 
 TEST(TestNetwork, RunsSizeAXB) {
-    for (uint32_t dim_x = 0; dim_x < 20; ++dim_x) {
-        for (uint32_t dim_y = 0; dim_y < 20; ++dim_y) {
+    for (uint32_t dim_x = 0; dim_x < 10; ++dim_x) {
+        for (uint32_t dim_y = 0; dim_y < 10; ++dim_y) {
             NetworkInit init;
             init.set_dim_x(dim_x + 1);
             init.set_dim_y(dim_y + 1);
