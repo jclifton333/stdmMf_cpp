@@ -82,8 +82,26 @@ EbolaState::EbolaState()
 }
 
 
+EbolaState::EbolaState(const uint32_t & num_nodes)
+    : EbolaState() {
+    CHECK_EQ(num_nodes, 290);
+}
+
+
 EbolaState::EbolaState(const boost::dynamic_bitset<> & inf_bits)
     : inf_bits(inf_bits), pop(ebola_pop) {
+}
+
+
+EbolaState& EbolaState::operator=(const EbolaState &rhs)
+{
+    // Check for self-assignment!
+    if (this == &rhs)
+        return *this;
+
+    this->inf_bits = rhs.inf_bits;
+
+    return *this;
 }
 
 
