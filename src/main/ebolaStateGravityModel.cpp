@@ -31,7 +31,8 @@ std::shared_ptr<Model<EbolaState> > EbolaStateGravityModel::clone() const {
 
 
 std::vector<double> EbolaStateGravityModel::par() const {
-    return {this->beta_0_, this->beta_1_, this->beta_2_};
+    return {this->beta_0_, this->beta_1_, this->beta_2_,
+            this->trt_pre_, this->trt_act_};
 }
 
 
