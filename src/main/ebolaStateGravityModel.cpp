@@ -150,4 +150,4 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_hess(
 
 
 
-} // namespace stdmMF
+} // namespace stdmMf
