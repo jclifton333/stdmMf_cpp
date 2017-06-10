@@ -5,6 +5,8 @@
 #include <list>
 #include <glog/logging.h>
 #include <njm_cpp/tools/random.hpp>
+#include <njm_cpp/info/project.hpp>
+#include <fstream>
 
 namespace stdmMf {
 
@@ -510,6 +512,69 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
 
     return network;
 }
+
+
+std::shared_ptr<Network> Network::gen_ebola() {
+    std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
+
+    network->kind_ = "ebola";
+    network->num_nodes_ = 290;
+    network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
+            network->num_nodes_, network->num_nodes_,
+            // allocate memory because this is a fully connected
+            // network
+            network->num_nodes_ * network->num_nodes_);
+
+    const std::string ebola_root_dir(
+            njm::info::project::PROJECT_ROOT_DIR + "/src/data/");
+    std::ifstream in(ebola_root_dir + "ebola_x.txt");
+    const std::vector<double> ebola_x{
+        std::istream_iterator<double>{in}, {}};
+    in.close();
+    CHECK_EQ(ebola_x.size(), 290);
+
+    in.open(ebola_root_dir + "ebola_y.txt");
+    const std::vector<double> ebola_y{
+        std::istream_iterator<double>{in}, {}};
+    in.close();
+    CHECK_EQ(ebola_y.size(), 290);
+
+    for (uint32_t i = 0; i < network->num_nodes_; ++i) {
+        Node * const n(network->node_list_.add_nodes());
+        n->set_x(ebola_x.at(i));
+        n->set_y(ebola_y.at(i));
+
+        // index
+        n->set_index(i);
+
+        // add distance and neighbors
+        std::vector<double> i_dist;
+        i_dist.reserve(network->num_nodes_);
+        for (uint32_t j = 0; j < network->num_nodes_; ++j) {
+            if (j != i) {
+                // connect i to all except itself
+                n->add_neigh(j);
+                network->adj_(i, j) = 1;
+
+                // distance from i to j
+                const double diff_x(ebola_x.at(i) - ebola_x.at(j));
+                const double diff_y(ebola_y.at(i) - ebola_y.at(j));
+                i_dist.push_back(std::sqrt(diff_x * diff_x + diff_y * diff_y));
+            } else {
+                // distance from i to itself
+                i_dist.push_back(0.0);
+            }
+        }
+
+        // add distance vector to matrix
+        network->dist_.push_back(std::move(i_dist));
+    }
+
+    return network;
+}
+
+
+
 
 
 const NodeList & Network::node_list() const {
