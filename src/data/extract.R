@@ -39,7 +39,7 @@ admn = read.csv(paste(data_dir, "AdmUnits_WBtwn.csv", sep="/"), as.is=TRUE)
 ebola = data.frame(county = ids$county,
                    country = ids$country,
                    loc = ids$loc,
-                   outbreak = outbreaks$infection_date,
+                   outbreaks = outbreaks$infection_date,
                    population = polygons$pop.size,
                    x = centroids$X,
                    y = centroids$Y
@@ -51,10 +51,10 @@ ebola$country = gsub("\\s+", "_", ebola$country)
 ebola$loc = gsub("\\s+", "_", ebola$loc)
 
 ## need to change date of outbreak to days
-first_date = min(ebola$outbreak, na.rm = TRUE)
-ebola$outbreak = ifelse(is.na(ebola$outbreak),
+first_date = min(ebola$outbreaks, na.rm = TRUE)
+ebola$outbreaks = ifelse(is.na(ebola$outbreaks),
                         -1,
-                        ebola$outbreak - first_date)
+                        ebola$outbreaks - first_date)
 
 ## write to files
 for(n in names(ebola)) {
