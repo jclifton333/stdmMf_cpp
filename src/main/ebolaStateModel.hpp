@@ -11,19 +11,19 @@ class EbolaStateModel : public Model<EbolaState> {
 protected:
     virtual double a_inf_b(const uint32_t & a_node, const uint32_t & b_node,
             const bool & a_trt, const bool & b_trt,
-            const boost::dynamic_bitset<> & inf_bits,
+            const EbolaState & state,
             const boost::dynamic_bitset<> & trt_bits) const = 0;
 
     virtual std::vector<double> a_inf_b_grad(
             const uint32_t & a_node, const uint32_t & b_node,
             const bool & a_trt, const bool & b_trt,
-            const boost::dynamic_bitset<> & inf_bits,
+            const EbolaState & state,
             const boost::dynamic_bitset<> & trt_bits) const = 0;
 
     virtual std::vector<double> a_inf_b_hess(
             const uint32_t & a_node, const uint32_t & b_node,
             const bool & a_trt, const bool & b_trt,
-            const boost::dynamic_bitset<> & inf_bits,
+            const EbolaState & state,
             const boost::dynamic_bitset<> & trt_bits) const = 0;
 
 public:

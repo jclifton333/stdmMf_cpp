@@ -43,7 +43,7 @@ std::vector<double> EbolaStateModel::probs(
                     // if neighbor is infected
                     const bool trt_neigh = status_neigh % 2 == 1;
                     prob *= 1.0 - this->a_inf_b(neigh, i, trt_neigh, trt_i,
-                            inf_status, trt_status);
+                            state, trt_status);
                 }
             }
             probs.push_back(1.0 - prob);
@@ -154,9 +154,10 @@ std::vector<double> EbolaStateModel::ll_grad(
                         // if neighbor is infected
                         const bool trt_neigh = inf_and_trt.at(neigh) % 2 == 1;
                         const double prob_jneigh = this->a_inf_b(
-                                neigh, j, trt_neigh, trt_j, curr_inf, curr_trt);
+                                neigh, j, trt_neigh, trt_j, curr_state,
+                                curr_trt);
                         std::vector<double> grad_jneigh = this->a_inf_b_grad(
-                                neigh, j , trt_neigh, trt_j, curr_inf,
+                                neigh, j , trt_neigh, trt_j, curr_state,
                                 curr_trt);
 
                         if (prob_jneigh < 1.0) {
@@ -242,18 +243,18 @@ std::vector<double> EbolaStateModel::ll_hess(
                             const bool trt_neigh =
                                 inf_and_trt.at(neigh) % 2 == 1;
                             const double prob_ineigh = this->a_inf_b(neigh, j,
-                                    trt_neigh, trt_j, curr_inf, curr_trt);
+                                    trt_neigh, trt_j, curr_state, curr_trt);
                             // add
                             std::vector<double> add_to_grad(
                                     this->a_inf_b_grad(neigh, j, trt_neigh,
-                                            trt_j, curr_inf, curr_trt));
+                                            trt_j, curr_state, curr_trt));
                             njm::linalg::mult_b_to_a(add_to_grad,
                                     - 1.0 / (1.0 - prob_ineigh));
                             njm::linalg::add_b_to_a(grad_j, add_to_grad);
 
                             std::vector<double> add_to_hess(
                                     this->a_inf_b_hess(neigh, j, trt_neigh,
-                                            trt_j, curr_inf, curr_trt));
+                                            trt_j, curr_state, curr_trt));
                             njm::linalg::mult_b_to_a(add_to_hess,
                                     - 1.0 / (1.0 - prob_ineigh));
                             njm::linalg::add_b_to_a(add_to_hess,
