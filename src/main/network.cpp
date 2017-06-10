@@ -291,6 +291,8 @@ std::shared_ptr<Network> Network::gen_grid(
 
     }
 
+    network->dist_ = network->calc_dist();
+
     return network;
 }
 
@@ -347,6 +349,8 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
         ++edge_deg.at(connect_to);
         edge_deg.push_back(1);
     }
+
+    network->dist_ = network->calc_dist();
 
     return network;
 }
@@ -501,6 +505,8 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
         subnets.at(subnet_index) = subnets.at(subnets.size() - 1);
         subnets.resize(subnets.size() - 1);
     }
+
+    network->dist_ = network->calc_dist();
 
     return network;
 }
