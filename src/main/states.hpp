@@ -47,6 +47,24 @@ struct InfShieldState {
 };
 
 
+struct EbolaState {
+    // infection status
+    boost::dynamic_bitset<> inf_bits;
+
+    const std::vector<double> & pop;
+
+    EbolaState();
+
+    EbolaState(const EbolaState & other) = default;
+
+    EbolaState(const boost::dynamic_bitset<> & inf_bits);
+
+    void reset();
+
+    static EbolaState random(njm::tools::Rng & rng);
+};
+
+
 template <typename State>
 struct StateAndTrt {
     State state;

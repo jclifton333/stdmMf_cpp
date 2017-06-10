@@ -2,6 +2,10 @@
 
 #include <glog/logging.h>
 
+#include <njm_cpp/info/project.hpp>
+#include <fstream>
+#include <iterator>
+
 namespace stdmMf {
 
 // infection only state
@@ -64,6 +68,41 @@ InfShieldState InfShieldState::random(const uint32_t & num_nodes,
 
     return state;
 }
+
+
+// Ebola state
+const std::string ebola_root_dir(
+        njm::info::project::PROJECT_ROOT_DIR + "/src/data/");
+std::ifstream in(ebola_root_dir + "ebola_population.txt");
+const std::vector<double> ebola_pop(std::istream_iterator<double>(in), {});
+
+
+EbolaState::EbolaState()
+    : inf_bits(290), pop(ebola_pop) {
+}
+
+
+EbolaState::EbolaState(const boost::dynamic_bitset<> & inf_bits)
+    : inf_bits(inf_bits), pop(ebola_pop) {
+}
+
+
+void EbolaState::reset() {
+    this->inf_bits.reset();
+}
+
+
+EbolaState EbolaState::random(njm::tools::Rng & rng) {
+    EbolaState state;
+    for (uint32_t i = 0; i < 290; ++i) {
+        if (rng.runif_01() < 0.5) {
+            state.inf_bits.flip(i);
+        }
+    }
+
+    return state;
+}
+
 
 
 // state and treatment together
