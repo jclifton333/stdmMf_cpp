@@ -45,6 +45,11 @@ ebola = data.frame(county = ids$county,
                    y = centroids$Y
                    )
 
+## fix names
+ebola$county = gsub("\\s+", "_", ebola$county)
+ebola$country = gsub("\\s+", "_", ebola$country)
+ebola$loc = gsub("\\s+", "_", ebola$loc)
+
 ## need to change date of outbreak to days
 first_date = min(ebola$outbreak, na.rm = TRUE)
 ebola$outbreak = ifelse(is.na(ebola$outbreak),
