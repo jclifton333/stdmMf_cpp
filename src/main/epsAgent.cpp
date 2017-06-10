@@ -78,6 +78,7 @@ void EpsAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class EpsAgent<InfState>;
 template class EpsAgent<InfShieldState>;
+template class EpsAgent<EbolaState>;
 
 
 } // namespace stdmMf

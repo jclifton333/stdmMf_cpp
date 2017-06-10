@@ -71,7 +71,7 @@ void ProximalAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class ProximalAgent<InfState>;
 template class ProximalAgent<InfShieldState>;
-
+template class ProximalAgent<EbolaState>;
 
 
 } // namespace stdmMf

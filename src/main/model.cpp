@@ -109,6 +109,7 @@ void Model<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class Model<InfState>;
 template class Model<InfShieldState>;
+template class Model<EbolaState>;
 
 
 template <typename State>
@@ -235,6 +236,7 @@ void ModelFit<State>::obj_fn_both(const gsl_vector * x, void * params,
 
 template class ModelFit<InfState>;
 template class ModelFit<InfShieldState>;
+template class ModelFit<EbolaState>;
 
 
 } // namespace stdmMf

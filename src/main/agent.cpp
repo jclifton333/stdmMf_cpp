@@ -33,6 +33,7 @@ boost::dynamic_bitset<> Agent<State>::apply_trt(
 
 template class Agent<InfState>;
 template class Agent<InfShieldState>;
+template class Agent<EbolaState>;
 
 
 } // namespace stdmMf

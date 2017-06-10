@@ -51,5 +51,6 @@ void RandomAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class RandomAgent<InfState>;
 template class RandomAgent<InfShieldState>;
+template class RandomAgent<EbolaState>;
 
 } // namespace stdmMf

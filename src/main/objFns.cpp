@@ -33,6 +33,9 @@ template double runner<InfState>(System<InfState> * system,
 template double runner<InfShieldState>(System<InfShieldState> * system,
         Agent<InfShieldState> * agent, const uint32_t & final_time,
         const double gamma);
+template double runner<EbolaState>(System<EbolaState> * system,
+        Agent<EbolaState> * agent, const uint32_t & final_time,
+        const double gamma);
 
 
 template <typename State>
@@ -103,6 +106,14 @@ template double bellman_residual_sq<InfShieldState>(
         const std::function<double(const InfShieldState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
+template double bellman_residual_sq<EbolaState>(
+        const std::vector<Transition<EbolaState> > & history,
+        Agent<EbolaState> * const agent, const double gamma,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
+
 
 template double bellman_residual_sq<InfState>(
         const std::vector<Transition<InfState> > & history,
@@ -119,6 +130,15 @@ template double bellman_residual_sq<InfShieldState>(
         const std::function<double(const InfShieldState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn,
         const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::vector<double> & weights);
+
+template double bellman_residual_sq<EbolaState>(
+        const std::vector<Transition<EbolaState> > & history,
+        Agent<EbolaState> * const agent, const double gamma,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const EbolaState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
         const std::vector<double> & weights);
 
@@ -191,6 +211,14 @@ template double sq_bellman_residual<InfShieldState>(
         const std::function<double(const InfShieldState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
+template double sq_bellman_residual<EbolaState>(
+        const std::vector<Transition<EbolaState> > & history,
+        Agent<EbolaState> * const agent, const double gamma,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
+
 
 template double sq_bellman_residual<InfState>(
         const std::vector<Transition<InfState> > & history,
@@ -207,6 +235,15 @@ template double sq_bellman_residual<InfShieldState>(
         const std::function<double(const InfShieldState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn,
         const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::vector<double> & weights);
+
+template double sq_bellman_residual<EbolaState>(
+        const std::vector<Transition<EbolaState> > & history,
+        Agent<EbolaState> * const agent, const double gamma,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const EbolaState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
         const std::vector<double> & weights);
 
@@ -258,7 +295,6 @@ std::vector<std::pair<double, double> > bellman_residual_parts<InfState>(
         const std::function<double(const InfState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
-
 template
 std::vector<std::pair<double, double> > bellman_residual_parts<InfShieldState>(
         const std::vector<Transition<InfShieldState> > & history,
@@ -266,6 +302,15 @@ std::vector<std::pair<double, double> > bellman_residual_parts<InfShieldState>(
         const std::function<double(const InfShieldState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn,
         const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
+
+template
+std::vector<std::pair<double, double> > bellman_residual_parts<EbolaState>(
+        const std::vector<Transition<EbolaState> > & history,
+        Agent<EbolaState> * const agent, const double gamma,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const EbolaState & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next);
 
 

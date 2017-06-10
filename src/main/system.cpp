@@ -138,6 +138,7 @@ void System<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class System<InfState>;
 template class System<InfShieldState>;
+template class System<EbolaState>;
 
 
 } // namespace stdmMf
