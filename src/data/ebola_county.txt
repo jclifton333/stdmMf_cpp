@@ -3,7 +3,7 @@ Abia
 Adamawa
 Agadez
 Agnéby
-Akwa Ibom
+Akwa_Ibom
 Alibori
 Anambra
 Ansongo
@@ -49,14 +49,14 @@ Bougouriba
 Boulgou
 Boulkiemdé
 Bourem
-Brong Ahafo
+Brong_Ahafo
 Cacheu
 Central
 Centre
 Collines
 Conakry
 Coyah
-Cross River
+Cross_River
 Dabola
 Dagana
 Dakar
@@ -69,7 +69,7 @@ Dinguiraye
 Dioïla
 Diourbel
 Diré
-Dix-Huit Montagnes
+Dix-Huit_Montagnes
 Djenné
 Donga
 Dosso
@@ -82,7 +82,7 @@ Ekiti
 Enugu
 Faranah
 Fatick
-Federal Capital Territory
+Federal_Capital_Territory
 Forécariah
 Foundiougne
 Fria
@@ -98,11 +98,11 @@ Gossas
 Goundam
 Gourma
 Gourma-Rharous
-Grand Cape Mount
+Grand_Cape_Mount
 GrandBassa
 GrandGedeh
 GrandKru
-Greater Accra
+Greater_Accra
 Guéckédou
 Haut-Sassandra
 Houet
@@ -166,8 +166,8 @@ Lofa
 Lola
 Loroum
 Louga
-Lower River
-Maccarthy Island
+Lower_River
+Maccarthy_Island
 Macenta
 Macina
 Mali
@@ -185,7 +185,7 @@ Ménaka
 Mono
 Montserrado
 Mopti
-Mou Houn
+Mou_Houn
 Moyamba
 Moyen-Cavally
 Moyen-Comoé
@@ -202,7 +202,7 @@ Nimba
 Niono
 Nioro
 Nioro-Du-Rip
-North Bank
+North_Bank
 Northern
 Nzérékoré
 Ogun
@@ -222,11 +222,11 @@ Plateau
 Plateaux
 Podor
 Poni
-Port Loko
+Port_Loko
 Pujehun
 Quinara
-River Cess
-River Gee
+River_Cess
+River_Gee
 Rivers
 Rufisque-Bargny
 San
@@ -261,16 +261,16 @@ Tominian
 Tonkolili
 Tougué
 Tuy
-Upper East
-Upper River
-Upper West
-Vallée du Bandama
+Upper_East
+Upper_River
+Upper_West
+Vallée_du_Bandama
 Vélingara
 Volta
 Western
 Western
-Western Rural
-Western Urban
+Western_Rural
+Western_Urban
 Worodougou
 Yagha
 Yamou
