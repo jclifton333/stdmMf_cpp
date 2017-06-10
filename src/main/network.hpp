@@ -81,6 +81,9 @@ public:
     // generate a barabasi type network
     static std::shared_ptr<Network> gen_barabasi(const uint32_t size);
 
+    // generate network for ebola
+    static std::shared_ptr<Network> gen_ebola();
+
     const NodeList & node_list() const;
 };
 
