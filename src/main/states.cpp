@@ -123,6 +123,7 @@ Transition<State>::Transition(const State & curr_state,
 
 template struct StateAndTrt<InfState>;
 template struct StateAndTrt<InfShieldState>;
+template struct StateAndTrt<EbolaState>;
 
 template <typename State>
 std::vector<Transition<State> > Transition<State>::from_sequence(
@@ -154,6 +155,7 @@ std::vector<Transition<State> > Transition<State>::from_sequence(
 
 template struct Transition<InfState>;
 template struct Transition<InfShieldState>;
+template struct Transition<EbolaState>;
 
 
 
