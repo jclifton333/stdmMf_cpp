@@ -11,6 +11,7 @@
 #include "proximalAgent.hpp"
 #include "epsAgent.hpp"
 #include "objFns.hpp"
+#include "ebolaData.hpp"
 
 namespace stdmMf {
 
@@ -61,6 +62,7 @@ double f_grad (double x, void * params) {
 
 
 TEST(TestEbolaStateGravityModel, TestPar) {
+    EbolaData::init();
     // generate network
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);
@@ -73,7 +75,6 @@ TEST(TestEbolaStateGravityModel, TestPar) {
 
     std::vector<double> par (m.par());
     for (uint32_t i = 0; i < par.size(); ++i) {
-        ASSERT_EQ(par.at(i), 0.);
         par.at(i) = i;
     }
 
@@ -84,7 +85,9 @@ TEST(TestEbolaStateGravityModel, TestPar) {
     }
 }
 
+
 TEST(TestEbolaStateGravityModel,TestLLGradient) {
+    EbolaData::init();
     // generate network
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);
@@ -106,21 +109,21 @@ TEST(TestEbolaStateGravityModel,TestLLGradient) {
     m->par(par);
 
     System<EbolaState> s(n,m);
+    s.start();
 
     RandomAgent<EbolaState> a(n);
 
-    const uint32_t num_points = 50;
+    const uint32_t num_points = 10;
     runner(&s, &a, num_points, 1.0);
 
     std::vector<Transition<EbolaState>> history(
             Transition<EbolaState>::from_sequence(s.history(), s.state()));
     ASSERT_EQ(history.size(), num_points);
 
-
     // generate new parameters so gradient is not zero
     std::for_each(par.begin(),par.end(),
             [&rng](double & x) {
-                x = rng.rnorm_01();
+                x += rng.runif_01();
             });
     m->par(par);
     const std::vector<double> grad_val =
@@ -141,8 +144,6 @@ TEST(TestEbolaStateGravityModel,TestLLGradient) {
         double abserr;
         gsl_deriv_central(&F, par.at(i), 1e-3, &result, &abserr);
 
-        std::cout << result << std::endl;
-
         EXPECT_NEAR(grad_val.at(i), result, eps)
             << "gradient failed for parameter " << i;
     }
@@ -150,6 +151,7 @@ TEST(TestEbolaStateGravityModel,TestLLGradient) {
 
 
 TEST(TestEbolaStateGravityModel,TestLLHessian) {
+    EbolaData::init();
     // generate network
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);
@@ -216,6 +218,7 @@ TEST(TestEbolaStateGravityModel,TestLLHessian) {
 
 
 TEST(TestEbolaStateGravityModel, EstPar) {
+    EbolaData::init();
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);
 
