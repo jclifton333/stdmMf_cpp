@@ -1,5 +1,7 @@
 #include "states.hpp"
 
+#include "ebolaData.hpp"
+
 #include <glog/logging.h>
 
 #include <njm_cpp/info/project.hpp>
@@ -71,14 +73,8 @@ InfShieldState InfShieldState::random(const uint32_t & num_nodes,
 
 
 // Ebola state
-const std::string ebola_root_dir(
-        njm::info::project::PROJECT_ROOT_DIR + "/src/data/");
-std::ifstream in(ebola_root_dir + "ebola_population.txt");
-const std::vector<double> ebola_pop(std::istream_iterator<double>(in), {});
-
-
 EbolaState::EbolaState()
-    : inf_bits(290), pop(ebola_pop) {
+    : inf_bits(290), pop(EbolaData::population()) {
 }
 
 
@@ -89,7 +85,7 @@ EbolaState::EbolaState(const uint32_t & num_nodes)
 
 
 EbolaState::EbolaState(const boost::dynamic_bitset<> & inf_bits)
-    : inf_bits(inf_bits), pop(ebola_pop) {
+    : inf_bits(inf_bits), pop(EbolaData::population()) {
 }
 
 
