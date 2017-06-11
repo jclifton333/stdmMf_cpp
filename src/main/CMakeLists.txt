@@ -44,6 +44,9 @@ add_library(stdmMf network.cpp system.cpp states.cpp
   ## optimization
   objFns.cpp polValIteration.cpp
 
+  ## ebola data
+  ebolaData.cpp
+
   ## extra
   # neuralNetwork.cpp
   ${PROTO_SRCS}
