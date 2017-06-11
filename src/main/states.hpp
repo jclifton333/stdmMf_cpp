@@ -65,6 +65,9 @@ struct EbolaState {
 
     static EbolaState random(njm::tools::Rng & rng);
 
+    static EbolaState random(const uint32_t & num_nodes,
+            njm::tools::Rng & rng);
+
     EbolaState& operator=(const EbolaState &rhs);
 };
 

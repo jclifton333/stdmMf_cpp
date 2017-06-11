@@ -106,6 +106,13 @@ void EbolaState::reset() {
 }
 
 
+EbolaState EbolaState::random(const uint32_t & num_nodes,
+        njm::tools::Rng & rng) {
+    CHECK_EQ(num_nodes, 290);
+    return EbolaState::random(rng);
+}
+
+
 EbolaState EbolaState::random(njm::tools::Rng & rng) {
     EbolaState state;
     for (uint32_t i = 0; i < 290; ++i) {
