@@ -21,6 +21,7 @@ SET(test_src
   test_networkRunFeatures
   test_networkRunSymFeatures_infState
   test_networkRunSymFeatures_infShieldState
+  test_ebolaFeatures
   test_sweepAgent
   test_polValIteration)
 
