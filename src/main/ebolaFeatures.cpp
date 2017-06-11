@@ -245,6 +245,23 @@ void EbolaFeatures::update_features(
         const EbolaState & state_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) {
+    const std::vector<Term> & terms_old(this->get_terms(changed_node,
+                    state_old.inf_bits.test(changed_node),
+                    trt_bits_old.test(changed_node)));
+
+    const std::vector<Term> & terms_new(this->get_terms(changed_node,
+                    state_new.inf_bits.test(changed_node),
+                    trt_bits_new.test(changed_node)));
+
+    std::vector<Term>::const_iterator it, end(terms_old.end());
+    for (it = terms_old.begin(); it != end; ++it) {
+        feat.at(it->index) -= it->weight;
+    }
+
+    end = terms_new.end();
+    for (it = terms_new.begin(); it != end; ++it) {
+        feat.at(it->index) += it->weight;
+    }
 }
 
 
