@@ -18,6 +18,8 @@
 
 #include "objFns.hpp"
 
+#include "ebolaStateGravityModel.hpp"
+
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include <njm_cpp/thread/pool.hpp>
@@ -34,85 +36,48 @@
 
 #include <chrono>
 
+#include "ebolaData.hpp"
+
 using namespace stdmMf;
 
 int main(int argc, char *argv[]) {
+    EbolaData::init();
+
     NetworkInit init;
-    init.set_dim_x(10);
-    init.set_dim_y(10);
-    init.set_wrap(false);
-    init.set_type(NetworkInit_NetType_GRID);
-    auto network(Network::gen_network(init));
+    init.set_type(NetworkInit_NetType_EBOLA);
 
-    // latent infections
-    const double prob_inf_latent = 0.01;
-    const double intcp_inf_latent =
-        std::log(1. / (1. - prob_inf_latent) - 1);
+    std::shared_ptr<Network> n = Network::gen_network(init);
 
-    // neighbor infections
-    const double prob_inf = 0.5;
-    const uint32_t prob_num_neigh = 3;
-    const double intcp_inf =
-        std::log(std::pow(1. - prob_inf, -1. / prob_num_neigh) - 1.);
+    // init model
+    const std::shared_ptr<EbolaStateGravityModel> m(
+            new EbolaStateGravityModel(n));
 
-    const double trt_act_inf =
-        std::log(std::pow(1. - prob_inf * 0.25, -1. / prob_num_neigh) - 1.)
-        - intcp_inf;
+    // set par
+    njm::tools::Rng rng;
+    std::vector<double> par(m->par());
+    par.at(0) = -5.246;
+    par.at(1) = -155.8;
+    par.at(2) = 0.186;
+    par.at(3) = -2.0;
+    par.at(4) = -1.0;
+    m->par(par);
 
-    const double trt_pre_inf =
-        std::log(std::pow(1. - prob_inf * 0.75, -1. / prob_num_neigh) - 1.)
-        - intcp_inf;
-
-    // recovery
-    const double prob_rec = 0.25;
-    const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
-    const double trt_act_rec =
-        std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
-
-    // shield
-    const double shield_coef = 0.9;
-
-
-    std::vector<double> par =
-        {intcp_inf_latent,
-         intcp_inf,
-         intcp_rec,
-         trt_act_inf,
-         trt_act_rec,
-         trt_pre_inf,
-         shield_coef};
-
-    const uint32_t time_points(25);
-
-    auto mod_system(std::shared_ptr<Model<InfShieldState> >(
-                    new InfShieldStateNoImNoSoModel(
-                            network)));
-    auto mod_agents(std::shared_ptr<Model<InfShieldState> >(
-                    new InfShieldStateNoImNoSoModel(
-                            network)));
-    mod_system->par(par);
-    mod_agents->par(par);
-
-
-    System<InfShieldState> s(network, mod_system->clone());
-    s.seed(0);
-
-    BrMinWtdSimPerturbAgent<InfShieldState> a(network,
-            std::shared_ptr<Features<InfShieldState> >(
-                    new FiniteQfnFeatures<InfShieldState>(
-                            network, {mod_agents->clone()},
-                            std::shared_ptr<Features<InfShieldState> >(
-                                    new NetworkRunSymFeatures<
-                                    InfShieldState>(
-                                            network, 2)), 1)),
-            mod_agents->clone(),
-            0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-            true, true, false, 100, 10, 0);
-    a.seed(0);
-
+    System<EbolaState> s(n,m);
     s.start();
 
-    runner(&s, &a, time_points, 1.0);
+    RandomAgent<EbolaState> ra(n);
+
+    runner(&s, &ra, 1, 1.0);
+
+    const auto history(Transition<EbolaState>::from_sequence(
+                    s.history(), s.state()));
+
+    const std::vector<double> grad(m->ll_grad(history));
+
+    for (uint32_t i = 0; i < m->par_size(); ++i) {
+        std::cout << grad.at(i) << std::endl;
+    }
+
 
     return 0;
 }
