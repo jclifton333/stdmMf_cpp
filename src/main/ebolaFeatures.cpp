@@ -19,7 +19,7 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
       num_neigh_(num_neigh) {
     CHECK_GT(this->num_base_locs_, 0);
     CHECK_LE(this->num_base_locs_, network->size());
-    CHECK_LE(this->num_neigh_, network->size());
+    CHECK_LT(this->num_neigh_, network->size());
 
     // calc centrality
     std::vector<std::pair<double, uint32_t> > centrality;
@@ -71,8 +71,8 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
         for (uint32_t j = 0; j < this->num_neigh_; ++j) {
             // correct sign on weights because it was previously
             // multiplied by -1 for sorting reasons
-            add_to_neigh.emplace_back(- weights.at(j).second,
-                    weights.at(j).first);
+            add_to_neigh.emplace_back(weights.at(j).second,
+                    -weights.at(j).first);
         }
 
         neigh_locs.push_back(std::move(add_to_neigh));
@@ -125,10 +125,10 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
 
 
     // create terms
-    this->neither_.reserve(this->network_->size());
-    this->only_inf_.reserve(this->network_->size());
-    this->only_trt_.reserve(this->network_->size());
-    this->both_.reserve(this->network_->size());
+    this->neither_.resize(this->network_->size());
+    this->only_inf_.resize(this->network_->size());
+    this->only_trt_.resize(this->network_->size());
+    this->both_.resize(this->network_->size());
 
     uint32_t term_index = 1; // zero is the intercept
     for (uint32_t i = 0; i < this->num_base_locs_; ++i) {
@@ -140,10 +140,10 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
 
             const auto & mean_var(solo_mean_var.at(m));
             if (mean_var.second > 0.0) {
-                t.weight = (solo_stats.at(m).at(base) - mean_var.first)
+                t.weight = (solo_stats.at(m).at(i) - mean_var.first)
                     / mean_var.second;
             } else {
-                CHECK_EQ(solo_stats.at(m).at(base), 1.0);
+                CHECK_EQ(solo_stats.at(m).at(i), 1.0);
                 t.weight = 1.0;
             }
 
