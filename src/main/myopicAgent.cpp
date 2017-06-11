@@ -116,5 +116,6 @@ void MyopicAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class MyopicAgent<InfState>;
 template class MyopicAgent<InfShieldState>;
+template class MyopicAgent<EbolaState>;
 
 } // namespace stdmMf

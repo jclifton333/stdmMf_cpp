@@ -439,7 +439,7 @@ void SweepAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class SweepAgent<InfState>;
 template class SweepAgent<InfShieldState>;
-
+template class SweepAgent<EbolaState>;
 
 
 } // namespace stdmMf

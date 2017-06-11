@@ -211,6 +211,7 @@ void VfnMaxSimPerturbAgent<State>::rng(
 
 template class VfnMaxSimPerturbAgent<InfState>;
 template class VfnMaxSimPerturbAgent<InfShieldState>;
+template class VfnMaxSimPerturbAgent<EbolaState>;
 
 
 } // namespace stdmMf

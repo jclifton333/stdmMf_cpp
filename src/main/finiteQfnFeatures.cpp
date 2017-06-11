@@ -455,5 +455,6 @@ void FiniteQfnFeatures<State>::rng(
 
 template class FiniteQfnFeatures<InfState>;
 template class FiniteQfnFeatures<InfShieldState>;
+template class FiniteQfnFeatures<EbolaState>;
 
 } // namespace stdmMf

@@ -345,6 +345,7 @@ void BrMinSimPerturbAgent<State>::rng(
 
 template class BrMinSimPerturbAgent<InfState>;
 template class BrMinSimPerturbAgent<InfShieldState>;
+template class BrMinSimPerturbAgent<EbolaState>;
 
 
 } // namespace stdmMf

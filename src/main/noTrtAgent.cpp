@@ -51,6 +51,6 @@ void NoTrtAgent<State>::rng(const std::shared_ptr<njm::tools::Rng> & rng) {
 
 template class NoTrtAgent<InfState>;
 template class NoTrtAgent<InfShieldState>;
-
+template class NoTrtAgent<EbolaState>;
 
 } // namespace stdmMf
