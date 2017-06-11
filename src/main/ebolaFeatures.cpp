@@ -224,6 +224,17 @@ const std::vector<EbolaFeatures::Term> & EbolaFeatures::get_terms(
 std::vector<double> EbolaFeatures::get_features(
         const EbolaState & state,
         const boost::dynamic_bitset<> & trt_bits) {
+    std::vector<double> feat(this->num_features());
+    feat.at(0) = 1.0;
+    for (uint32_t i = 0; i < this->network_->size(); ++i) {
+        const std::vector<Term> & terms(this->get_terms(i,
+                        state.inf_bits.test(i), trt_bits.test(i)));
+        std::vector<Term>::const_iterator it, end(terms.end());
+        for (it = terms.begin(); it != end; ++it) {
+            feat.at(it->index) += it->weight;
+        }
+    }
+    return feat;
 }
 
 
