@@ -394,7 +394,7 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
     const arma::mat xtx_train(xt_train * xt_train.t());
     const arma::vec xty_train(xt_train * y_train);
 
-    const std::vector<double> lambda_vals({5.0, 10.0, 25.0, 50.0, 100.0,
+    const std::vector<double> lambda_vals({1.0, 10.0, 25.0, 50.0, 100.0,
                                            250.0, 500.0, 1000.0});
     double best_ss = std::numeric_limits<double>::infinity();
     arma::vec best_beta;
