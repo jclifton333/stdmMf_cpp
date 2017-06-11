@@ -49,8 +49,9 @@ void Model<State>::est_par(const std::vector<Transition<State> > & history) {
 
     gsl_vector * const x = gsl_vector_alloc(this->par_size());
 
+    const std::vector<double> current_par(this->par());
     for(uint32_t pi = 0; pi < this->par_size(); ++pi){
-        gsl_vector_set(x, pi, 0.0);
+        gsl_vector_set(x, pi, current_par.at(pi));
     }
 
     gsl_multimin_function_fdf my_func;
