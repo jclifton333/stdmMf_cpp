@@ -232,7 +232,8 @@ std::vector<double> EbolaStateModel::ll_hess(
 
                 if (prob_j > 0.0 && prob_j < 1.0) {
                     std::vector<double> grad_j(this->par_size());
-                    std::vector<double> hess_j(this->par_size());
+                    std::vector<double> hess_j(
+                            this->par_size() * this->par_size());
 
                     // neighbor probs
                     const Node & node_j = this->network_->get_node(j);
