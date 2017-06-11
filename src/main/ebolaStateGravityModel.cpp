@@ -97,6 +97,8 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_grad(
     grad.at(1) *= std::exp(log_grav_term);
     grad.at(2) *= this->beta_1_ * this->network_->dist().at(a_node).at(b_node)
         * std::pow(pop, - this->beta_2_) * (- std::log(pop));
+    grad.at(3) *= b_trt;
+    grad.at(4) *= a_trt;
 
     return grad;
 }
@@ -130,6 +132,8 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_hess(
     grad_logit.at(2) = this->beta_1_
         * this->network_->dist().at(a_node).at(b_node)
         * std::pow(pop, - this->beta_2_) * (- std::log(pop));
+    grad_logit.at(3) *= b_trt;
+    grad_logit.at(4) *= a_trt;
 
     std::vector<double> hess_one(this->par_size_ * this->par_size_, 0.0);
     const std::vector<double> hess_two(njm::linalg::outer_a_and_b(
