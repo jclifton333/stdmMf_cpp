@@ -27,6 +27,11 @@ private:
     std::vector<std::vector<Term> > only_trt_;
     std::vector<std::vector<Term> > both_;
 
+    const std::vector<Term> & get_terms(
+            const uint32_t & loc,
+            const bool & inf_bit,
+            const bool & trt_bit) const;
+
 public:
     EbolaFeatures(const std::shared_ptr<const Network> & network,
             const uint32_t & num_base_locs, const uint32_t & num_neigh);

@@ -201,6 +201,25 @@ std::shared_ptr<Features<EbolaState> > EbolaFeatures::clone() const {
     return std::shared_ptr<Features<EbolaState> > (new EbolaFeatures(*this));
 }
 
+const std::vector<EbolaFeatures::Term> & EbolaFeatures::get_terms(
+        const uint32_t & loc,
+        const bool & inf_bit,
+        const bool & trt_bit) const {
+    if (inf_bit) {
+        if (trt_bit) {
+            return this->both_.at(loc);
+        } else {
+            return this->only_inf_.at(loc);
+        }
+    } else {
+        if (trt_bit) {
+            return this->only_trt_.at(loc);
+        } else {
+            return this->neither_.at(loc);
+        }
+    }
+}
+
 
 std::vector<double> EbolaFeatures::get_features(
         const EbolaState & state,
