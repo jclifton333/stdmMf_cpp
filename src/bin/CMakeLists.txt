@@ -22,7 +22,7 @@ SET(bin_file_names
   ## sims
   run_infState
   run_infShieldState
-
+  run_ebola
 
   ## adaptive testing
   # adaptTestData_infState
