@@ -225,7 +225,7 @@ void EbolaFeatures::update_features_async(
         const EbolaState & state_old,
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) const {
-    LOG(FATAL) < "NOT IMPLEMENTED";
+    LOG(FATAL) << "NOT IMPLEMENTED";
 }
 
 
