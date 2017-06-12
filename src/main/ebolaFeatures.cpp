@@ -89,7 +89,8 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
         // constant
         solo_stats.at(solo_index++).push_back(1.0);
         // population
-        solo_stats.at(solo_index++).push_back(EbolaData::population().at(base));
+        solo_stats.at(solo_index++).push_back(
+                std::log(EbolaData::population().at(base)));
 
         CHECK_EQ(solo_index, this->num_solo_);
 
@@ -103,8 +104,8 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
                     this->network_->dist().at(base).at(neigh));
             // population product
             joint_stats.at(joint_index++).push_back(
-                    EbolaData::population().at(base)
-                    * EbolaData::population().at(neigh));
+                    std::log(EbolaData::population().at(base))
+                    + std::log( EbolaData::population().at(neigh)));
             // // gravity
             // joint_stats.at(joint_index++).push_back(
             //         this->network_->dist().at(base).at(neigh)
