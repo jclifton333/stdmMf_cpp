@@ -542,6 +542,9 @@ int main(int argc, char *argv[]) {
     std::vector<std::pair<std::string,
                           std::vector<ModelPair> > > models;
     { // models
+
+        std::vector<double> grav_par{-5.246, -155.8, 0.186, -3.0, -2.0};
+
         { // Correct: Gravity,  Postulated: Gravity
             std::vector<ModelPair> models_add;
             for (uint32_t i = 0; i < networks.size(); ++i) {
@@ -551,6 +554,8 @@ int main(int argc, char *argv[]) {
                         std::shared_ptr<Model<EbolaState> >(
                                 new EbolaStateGravityModel(
                                         networks.at(i))));
+                mp.first->par(grav_par);
+                mp.second->par(grav_par);
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
