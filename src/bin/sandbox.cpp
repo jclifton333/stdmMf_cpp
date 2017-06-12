@@ -20,6 +20,8 @@
 
 #include "ebolaStateGravityModel.hpp"
 
+#include "ebolaFeatures.hpp"
+
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
 #include <njm_cpp/thread/pool.hpp>
@@ -46,38 +48,36 @@ int main(int argc, char *argv[]) {
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);
 
-    std::shared_ptr<Network> n = Network::gen_network(init);
+    std::shared_ptr<Network> net(Network::gen_network(init));
+
+    const uint32_t time_points(50);
 
     // init model
-    const std::shared_ptr<EbolaStateGravityModel> m(
-            new EbolaStateGravityModel(n));
+    const std::shared_ptr<EbolaStateGravityModel> mod(
+            new EbolaStateGravityModel(net));
 
-    // set par
-    njm::tools::Rng rng;
-    std::vector<double> par(m->par());
-    par.at(0) = -5.246;
-    par.at(1) = -155.8;
-    par.at(2) = 0.186;
-    par.at(3) = -2.0;
-    par.at(4) = -1.0;
-    m->par(par);
+    System<EbolaState> s(net, mod->clone());
+    s.seed(0);
+    VfnMaxSimPerturbAgent<EbolaState> a(net,
+            std::shared_ptr<Features<EbolaState> >(
+                    new FiniteQfnFeatures<EbolaState>(
+                            net, {mod->clone()},
+                            std::shared_ptr<Features<EbolaState> >(
+                                    new EbolaFeatures(
+                                            net, 20, 10)), 1)),
+            mod->clone(),
+            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+    a.seed(0);
 
-    System<EbolaState> s(n,m);
     s.start();
 
-    RandomAgent<EbolaState> ra(n);
+    runner(&s, &a, time_points, 1.0);
 
-    runner(&s, &ra, 1, 1.0);
+    // EbolaFeatures ef(net, 2, 1);
 
-    const auto history(Transition<EbolaState>::from_sequence(
-                    s.history(), s.state()));
-
-    const std::vector<double> grad(m->ll_grad(history));
-
-    for (uint32_t i = 0; i < m->par_size(); ++i) {
-        std::cout << grad.at(i) << std::endl;
-    }
-
+    // s.start();
+    // const std::vector<double> feat(ef.get_features(s.state(),
+    //                 boost::dynamic_bitset<>(net->size())));
 
     return 0;
 }
