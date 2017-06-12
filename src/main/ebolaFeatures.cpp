@@ -136,7 +136,6 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
         // solo terms
         for (uint32_t m = 0; m < solo_stats.size(); ++m) {
             Term t;
-            t.index = term_index++;
 
             const auto & mean_var(solo_mean_var.at(m));
             if (mean_var.second > 0.0) {
@@ -148,18 +147,27 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
             }
 
             // add term
+            t.index = term_index++;
             this->neither_.at(base).push_back(t);
+
+            t.index = term_index++;
             this->only_inf_.at(base).push_back(t);
+
+            t.index = term_index++;
             this->only_trt_.at(base).push_back(t);
+
+            t.index = term_index++;
             this->both_.at(base).push_back(t);
         }
 
         // joint terms
         for (uint32_t m = 0; m < joint_stats.size(); ++m) {
+            // bookmark index so neighbors sum in same feature slot
+            const uint32_t bookmark_index(term_index);
             for (uint32_t j = 0; j < this->num_neigh_; ++j) {
+                term_index = bookmark_index;
                 const uint32_t & neigh(neigh_locs.at(i).at(j).first);
                 Term t;
-                t.index = term_index; // don't increment
 
                 const double & dist_weight(neigh_locs.at(i).at(j).second);
 
@@ -175,13 +183,18 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
                 }
 
                 // add term
+                t.index = term_index++;
                 this->neither_.at(neigh).push_back(t);
+
+                t.index = term_index++;
                 this->only_inf_.at(neigh).push_back(t);
+
+                t.index = term_index++;
                 this->only_trt_.at(neigh).push_back(t);
+
+                t.index = term_index++;
                 this->both_.at(neigh).push_back(t);
             }
-            // increment for next feature
-            ++term_index;
         }
     }
 
