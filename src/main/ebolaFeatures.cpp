@@ -290,8 +290,8 @@ void EbolaFeatures::update_features_async(
 
 
 uint32_t EbolaFeatures::num_features() const {
-    return 1 + this->num_base_locs_ * this->num_solo_
-        + this->num_base_locs_ * this->num_joint_;
+    return 1 + 4 * (this->num_base_locs_ * this->num_solo_
+            + this->num_base_locs_ * this->num_joint_);
 }
 
 
