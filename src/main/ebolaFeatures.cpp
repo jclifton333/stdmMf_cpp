@@ -10,7 +10,7 @@
 namespace stdmMf {
 
 const uint32_t EbolaFeatures::num_solo_ = 2;
-const uint32_t EbolaFeatures::num_joint_ = 4;
+const uint32_t EbolaFeatures::num_joint_ = 3;
 
 
 EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
@@ -105,11 +105,11 @@ EbolaFeatures::EbolaFeatures(const std::shared_ptr<const Network> & network,
             joint_stats.at(joint_index++).push_back(
                     EbolaData::population().at(base)
                     * EbolaData::population().at(neigh));
-            // gravity
-            joint_stats.at(joint_index++).push_back(
-                    this->network_->dist().at(base).at(neigh)
-                    / (EbolaData::population().at(base)
-                            * EbolaData::population().at(neigh)));
+            // // gravity
+            // joint_stats.at(joint_index++).push_back(
+            //         this->network_->dist().at(base).at(neigh)
+            //         / (EbolaData::population().at(base)
+            //                 * EbolaData::population().at(neigh)));
 
             CHECK_EQ(joint_index, this->num_joint_);
         }
