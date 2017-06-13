@@ -1,5 +1,6 @@
 rm(list=ls(all=TRUE))
 
+require(maptools)
 require(PBSmapping)
 
 ## download data and code for Ebola paper from
