@@ -259,8 +259,8 @@ TEST(TestInfStateOrSoModel, EstPar) {
 
     const std::vector<double> est_par = m->par();
     for (uint32_t i = 0; i < m->par_size(); ++i) {
-        const double diff = std::abs(par.at(i) - est_par.at(i));
-        EXPECT_LT(diff / par.at(i), 0.1)
+        const double diff(par.at(i) - est_par.at(i));
+        EXPECT_LT(std::abs(diff / par.at(i)), 0.1)
             << "Par " << i << " failed with truth " << par.at(i)
             << " and estimate " << est_par.at(i);
     }
