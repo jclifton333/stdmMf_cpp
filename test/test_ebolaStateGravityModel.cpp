@@ -252,7 +252,7 @@ TEST(TestEbolaStateGravityModel, EstPar) {
             new RandomAgent<EbolaState>(n));
     EpsAgent<EbolaState> ea(n, pa, ra, 0.1);
 
-    const uint32_t num_points = 200;
+    const uint32_t num_points = 10;
     runner(&s, &ea, num_points, 1.0);
 
     std::vector<Transition<EbolaState> > history(
