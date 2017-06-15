@@ -39,7 +39,7 @@ ebola = data.frame(county = ids$county,
                    region = region,
                    loc = ids$loc,
                    outbreaks = outbreaks$infection_date,
-                   population = polygons$pop.size / mean(polygons$pop.size),
+                   population = polygons$pop.size,
                    x = centroids$X,
                    y = centroids$Y
                    )
