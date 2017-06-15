@@ -555,7 +555,6 @@ int main(int argc, char *argv[]) {
                                 new EbolaStateGravityModel(
                                         networks.at(i))));
                 mp.first->par(grav_par);
-                mp.second->par(grav_par);
                 models_add.push_back(mp);
             }
             models.push_back(std::pair<std::string,
