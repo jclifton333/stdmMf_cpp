@@ -56,6 +56,13 @@ int main(int argc, char *argv[]) {
     const std::shared_ptr<EbolaStateGravityModel> mod(
             new EbolaStateGravityModel(net));
 
+    std::vector<double> par(mod->par_size());
+    par.at(0) = -5.25;
+    par.at(1) = std::log(156);
+    par.at(2) = 0.186;
+    par.at(3) = -1.5;
+    par.at(4) = -1.0;
+
     System<EbolaState> s(net, mod->clone());
     s.seed(0);
     VfnMaxSimPerturbAgent<EbolaState> a(net,
