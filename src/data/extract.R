@@ -54,6 +54,9 @@ first_date = min(ebola$outbreaks, na.rm = TRUE)
 ebola$outbreaks = ifelse(is.na(ebola$outbreaks),
                         -1,
                         ebola$outbreaks - first_date)
+## ebola paper cuts off outbreaks past 157 days
+ebola$outbreaks = ifelse(ebola$outbreaks > 157, -1, ebola$outbreaks)
+
 
 ## write to files
 for(n in names(ebola)) {
