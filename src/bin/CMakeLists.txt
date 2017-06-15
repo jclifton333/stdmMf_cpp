@@ -40,6 +40,7 @@ SET(bin_file_names
   # fit_nn
   networksToFile
   sandbox
+  fit_ebola
   )
 
 foreach(bin_file ${bin_file_names})
