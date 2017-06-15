@@ -11,8 +11,6 @@ namespace stdmMf {
 EbolaStateGravityModel::EbolaStateGravityModel(
         const std::shared_ptr<const Network> & network)
     : EbolaStateModel(5, network),
-      // beta_0_(-5.246), beta_1_(-155.8), beta_2_(0.186),
-      // trt_pre_(-2.0), trt_act_(-1.0) {
       beta_0_(-3.0), beta_1_(0.0), beta_2_(0.0),
       trt_pre_(0.0), trt_act_(0.0) {
 }
