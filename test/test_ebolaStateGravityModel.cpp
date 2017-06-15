@@ -144,8 +144,6 @@ TEST(TestEbolaStateGravityModel,TestLLGradient) {
         double abserr;
         gsl_deriv_central(&F, par.at(i), 1e-3, &result, &abserr);
 
-        std::cout << result << std::endl;
-
         EXPECT_NEAR(grad_val.at(i), result, eps)
             << "gradient failed for parameter " << i;
     }
@@ -272,7 +270,6 @@ TEST(TestEbolaStateGravityModel, EstPar) {
     const std::vector<double> est_par = m->par();
     for (uint32_t i = 0; i < m->par_size(); ++i) {
         const double diff(par.at(i) - est_par.at(i));
-        std::cout << par.at(i) << " == " << est_par.at(i) << std::endl;
         EXPECT_LT(std::abs(diff / par.at(i)), 0.1)
             << "Par " << i << " failed with truth " << par.at(i)
             << " and estimate " << est_par.at(i);
