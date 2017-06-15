@@ -80,11 +80,5 @@ int main(int argc, char *argv[]) {
 
     runner(&s, &a, time_points, 1.0);
 
-    // EbolaFeatures ef(net, 2, 1);
-
-    // s.start();
-    // const std::vector<double> feat(ef.get_features(s.state(),
-    //                 boost::dynamic_bitset<>(net->size())));
-
     return 0;
 }
