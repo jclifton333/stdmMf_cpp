@@ -13,6 +13,7 @@ bool EbolaData::init_ = false;
 std::vector<std::string> EbolaData::country_;
 std::vector<std::string> EbolaData::county_;
 std::vector<std::string> EbolaData::loc_;
+std::vector<uint32_t> EbolaData::region_;
 std::vector<int> EbolaData::outbreaks_;
 std::vector<double> EbolaData::population_;
 std::vector<double> EbolaData::x_;
@@ -50,6 +51,15 @@ void EbolaData::init() {
         std::copy(input, std::istream_iterator<std::string>(),
                 std::back_inserter(EbolaData::loc_));
         CHECK_EQ(EbolaData::loc_.size(), 290) << "ebola_loc";
+        inputFile.close();
+    }
+    {
+        std::ifstream inputFile{ebola_root_dir + "ebola_region.txt"};
+        CHECK(inputFile.good()) << "ebola_region";
+        std::istream_iterator<uint32_t> input(inputFile);
+        std::copy(input, std::istream_iterator<uint32_t>(),
+                std::back_inserter(EbolaData::region_));
+        CHECK_EQ(EbolaData::region_.size(), 290) << "ebola_region";
         inputFile.close();
     }
     {
