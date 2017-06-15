@@ -13,13 +13,12 @@ data_dir = "~/Downloads/DataAndCode/DataAndcode"
 ## polygon data set
 polygons = readRDS(paste(data_dir, "WestAfricaCountyPolygons.rds", sep="/"))
 centroids = calcCentroid(SpatialPolygons2PolySet(polygons), rollup = 1)
+region = as.integer(as.factor(polygons$ISO))
 
 ## outbreaks data set
 outbreaks = readRDS(paste(data_dir,
                           "OutbreakDateByCounty_Summer_AllCountries.rds",
                           sep="/"))
-## sort outbreaks by county
-outbreaks = outbreaks[order(as.character(outbreaks$county_names)),]
 
 
 ## id data set
@@ -28,8 +27,6 @@ ids = readRDS(paste(data_dir, "MobilityDataIDs.rds", sep="/"))
 ids$county[which(ids$county=="Gbapolu")] = "Gbarpolu"
 ids$county[which(ids$county=="BafatÃ¡")] = "Bafatá"
 ids$county[which(ids$county=="GabÃº")] = "Gabú"
-## sort ids by county
-ids = ids[order(ids$county),]
 
 
 ## read in supplemental data to get x and y coordinates
@@ -39,9 +36,10 @@ admn = read.csv(paste(data_dir, "AdmUnits_WBtwn.csv", sep="/"), as.is=TRUE)
 ## combine necessary data for simulations
 ebola = data.frame(county = ids$county,
                    country = ids$country,
+                   region = region,
                    loc = ids$loc,
                    outbreaks = outbreaks$infection_date,
-                   population = polygons$pop.size,
+                   population = polygons$pop.size / mean(polygons$pop.size),
                    x = centroids$X,
                    y = centroids$Y
                    )
