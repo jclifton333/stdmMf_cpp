@@ -326,7 +326,7 @@ void queue_sim(
                                     net, {mod},
                                     std::shared_ptr<Features<EbolaState> >(
                                             new EbolaFeatures(
-                                                    net, 20, 10)), 1)),
+                                                    net, 50, 10)), 2)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
                     true, true, false, 0, 0, 0, 0);
