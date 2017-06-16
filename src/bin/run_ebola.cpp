@@ -273,7 +273,7 @@ void queue_sim(
             VfnMaxSimPerturbAgent<EbolaState> a(net,
                     std::shared_ptr<Features<EbolaState> >(
                             new EbolaFeatures(
-                                    net, 20, 10)),
+                                    net, 50, 10)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
