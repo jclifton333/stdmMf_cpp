@@ -586,7 +586,8 @@ int main(int argc, char *argv[]) {
                           std::vector<ModelPair> > > models;
     { // models
 
-        std::vector<double> grav_par{-5.246, std::log(155.8), 0.186, -6.0, -4.0};
+        std::vector<double> grav_par{-5.246, std::log(155.8), 0.186,
+                                     -8.0, -8.0};
 
         { // Correct: Gravity,  Postulated: Gravity
             std::vector<ModelPair> models_add;
