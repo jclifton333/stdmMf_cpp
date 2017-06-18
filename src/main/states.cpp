@@ -73,14 +73,8 @@ InfShieldState InfShieldState::random(const uint32_t & num_nodes,
 
 
 // Ebola state
-EbolaState::EbolaState()
-    : inf_bits(290), pop(EbolaData::population()) {
-}
-
-
 EbolaState::EbolaState(const uint32_t & num_nodes)
-    : EbolaState() {
-    CHECK_EQ(num_nodes, 290);
+    : inf_bits(num_nodes), pop(EbolaData::population()) {
 }
 
 
@@ -108,14 +102,8 @@ void EbolaState::reset() {
 
 EbolaState EbolaState::random(const uint32_t & num_nodes,
         njm::tools::Rng & rng) {
-    CHECK_EQ(num_nodes, 290);
-    return EbolaState::random(rng);
-}
-
-
-EbolaState EbolaState::random(njm::tools::Rng & rng) {
-    EbolaState state;
-    for (uint32_t i = 0; i < 290; ++i) {
+    EbolaState state(num_nodes);
+    for (uint32_t i = 0; i < num_nodes; ++i) {
         if (rng.runif_01() < 0.5) {
             state.inf_bits.flip(i);
         }
