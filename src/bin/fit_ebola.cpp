@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     const int & max_outbreak(*std::max_element(
                     outbreaks.begin(), outbreaks.end()));
     for (uint32_t i = 0; i < (max_outbreak + 1); ++i) {
-        obs_history.emplace_back(EbolaState(),
+        obs_history.emplace_back(EbolaState(net->size()),
                 boost::dynamic_bitset<>(net->size()));
     }
 
