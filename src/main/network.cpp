@@ -1,4 +1,5 @@
 #include "network.hpp"
+#include "ebolaData.hpp"
 #include <algorithm>
 #include <numeric>
 #include <queue>
@@ -522,26 +523,15 @@ std::shared_ptr<Network> Network::gen_ebola() {
     std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
 
     network->kind_ = "ebola";
-    network->num_nodes_ = 290;
+    network->num_nodes_ = EbolaData::loc().size();
     network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
             network->num_nodes_, network->num_nodes_,
             // allocate memory because this is a fully connected
             // network
             network->num_nodes_ * network->num_nodes_);
 
-    const std::string ebola_root_dir(
-            njm::info::project::PROJECT_ROOT_DIR + "/src/data/");
-    std::ifstream in(ebola_root_dir + "ebola_x.txt");
-    const std::vector<double> ebola_x{
-        std::istream_iterator<double>{in}, {}};
-    in.close();
-    CHECK_EQ(ebola_x.size(), 290);
-
-    in.open(ebola_root_dir + "ebola_y.txt");
-    const std::vector<double> ebola_y{
-        std::istream_iterator<double>{in}, {}};
-    in.close();
-    CHECK_EQ(ebola_y.size(), 290);
+    const std::vector<double> & ebola_x(EbolaData::x());
+    const std::vector<double> ebola_y(EbolaData::y());
 
     for (uint32_t i = 0; i < network->num_nodes_; ++i) {
         Node * const n(network->node_list_.add_nodes());
