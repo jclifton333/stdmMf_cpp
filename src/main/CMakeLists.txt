@@ -42,7 +42,7 @@ add_library(stdmMf network.cpp system.cpp states.cpp
   finiteQfnFeatures.cpp # finiteQfnNnFeatures.cpp
 
   ## ebola features
-  ebolaFeatures.cpp
+  ebolaFeatures.cpp ebolaBinnedFeatures.cpp
 
   ## optimization
   objFns.cpp polValIteration.cpp
