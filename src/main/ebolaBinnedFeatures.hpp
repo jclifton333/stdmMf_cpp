@@ -16,9 +16,11 @@ protected:
         double weight;
     };
 
-    const std::shared_ptr<const Network> & network_;
+    const std::shared_ptr<const Network> network_;
 
     const uint32_t num_bins_;
+    const uint32_t num_per_bin_;
+    const uint32_t num_extra_;
     static const uint32_t num_features_per_bin_;
     const uint32_t num_neigh_;
 
@@ -71,9 +73,6 @@ public:
     std::vector<std::vector<uint32_t> > get_neigh() const;
 
     std::vector<std::vector<Term> > get_terms() const;
-
-    using njm::tools::RngClass::rng;
-    virtual void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
 
 

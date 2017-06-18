@@ -10,14 +10,17 @@
 namespace stdmMf {
 
 
-const uint32_t EbolaBinnedFeatures::num_features_per_bin_ = 2;
+const uint32_t EbolaBinnedFeatures::num_features_per_bin_ = 5;
 
 
 EbolaBinnedFeatures::EbolaBinnedFeatures(
         const std::shared_ptr<const Network> & network,
         const uint32_t num_bins,
         const uint32_t num_neigh)
-    : network_(network), num_bins_(num_bins), num_neigh_(num_neigh),
+    : network_(network), num_bins_(num_bins),
+      num_per_bin_(this->network_->size() / this->num_bins_),
+      num_extra_(this->network_->size() % this->num_bins_),
+      num_neigh_(num_neigh),
       bins_(this->get_bins()), neigh_(this->get_neigh()),
       terms_(this->get_terms()) {
 }
@@ -25,6 +28,7 @@ EbolaBinnedFeatures::EbolaBinnedFeatures(
 
 EbolaBinnedFeatures::EbolaBinnedFeatures(const EbolaBinnedFeatures & other)
     : network_(other.network_), num_bins_(other.num_bins_),
+      num_per_bin_(other.num_per_bin_), num_extra_(other.num_extra_),
       num_neigh_(other.num_neigh_), bins_(other.bins_),
       neigh_(other.neigh_), terms_(other.terms_) {
 }
@@ -102,19 +106,19 @@ std::vector<uint32_t> EbolaBinnedFeatures::get_bins() const {
     // sort by centrality
     std::sort(centrality.begin(), centrality.end());
 
-    const uint32_t num_per_bin(this->network_->size() / this->num_bins_);
-    const uint32_t num_extra(this->network_->size() % this->num_bins_);
-    CHECK_EQ(num_per_bin * this->num_bins_ + num_extra, this->network_->size());
+    CHECK_EQ(this->num_per_bin_ * this->num_bins_ + this->num_extra_,
+            this->network_->size());
 
     std::vector<uint32_t> bins(this->network_->size(), this->num_bins_);
     uint32_t beg(0);
-    uint32_t end(num_per_bin);
-    for (uint32_t bin = 0; bin < this->num_bins_; ++bin, end += num_per_bin) {
+    uint32_t end(this->num_per_bin_);
+    for (uint32_t bin = 0; bin < this->num_bins_;
+         ++bin, end += this->num_per_bin_) {
         // fill in the extras in the early bins
-        if (bin < num_extra) {
+        if (bin < this->num_extra_) {
             ++end;
         }
-        for (uint32_t node(bin); node < end; ++node) {
+        for (uint32_t node(beg); node < end; ++node) {
             bins.at(centrality.at(node).second) = bin;
         }
         beg = end;
@@ -169,22 +173,26 @@ EbolaBinnedFeatures::get_terms() const {
 
     std::vector<std::vector<Term> > terms(this->network_->size());
     for (uint32_t i = 0; i < this->network_->size(); ++i) {
-        uint32_t index(this->num_features_per_bin_ * this->bins_.at(i) * 4);
+        uint32_t index(1 + this->num_features_per_bin_ * this->bins_.at(i) * 4);
+        const uint32_t bin_count(this->bins_.at(i) < this->num_extra_
+                ? this->num_per_bin_ + 1 : this->num_per_bin_);
+
         // counts
-        terms.at(i).emplace_back(Term{index, 1.0});
+        terms.at(i).emplace_back(Term{index, 1.0 / bin_count});
         index += 4;
 
         // population
-        terms.at(i).emplace_back(Term{index, norm_pop.at(i)});
+        terms.at(i).emplace_back(Term{index, norm_pop.at(i) / bin_count});
         index += 4;
 
         // neighbor counts
         for (uint32_t j = 0; j < this->num_neigh_; ++j) {
             const uint32_t neigh(this->neigh_.at(i).at(j));
             const double prox_weight(
-                    std::exp(-this->network_->dist().at(i).at(neigh)
-                            / min_dist));
-            terms.at(neigh).emplace_back(Term{index, prox_weight});
+                    std::exp(-(this->network_->dist().at(i).at(neigh)
+                                    - min_dist)));
+            terms.at(neigh).emplace_back(
+                    Term{index, prox_weight / this->num_neigh_ / bin_count});
         }
         index += 4;
 
@@ -192,11 +200,11 @@ EbolaBinnedFeatures::get_terms() const {
         for (uint32_t j = 0; j < this->num_neigh_; ++j) {
             const uint32_t neigh(this->neigh_.at(i).at(j));
             const double prox_weight(
-                    std::exp(-this->network_->dist().at(i).at(neigh)
-                            / min_dist));
+                    std::exp(-(this->network_->dist().at(i).at(neigh)
+                                    - min_dist)));
             const double weight(prox_weight * norm_pop.at(neigh));
             terms.at(neigh).emplace_back(
-                    Term{index, weight / this->num_neigh_});
+                    Term{index, weight / this->num_neigh_ / bin_count});
         }
         index += 4;
 
@@ -204,11 +212,12 @@ EbolaBinnedFeatures::get_terms() const {
         for (uint32_t j = 0; j < this->num_neigh_; ++j) {
             const uint32_t neigh(this->neigh_.at(i).at(j));
             const double dist(this->network_->dist().at(i).at(neigh));
-            const double prox_weight(std::exp(-dist / min_dist));
+            const double prox_weight(std::exp(-(dist - min_dist)));
+
             const double weight(prox_weight * (dist / mean_dist)
                     / (norm_pop.at(i) * norm_pop.at(neigh)));
             terms.at(neigh).emplace_back(
-                    Term{index, weight / this->num_neigh_});
+                    Term{index, weight / this->num_neigh_ / bin_count});
         }
         index += 4;
     }
@@ -218,7 +227,7 @@ EbolaBinnedFeatures::get_terms() const {
 
 
 uint32_t EbolaBinnedFeatures::num_features() const {
-    return this->num_bins_ * num_features_per_bin_ * 4;
+    return 1 + this->num_bins_ * num_features_per_bin_ * 4;
 }
 
 
