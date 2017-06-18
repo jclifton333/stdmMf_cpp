@@ -612,7 +612,7 @@ int main(int argc, char *argv[]) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
-                "vfn", // "vfn_finite_q",
+                "vfn", "vfn_finite_q",
                 // "br_finite_q"
             });
     AllResults<std::promise> promise_results;
