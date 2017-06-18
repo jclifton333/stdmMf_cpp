@@ -68,6 +68,18 @@ public:
     }
 
     static void init ();
+
+    static void init(
+            const std::vector<std::string> & country,
+            const std::vector<std::string> & county,
+            const std::vector<std::string> & loc,
+            const std::vector<uint32_t> & region,
+            const std::vector<int> & outbreaks,
+            const std::vector<double> & population,
+            const std::vector<double> & x,
+            const std::vector<double> & y);
+
+    static void deinit();
 };
 
 

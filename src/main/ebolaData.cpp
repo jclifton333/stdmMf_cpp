@@ -19,6 +19,45 @@ std::vector<double> EbolaData::population_;
 std::vector<double> EbolaData::x_;
 std::vector<double> EbolaData::y_;
 
+void EbolaData::deinit() {
+    EbolaData::country_.clear();
+    EbolaData::county_.clear();
+    EbolaData::loc_.clear();
+    EbolaData::region_.clear();
+    EbolaData::outbreaks_.clear();
+    EbolaData::population_.clear();
+    EbolaData::x_.clear();
+    EbolaData::y_.clear();
+    EbolaData::init_ = false;
+}
+
+
+void EbolaData::init(
+        const std::vector<std::string> & country,
+        const std::vector<std::string> & county,
+        const std::vector<std::string> & loc,
+        const std::vector<uint32_t> & region,
+        const std::vector<int> & outbreaks,
+        const std::vector<double> & population,
+        const std::vector<double> & x,
+        const std::vector<double> & y) {
+    if (EbolaData::init_) {
+        return;
+    }
+
+    EbolaData::country_ = country;
+    EbolaData::county_ = county;
+    EbolaData::loc_ = loc;
+    EbolaData::region_ = region;
+    EbolaData::outbreaks_ = outbreaks;
+    EbolaData::population_ = population;
+    EbolaData::x_ = x;
+    EbolaData::y_ = y;
+
+    EbolaData::init_ = true;
+}
+
+
 void EbolaData::init() {
     if (EbolaData::init_) {
         return;
