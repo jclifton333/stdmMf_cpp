@@ -30,8 +30,8 @@ add_library(stdmMf network.cpp system.cpp states.cpp
   ebolaStateModel.cpp ebolaStateGravityModel.cpp
 
   ## agents
-  agent.cpp noTrtAgent.cpp randomAgent.cpp proximalAgent.cpp myopicAgent.cpp
-  epsAgent.cpp sweepAgent.cpp sweepAgentSlow.cpp
+  agent.cpp noTrtAgent.cpp allTrtAgent.cpp randomAgent.cpp proximalAgent.cpp
+  myopicAgent.cpp epsAgent.cpp sweepAgent.cpp sweepAgentSlow.cpp
   vfnMaxSimPerturbAgent.cpp brMinSimPerturbAgent.cpp
   vfnBrAdaptSimPerturbAgent.cpp vfnBrStartSimPerturbAgent.cpp
   brMinWtdSimPerturbAgent.cpp
