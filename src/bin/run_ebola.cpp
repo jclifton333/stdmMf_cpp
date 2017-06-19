@@ -121,7 +121,14 @@ void queue_sim(
             NoTrtAgent<EbolaState> a(net);
             a.seed(i);
 
-            s.start();
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
 
             Outcome outcome;
 
@@ -306,50 +313,50 @@ void queue_sim(
     }
 
 
-    // // vfn max finite q
-    // CHECK_EQ(results->results.count("vfn_finite_q"), 1);
-    // CHECK_EQ(results->results.at("vfn_finite_q").size(), num_reps);
-    // for (uint32_t i = 0; i < num_reps; ++i) {
-    //     pool->service().post([=]() {
-    //         System<EbolaState> s(net, mod_system->clone());
-    //         s.seed(i);
-    //         VfnMaxSimPerturbAgent<EbolaState> a(net,
-    //                 std::shared_ptr<Features<EbolaState> >(
-    //                         new FiniteQfnFeatures<EbolaState>(
-    //                                 net, {mod_agents->clone()},
-    //                                 std::shared_ptr<Features<EbolaState> >(
-    //                                         new EbolaBinnedFeatures(
-    //                                                 net, 20, 5)), 2)),
-    //                 mod_agents->clone(),
-    //                 2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    //         a.seed(i);
+    // vfn max finite q
+    CHECK_EQ(results->results.count("vfn_finite_q"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<EbolaState> s(net, mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
+                    std::shared_ptr<Features<EbolaState> >(
+                            new FiniteQfnFeatures<EbolaState>(
+                                    net, {mod_agents->clone()},
+                                    std::shared_ptr<Features<EbolaState> >(
+                                            new EbolaBinnedFeatures(
+                                                    net, 20, 5)), 2)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
 
-    //         s.start();
+            s.start();
 
-    //         Outcome outcome;
+            Outcome outcome;
 
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tick =
-    //             std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-    //         outcome.value = runner(&s, &a, time_points, 1.0);
+            outcome.value = runner(&s, &a, time_points, 1.0);
 
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tock =
-    //             std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-    //         outcome.time = std::chrono::duration_cast<
-    //             std::chrono::seconds>(tock - tick).count();
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
 
-    //         outcome.history = s.history();
-    //         outcome.history.emplace_back(s.state(),
-    //                 boost::dynamic_bitset<>(net->size()));
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
 
-    //         results->results.at("vfn_finite_q").at(i).set_value(
-    //                 std::move(outcome));
-    //         progress->update();
-    //     });
-    // }
+            results->results.at("vfn_finite_q").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
 
 
     // // br min finite q
@@ -586,8 +593,12 @@ int main(int argc, char *argv[]) {
                           std::vector<ModelPair> > > models;
     { // models
 
-        std::vector<double> grav_par{-5.246, std::log(155.8), 0.186,
-                                     -8.0, -8.0};
+        // std::vector<double> grav_par{-5.246, std::log(155.8), 0.186,
+        //                              -8.0, -8.0};
+
+        // these are obtained from running fit_ebola
+        std::vector<double> grav_par{-2.999819, 1.399234, 0.051293,
+                                      -1.015256, -1.015256};
 
         { // Correct: Gravity,  Postulated: Gravity
             std::vector<ModelPair> models_add;
@@ -613,7 +624,8 @@ int main(int argc, char *argv[]) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
-                "vfn", // "vfn_finite_q",
+                "vfn",
+                "vfn_finite_q",
                 // "br_finite_q"
             });
     AllResults<std::promise> promise_results;
