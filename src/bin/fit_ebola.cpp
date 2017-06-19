@@ -2,6 +2,7 @@
 #include "infShieldStateNoImNoSoModel.hpp"
 #include "infShieldStatePosImNoSoModel.hpp"
 #include "noTrtAgent.hpp"
+#include "allTrtAgent.hpp"
 #include "proximalAgent.hpp"
 #include "randomAgent.hpp"
 #include "myopicAgent.hpp"
@@ -79,16 +80,177 @@ int main(int argc, char *argv[]) {
     }
 
     std::vector<double> par(mod->par_size(), 0.0);
-    // par.at(0) = -5.25;
-    // par.at(1) = -std::log(156);
-    // par.at(2) = 0.186;
     mod->par(par);
 
     mod->est_par(Transition<EbolaState>::from_sequence(obs_history));
 
     par = mod->par();
 
+    // par = {-4.50446, 1.80575, 0.051293, 0.0, 0.0};
+
+    std::cout << "estimated par:";
+    std::for_each(par.begin(), par.end(),
+            [] (const double & x_) {std::cout << " " << x_;});
+    std::cout << std::endl;
+
+
+    EbolaState start_state(EbolaState(net->size()));
+    for (uint32_t i = 0; i < net->size(); ++i) {
+        if (EbolaData::outbreaks().at(i) >= 0) {
+            start_state.inf_bits.set(i);
+        }
+    }
+
+    NoTrtAgent<EbolaState> notrt(net);
+    AllTrtAgent<EbolaState> alltrt(net);
+
+    const uint32_t time_points(25);
+    const uint32_t num_reps(100);
+
+    // tune infection rate
+    const double target_inf_notrt(0.8);
+    bool calibrated(false);
+    bool was_above(false);
+    double scale = 0.1;
+    std::cout << "tuning infection rate" << std::endl;
+    std::cout << "target infection: "
+              << std::setw(8)
+              << std::setfill('0')
+              << std::setprecision(6)
+              << std::fixed
+              << target_inf_notrt << std::endl;
+    while(!calibrated) {
+        mod->par(par);
+        System<EbolaState> s(net, mod);
+        double avg_inf(0.0);
+        for (uint32_t rep = 0; rep < num_reps; ++rep) {
+            // set seeds
+            s.seed(rep);
+            notrt.seed(rep);
+
+            // set up starting state
+            s.reset();
+            s.state(start_state);
+
+            // run
+            runner(&s, &notrt, time_points, 1.0);
+
+            // record final infections
+            avg_inf += s.n_inf();
+        }
+        avg_inf /= net->size();
+        avg_inf /= num_reps;
+
+        std::cout << "\rcurrent: "
+                  << std::setw(8)
+                  << std::setfill('0')
+                  << std::setprecision(6)
+                  << std::fixed
+                  << avg_inf << std::flush;
+
+        if (std::abs(avg_inf - target_inf_notrt) < 0.01) {
+            // done
+            calibrated = true;
+        } else if (avg_inf > target_inf_notrt) {
+            // reduce rate of spread
+            par.at(0) *= 1.0 + scale;
+            par.at(1) = std::log(std::exp(par.at(1)) * (1.0 + scale));
+            if (!was_above) {
+                // jumping across target, decrease scale size
+                scale *= 0.9;
+            }
+            was_above = true;
+        } else {
+            // increase rate of spread
+            par.at(0) /= 1.0 + scale;
+            par.at(1) = std::log(std::exp(par.at(1)) / (1.0 + scale));
+            if (was_above) {
+                // jumping across target, decrease scale size
+                scale *= 0.9;
+            }
+            was_above = false;
+        }
+    }
+    std::cout << std::endl;
+
+    // print current par
     std::cout << "par:";
+    std::for_each(par.begin(), par.end(),
+            [] (const double & x_) {std::cout << " " << x_;});
+    std::cout << std::endl;
+
+
+    // tune treatment effect size
+    par.at(3) = par.at(4) = -10.0;
+    const double target_inf_alltrt(
+            0.95 * start_state.inf_bits.count() / net->size()
+            + 0.1 * target_inf_notrt);
+    calibrated = false;
+    was_above = false;
+    scale = 0.1;
+    std::cout << "tuning treatment effect size" << std::endl;
+    std::cout << "target infection: "
+              << std::setw(8)
+              << std::setfill('0')
+              << std::setprecision(6)
+              << std::fixed
+              << target_inf_alltrt << std::endl;
+    while(!calibrated) {
+        mod->par(par);
+        System<EbolaState> s(net, mod);
+        double avg_inf(0.0);
+        for (uint32_t rep = 0; rep < num_reps; ++rep) {
+            // set seeds
+            s.seed(rep);
+            alltrt.seed(rep);
+
+            // set up starting state
+            s.reset();
+            s.state(start_state);
+
+            // run
+            runner(&s, &alltrt, time_points, 1.0);
+
+            // record final infections
+            avg_inf += s.n_inf();
+        }
+        avg_inf /= net->size();
+        avg_inf /= num_reps;
+
+        std::cout << "\rcurrent: "
+                  << std::setw(8)
+                  << std::setfill('0')
+                  << std::setprecision(6)
+                  << std::fixed
+                  << avg_inf << std::flush;
+
+        if (std::abs(avg_inf - target_inf_alltrt) < 0.01) {
+            // done
+            calibrated = true;
+        } else if (avg_inf > target_inf_alltrt) {
+            // increase treatment effect size
+            par.at(3) *= 1.0 + scale;
+            par.at(4) *= 1.0 + scale;
+            if (!was_above) {
+                // jumping across target, decrease scale size
+                scale *= 0.9;
+            }
+            was_above = true;
+        } else {
+            // decrease treatment effect size
+            par.at(3) /= 1.0 + scale;
+            par.at(4) /= 1.0 + scale;
+            if (was_above) {
+                // jumping across target, decrease scale size
+                scale *= 0.9;
+            }
+            was_above = false;
+        }
+    }
+    std::cout << std::endl;
+
+    // print final par
+    std::cout << "final par:";
     std::for_each(par.begin(), par.end(),
             [] (const double & x_) {std::cout << " " << x_;});
     std::cout << std::endl;
