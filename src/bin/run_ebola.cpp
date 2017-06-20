@@ -165,7 +165,14 @@ void queue_sim(
             RandomAgent<EbolaState> a(net);
             a.seed(i);
 
-            s.start();
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
 
             Outcome outcome;
 
@@ -203,7 +210,14 @@ void queue_sim(
             ProximalAgent<EbolaState> a(net);
             a.seed(i);
 
-            s.start();
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
 
             Outcome outcome;
 
@@ -242,7 +256,14 @@ void queue_sim(
                     mod_agents->clone());
             a.seed(i);
 
-            s.start();
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
 
             Outcome outcome;
 
@@ -285,7 +306,14 @@ void queue_sim(
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
-            s.start();
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
 
             Outcome outcome;
 
@@ -331,7 +359,14 @@ void queue_sim(
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
-            s.start();
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
 
             Outcome outcome;
 
@@ -382,7 +417,14 @@ void queue_sim(
     //                 true, true, false, 0, 0, 0, 0);
     //         a.seed(i);
 
-    //         s.start();
+    //         EbolaState start_state(EbolaState(net->size()));
+    //         for (uint32_t i = 0; i < net->size(); ++i) {
+    //             if (EbolaData::outbreaks().at(i) >= 0) {
+    //                 start_state.inf_bits.set(i);
+    //             }
+    //         }
+    //         s.reset();
+    //         s.state(start_state);
 
     //         Outcome outcome;
 
