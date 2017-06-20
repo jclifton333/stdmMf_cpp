@@ -82,11 +82,11 @@ int main(int argc, char *argv[]) {
     std::vector<double> par(mod->par_size(), 0.0);
     mod->par(par);
 
-    mod->est_par(Transition<EbolaState>::from_sequence(obs_history));
+    // mod->est_par(Transition<EbolaState>::from_sequence(obs_history));
 
-    par = mod->par();
+    // par = mod->par();
 
-    // par = {-4.50446, 1.80575, 0.051293, 0.0, 0.0};
+    par = {-4.50446, 1.80575, 0.051293, 0.0, 0.0};
 
     std::cout << "estimated par:";
     std::for_each(par.begin(), par.end(),
@@ -103,12 +103,13 @@ int main(int argc, char *argv[]) {
 
     NoTrtAgent<EbolaState> notrt(net);
     AllTrtAgent<EbolaState> alltrt(net);
+    // RandomAgent<EbolaState> alltrt(net);
 
     const uint32_t time_points(25);
     const uint32_t num_reps(100);
 
     // tune infection rate
-    const double target_inf_notrt(0.8);
+    const double target_inf_notrt(0.7);
     bool calibrated(false);
     bool was_above(false);
     double scale = 0.1;
@@ -184,7 +185,7 @@ int main(int argc, char *argv[]) {
     par.at(3) = par.at(4) = -10.0;
     const double target_inf_alltrt(
             0.95 * start_state.inf_bits.count() / net->size()
-            + 0.1 * target_inf_notrt);
+            + 0.05 * target_inf_notrt);
     calibrated = false;
     was_above = false;
     scale = 0.1;
