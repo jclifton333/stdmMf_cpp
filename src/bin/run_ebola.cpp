@@ -93,8 +93,8 @@ std::string history_to_csv_entry(
             const uint32_t j_inf(static_cast<uint32_t>(state.inf_bits.test(j)));
             const uint32_t j_trt(static_cast<uint32_t>(trt_bits.test(j)));
 
-            ss << agent << ", " << rep << ", " << i << ", " << j << ", "
-               << j_inf << ", " << j_trt << "\n";
+            ss << agent << "," << rep << "," << i << "," << j << ","
+               << j_inf << "," << j_trt << "\n";
         }
     }
     return ss.str();
