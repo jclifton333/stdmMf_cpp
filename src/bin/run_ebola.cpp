@@ -640,7 +640,7 @@ int main(int argc, char *argv[]) {
 
         // these are obtained from running fit_ebola
         std::vector<double> grav_par{-2.999819, 1.399234, 0.051293,
-                                     -1.015256, -1.015256};
+                                     -1.015256*2, -1.015256*2};
 
         { // Correct: Gravity,  Postulated: Gravity
             std::vector<ModelPair> models_add;
