@@ -76,4 +76,7 @@ p = p + scale_color_manual("Treatment Strategy",
                                       "#0072B2", "#D55E00", "#CC79A7"))
 p = p + ylab("Estimated mean value")
 p = p + xlab("Misspecification proportion")
+p = p + theme(panel.spacing = unit(1.5, "lines"))
 print(p)
+
+ggsave("../data/figures/toy_sim_results.pdf", p)
