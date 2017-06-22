@@ -27,14 +27,19 @@ outbreaks = read_csv("../src/data/ebola_outbreaks.txt", col_names = FALSE)
 names(outbreaks) = c("day")
 outbreaks$day = ifelse(outbreaks$day < 0, NA, outbreaks$day)
 outbreaks$node = 0:289
+outbreaks$date = as.Date("2014-04-26") + outbreaks$day
 
 obs_polygons_data = join(outbreaks, polygons.df, by = "node")
 
+convert_to_date = function(x) {
+  as.Date(x, origin = "1970-01-01")
+}
+
 p = ggplot(obs_polygons_data) +
-  aes(long,lat,group=group,fill=day) +
+  aes(long,lat,group=group,fill=as.integer(date)) +
   geom_polygon() +
   geom_path(color="gray") +
-  scale_fill_viridis("Day of outbreak") +
+  scale_fill_viridis("Date of outbreak", labels = convert_to_date) +
   coord_equal() +
   theme(legend.position="right",
         panel.background = element_blank(),
