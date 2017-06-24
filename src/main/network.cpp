@@ -368,6 +368,8 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
 
     network->kind_ = "random-" + std::to_string(size);
     network->num_nodes_ = size;
+    network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
+            network->num_nodes_,network->num_nodes_);
 
     const uint32_t num_neigh(3);
 
