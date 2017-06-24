@@ -11,6 +11,7 @@
 #include "utilities.hpp"
 
 #include <cmath>
+#include <iterator>
 #include <glog/logging.h>
 #include <armadillo>
 
@@ -24,10 +25,12 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
         const std::shared_ptr<const Network> & network,
         const std::vector<std::shared_ptr<Model<State> > > & models,
         const std::shared_ptr<Features<State> > & features,
-        const uint32_t & look_ahead)
+        const uint32_t & look_ahead,
+        const bool & concat)
     : network_(network), num_nodes_(this->network_->size()), models_(models),
       num_models_(this->models_.size()), features_(features),
-      look_ahead_(look_ahead), coef_(this->num_models_) {
+      look_ahead_(look_ahead), coef_(this->num_models_),
+      concat_(concat) {
 
     CHECK_GT(this->look_ahead_, 0);
 
@@ -54,7 +57,7 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
       models_(clone_vec(other.models_)), num_models_(other.num_models_),
       features_(other.features_->clone()),
       look_ahead_(other.look_ahead_), coef_(other.coef_),
-      last_feat_(other.last_feat_) {
+      concat_(other.concat_), last_feat_(other.last_feat_) {
 
     std::for_each(this->models_.begin(), this->models_.end(),
             [this] (const std::shared_ptr<Model<State> > & m_) {
@@ -152,6 +155,12 @@ std::vector<double> FiniteQfnFeatures<State>::get_features(
                             this->last_feat_, this->coef_.at(m).at(i)));
         }
     }
+
+    if (this->concat_) {
+        features.insert(features.end(), this->last_feat_.begin(),
+                this->last_feat_.end());
+    }
+
     return features;
 }
 
@@ -171,6 +180,13 @@ void FiniteQfnFeatures<State>::update_features(
             feat.at(i + 1) = njm::linalg::dot_a_and_b(
                     this->last_feat_, this->coef_.at(m).at(i));
         }
+    }
+
+    if (this->concat_) {
+        int dist(this->features_->num_features());
+        std::vector<double>::iterator it(feat.end());
+        std::advance(it, -dist);
+        std::copy(this->last_feat_.begin(), this->last_feat_.end(), it);
     }
 }
 
@@ -437,7 +453,12 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
 
 template <typename State>
 uint32_t FiniteQfnFeatures<State>::num_features() const {
-    return this->look_ahead_ * this->num_models_ + 1;
+    if (this->concat_) {
+        return this->look_ahead_ * this->num_models_ + 1 +
+            this->features_->num_features();
+    } else {
+        return this->look_ahead_ * this->num_models_ + 1;
+    }
 }
 
 

@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
                             net, {mod->clone()},
                             std::shared_ptr<Features<EbolaState> >(
                                     new EbolaFeatures(
-                                            net, 20, 10)), 1)),
+                                            net, 20, 10)), 1, false)),
             mod->clone(),
             2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
     a.seed(0);

@@ -77,6 +77,8 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(state, history);
     }
 
+    std::cout << "time: " << history.size() << std::endl;
+
     // update features
     this->features_->update(curr_state, history, this->num_trt());
 
@@ -85,6 +87,11 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
 
     const std::vector<double> optim_par = this->train(all_history,
             this->last_optim_par_);
+
+    std::cout << "feat coef:";
+    std::for_each(optim_par.begin(), optim_par.end(),
+            [] (const double & x_) {std::cout << " " << x_;});
+    std::cout << std::endl;
 
     // store parameter values and scale to norm 1 (don't need to scale
     // optim_par as the policy is scale invariant)
@@ -99,6 +106,9 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
             njm::linalg::dot_a_and_b, 2, true);
     a.rng(this->rng());
 
+
+    std::cout << "////////////////////" << std::endl;
+
     return a.apply_trt(curr_state, history);
 }
 
@@ -109,6 +119,12 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
         const std::vector<double> & starting_vals) {
 
     this->model_->est_par(history);
+
+    std::cout << "model coef:";
+    const auto model_coef(this->model_->par());
+    std::for_each(model_coef.begin(), model_coef.end(),
+            [] (const double & x_) {std::cout << " " << x_;});
+    std::cout << std::endl;
 
     // get information matrix and take inverse sqrt
     std::vector<double> hess = this->model_->ll_hess(history);
@@ -153,6 +169,11 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
             [] (const double & x_) {
                 LOG_IF(FATAL, !std::isfinite(x_));
             });
+
+    std::cout << "model samp:";
+    std::for_each(par_samp.begin(), par_samp.end(),
+            [] (const double & x_) {std::cout << " " << x_;});
+    std::cout << std::endl;
 
     // set new parameters
     this->model_->par(par_samp);

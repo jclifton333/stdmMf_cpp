@@ -354,7 +354,7 @@ void queue_sim(
                                     net, {mod_agents->clone()},
                                     std::shared_ptr<Features<EbolaState> >(
                                             new EbolaBinnedFeatures(
-                                                    net, 20, 5)), 3)),
+                                                    net, 20, 5)), 3, false)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -407,7 +407,7 @@ void queue_sim(
                                     net, {mod_agents->clone()},
                                     std::shared_ptr<Features<EbolaState> >(
                                             new EbolaBinnedFeatures(
-                                                    net, 20, 5)), 2)),
+                                                    net, 20, 5)), 2, false)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -460,7 +460,7 @@ void queue_sim(
                                     net, {mod_agents->clone()},
                                     std::shared_ptr<Features<EbolaState> >(
                                             new EbolaBinnedFeatures(
-                                                    net, 20, 5)), 1)),
+                                                    net, 20, 5)), 1, false)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
