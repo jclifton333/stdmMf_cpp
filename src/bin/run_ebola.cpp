@@ -1055,8 +1055,8 @@ int main(int argc, char *argv[]) {
                 "vfn_finite_q_f",
                 "vfn_finite_q_g",
                 "vfn_finite_q_h",
-                "vfn_finite_q_i",
-                "br_finite_q",
+                "vfn_finite_q_i"
+                // "br_finite_q",
             });
     AllResults<std::promise> promise_results;
     AllResults<std::future> future_results;
