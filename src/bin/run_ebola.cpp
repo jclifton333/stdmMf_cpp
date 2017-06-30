@@ -291,17 +291,20 @@ void queue_sim(
     }
 
 
-    // vfn max
-    CHECK_EQ(results->results.count("vfn_max"), 1);
-    CHECK_EQ(results->results.at("vfn_max").size(), num_reps);
+    // vfn max finite q a
+    CHECK_EQ(results->results.count("vfn_finite_q_a"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_b").size(), num_reps);
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool->service().post([=]() {
             System<EbolaState> s(net, mod_system->clone());
             s.seed(i);
             VfnMaxSimPerturbAgent<EbolaState> a(net,
                     std::shared_ptr<Features<EbolaState> >(
-                            new EbolaBinnedFeatures(
-                                    net, 20, 5)),
+                            new FiniteQfnFeatures<EbolaState>(
+                                    net, {mod_agents->clone()},
+                                    std::shared_ptr<Features<EbolaState> >(
+                                            new EbolaBinnedFeatures(
+                                                    net, 10, 5)), 1, false)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -334,16 +337,16 @@ void queue_sim(
             outcome.history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("vfn_max").at(i).set_value(
+            results->results.at("vfn_finite_q_a").at(i).set_value(
                     std::move(outcome));
             progress->update();
         });
     }
 
 
-    // vfn max finite q
-    CHECK_EQ(results->results.count("vfn_finite_q"), 1);
-    CHECK_EQ(results->results.at("vfn_finite_q").size(), num_reps);
+    // vfn max finite q b
+    CHECK_EQ(results->results.count("vfn_finite_q_b"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_b").size(), num_reps);
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool->service().post([=]() {
             System<EbolaState> s(net, mod_system->clone());
@@ -387,16 +390,16 @@ void queue_sim(
             outcome.history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("vfn_finite_q").at(i).set_value(
+            results->results.at("vfn_finite_q_b").at(i).set_value(
                     std::move(outcome));
             progress->update();
         });
     }
 
 
-    // vfn max finite q concat
-    CHECK_EQ(results->results.count("vfn_finite_q_concat"), 1);
-    CHECK_EQ(results->results.at("vfn_finite_q_concat").size(), num_reps);
+    // vfn max finite q c
+    CHECK_EQ(results->results.count("vfn_finite_q_c"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_c").size(), num_reps);
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool->service().post([=]() {
             System<EbolaState> s(net, mod_system->clone());
@@ -407,7 +410,7 @@ void queue_sim(
                                     net, {mod_agents->clone()},
                                     std::shared_ptr<Features<EbolaState> >(
                                             new EbolaBinnedFeatures(
-                                                    net, 20, 5)), 1, true)),
+                                                    net, 30, 5)), 1, false)),
                     mod_agents->clone(),
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
@@ -440,88 +443,28 @@ void queue_sim(
             outcome.history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("vfn_finite_q_concat").at(i).set_value(
+            results->results.at("vfn_finite_q_c").at(i).set_value(
                     std::move(outcome));
             progress->update();
         });
     }
 
-
-    // br min
-    CHECK_EQ(results->results.count("br_min"), 1);
-    CHECK_EQ(results->results.at("br_min").size(), num_reps);
+    // vfn max finite q d
+    CHECK_EQ(results->results.count("vfn_finite_q_d"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_d").size(), num_reps);
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool->service().post([=]() {
             System<EbolaState> s(net, mod_system->clone());
             s.seed(i);
-
-            std::shared_ptr<Model<EbolaState> > mod(
-                    new EbolaStateGravityModel(net));
-
-            BrMinSimPerturbAgent<EbolaState> a(net,
-                    std::shared_ptr<Features<EbolaState> >(
-                            new EbolaBinnedFeatures(net, 20, 5)),
-                    mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0);
-            a.seed(i);
-
-            EbolaState start_state(EbolaState(net->size()));
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0) {
-                    start_state.inf_bits.set(i);
-                }
-            }
-            s.reset();
-            s.state(start_state);
-
-            Outcome outcome;
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
-
-            outcome.value = runner(&s, &a, time_points, 1.0);
-
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
-
-            outcome.time = std::chrono::duration_cast<
-                std::chrono::seconds>(tock - tick).count();
-
-            outcome.history = s.history();
-            outcome.history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
-
-            results->results.at("br_min").at(i).set_value(
-                    std::move(outcome));
-            progress->update();
-        });
-    }
-
-
-    // br min finite q
-    CHECK_EQ(results->results.count("br_finite_q"), 1);
-    CHECK_EQ(results->results.at("br_finite_q").size(), num_reps);
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        pool->service().post([=]() {
-            System<EbolaState> s(net, mod_system->clone());
-            s.seed(i);
-
-            std::shared_ptr<Model<EbolaState> > mod(
-                    new EbolaStateGravityModel(net));
-
-            BrMinSimPerturbAgent<EbolaState> a(net,
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
                     std::shared_ptr<Features<EbolaState> >(
                             new FiniteQfnFeatures<EbolaState>(
-                                    net, {mod},
+                                    net, {mod_agents->clone()},
                                     std::shared_ptr<Features<EbolaState> >(
                                             new EbolaBinnedFeatures(
-                                                    net, 20, 5)), 1, false)),
+                                                    net, 10, 10)), 1, false)),
                     mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0);
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             EbolaState start_state(EbolaState(net->size()));
@@ -552,34 +495,30 @@ void queue_sim(
             outcome.history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("br_finite_q").at(i).set_value(
+            results->results.at("vfn_finite_q_d").at(i).set_value(
                     std::move(outcome));
             progress->update();
         });
     }
 
 
-    // br min finite q concat
-    CHECK_EQ(results->results.count("br_finite_q_concat"), 1);
-    CHECK_EQ(results->results.at("br_finite_q_concat").size(), num_reps);
+
+    // vfn max finite q e
+    CHECK_EQ(results->results.count("vfn_finite_q_e"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_e").size(), num_reps);
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool->service().post([=]() {
             System<EbolaState> s(net, mod_system->clone());
             s.seed(i);
-
-            std::shared_ptr<Model<EbolaState> > mod(
-                    new EbolaStateGravityModel(net));
-
-            BrMinSimPerturbAgent<EbolaState> a(net,
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
                     std::shared_ptr<Features<EbolaState> >(
                             new FiniteQfnFeatures<EbolaState>(
-                                    net, {mod},
+                                    net, {mod_agents->clone()},
                                     std::shared_ptr<Features<EbolaState> >(
                                             new EbolaBinnedFeatures(
-                                                    net, 20, 5)), 1, true)),
+                                                    net, 20, 10)), 1, false)),
                     mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0);
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             EbolaState start_state(EbolaState(net->size()));
@@ -610,11 +549,286 @@ void queue_sim(
             outcome.history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("br_finite_q_concat").at(i).set_value(
+            results->results.at("vfn_finite_q_e").at(i).set_value(
                     std::move(outcome));
             progress->update();
         });
     }
+
+
+
+    // vfn max finite q f
+    CHECK_EQ(results->results.count("vfn_finite_q_f"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_f").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<EbolaState> s(net, mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
+                    std::shared_ptr<Features<EbolaState> >(
+                            new FiniteQfnFeatures<EbolaState>(
+                                    net, {mod_agents->clone()},
+                                    std::shared_ptr<Features<EbolaState> >(
+                                            new EbolaBinnedFeatures(
+                                                    net, 30, 10)), 1, false)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
+
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("vfn_finite_q_f").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
+    // vfn max finite q g
+    CHECK_EQ(results->results.count("vfn_finite_q_g"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_g").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<EbolaState> s(net, mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
+                    std::shared_ptr<Features<EbolaState> >(
+                            new FiniteQfnFeatures<EbolaState>(
+                                    net, {mod_agents->clone()},
+                                    std::shared_ptr<Features<EbolaState> >(
+                                            new EbolaBinnedFeatures(
+                                                    net, 10, 15)), 1, false)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
+
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("vfn_finite_q_g").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
+    // vfn max finite q h
+    CHECK_EQ(results->results.count("vfn_finite_q_h"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_h").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<EbolaState> s(net, mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
+                    std::shared_ptr<Features<EbolaState> >(
+                            new FiniteQfnFeatures<EbolaState>(
+                                    net, {mod_agents->clone()},
+                                    std::shared_ptr<Features<EbolaState> >(
+                                            new EbolaBinnedFeatures(
+                                                    net, 20, 15)), 1, false)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
+
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("vfn_finite_q_h").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
+
+
+    // vfn max finite q i
+    CHECK_EQ(results->results.count("vfn_finite_q_i"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_i").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<EbolaState> s(net, mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
+                    std::shared_ptr<Features<EbolaState> >(
+                            new FiniteQfnFeatures<EbolaState>(
+                                    net, {mod_agents->clone()},
+                                    std::shared_ptr<Features<EbolaState> >(
+                                            new EbolaBinnedFeatures(
+                                                    net, 30, 15)), 1, false)),
+                    mod_agents->clone(),
+                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+            a.seed(i);
+
+            EbolaState start_state(EbolaState(net->size()));
+            for (uint32_t i = 0; i < net->size(); ++i) {
+                if (EbolaData::outbreaks().at(i) >= 0) {
+                    start_state.inf_bits.set(i);
+                }
+            }
+            s.reset();
+            s.state(start_state);
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("vfn_finite_q_i").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
+
+
+    // // br min finite q
+    // CHECK_EQ(results->results.count("br_finite_q"), 1);
+    // CHECK_EQ(results->results.at("br_finite_q").size(), num_reps);
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     pool->service().post([=]() {
+    //         System<EbolaState> s(net, mod_system->clone());
+    //         s.seed(i);
+
+    //         std::shared_ptr<Model<EbolaState> > mod(
+    //                 new EbolaStateGravityModel(net));
+
+    //         BrMinSimPerturbAgent<EbolaState> a(net,
+    //                 std::shared_ptr<Features<EbolaState> >(
+    //                         new FiniteQfnFeatures<EbolaState>(
+    //                                 net, {mod},
+    //                                 std::shared_ptr<Features<EbolaState> >(
+    //                                         new EbolaBinnedFeatures(
+    //                                                 net, 20, 5)), 1, false)),
+    //                 mod_agents->clone(),
+    //                 0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+    //                 true, true, false, 0, 0, 0, 0);
+    //         a.seed(i);
+
+    //         EbolaState start_state(EbolaState(net->size()));
+    //         for (uint32_t i = 0; i < net->size(); ++i) {
+    //             if (EbolaData::outbreaks().at(i) >= 0) {
+    //                 start_state.inf_bits.set(i);
+    //             }
+    //         }
+    //         s.reset();
+    //         s.state(start_state);
+
+    //         Outcome outcome;
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
+
+    //         outcome.value = runner(&s, &a, time_points, 1.0);
+
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
+
+    //         outcome.time = std::chrono::duration_cast<
+    //             std::chrono::seconds>(tock - tick).count();
+
+    //         outcome.history = s.history();
+    //         outcome.history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
+
+    //         results->results.at("br_finite_q").at(i).set_value(
+    //                 std::move(outcome));
+    //         progress->update();
+    //     });
+    // }
 }
 
 
@@ -833,12 +1047,16 @@ int main(int argc, char *argv[]) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
-                "vfn_max",
-                "vfn_finite_q",
-                "vfn_finite_q_concat",
-                "br_min",
+                "vfn_finite_q_a",
+                "vfn_finite_q_b",
+                "vfn_finite_q_c",
+                "vfn_finite_q_d",
+                "vfn_finite_q_e",
+                "vfn_finite_q_f",
+                "vfn_finite_q_g",
+                "vfn_finite_q_h",
+                "vfn_finite_q_i",
                 "br_finite_q",
-                "br_finite_q_concat"
             });
     AllResults<std::promise> promise_results;
     AllResults<std::future> future_results;
