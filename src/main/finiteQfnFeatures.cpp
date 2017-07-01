@@ -474,10 +474,9 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
             if (i == 0) {
                 for (uint32_t j = 1; j < num_features; ++j) {
                     if (feat_stddev(j) > 0.0) {
-                        corrected_coef -= best_beta(j) * feat_mean(j)
-                            / feat_stddev(j);
+                        corrected_coef -= feat_mean(j) / feat_stddev(j);
                     } else {
-                        corrected_coef -= best_beta(j) * feat_mean(j);
+                        corrected_coef -= feat_mean(j);
                     }
                 }
             } else {
