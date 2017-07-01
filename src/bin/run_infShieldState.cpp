@@ -499,6 +499,60 @@ void queue_sim(
     }
 
 
+    // br min finite q 2
+    CHECK_EQ(results->results.count("br_finite_q_2"), 1);
+    CHECK_EQ(results->results.at("br_finite_q_2").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<InfShieldState> s(net, mod_system->clone());
+            s.seed(i);
+
+            std::shared_ptr<Model<InfShieldState> > modNoIm(
+                    new InfShieldStateNoImNoSoModel(net));
+            std::shared_ptr<Model<InfShieldState> > modPosIm(
+                    new InfShieldStatePosImNoSoModel(net));
+
+            BrMinSimPerturbAgent<InfShieldState> a(net,
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new FiniteQfnFeatures<InfShieldState>(
+                                    net, {modNoIm, modPosIm},
+                                    std::shared_ptr<Features<InfShieldState> >(
+                                            new NetworkRunSymFeatures<
+                                            InfShieldState>(
+                                                    net, 2)), 2, false)),
+                    mod_agents->clone(),
+                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+                    true, true, false, 0, 0, 0, 0);
+            a.seed(i);
+
+            s.start();
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("br_finite_q_2").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
     // // br min finite q concat
     // CHECK_EQ(results->results.count("br_finite_q_concat"), 1);
     // CHECK_EQ(results->results.at("br_finite_q_concat").size(), num_reps);
@@ -1030,7 +1084,7 @@ int main(int argc, char *argv[]) {
                 "none", "random", "proximal", "myopic",
                 "vfn_max", // "vfn_finite_q", "vfn_finite_q_concat",
                 // "br_min",
-                "br_finite_q"// , "br_finite_q_concat"
+                "br_finite_q", "br_finite_q_2"
             });
     AllResults<std::promise> promise_results;
     AllResults<std::future> future_results;
