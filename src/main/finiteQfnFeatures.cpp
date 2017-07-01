@@ -378,6 +378,8 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
                         state_trt_train.at(i).state,
                         state_trt_train.at(i).trt_bits));
 
+        CHECK_NEAR(feat.at(0), 1.0, 1e-8);
+
         // set column in x matrix
         auto xt_it(xt_train.begin_col(i));
         auto f_it(feat.begin());
@@ -407,6 +409,28 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
         y_test(i) = outcomes_test.at(i);
     }
 
+
+    // standardize train and test design matrices using mean and
+    // stddev of training set
+    arma::vec feat_mean(num_features);
+    arma::vec feat_stddev(num_features);
+    for (uint32_t i = 0; i < num_features; ++i) {
+        const double mean(arma::mean(xt_train.row(i)));
+        const double stddev(arma::stddev(xt_train.row(i)));
+        feat_mean(i) = mean;
+        feat_stddev(i) = stddev;
+
+        if (i > 0) { // leave intercept alone
+            xt_train.row(i) -= mean;
+            xt_test.row(i) -= mean;
+            if (stddev > 0.0) {
+                xt_train.row(i) /= stddev;
+                xt_test.row(i) /= stddev;
+            }
+        }
+    }
+
+
     const arma::mat xtx_train(xt_train * xt_train.t());
     const arma::vec xty_train(xt_train * y_train);
 
@@ -416,7 +440,7 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
     arma::vec best_beta;
 
     arma::mat pen_eye(arma::eye(num_features, num_features));
-    pen_eye(0, 0) = 0.0;
+    pen_eye(0, 0) = 0.0; // don't penalize intercept
 
     for (uint32_t i = 0; i < lambda_vals.size(); ++i) {
         const double & lambda(lambda_vals.at(i));
@@ -426,7 +450,7 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
         const arma::mat r_train(arma::chol(xtx_train + pen_eye * lambda));
 
         // forward solve then backward solve
-        const arma::vec beta(arma::solve(arma::trimatu(r_train),
+        arma::vec beta(arma::solve(arma::trimatu(r_train),
                         arma::solve(arma::trimatl(r_train.t()),
                                 xty_train)));
 
@@ -445,7 +469,22 @@ void FiniteQfnFeatures<State>::fit_q_function(const uint32_t & qfn_index,
         auto coef_it(coef_.at(model_index).at(qfn_index).begin());
         auto beta_it(best_beta.begin());
         for (uint32_t i = 0; i < num_features; ++i, ++coef_it, ++beta_it) {
-            *coef_it = *beta_it;
+            double corrected_coef(*beta_it);
+
+            if (i == 0) {
+                for (uint32_t j = 1; j < num_features; ++j) {
+                    if (feat_stddev(j) > 0.0) {
+                        corrected_coef -= feat_mean(j) / feat_stddev(j);
+                    } else {
+                        corrected_coef -= feat_mean(j);
+                    }
+                }
+            } else {
+                if (feat_stddev(i) > 0.0) {
+                    corrected_coef /= feat_stddev(i);
+                }
+            }
+            *coef_it = corrected_coef;
         }
     }
 }
