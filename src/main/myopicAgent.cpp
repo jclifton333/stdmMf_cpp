@@ -140,7 +140,7 @@ boost::dynamic_bitset<> MyopicAgent<EbolaState>::apply_trt(
                 // ascending order
                 double weight_prob(0.0);
                 for (uint32_t j = 0; j < this->num_nodes_; ++j) {
-                    if (j != node) {
+                    if (j != node && !curr_state.inf_bits.test(j)) {
                         weight_prob += probs.at(j)
                             / this->network_->dist().at(node).at(j);
                     }
