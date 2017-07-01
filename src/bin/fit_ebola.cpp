@@ -292,5 +292,95 @@ int main(int argc, char *argv[]) {
             [] (const double & x_) {std::cout << " " << x_;});
     std::cout << std::endl;
 
+
+    // evalute policies
+    {
+        NoTrtAgent<EbolaState> agent_notrt(net);
+        System<EbolaState> s(net, mod);
+        double avg_inf(0.0);
+        for (uint32_t rep = 0; rep < num_reps; ++rep) {
+            // set seeds
+            s.seed(rep);
+            agent_tune_trt.seed(rep);
+
+            // set up starting state
+            s.reset();
+            s.state(start_state);
+
+            // run
+            runner(&s, &agent_notrt, time_points, 1.0);
+
+            // record final infections
+            avg_inf += s.n_inf();
+        }
+        avg_inf /= net->size();
+        avg_inf /= num_reps;
+        std::cout << "no trt: "
+                  << std::setw(8)
+                  << std::setfill('0')
+                  << std::setprecision(6)
+                  << std::fixed
+                  << avg_inf << std::endl;
+    }
+
+    {
+        RandomAgent<EbolaState> agent_random(net);
+        System<EbolaState> s(net, mod);
+        double avg_inf(0.0);
+        for (uint32_t rep = 0; rep < num_reps; ++rep) {
+            // set seeds
+            s.seed(rep);
+            agent_tune_trt.seed(rep);
+
+            // set up starting state
+            s.reset();
+            s.state(start_state);
+
+            // run
+            runner(&s, &agent_random, time_points, 1.0);
+
+            // record final infections
+            avg_inf += s.n_inf();
+        }
+        avg_inf /= net->size();
+        avg_inf /= num_reps;
+        std::cout << "random: "
+                  << std::setw(8)
+                  << std::setfill('0')
+                  << std::setprecision(6)
+                  << std::fixed
+                  << avg_inf << std::endl;
+    }
+
+    {
+        ProximalAgent<EbolaState> agent_proximal(net);
+        System<EbolaState> s(net, mod);
+        double avg_inf(0.0);
+        for (uint32_t rep = 0; rep < num_reps; ++rep) {
+            // set seeds
+            s.seed(rep);
+            agent_tune_trt.seed(rep);
+
+            // set up starting state
+            s.reset();
+            s.state(start_state);
+
+            // run
+            runner(&s, &agent_proximal, time_points, 1.0);
+
+            // record final infections
+            avg_inf += s.n_inf();
+        }
+        avg_inf /= net->size();
+        avg_inf /= num_reps;
+        std::cout << "proximal: "
+                  << std::setw(8)
+                  << std::setfill('0')
+                  << std::setprecision(6)
+                  << std::fixed
+                  << avg_inf << std::endl;
+
+    }
+
     return 0;
 }
