@@ -122,8 +122,8 @@ int main(int argc, char *argv[]) {
               << std::endl;
 
     NoTrtAgent<EbolaState> agent_tune_inf(net);
-    // AllTrtAgent<EbolaState> agent_tune_trt(net);
-    RandomAgent<EbolaState> agent_tune_trt(net);
+    AllTrtAgent<EbolaState> agent_tune_trt(net);
+    // RandomAgent<EbolaState> agent_tune_trt(net);
     // ProximalAgent<EbolaState> agent_tune_trt(net);
     // MyopicAgent<EbolaState> agent_tune_trt(net, mod);
 
@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
     const double start_inf = start_state.inf_bits.count()
         / static_cast<double>(net->size());
     const double target_tune_trt(start_inf
-            + 0.95 * (target_tune_inf - start_inf));
+            + 0.05 * (target_tune_inf - start_inf));
     calibrated = false;
     was_above = false;
     scale = 0.1;
