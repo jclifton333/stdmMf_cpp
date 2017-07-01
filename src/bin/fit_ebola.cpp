@@ -93,23 +93,45 @@ int main(int argc, char *argv[]) {
             [] (const double & x_) {std::cout << " " << x_;});
     std::cout << std::endl;
 
+    // sort outbreaks
+    std::vector<uint32_t> outbreak_dates;
+    for (uint32_t i = 0; i < net->size(); ++i) {
+        if (EbolaData::outbreaks().at(i) >= 0) {
+            outbreak_dates.push_back(EbolaData::outbreaks().at(i));
+        }
+    }
+    std::sort(outbreak_dates.begin(), outbreak_dates.end());
+    const uint32_t outbreaks_cutoff(
+            outbreak_dates.at(static_cast<uint32_t>(
+                            outbreak_dates.size() * 0.25)));
 
     EbolaState start_state(EbolaState(net->size()));
     for (uint32_t i = 0; i < net->size(); ++i) {
-        if (EbolaData::outbreaks().at(i) >= 0) {
+        if (EbolaData::outbreaks().at(i) >= 0
+                && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
             start_state.inf_bits.set(i);
         }
     }
 
-    NoTrtAgent<EbolaState> notrt(net);
-    AllTrtAgent<EbolaState> alltrt(net);
-    // RandomAgent<EbolaState> alltrt(net);
+    std::cout << "starting infection: "
+              << start_state.inf_bits.count()
+              << " / " << net->size()
+              << " -> "
+              << (start_state.inf_bits.count()
+                      / static_cast<double>(net->size()))
+              << std::endl;
+
+    NoTrtAgent<EbolaState> agent_tune_inf(net);
+    // AllTrtAgent<EbolaState> agent_tune_trt(net);
+    RandomAgent<EbolaState> agent_tune_trt(net);
+    // ProximalAgent<EbolaState> agent_tune_trt(net);
+    // MyopicAgent<EbolaState> agent_tune_trt(net, mod);
 
     const uint32_t time_points(25);
     const uint32_t num_reps(100);
 
     // tune infection rate
-    const double target_inf_notrt(0.7);
+    const double target_tune_inf(0.5);
     bool calibrated(false);
     bool was_above(false);
     double scale = 0.1;
@@ -119,7 +141,8 @@ int main(int argc, char *argv[]) {
               << std::setfill('0')
               << std::setprecision(6)
               << std::fixed
-              << target_inf_notrt << std::endl;
+              << target_tune_inf << std::endl;
+    uint32_t iter(0);
     while(!calibrated) {
         mod->par(par);
         System<EbolaState> s(net, mod);
@@ -127,14 +150,14 @@ int main(int argc, char *argv[]) {
         for (uint32_t rep = 0; rep < num_reps; ++rep) {
             // set seeds
             s.seed(rep);
-            notrt.seed(rep);
+            agent_tune_inf.seed(rep);
 
             // set up starting state
             s.reset();
             s.state(start_state);
 
             // run
-            runner(&s, &notrt, time_points, 1.0);
+            runner(&s, &agent_tune_inf, time_points, 1.0);
 
             // record final infections
             avg_inf += s.n_inf();
@@ -149,10 +172,10 @@ int main(int argc, char *argv[]) {
                   << std::fixed
                   << avg_inf << std::flush;
 
-        if (std::abs(avg_inf - target_inf_notrt) < 0.01) {
+        if (std::abs(avg_inf - target_tune_inf) < 0.01) {
             // done
             calibrated = true;
-        } else if (avg_inf > target_inf_notrt) {
+        } else if (avg_inf > target_tune_inf) {
             // reduce rate of spread
             par.at(0) *= 1.0 + scale;
             par.at(1) = std::log(std::exp(par.at(1)) * (1.0 + scale));
@@ -183,9 +206,10 @@ int main(int argc, char *argv[]) {
 
     // tune treatment effect size
     par.at(3) = par.at(4) = -10.0;
-    const double target_inf_alltrt(
-            0.95 * start_state.inf_bits.count() / net->size()
-            + 0.05 * target_inf_notrt);
+    const double start_inf = start_state.inf_bits.count()
+        / static_cast<double>(net->size());
+    const double target_tune_trt(start_inf
+            + 0.95 * (target_tune_inf - start_inf));
     calibrated = false;
     was_above = false;
     scale = 0.1;
@@ -195,7 +219,8 @@ int main(int argc, char *argv[]) {
               << std::setfill('0')
               << std::setprecision(6)
               << std::fixed
-              << target_inf_alltrt << std::endl;
+              << target_tune_trt << std::endl;
+    iter = 0;
     while(!calibrated) {
         mod->par(par);
         System<EbolaState> s(net, mod);
@@ -203,14 +228,14 @@ int main(int argc, char *argv[]) {
         for (uint32_t rep = 0; rep < num_reps; ++rep) {
             // set seeds
             s.seed(rep);
-            alltrt.seed(rep);
+            agent_tune_trt.seed(rep);
 
             // set up starting state
             s.reset();
             s.state(start_state);
 
             // run
-            runner(&s, &alltrt, time_points, 1.0);
+            runner(&s, &agent_tune_trt, time_points, 1.0);
 
             // record final infections
             avg_inf += s.n_inf();
@@ -223,12 +248,22 @@ int main(int argc, char *argv[]) {
                   << std::setfill('0')
                   << std::setprecision(6)
                   << std::fixed
-                  << avg_inf << std::flush;
+                  << avg_inf
+                  << " ("
+                  << std::setw(3)
+                  << iter
+                  << " -> "
+                  << std::setw(6)
+                  << std::setfill('0')
+                  << std::setprecision(3)
+                  << std::fixed
+                  << par.at(3)
+                  << ")" << std::flush;
 
-        if (std::abs(avg_inf - target_inf_alltrt) < 0.01) {
+        if (std::abs(avg_inf - target_tune_trt) < 0.01) {
             // done
             calibrated = true;
-        } else if (avg_inf > target_inf_alltrt) {
+        } else if (avg_inf > target_tune_trt) {
             // increase treatment effect size
             par.at(3) *= 1.0 + scale;
             par.at(4) *= 1.0 + scale;
@@ -247,6 +282,7 @@ int main(int argc, char *argv[]) {
             }
             was_above = false;
         }
+        ++iter;
     }
     std::cout << std::endl;
 
