@@ -30,14 +30,10 @@ std::vector<double> EbolaStateModel::probs(
         const bool trt_i = status_i % 2 == 1;
         if (status_i < 2) {
             // not infected -> infection probability
-            const Node & node = this->network_->get_node(i);
-            const uint32_t num_neigh = node.neigh_size();
-
             double prob = 1.0;
 
             // factor in neighbors
-            for (uint32_t j = 0; j < num_neigh; ++j) {
-                const uint32_t neigh = node.neigh(j);
+            for (uint32_t neigh = 0; neigh < this->num_nodes_; ++neigh) {
                 const uint32_t status_neigh = status.at(neigh);
                 if (status_neigh >= 2) {
                     // if neighbor is infected
@@ -146,10 +142,7 @@ std::vector<double> EbolaStateModel::ll_grad(
                 std::vector<double> val_to_add(this->par_size_, 0.0);
 
                 // neighbor effect
-                const Node & node_j = this->network_->get_node(j);
-                const uint32_t neigh_size = node_j.neigh_size();
-                for (uint32_t k = 0; k < neigh_size; ++k) {
-                    const uint32_t neigh = node_j.neigh(k);
+                for (uint32_t neigh = 0; neigh < this->num_nodes_; ++neigh) {
                     if (inf_and_trt.at(neigh) >= 2) {
                         // if neighbor is infected
                         const bool trt_neigh = inf_and_trt.at(neigh) % 2 == 1;
@@ -236,10 +229,8 @@ std::vector<double> EbolaStateModel::ll_hess(
                             this->par_size() * this->par_size());
 
                     // neighbor probs
-                    const Node & node_j = this->network_->get_node(j);
-                    const uint32_t num_neigh = node_j.neigh_size();
-                    for (uint32_t k = 0; k < num_neigh; ++k) {
-                        const uint32_t neigh = node_j.neigh(k);
+                    for (uint32_t neigh = 0; neigh < this->num_nodes_;
+                         ++neigh) {
                         if (inf_and_trt.at(neigh) >= 2) {
                             const bool trt_neigh =
                                 inf_and_trt.at(neigh) % 2 == 1;
