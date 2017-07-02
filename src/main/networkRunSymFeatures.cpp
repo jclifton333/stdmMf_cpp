@@ -463,9 +463,166 @@ void NetworkRunSymFeatures<InfShieldState>::update_features_async(
 // END: Implementation for InfShieldState
 
 
+// BEGIN: Implementation for EbolaState
+
+template <>
+const uint32_t NetworkRunSymFeatures<EbolaState>::bits_per_node_ = 2;
+
+
+template <>
+std::vector<double> NetworkRunSymFeatures<EbolaState>::get_features(
+        const EbolaState & state,
+        const boost::dynamic_bitset<> & trt_bits) {
+    std::vector<double> feat(this->num_features(), 0.0);
+    feat.at(0) = 1.0; // intercept
+
+    for (uint32_t i = 0; i < this->num_runs_; ++i) {
+        const NetworkRun & nr = this->runs_.at(i);
+        const uint32_t & run_len = nr.len;
+
+        uint32_t & mask(*this->masks_.at(i));
+
+        mask = 0;
+        for (uint32_t j = 0; j < run_len; j++) {
+            if (state.inf_bits.test(nr.nodes.at(j))) {
+                mask |= (1 << (j + run_len));
+            }
+
+            if (trt_bits.test(nr.nodes.at(j))) {
+                mask |= (1 << j);
+            }
+        }
+
+        const uint32_t max_mask = 1 << (run_len + run_len);
+        if (mask < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(mask)) +=
+                this->increment_by_len_.at(run_len - 1);
+        }
+    }
+
+    return feat;
+}
+
+
+template <>
+void NetworkRunSymFeatures<EbolaState>::update_features(
+        const uint32_t & changed_node,
+        const EbolaState & state_new,
+        const boost::dynamic_bitset<> & trt_bits_new,
+        const EbolaState & state_old,
+        const boost::dynamic_bitset<> & trt_bits_old,
+        std::vector<double> & feat) {
+
+    const std::vector<NetworkRun> & changed_runs(
+            runs_by_node_.at(changed_node));
+    const uint32_t num_changed = changed_runs.size();
+
+    const std::vector<uint32_t *> &
+        changed_masks = this->masks_by_node_.at(changed_node);
+
+    const bool inf_changed =
+        state_new.inf_bits.test(changed_node)
+        != state_old.inf_bits.test(changed_node);
+    const bool trt_changed =
+        trt_bits_new.test(changed_node) != trt_bits_old.test(changed_node);
+
+    for (uint32_t i = 0; i < num_changed; ++i) {
+        const NetworkRun & nr = changed_runs.at(i);
+        const uint32_t & run_len = nr.len;
+        uint32_t & cm = *changed_masks.at(i);
+
+        const uint32_t max_mask = 1 << (run_len + run_len);
+
+        // update features for old masks
+        if (cm < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(cm)) -=
+                this->increment_by_len_.at(run_len - 1);
+        }
+
+        // update masks
+        for (uint32_t j = 0; j < run_len; ++j) {
+            const uint32_t & node = nr.nodes.at(j);
+            if (node == changed_node) {
+                if (inf_changed) {
+                    cm ^= (1 << (j + run_len));
+                }
+                if (trt_changed) {
+                    cm ^= (1 << j);
+                }
+                break;
+            }
+        }
+
+        // update features for new masks
+        if (cm < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(cm)) +=
+                this->increment_by_len_.at(run_len - 1);
+        }
+
+    }
+}
+
+
+template<>
+void NetworkRunSymFeatures<EbolaState>::update_features_async(
+        const uint32_t & changed_node,
+        const EbolaState & state_new,
+        const boost::dynamic_bitset<> & trt_bits_new,
+        const EbolaState & state_old,
+        const boost::dynamic_bitset<> & trt_bits_old,
+        std::vector<double> & feat) const {
+
+    const std::vector<NetworkRun> & changed_runs(
+            runs_by_node_.at(changed_node));
+    const uint32_t num_changed = changed_runs.size();
+
+    for (uint32_t i = 0; i < num_changed; ++i) {
+        const NetworkRun & nr = changed_runs.at(i);
+        const uint32_t & run_len = nr.len;
+
+        uint32_t mask_new = 0;
+        uint32_t mask_old = 0;
+
+        for (uint32_t j = 0; j < run_len; ++j) {
+            const uint32_t & node = nr.nodes.at(j);
+            if (state_new.inf_bits.test(node)) {
+                mask_new |= (1 << (j + run_len));
+            }
+            if (trt_bits_new.test(node)) {
+                mask_new |= (1 << j);
+            }
+            if (state_old.inf_bits.test(node)) {
+                mask_old |= (1 << (j + run_len));
+            }
+            if (trt_bits_old.test(node)) {
+                mask_old |= (1 << j);
+            }
+        }
+
+        const uint32_t max_mask = 1 << (run_len + run_len);
+        if (mask_new < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(mask_new)) +=
+                this->increment_by_len_.at(run_len - 1);
+        }
+
+        if (mask_old < (max_mask - 1)) {
+            feat.at(this->index_by_len_.at(run_len - 1).at(mask_old)) -=
+                this->increment_by_len_.at(run_len - 1);
+        }
+    }
+}
+
+
+
+// END: Implementation for EbolaState
+
+
+
+
 
 template class NetworkRunSymFeatures<InfState>;
 template class NetworkRunSymFeatures<InfShieldState>;
+template class NetworkRunSymFeatures<EbolaState>;
 
 
 } // namespace stdmMf
