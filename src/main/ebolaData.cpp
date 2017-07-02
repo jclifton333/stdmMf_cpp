@@ -18,6 +18,7 @@ std::vector<int> EbolaData::outbreaks_;
 std::vector<double> EbolaData::population_;
 std::vector<double> EbolaData::x_;
 std::vector<double> EbolaData::y_;
+std::vector<std::pair<uint32_t, uint32_t> > EbolaData::edges_;
 
 void EbolaData::deinit() {
     EbolaData::country_.clear();
@@ -28,6 +29,7 @@ void EbolaData::deinit() {
     EbolaData::population_.clear();
     EbolaData::x_.clear();
     EbolaData::y_.clear();
+    EbolaData::edges_.clear();
     EbolaData::init_ = false;
 }
 
@@ -40,7 +42,8 @@ void EbolaData::init(
         const std::vector<int> & outbreaks,
         const std::vector<double> & population,
         const std::vector<double> & x,
-        const std::vector<double> & y) {
+        const std::vector<double> & y,
+        const std::vector<std::pair<uint32_t, uint32_t> > & edges) {
     if (EbolaData::init_) {
         return;
     }
@@ -53,6 +56,7 @@ void EbolaData::init(
     EbolaData::population_ = population;
     EbolaData::x_ = x;
     EbolaData::y_ = y;
+    EbolaData::edges_ = edges;
 
     EbolaData::init_ = true;
 }
@@ -137,6 +141,20 @@ void EbolaData::init() {
         CHECK_EQ(EbolaData::y_.size(), 290) << "ebola_y";
         inputFile.close();
     }
+    {
+        std::ifstream inputFile{ebola_root_dir + "ebola_edges.txt"};
+        CHECK(inputFile.good()) << "ebola_edges";
+        std::istream_iterator<uint32_t> input(inputFile);
+        std::vector<uint32_t> edge_vec;
+        std::copy(input, std::istream_iterator<uint32_t>(),
+                std::back_inserter(edge_vec));
+        CHECK_EQ(edge_vec.size() % 2, 0);
+        for (uint32_t i = 0; i < edge_vec.size(); i += 2) {
+            EbolaData::edges_.emplace_back(edge_vec.at(i), edge_vec.at(i + 1));
+        }
+        inputFile.close();
+    }
+
     EbolaData::init_ = true;
 }
 

@@ -21,6 +21,7 @@ protected:
     static std::vector<double> population_;
     static std::vector<double> x_;
     static std::vector<double> y_;
+    static std::vector<std::pair<uint32_t, uint32_t> > edges_;
 
     static bool init_;
 
@@ -67,6 +68,11 @@ public:
         return EbolaData::y_;
     }
 
+    inline static const std::vector<std::pair<uint32_t, uint32_t> > & edges() {
+        CHECK(EbolaData::init_);
+        return EbolaData::edges_;
+    }
+
     static void init ();
 
     static void init(
@@ -77,7 +83,8 @@ public:
             const std::vector<int> & outbreaks,
             const std::vector<double> & population,
             const std::vector<double> & x,
-            const std::vector<double> & y);
+            const std::vector<double> & y,
+            const std::vector<std::pair<uint32_t, uint32_t> > & edges);
 
     static void deinit();
 };
