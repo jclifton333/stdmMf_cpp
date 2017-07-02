@@ -319,8 +319,8 @@ void queue_sim(
 
 
     // vfn max finite q binned features
-    CHECK_EQ(results->results.count("vfn_finite_q_mod"), 1);
-    CHECK_EQ(results->results.at("vfn_finite_q_mod").size(), num_reps);
+    CHECK_EQ(results->results.count("vfn_finite_q_bin"), 1);
+    CHECK_EQ(results->results.at("vfn_finite_q_bin").size(), num_reps);
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool->service().post([=]() {
             System<EbolaState> s(net, mod_system->clone());
@@ -359,7 +359,7 @@ void queue_sim(
             outcome.history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("vfn_finite_q_mod").at(i).set_value(
+            results->results.at("vfn_finite_q_bin").at(i).set_value(
                     std::move(outcome));
             progress->update();
         });
