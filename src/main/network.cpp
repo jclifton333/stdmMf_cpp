@@ -548,10 +548,6 @@ std::shared_ptr<Network> Network::gen_ebola() {
         i_dist.reserve(network->num_nodes_);
         for (uint32_t j = 0; j < network->num_nodes_; ++j) {
             if (j != i) {
-                // connect i to all except itself
-                n->add_neigh(j);
-                network->adj_(i, j) = 1;
-
                 // distance from i to j
                 const double diff_x(ebola_x.at(i) - ebola_x.at(j));
                 const double diff_y(ebola_y.at(i) - ebola_y.at(j));
@@ -564,6 +560,26 @@ std::shared_ptr<Network> Network::gen_ebola() {
 
         // add distance vector to matrix
         network->dist_.push_back(std::move(i_dist));
+    }
+
+    // adjacency
+    for (uint32_t i = 0; i < EbolaData::edges().size(); ++i) {
+        const std::pair<uint32_t, uint32_t> & edge(EbolaData::edges().at(i));
+
+        Node * const a(network->node_list_.mutable_nodes(edge.first));
+        Node * const b(network->node_list_.mutable_nodes(edge.second));
+
+        a->add_neigh(edge.second);
+        b->add_neigh(edge.first);
+
+        network->adj_(edge.first, edge.second) = 1;
+        network->adj_(edge.second, edge.first) = 1;
+    }
+
+    // sort neighbors
+    for (uint32_t i = 0; i < network->size(); ++i) {
+        Node * const node(network->node_list_.mutable_nodes(i));
+        std::sort(node->mutable_neigh()->begin(), node->mutable_neigh()->end());
     }
 
     return network;
