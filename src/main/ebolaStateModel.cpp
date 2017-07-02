@@ -20,8 +20,6 @@ EbolaStateModel::EbolaStateModel(const EbolaStateModel & other)
 std::vector<double> EbolaStateModel::probs(
         const EbolaState & state,
         const boost::dynamic_bitset<> & trt_status) const {
-    const boost::dynamic_bitset<> & inf_status(state.inf_bits);
-
     std::vector<double> probs;
     const std::vector<uint32_t> status = njm::tools::combine_sets(
             state.inf_bits, trt_status);
