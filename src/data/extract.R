@@ -25,6 +25,54 @@ outbreaks = readRDS(paste(data_dir,
 ## get adjacency matrix
 adj = gTouches(polygons, byid = TRUE)
 stopifnot(all(adj == t(adj)))
+
+## find islands
+connected = c(1)
+for(i in 1:length(polygons)) {
+  for(c in connected) {
+    connected = c(connected, which(adj[c,]))
+    connected = sort(unique(connected))
+  }
+  if (length(connected) == length(polygons)) {
+    break;
+  }
+}
+
+hung = which(!(1:length(polygons) %in% connected))
+
+## Right now only know how to deal with a lone island.  If the next
+## two lines fail, need to think about connecting subgroups.
+stopifnot(length(hung) == 1)
+stopifnot(hung[1] == 158)
+
+## connect to closest centroid
+centroid_dist = as.matrix(dist(centroids))
+diag(centroid_dist) = Inf
+for(h in hung) {
+  neigh = which.min(centroid_dist[h,])
+  adj[h, neigh] = TRUE
+  adj[neigh, h] = TRUE
+}
+
+## run checks on new adjacency matrix
+for(h in hung) {
+  stopifnot(sum(adj[h,]) == 1)
+  stopifnot(sum(adj[,h]) == 1)
+}
+
+connected = c(1)
+for(i in 1:length(polygons)) {
+  for(c in connected) {
+    connected = c(connected, which(adj[c,]))
+    connected = sort(unique(connected))
+  }
+  if (length(connected) == length(polygons)) {
+    break;
+  }
+}
+stopifnot(length(connected) == length(polygons))
+
+## save edges
 edges = which(adj, arr.ind = TRUE)
 edges = edges[which(edges[, 1] < edges[, 2]), ]
 write.table(edges, file = "ebola_edges.txt", sep = " ",
