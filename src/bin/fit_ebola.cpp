@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
     std::sort(outbreak_dates.begin(), outbreak_dates.end());
     const uint32_t outbreaks_cutoff(
             outbreak_dates.at(static_cast<uint32_t>(
-                            outbreak_dates.size() * 0.25)));
+                            outbreak_dates.size() * 0.05)));
 
     EbolaState start_state(EbolaState(net->size()));
     for (uint32_t i = 0; i < net->size(); ++i) {
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps(100);
 
     // tune infection rate
-    const double target_tune_inf(0.5);
+    const double target_tune_inf(0.35);
     bool calibrated(false);
     bool was_above(false);
     double scale = 0.1;

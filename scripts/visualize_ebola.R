@@ -22,16 +22,21 @@ polygons.points = fortify(polygons)
 polygons.df = join(polygons.points, polygons@data, by="id")
 
 
-sim_run_date = "2017-06-19_20-21-43"
-sim_filename = paste("../data", sim_run_date,
+sim_run_data = "../data/2017-07-01_17-33-00"
+sim_filename = paste(sim_run_data,
                      "ebola_Gravity-Gravity_history.txt", sep="/")
-sim_data = as.data.frame(read_delim(sim_filename, trim_ws = TRUE, delim = ","))
-sim_data = subset(sim_data, sim_data$rep == 0 & sim_data$agent == "none")
+sim_data_all = as.data.frame(read_delim(sim_filename, trim_ws = TRUE, delim = ","))
+
+sim_data = subset(sim_data_all,
+                  sim_data_all$rep == 0
+                  & (sim_data_all$agent == "vfn_finite_q_g"
+                    | sim_data_all$agent == "myopic"
+                    | sim_data_all$agent == "none"))
 
 sim_polygons_data = join(sim_data, polygons.df, by = "node")
 
 p = ggplot(sim_polygons_data) +
-  aes(long,lat,group=group,fill=inf,frame=time) +
+  aes(long,lat,group=group,fill=interaction(inf, trt),frame=time) +
   geom_polygon() +
   geom_path(color="gray") +
   coord_equal() +
