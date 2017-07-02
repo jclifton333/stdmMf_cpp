@@ -2,6 +2,8 @@ rm(list=ls(all=TRUE))
 
 require(maptools)
 require(PBSmapping)
+require(rgeos)
+require(rgdal)
 
 ## download data and code for Ebola paper from
 ## http://datadryad.org/resource/doi:10.5061/dryad.k95j3.2
@@ -19,6 +21,14 @@ region = as.integer(as.factor(polygons$ISO))
 outbreaks = readRDS(paste(data_dir,
                           "OutbreakDateByCounty_Summer_AllCountries.rds",
                           sep="/"))
+
+## get adjacency matrix
+adj = gTouches(polygons, byid = TRUE)
+stopifnot(all(adj == t(adj)))
+edges = which(adj, arr.ind = TRUE)
+edges = edges[which(edges[, 1] < edges[, 2]), ]
+write.table(edges, file = "ebola_edges.txt", sep = " ",
+            row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 
 ## id data set
