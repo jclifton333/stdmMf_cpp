@@ -111,7 +111,8 @@ void queue_sim(
         const std::shared_ptr<Model<EbolaState> > & mod_system,
         const std::shared_ptr<Model<EbolaState> > & mod_agents,
         const uint32_t & num_reps,
-        const uint32_t & time_points) {
+        const uint32_t & time_points,
+        const EbolaState & start_state) {
 
     // none
     CHECK_EQ(results->results.count("none"), 1);
@@ -123,25 +124,6 @@ void queue_sim(
             NoTrtAgent<EbolaState> a(net);
             a.seed(i);
 
-            // sort outbreaks
-            std::vector<uint32_t> outbreak_dates;
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0) {
-                    outbreak_dates.push_back(EbolaData::outbreaks().at(i));
-                }
-            }
-            std::sort(outbreak_dates.begin(), outbreak_dates.end());
-            const uint32_t outbreaks_cutoff(
-                    outbreak_dates.at(static_cast<uint32_t>(
-                                    outbreak_dates.size() * 0.25)));
-
-            EbolaState start_state(EbolaState(net->size()));
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0
-                        && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
-                    start_state.inf_bits.set(i);
-                }
-            }
             s.reset();
             s.state(start_state);
 
@@ -180,25 +162,6 @@ void queue_sim(
             RandomAgent<EbolaState> a(net);
             a.seed(i);
 
-            // sort outbreaks
-            std::vector<uint32_t> outbreak_dates;
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0) {
-                    outbreak_dates.push_back(EbolaData::outbreaks().at(i));
-                }
-            }
-            std::sort(outbreak_dates.begin(), outbreak_dates.end());
-            const uint32_t outbreaks_cutoff(
-                    outbreak_dates.at(static_cast<uint32_t>(
-                                    outbreak_dates.size() * 0.25)));
-
-            EbolaState start_state(EbolaState(net->size()));
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0
-                        && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
-                    start_state.inf_bits.set(i);
-                }
-            }
             s.reset();
             s.state(start_state);
 
@@ -238,25 +201,6 @@ void queue_sim(
             ProximalAgent<EbolaState> a(net);
             a.seed(i);
 
-            // sort outbreaks
-            std::vector<uint32_t> outbreak_dates;
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0) {
-                    outbreak_dates.push_back(EbolaData::outbreaks().at(i));
-                }
-            }
-            std::sort(outbreak_dates.begin(), outbreak_dates.end());
-            const uint32_t outbreaks_cutoff(
-                    outbreak_dates.at(static_cast<uint32_t>(
-                                    outbreak_dates.size() * 0.25)));
-
-            EbolaState start_state(EbolaState(net->size()));
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0
-                        && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
-                    start_state.inf_bits.set(i);
-                }
-            }
             s.reset();
             s.state(start_state);
 
@@ -297,25 +241,6 @@ void queue_sim(
                     mod_agents->clone());
             a.seed(i);
 
-            // sort outbreaks
-            std::vector<uint32_t> outbreak_dates;
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0) {
-                    outbreak_dates.push_back(EbolaData::outbreaks().at(i));
-                }
-            }
-            std::sort(outbreak_dates.begin(), outbreak_dates.end());
-            const uint32_t outbreaks_cutoff(
-                    outbreak_dates.at(static_cast<uint32_t>(
-                                    outbreak_dates.size() * 0.25)));
-
-            EbolaState start_state(EbolaState(net->size()));
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0
-                        && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
-                    start_state.inf_bits.set(i);
-                }
-            }
             s.reset();
             s.state(start_state);
 
@@ -364,25 +289,6 @@ void queue_sim(
                     2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
-            // sort outbreaks
-            std::vector<uint32_t> outbreak_dates;
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0) {
-                    outbreak_dates.push_back(EbolaData::outbreaks().at(i));
-                }
-            }
-            std::sort(outbreak_dates.begin(), outbreak_dates.end());
-            const uint32_t outbreaks_cutoff(
-                    outbreak_dates.at(static_cast<uint32_t>(
-                                    outbreak_dates.size() * 0.25)));
-
-            EbolaState start_state(EbolaState(net->size()));
-            for (uint32_t i = 0; i < net->size(); ++i) {
-                if (EbolaData::outbreaks().at(i) >= 0
-                        && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
-                    start_state.inf_bits.set(i);
-                }
-            }
             s.reset();
             s.state(start_state);
 
@@ -421,7 +327,8 @@ void queue_all_sims(
         const std::vector<std::pair<std::string,
         std::vector<ModelPair> > > & models,
         const uint32_t & num_reps,
-        const uint32_t & time_points) {
+        const uint32_t & time_points,
+        const EbolaState & start_state) {
 
     CHECK_EQ(networks.size(), results->size());
     for (uint32_t i = 0; i < networks.size(); ++i) {
@@ -432,7 +339,7 @@ void queue_all_sims(
                     networks.at(i),
                     models.at(j).second.at(i).first,
                     models.at(j).second.at(i).second,
-                    num_reps, time_points);
+                    num_reps, time_points, start_state);
         }
     }
 }
@@ -603,7 +510,7 @@ int main(int argc, char *argv[]) {
         //                              -1.015256*2, -1.015256*2};
         // std::vector<double> grav_par{-3.104833, 1.433642, 0.051293,
         //                              -1.486436, -1.486436};
-        std::vector<double> grav_par{-3.084, 1.427, 0.051, -1.486, -1.486};
+        std::vector<double> grav_par{-3.105, 1.434, 0.051, -1.117, -1.117};
 
 
         { // Correct: Gravity,  Postulated: Gravity
@@ -623,6 +530,32 @@ int main(int argc, char *argv[]) {
                             models_add));
         }
     }
+
+    // sort outbreaks
+    const double starting_prop(0.0);
+    std::vector<uint32_t> outbreak_dates;
+    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
+        if (EbolaData::outbreaks().at(i) >= 0) {
+            outbreak_dates.push_back(EbolaData::outbreaks().at(i));
+        }
+    }
+    std::sort(outbreak_dates.begin(), outbreak_dates.end());
+    const uint32_t last_index(
+            std::min(std::max(1u,
+                            static_cast<uint32_t>(
+                                    outbreak_dates.size()
+                                    * starting_prop)),
+                    static_cast<uint32_t>(outbreak_dates.size() - 1u)));
+    const uint32_t outbreaks_cutoff(outbreak_dates.at(last_index));
+
+    EbolaState start_state(EbolaState(EbolaData::outbreaks().size()));
+    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
+        if (EbolaData::outbreaks().at(i) >= 0
+                && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
+            start_state.inf_bits.set(i);
+        }
+    }
+
 
     const uint32_t num_reps = 50;
     const uint32_t time_points = 25;
@@ -687,7 +620,7 @@ int main(int argc, char *argv[]) {
 
     // queue sims
     queue_all_sims(&pool, &progress, &promise_results,
-            networks, models, num_reps, time_points);
+            networks, models, num_reps, time_points, start_state);
 
     // process results
     process_results(tk, future_results, agent_names);
