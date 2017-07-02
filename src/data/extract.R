@@ -75,6 +75,7 @@ stopifnot(length(connected) == length(polygons))
 ## save edges
 edges = which(adj, arr.ind = TRUE)
 edges = edges[which(edges[, 1] < edges[, 2]), ]
+edges = edges - 1 ## convert to zero based indexing
 write.table(edges, file = "ebola_edges.txt", sep = " ",
             row.names = FALSE, col.names = FALSE, quote = FALSE)
 
