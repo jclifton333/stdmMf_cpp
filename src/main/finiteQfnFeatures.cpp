@@ -77,6 +77,9 @@ template <typename State>
 void FiniteQfnFeatures<State>::update(const State & curr_state,
         const std::vector<StateAndTrt<State> > & history,
         const uint32_t & num_trt) {
+    // update nested features
+    this->features_->update(curr_state, history, num_trt);
+
     const std::vector<Transition<State> > all_history(
             Transition<State>::from_sequence(history, curr_state));
     for (uint32_t m = 0; m < this->num_models_; ++m) {
