@@ -118,11 +118,11 @@ std::vector<double> EbolaModelFeatures::get_features(
             double one_to_one_diff(0.0);
             double prob_dist(0.0);
             for (uint32_t j = 0; j < this->network_->size(); ++j) {
-                if (!state.inf_bits.test(i) && i != j) {
+                if (!state.inf_bits.test(j) && i != j) {
                     const double a_inf_b_no(mod->a_inf_b(i, j, false, false,
                                     state, trt_bits // these don't matter
                                     ));
-                    const double a_inf_b_yes(mod->a_inf_b(i, j, false, false,
+                    const double a_inf_b_yes(mod->a_inf_b(i, j, true, false,
                                     state, trt_bits // these don't matter
                                     ));
                     one_to_one += a_inf_b_no;
@@ -139,8 +139,8 @@ std::vector<double> EbolaModelFeatures::get_features(
             }
 
             this->terms_.at(i).emplace_back(Term{1, one_to_one});
-            this->terms_.at(i).emplace_back(Term{3, one_to_one});
-            this->terms_.at(i).emplace_back(Term{5, one_to_one});
+            this->terms_.at(i).emplace_back(Term{3, one_to_one_diff});
+            this->terms_.at(i).emplace_back(Term{5, prob_dist});
         } else {
             this->terms_.at(i).emplace_back(Term{7, probs.at(i)});
 
