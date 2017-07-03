@@ -466,6 +466,13 @@ uint32_t FiniteQfnFeatures<State>::num_features() const {
 
 
 template <typename State>
+const std::vector<std::vector<std::vector<double> > > &
+FiniteQfnFeatures<State>::coef() const {
+    return this->coef_;
+}
+
+
+template <typename State>
 void FiniteQfnFeatures<State>::rng(
         const std::shared_ptr<njm::tools::Rng> & rng) {
     this->njm::tools::RngClass::rng(rng);

@@ -76,6 +76,8 @@ public:
     virtual void fit_q_functions(
             const std::vector<std::vector<Transition<State> > > & obs);
 
+    const std::vector<std::vector<std::vector<double> > > & coef() const;
+
     using njm::tools::RngClass::rng;
     virtual void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;
 };
