@@ -649,7 +649,7 @@ int main(int argc, char *argv[]) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
-                "vfn_finite_q"
+                "vfn_finite_q",
                 "vfn_finite_q_mod", "vfn_finite_q_bin"
                 // "br_finite_q",
             });
