@@ -15,7 +15,7 @@ namespace stdmMf {
 
 
 const uint32_t EbolaModelFeatures::num_inf_features_ = 3;
-const uint32_t EbolaModelFeatures::num_not_features_ = 2;
+const uint32_t EbolaModelFeatures::num_not_features_ = 3;
 
 
 EbolaModelFeatures::EbolaModelFeatures(
@@ -104,8 +104,12 @@ std::vector<double> EbolaModelFeatures::get_features(
             std::static_pointer_cast<EbolaStateModel>(this->model_));
 
     // probs with no treatment
-    std::vector<double> probs(mod->probs(state,
+    const std::vector<double> probs(mod->probs(state,
                     boost::dynamic_bitset<>(this->network_->size())));
+    // treat all inot infected locations
+    boost::dynamic_bitset<> not_trt_bits(state.inf_bits);
+    not_trt_bits.flip();
+    const std::vector<double> probs_not_trt(mod->probs(state, not_trt_bits));
 
     this->terms_.resize(this->network_->size());
 
@@ -143,6 +147,9 @@ std::vector<double> EbolaModelFeatures::get_features(
             this->terms_.at(i).emplace_back(Term{5, prob_dist});
         } else {
             this->terms_.at(i).emplace_back(Term{7, probs.at(i)});
+            // benefit of treating
+            this->terms_.at(i).emplace_back(
+                    Term{9, probs.at(i) - probs_not_trt.at(i)});
 
             double inf_effect(0.0);
             for (uint32_t j = 0; j < this->network_->size(); ++j) {
@@ -157,7 +164,7 @@ std::vector<double> EbolaModelFeatures::get_features(
                 inf_effect /= num_not;
             }
 
-            this->terms_.at(i).emplace_back(Term{9, inf_effect});
+            this->terms_.at(i).emplace_back(Term{11, inf_effect});
         }
     }
 
