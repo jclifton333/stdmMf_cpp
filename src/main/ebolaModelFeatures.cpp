@@ -146,7 +146,7 @@ std::vector<double> EbolaModelFeatures::get_features(
 
             double inf_effect(0.0);
             for (uint32_t j = 0; j < this->network_->size(); ++j) {
-                if (!state.inf_bits.test(i) && i != j) {
+                if (!state.inf_bits.test(j) && i != j) {
                     const double a_inf_b_no(mod->a_inf_b(i, j, false, false,
                                     state, trt_bits // these don't matter
                                     ));
