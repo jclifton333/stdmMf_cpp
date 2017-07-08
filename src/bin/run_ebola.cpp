@@ -736,26 +736,117 @@ int main(int argc, char *argv[]) {
         //                              -1.015256*2, -1.015256*2};
         // std::vector<double> grav_par{-3.104833, 1.433642, 0.051293,
         //                              -1.486436, -1.486436};
-        std::vector<double> grav_par{-3.105, 1.434, 0.051,
-                                     -1.117 * 3.0, -1.117 / 3.0};
+        {
+            std::vector<double> grav_par{-3.105, 1.434, 0.051,
+                                         -1.117, -1.117};
 
 
-        { // Correct: Gravity,  Postulated: Gravity
-            std::vector<ModelPair> models_add;
-            for (uint32_t i = 0; i < networks.size(); ++i) {
-                ModelPair mp (std::shared_ptr<Model<EbolaState> >(
-                                new EbolaStateGravityModel(
-                                        networks.at(i))),
-                        std::shared_ptr<Model<EbolaState> >(
-                                new EbolaStateGravityModel(
-                                        networks.at(i))));
-                mp.first->par(grav_par);
-                models_add.push_back(mp);
+            { // Correct: Gravity,  Postulated: Gravity
+                std::vector<ModelPair> models_add;
+                for (uint32_t i = 0; i < networks.size(); ++i) {
+                    ModelPair mp (std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))),
+                            std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))));
+                    mp.first->par(grav_par);
+                    models_add.push_back(mp);
+                }
+                models.push_back(std::pair<std::string,
+                        std::vector<ModelPair> >("Gravity-Gravity_0",
+                                models_add));
             }
-            models.push_back(std::pair<std::string,
-                    std::vector<ModelPair> >("Gravity-Gravity",
-                            models_add));
         }
+        {
+            std::vector<double> grav_par{-3.105, 1.434, 0.051,
+                                         -1.117 * 3, -1.117 / 3};
+
+
+            { // Correct: Gravity,  Postulated: Gravity
+                std::vector<ModelPair> models_add;
+                for (uint32_t i = 0; i < networks.size(); ++i) {
+                    ModelPair mp (std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))),
+                            std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))));
+                    mp.first->par(grav_par);
+                    models_add.push_back(mp);
+                }
+                models.push_back(std::pair<std::string,
+                        std::vector<ModelPair> >("Gravity-Gravity_1",
+                                models_add));
+            }
+        }
+        {
+            std::vector<double> grav_par{-3.105, 1.434, 0.051,
+                                         -1.117 * 5, -1.117 / 5};
+
+
+            { // Correct: Gravity,  Postulated: Gravity
+                std::vector<ModelPair> models_add;
+                for (uint32_t i = 0; i < networks.size(); ++i) {
+                    ModelPair mp (std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))),
+                            std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))));
+                    mp.first->par(grav_par);
+                    models_add.push_back(mp);
+                }
+                models.push_back(std::pair<std::string,
+                        std::vector<ModelPair> >("Gravity-Gravity_2",
+                                models_add));
+            }
+        }
+        {
+            std::vector<double> grav_par{-3.105, 1.434, 0.051,
+                                         -1.117 / 3, -1.117 * 3};
+
+
+            { // Correct: Gravity,  Postulated: Gravity
+                std::vector<ModelPair> models_add;
+                for (uint32_t i = 0; i < networks.size(); ++i) {
+                    ModelPair mp (std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))),
+                            std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))));
+                    mp.first->par(grav_par);
+                    models_add.push_back(mp);
+                }
+                models.push_back(std::pair<std::string,
+                        std::vector<ModelPair> >("Gravity-Gravity_3",
+                                models_add));
+            }
+        }
+        {
+            std::vector<double> grav_par{-3.105, 1.434, 0.051,
+                                         -1.117 / 5, -1.117 * 5};
+
+
+            { // Correct: Gravity,  Postulated: Gravity
+                std::vector<ModelPair> models_add;
+                for (uint32_t i = 0; i < networks.size(); ++i) {
+                    ModelPair mp (std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))),
+                            std::shared_ptr<Model<EbolaState> >(
+                                    new EbolaStateGravityModel(
+                                            networks.at(i))));
+                    mp.first->par(grav_par);
+                    models_add.push_back(mp);
+                }
+                models.push_back(std::pair<std::string,
+                        std::vector<ModelPair> >("Gravity-Gravity_4",
+                                models_add));
+            }
+        }
+
     }
 
     // sort outbreaks
