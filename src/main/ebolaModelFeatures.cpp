@@ -136,11 +136,11 @@ std::vector<double> EbolaModelFeatures::get_features(
                         / this->network_->dist().at(i).at(j);
                 }
             }
-            if (num_not > 0) {
-                one_to_one /= num_not;
-                one_to_one_diff /= num_not;
-                prob_dist /= num_not;
-            }
+            // if (num_not > 0) {
+            //     one_to_one /= num_not;
+            //     one_to_one_diff /= num_not;
+            //     prob_dist /= num_not;
+            // }
 
             this->terms_.at(i).emplace_back(Term{1, one_to_one});
             this->terms_.at(i).emplace_back(Term{3, one_to_one_diff});
