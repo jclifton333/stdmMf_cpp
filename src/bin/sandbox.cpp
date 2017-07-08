@@ -21,6 +21,8 @@
 #include "ebolaStateGravityModel.hpp"
 
 #include "ebolaFeatures.hpp"
+#include "ebolaModelFeatures.hpp"
+#include "ebolaBinnedFeatures.hpp"
 
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
@@ -50,35 +52,55 @@ int main(int argc, char *argv[]) {
 
     std::shared_ptr<Network> net(Network::gen_network(init));
 
-    const uint32_t time_points(50);
-
     // init model
     const std::shared_ptr<EbolaStateGravityModel> mod(
             new EbolaStateGravityModel(net));
 
-    std::vector<double> par(mod->par_size());
-    par.at(0) = -5.25;
-    par.at(1) = std::log(156);
-    par.at(2) = 0.186;
-    par.at(3) = -1.5;
-    par.at(4) = -1.0;
+    std::vector<double> par{-3.105, 1.434, 0.051, -1.117, -1.117};
 
-    System<EbolaState> s(net, mod->clone());
-    s.seed(0);
-    VfnMaxSimPerturbAgent<EbolaState> a(net,
+    mod->par(par);
+
+    SweepAgent<EbolaState> a(net,
             std::shared_ptr<Features<EbolaState> >(
-                    new FiniteQfnFeatures<EbolaState>(
-                            net, {mod->clone()},
-                            std::shared_ptr<Features<EbolaState> >(
-                                    new EbolaFeatures(
-                                            net, 20, 10)), 1, false)),
-            mod->clone(),
-            2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
-    a.seed(0);
+                    new EbolaModelFeatures(
+                            net, mod->clone())),
+            {0.0,
+                    -1000.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    -1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+            njm::linalg::dot_a_and_b, 2, false);
 
-    s.start();
+    njm::tools::Rng rng;
 
-    runner(&s, &a, time_points, 1.0);
+    EbolaState state(EbolaState::random(net->size(), rng));
+
+    const boost::dynamic_bitset<> trt_bits(a.apply_trt(state));
+
+    std::cout << "inf: " << (trt_bits & state.inf_bits).count()
+              << std::endl;
+    state.inf_bits.flip();
+    std::cout << "not: " << (trt_bits & state.inf_bits).count()
+              << std::endl;
+
+    // const std::vector<double> probs(mod->probs(state,
+    //                 boost::dynamic_bitset<>(net->size())));
+
+    // std::vector<std::pair<double, uint32_t> > prob_match;
+    // for (uint32_t i = 0; i < net->size(); ++i) {
+    //     if (!state.inf_bits.test(i)) {
+    //         prob_match.emplace_back(-probs.at(i), i);
+    //     }
+    // }
+
+    // std::sort(prob_match.begin(), prob_match.end());
+
+    // for (uint32_t i = 0; i < prob_match.size(); ++i) {
+    //     std::cout << prob_match.at(i).second
+    //               << ": "
+    //               << prob_match.at(i).first
+    //               << " -> "
+    //               << trt_bits.test(prob_match.at(i).second)
+    //               << std::endl;
+    // }
 
     return 0;
 }
