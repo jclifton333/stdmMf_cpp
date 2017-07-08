@@ -21,7 +21,8 @@ TEST(TestNetworkRunFeatures, TestValuesEvenBins) {
             {1, 2, 3},
             {0.5, 1.0, 1.5},
             {-2.0, 0.0, 1.0},
-            {0.0, 0.0, 0.0});
+            {0.0, 0.0, 0.0},
+            {});
     // generate network
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);
@@ -152,7 +153,8 @@ TEST(TestNetworkRunFeatures, TestValuesUnevenBins) {
             {1, 2, 3},
             {0.5, 1.0, 1.5},
             {-2.0, 0.0, 1.0},
-            {0.0, 0.0, 0.0});
+            {0.0, 0.0, 0.0},
+            {});
     // generate network
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);

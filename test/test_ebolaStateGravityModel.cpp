@@ -64,7 +64,7 @@ double f_grad (double x, void * params) {
 TEST(TestEbolaStateGravityModel, TestPar) {
     EbolaData::deinit();
     // dummy ebola network
-    EbolaData::init({"a"}, {"1"}, {"a1"}, {1}, {0}, {1.0}, {0.0}, {0.0});
+    EbolaData::init({"a"}, {"1"}, {"a1"}, {1}, {0}, {1.0}, {0.0}, {0.0}, {});
     // generate network
     NetworkInit init;
     init.set_type(NetworkInit_NetType_EBOLA);
@@ -124,7 +124,7 @@ TEST(TestEbolaStateGravityModel,TestLLGradient) {
 
         EbolaData::deinit();
         EbolaData::init(str_var, str_var, str_var, region,
-                outbreaks, population, x, y);
+                outbreaks, population, x, y, {});
     }
     // generate network
     NetworkInit init;
@@ -226,7 +226,7 @@ TEST(TestEbolaStateGravityModel,TestLLHessian) {
 
         EbolaData::deinit();
         EbolaData::init(str_var, str_var, str_var, region,
-                outbreaks, population, x, y);
+                outbreaks, population, x, y, {});
     }
 
     // generate network
