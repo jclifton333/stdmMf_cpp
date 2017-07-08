@@ -188,9 +188,9 @@ std::vector<double> EbolaModelFeatures::get_features(
         const std::vector<Term> & t(this->terms_.at(i));
         std::vector<Term>::const_iterator it,end(t.end());
         if (trt_bits.test(i)) {
-            for (it = t.begin(); it != end; ++it) {
-                feat.at(it->index + 1) += it->weight;
-            }
+            // for (it = t.begin(); it != end; ++it) {
+            //     feat.at(it->index + 1) += it->weight;
+            // }
         } else {
             for (it = t.begin(); it != end; ++it) {
                 feat.at(it->index) += it->weight;
@@ -218,11 +218,11 @@ void EbolaModelFeatures::update_features(
     if (trt_now && !trt_before) {
         for (it = t.begin(); it != end; ++it) {
             feat.at(it->index) -= it->weight;
-            feat.at(it->index + 1) += it->weight;
+            // feat.at(it->index + 1) += it->weight;
         }
     } else if (!trt_now && trt_before) {
         for (it = t.begin(); it != end; ++it) {
-            feat.at(it->index + 1) -= it->weight;
+            // feat.at(it->index + 1) -= it->weight;
             feat.at(it->index) += it->weight;
         }
     } else {
