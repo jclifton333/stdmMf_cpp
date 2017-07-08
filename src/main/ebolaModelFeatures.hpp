@@ -20,6 +20,8 @@ protected:
 
     const std::shared_ptr<Model<EbolaState> > model_;
 
+    double dist_mean_;
+
     static const uint32_t num_inf_features_;
     static const uint32_t num_not_features_;
 
