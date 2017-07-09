@@ -274,7 +274,7 @@ run(const std::shared_ptr<Network> & net,
                             new NetworkRunSymFeatures<InfState>(
                                     net->clone(), 1)),
                     mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    2, time_points, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             s.start();
@@ -326,7 +326,7 @@ run(const std::shared_ptr<Network> & net,
                             new NetworkRunSymFeatures<InfState>(
                                     net->clone(), 2)),
                     mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    2, time_points, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             s.start();
@@ -378,7 +378,7 @@ run(const std::shared_ptr<Network> & net,
                             new NetworkRunSymFeatures<InfState>(
                                     net->clone(), 3)),
                     mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    2, time_points, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             s.start();

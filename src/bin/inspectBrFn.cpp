@@ -86,7 +86,8 @@ void run(const uint32_t & level_num, const uint32_t & rep,
     {
         VfnMaxSimPerturbAgent<InfShieldState> vfnAgent(network->clone(),
                 features->clone(), model->clone(),
-                2, all_history.size() + 100, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                2, all_history.size() + 100, all_history.size() + 100,
+                10.0, 0.1, 5, 1, 0.4, 0.7);
         vfnAgent.rng(rng);
         vfn_optim_par = vfnAgent.train(all_history,
                 std::vector<double>(features->num_features(), 0.0));

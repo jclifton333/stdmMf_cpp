@@ -117,7 +117,8 @@ std::vector<double> VfnBrAdaptSimPerturbAgent<State>::train(
         const std::vector<double> & starting_vals) {
 
     VfnMaxSimPerturbAgent<State> vfnMaxAgent(this->network_, this->features_,
-            this->model_, this->vfn_num_reps_, this->vfn_final_t_, this->vfn_c_,
+            this->model_, this->vfn_num_reps_, this->vfn_final_t_,
+            this->vfn_final_t_, this->vfn_c_,
             this->vfn_t_, this->vfn_a_, this->vfn_b_, this->vfn_ell_,
             this->vfn_min_step_size_);
     vfnMaxAgent.rng(this->rng());

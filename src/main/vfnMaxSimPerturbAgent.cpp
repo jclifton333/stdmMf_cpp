@@ -22,6 +22,7 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
         const std::shared_ptr<Model<State> > & model,
         const uint32_t & num_reps,
         const uint32_t & final_t,
+        const uint32_t & proj_t,
         const double & c,
         const double & t,
         const double & a,
@@ -29,7 +30,8 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
         const double & ell,
         const double & min_step_size)
     : Agent<State>(network), features_(features), model_(model),
-      num_reps_(num_reps), final_t_(final_t), c_(c), t_(t), a_(a), b_(b),
+      num_reps_(num_reps), final_t_(final_t), proj_t_(proj_t),
+      c_(c), t_(t), a_(a), b_(b),
       ell_(ell), min_step_size_(min_step_size),
       last_optim_par_(this->features_->num_features(), 0.0) {
     // share rng
@@ -44,6 +46,7 @@ VfnMaxSimPerturbAgent<State>::VfnMaxSimPerturbAgent(
     : Agent<State>(other),
       features_(other.features_->clone()), model_(other.model_->clone()),
       num_reps_(other.num_reps_), final_t_(other.final_t_),
+      proj_t_(other.proj_t_),
       c_(other.c_), t_(other.t_), a_(other.a_), b_(other.b_), ell_(other.ell_),
       min_step_size_(other.min_step_size_) ,
       last_optim_par_(other.last_optim_par_) {
@@ -64,6 +67,7 @@ template <typename State>
 boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
+    std::cout << "time: " << history.size() << std::endl;
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
         a.rng(this->rng());
@@ -159,7 +163,9 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     // this->model_->par(par_samp);
 
     CHECK_GT(this->final_t_, history.size());
-    const uint32_t num_points = this->final_t_ - history.size();
+    CHECK_GE(this->final_t_, this->proj_t_);
+    const uint32_t num_points(
+            std::min<uint32_t>(this->final_t_ - history.size(), this->proj_t_));
 
     const State & curr_state = history.at(history.size() - 1).next_state;
 
@@ -187,6 +193,8 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
             this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
+
+    sp.verbose(true);
 
     njm::optim::ErrorCode ec;
     do {

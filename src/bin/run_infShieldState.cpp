@@ -274,7 +274,7 @@ void queue_sim(
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures<InfShieldState>(net, 2)),
                     mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    2, time_points, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             s.start();
