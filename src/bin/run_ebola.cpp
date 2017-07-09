@@ -881,7 +881,7 @@ int main(int argc, char *argv[]) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
-                // "sweep_cheat"
+                "sweep_cheat",
                 "vfn",
                 "vfn_finite_q"
                 // "vfn_finite_q_mod"
