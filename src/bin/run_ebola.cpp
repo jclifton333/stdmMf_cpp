@@ -366,52 +366,52 @@ void queue_sim(
     // }
 
 
-    // vfn max finite qfn
-    CHECK_EQ(results->results.count("vfn_finite_q"), 1);
-    CHECK_EQ(results->results.at("vfn_finite_q").size(), num_reps);
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        pool->service().post([=]() {
-            System<EbolaState> s(net, mod_system->clone());
-            s.seed(i);
-            VfnMaxSimPerturbAgent<EbolaState> a(net,
-                    std::shared_ptr<Features<EbolaState> >(
-                            new FiniteQfnFeatures<EbolaState>(
-                                    net, {mod_agents->clone()},
-                                    std::shared_ptr<Features<EbolaState> >(
-                                            new EbolaModelFeatures(
-                                                    net, mod_agents->clone())),
-                                    1, false)),
-                    mod_agents->clone(),
-                    2, time_points, 50.0, 0.1, 5, 1, 0.4, 0.7);
-            a.seed(i);
+    // // vfn max finite qfn
+    // CHECK_EQ(results->results.count("vfn_finite_q"), 1);
+    // CHECK_EQ(results->results.at("vfn_finite_q").size(), num_reps);
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     pool->service().post([=]() {
+    //         System<EbolaState> s(net, mod_system->clone());
+    //         s.seed(i);
+    //         VfnMaxSimPerturbAgent<EbolaState> a(net,
+    //                 std::shared_ptr<Features<EbolaState> >(
+    //                         new FiniteQfnFeatures<EbolaState>(
+    //                                 net, {mod_agents->clone()},
+    //                                 std::shared_ptr<Features<EbolaState> >(
+    //                                         new EbolaModelFeatures(
+    //                                                 net, mod_agents->clone())),
+    //                                 1, false)),
+    //                 mod_agents->clone(),
+    //                 2, time_points, 50.0, 0.1, 5, 1, 0.4, 0.7);
+    //         a.seed(i);
 
-            s.reset();
-            s.state(start_state);
+    //         s.reset();
+    //         s.state(start_state);
 
-            Outcome outcome;
+    //         Outcome outcome;
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            outcome.value = runner(&s, &a, time_points, 1.0);
+    //         outcome.value = runner(&s, &a, time_points, 1.0);
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            outcome.time = std::chrono::duration_cast<
-                std::chrono::seconds>(tock - tick).count();
+    //         outcome.time = std::chrono::duration_cast<
+    //             std::chrono::seconds>(tock - tick).count();
 
-            outcome.history = s.history();
-            outcome.history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
+    //         outcome.history = s.history();
+    //         outcome.history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("vfn_finite_q").at(i).set_value(
-                    std::move(outcome));
-            progress->update();
-        });
-    }
+    //         results->results.at("vfn_finite_q").at(i).set_value(
+    //                 std::move(outcome));
+    //         progress->update();
+    //     });
+    // }
 
 
     // vfn max finite q model features
@@ -884,8 +884,8 @@ int main(int argc, char *argv[]) {
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
                 "sweep_cheat",
-                "vfn",
-                "vfn_finite_q"
+                "vfn"
+                // "vfn_finite_q"
                 // "vfn_finite_q_mod"
                 // "vfn_finite_q_bin",
                 // "vfn_finite_q_orig"
