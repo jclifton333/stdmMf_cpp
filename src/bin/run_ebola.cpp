@@ -285,8 +285,9 @@ void queue_sim(
                             new EbolaModelFeatures(
                                     net, mod_system->clone())),
                     {0.0,
-                            -1000.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                            -1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                            -1000.0, 0.0, // 0.0, 0.0, 0.0, 0.0,
+                            -1.0, 0.0, // 0.0, 0.0, 0.0, 0.0
+                            },
                     njm::linalg::dot_a_and_b, 2, false);
             a.seed(i);
 
