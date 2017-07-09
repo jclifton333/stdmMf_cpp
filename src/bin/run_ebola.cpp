@@ -426,7 +426,7 @@ void queue_sim(
                             new EbolaModelFeatures(
                                     net, mod_agents->clone())),
                     mod_agents->clone(),
-                    2, time_points, 3, 10.0, 0.1, 10, 1, 0.4, 1.0);
+                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.0);
             a.seed(i);
 
             s.reset();
