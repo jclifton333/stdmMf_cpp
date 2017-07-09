@@ -380,7 +380,7 @@ void queue_sim(
                                                     net, mod_agents->clone())),
                                     1, false)),
                     mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    2, time_points, 50.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             s.reset();
@@ -424,7 +424,7 @@ void queue_sim(
                             new EbolaModelFeatures(
                                     net, mod_agents->clone())),
                     mod_agents->clone(),
-                    2, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    2, time_points, 50.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             s.reset();
