@@ -54,53 +54,53 @@ void EbolaModelFeatures::update(const EbolaState & curr_state,
     // fit model
     this->model_->est_par(all_history);
 
-    // thompson sampling
-    // get information matrix and take inverse sqrt
-    std::vector<double> hess = this->model_->ll_hess(all_history);
-    njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
+    // // thompson sampling
+    // // get information matrix and take inverse sqrt
+    // std::vector<double> hess = this->model_->ll_hess(all_history);
+    // njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
 
-    const arma::mat hess_mat(hess.data(), this->model_->par_size(),
-            this->model_->par_size());
-    arma::mat eigvec;
-    arma::vec eigval;
-    arma::eig_sym(eigval, eigvec, hess_mat);
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        if (eigval(i) > 0.1)
-            eigval(i) = std::sqrt(1.0 / eigval(i));
-        else
-            eigval(i) = 0.0;
-    }
-    // threshold eigen vectors
-    for (auto it = eigvec.begin(); it != eigvec.end(); ++it) {
-        if (std::abs(*it) < 1e-3) {
-            *it = 0.0;
-        }
-    }
-    arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
-    // threshold sqrt matrix
-    for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
-        if (*it < 1e-3) {
-            *it = 0.0;
-        }
-    }
+    // const arma::mat hess_mat(hess.data(), this->model_->par_size(),
+    //         this->model_->par_size());
+    // arma::mat eigvec;
+    // arma::vec eigval;
+    // arma::eig_sym(eigval, eigvec, hess_mat);
+    // for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
+    //     if (eigval(i) > 0.1)
+    //         eigval(i) = std::sqrt(1.0 / eigval(i));
+    //     else
+    //         eigval(i) = 0.0;
+    // }
+    // // threshold eigen vectors
+    // for (auto it = eigvec.begin(); it != eigvec.end(); ++it) {
+    //     if (std::abs(*it) < 1e-3) {
+    //         *it = 0.0;
+    //     }
+    // }
+    // arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
+    // // threshold sqrt matrix
+    // for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
+    //     if (*it < 1e-3) {
+    //         *it = 0.0;
+    //     }
+    // }
 
-    // sample new parameters
-    arma::vec std_norm(this->model_->par_size());
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        std_norm(i) = this->rng_->rnorm_01();
-    }
-    const std::vector<double> par_samp(
-            njm::linalg::add_a_and_b(this->model_->par(),
-                    arma::conv_to<std::vector<double> >::from(
-                            var_sqrt * std_norm)));
-    // check for finite values
-    std::for_each(par_samp.begin(), par_samp.end(),
-            [] (const double & x_) {
-                LOG_IF(FATAL, !std::isfinite(x_));
-            });
+    // // sample new parameters
+    // arma::vec std_norm(this->model_->par_size());
+    // for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
+    //     std_norm(i) = this->rng_->rnorm_01();
+    // }
+    // const std::vector<double> par_samp(
+    //         njm::linalg::add_a_and_b(this->model_->par(),
+    //                 arma::conv_to<std::vector<double> >::from(
+    //                         var_sqrt * std_norm)));
+    // // check for finite values
+    // std::for_each(par_samp.begin(), par_samp.end(),
+    //         [] (const double & x_) {
+    //             LOG_IF(FATAL, !std::isfinite(x_));
+    //         });
 
-    // set new parameters
-    this->model_->par(par_samp);
+    // // set new parameters
+    // this->model_->par(par_samp);
 }
 
 
@@ -188,9 +188,9 @@ std::vector<double> EbolaModelFeatures::get_features(
         const std::vector<Term> & t(this->terms_.at(i));
         std::vector<Term>::const_iterator it,end(t.end());
         if (trt_bits.test(i)) {
-            // for (it = t.begin(); it != end; ++it) {
-            //     feat.at(it->index + 1) += it->weight;
-            // }
+            for (it = t.begin(); it != end; ++it) {
+                feat.at(it->index + 1) += it->weight;
+            }
         } else {
             for (it = t.begin(); it != end; ++it) {
                 feat.at(it->index) += it->weight;
@@ -218,11 +218,11 @@ void EbolaModelFeatures::update_features(
     if (trt_now && !trt_before) {
         for (it = t.begin(); it != end; ++it) {
             feat.at(it->index) -= it->weight;
-            // feat.at(it->index + 1) += it->weight;
+            feat.at(it->index + 1) += it->weight;
         }
     } else if (!trt_now && trt_before) {
         for (it = t.begin(); it != end; ++it) {
-            // feat.at(it->index + 1) -= it->weight;
+            feat.at(it->index + 1) -= it->weight;
             feat.at(it->index) += it->weight;
         }
     } else {
