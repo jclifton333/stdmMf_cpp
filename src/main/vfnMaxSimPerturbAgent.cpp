@@ -67,7 +67,6 @@ template <typename State>
 boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         const State & curr_state,
         const std::vector<StateAndTrt<State> > & history) {
-    std::cout << "time: " << history.size() << std::endl;
     if (history.size() < 1) {
         ProximalAgent<State> a(this->network_);
         a.rng(this->rng());
@@ -193,8 +192,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
             this->a_, this->b_, this->ell_, this->min_step_size_);
     sp.rng(this->rng());
-
-    sp.verbose(true);
 
     njm::optim::ErrorCode ec;
     do {
