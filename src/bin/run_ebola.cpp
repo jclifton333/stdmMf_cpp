@@ -284,10 +284,11 @@ void queue_sim(
                     std::shared_ptr<Features<EbolaState> >(
                             new EbolaModelFeatures(
                                     net, mod_system->clone())),
-                    {0.0,
-                            -1000.0, 0.0, // 0.0, 0.0, 0.0, 0.0,
-                            -1.0, 0.0, // 0.0, 0.0, 0.0, 0.0
-                            },
+                    {-1.63145, -28.7142, -3.33137, 7.6446, 3.38264},
+                    // {0.0,
+                    //         -1000.0, 0.0, // 0.0, 0.0, 0.0, 0.0,
+                    //         -1.0, 0.0, // 0.0, 0.0, 0.0, 0.0
+                    //         },
                     njm::linalg::dot_a_and_b, 2, false);
             a.seed(i);
 
