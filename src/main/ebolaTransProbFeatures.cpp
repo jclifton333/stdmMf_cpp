@@ -193,103 +193,137 @@ void EbolaTransProbFeatures::update_features(
         const boost::dynamic_bitset<> & trt_bits_old,
         std::vector<double> & feat) {
 
+    // treatment status
+    const bool trt_now(trt_bits_new.test(changed_node));
+    const bool trt_before(trt_bits_old.test(changed_node));
 
-    feat = this->get_features(state_new, trt_bits_new);
+    CHECK_NE(trt_now, trt_before)
+        << "Treatment status did not change for " << changed_node;
 
-    // // treatment status
-    // const bool trt_now(trt_bits_new.test(changed_node));
-    // const bool trt_before(trt_bits_old.test(changed_node));
+    CHECK_EQ(state_new.inf_bits.test(changed_node),
+            state_old.inf_bits.test(changed_node))
+        << "Infection status changed for " << changed_node;
 
-    // CHECK_NE(trt_now, trt_before)
-    //     << "Treatment status did not change for " << changed_node;
 
-    // CHECK_EQ(state_new.inf_bits.test(changed_node),
-    //         state_old.inf_bits.test(changed_node))
-    //     << "Infection status changed for " << changed_node;
+    const auto both(njm::tools::both_sets(state_new.inf_bits));
+    const std::vector<uint32_t> inf_vec(both.first), not_vec(both.second);
+    std::vector<uint32_t>::const_iterator not_it, not_end;
+    not_end = not_vec.end();
 
-    // // update terms
-    // if (state_new.inf_bits.test(changed_node)) {
-    //     // infected
+    std::vector<uint32_t>::const_iterator inf_it, inf_end;
+    inf_end = inf_vec.end();
 
-    //     const uint32_t inf_trt_bits_new(trt_now * 2);
-    //     const uint32_t inf_trt_bits_old(trt_before * 2);
+    // update terms
+    if (state_new.inf_bits.test(changed_node)) {
+        // infected
 
-    //     // update to_prob
-    //     // remove old
-    //     feat.at(1) -= this->to_probs_.at(changed_node);
+        const uint32_t inf_trt_bits_new(trt_now * 2);
+        const uint32_t inf_trt_bits_old(trt_before * 2);
 
-    //     std::vector<uint32_t> not_vec(njm::tools::inactive_set(
-    //                     state_new.inf_bits));
-    //     std::vector<uint32_t>::iterator not_it, not_end;
-    //     not_end = not_vec.end();
+        // update to_prob
+        // remove old
+        feat.at(1) -= this->to_probs_.at(changed_node);
 
-    //     double to_prob(0.0);
-    //     for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
-    //         const uint32_t not_trt_bits(trt_bits_new.test(*not_it) ? 1 : 0);
+        double to_prob(0.0);
+        for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
+            const uint32_t not_trt_bits(trt_bits_new.test(*not_it) ? 1 : 0);
 
-    //         to_prob += std::log(1.0 - this->all_probs_.at(*not_it)
-    //                 .at(changed_node).at(inf_trt_bits_new | not_trt_bits));
-    //     }
-    //     this->to_probs_.at(changed_node) = std::exp(to_prob);
-    //     // add new
-    //     feat.at(1) += std::exp(to_prob);
+            to_prob += std::log(1.0 - this->all_probs_.at(*not_it)
+                    .at(changed_node).at(inf_trt_bits_new | not_trt_bits));
+        }
+        this->to_probs_.at(changed_node) = std::exp(to_prob);
+        // add new
+        feat.at(1) += std::exp(to_prob);
 
-    //     // update from_prob
-    //     feat.at(2) = 0.0;
-    //     bool check_okay(true);
-    //     for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
-    //         const uint32_t not_trt_bits(trt_bits_new.test(*not_it) ? 1 : 0);
+        // update from_prob
+        feat.at(2) = 0.0;
+        bool check_okay(true);
+        for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
+            const uint32_t not_trt_bits(trt_bits_new.test(*not_it) ? 1 : 0);
 
-    //         // update
-    //         this->from_probs_.at(*not_it) *= (1.0 - this->all_probs_.at(*not_it)
-    //                 .at(changed_node).at(inf_trt_bits_new | not_trt_bits));
-    //         this->from_probs_.at(*not_it) /= (1.0 - this->all_probs_.at(*not_it)
-    //                 .at(changed_node).at(inf_trt_bits_old | not_trt_bits));
+            const double new_val(1.0 - this->all_probs_.at(*not_it)
+                    .at(changed_node).at(inf_trt_bits_new | not_trt_bits));
+            const double old_val(1.0 - this->all_probs_.at(*not_it)
+                    .at(changed_node).at(inf_trt_bits_old | not_trt_bits));
 
-    //         feat.at(2) += this->from_probs_.at(*not_it);
-    //     }
-    // } else {
-    //     // not infected
+            // update
+            if (old_val > 0) {
+                double current(std::log(this->from_probs_.at(*not_it)));
 
-    //     const uint32_t not_trt_bits_new(trt_now);
-    //     const uint32_t not_trt_bits_old(trt_before);
+                current += std::log(new_val) - std::log(old_val);
 
-    //     // update from_prob
-    //     // remove old
-    //     feat.at(2) -= this->from_probs_.at(changed_node);
+                this->from_probs_.at(*not_it) = std::exp(current);
+            } else {
+                double from_prob(0.0);
+                for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
+                    const uint32_t inf_trt_bits(
+                            trt_bits_new.test(*inf_it) ? 2 : 0);
 
-    //     std::vector<uint32_t> inf_vec(njm::tools::active_set(
-    //                     state_new.inf_bits));
-    //     std::vector<uint32_t>::iterator inf_it, inf_end;
-    //     inf_end = inf_vec.end();
+                    from_prob += std::log(1.0 - this->all_probs_.at(*not_it)
+                            .at(*inf_it).at(inf_trt_bits | not_trt_bits));
+                }
+                this->from_probs_.at(*not_it) = std::exp(from_prob);
+            }
 
-    //     double from_prob(0.0);
-    //     for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
-    //         const uint32_t inf_trt_bits(trt_bits_new.test(*inf_it) ? 2 : 0);
+            feat.at(2) += this->from_probs_.at(*not_it);
+        }
+    } else {
+        // not infected
 
-    //         from_prob += std::log(1.0 - this->all_probs_.at(changed_node)
-    //                 .at(*inf_it).at(inf_trt_bits | not_trt_bits_new));
-    //     }
-    //     this->from_probs_.at(changed_node) = std::exp(from_prob);
-    //     // add new
-    //     feat.at(2) += std::exp(from_prob);
+        const uint32_t not_trt_bits_new(trt_now);
+        const uint32_t not_trt_bits_old(trt_before);
 
-    //     // update to_prob
-    //     feat.at(1) = 0.0;
-    //     for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
-    //         const uint32_t inf_trt_bits(trt_bits_new.test(*inf_it) ? 2 : 0);
+        // update from_prob
+        // remove old
+        feat.at(2) -= this->from_probs_.at(changed_node);
 
-    //         // update
-    //         this->to_probs_.at(*inf_it) *= (1.0 - this->all_probs_
-    //                 .at(changed_node).at(*inf_it)
-    //                 .at(inf_trt_bits | not_trt_bits_new));
-    //         this->to_probs_.at(*inf_it) /= (1.0 - this->all_probs_
-    //                 .at(changed_node).at(*inf_it)
-    //                 .at(inf_trt_bits | not_trt_bits_old));
 
-    //         feat.at(1) += this->to_probs_.at(*inf_it);
-    //     }
-    // }
+        double from_prob(0.0);
+        for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
+            const uint32_t inf_trt_bits(trt_bits_new.test(*inf_it) ? 2 : 0);
+
+            from_prob += std::log(1.0 - this->all_probs_.at(changed_node)
+                    .at(*inf_it).at(inf_trt_bits | not_trt_bits_new));
+        }
+        this->from_probs_.at(changed_node) = std::exp(from_prob);
+
+        // add new
+        feat.at(2) += std::exp(from_prob);
+
+        // update to_prob
+        feat.at(1) = 0.0;
+        for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
+            const uint32_t inf_trt_bits(trt_bits_new.test(*inf_it) ? 2 : 0);
+
+            const double new_val(1.0 - this->all_probs_
+                    .at(changed_node).at(*inf_it)
+                    .at(inf_trt_bits | not_trt_bits_new));
+            const double old_val(1.0 - this->all_probs_
+                    .at(changed_node).at(*inf_it)
+                    .at(inf_trt_bits | not_trt_bits_old));
+
+            // update
+            if (old_val > 0) {
+                double current(std::log(this->to_probs_.at(*inf_it)));
+
+                current += std::log(new_val) - std::log(old_val);
+
+                this->to_probs_.at(*inf_it) = std::exp(current);
+            } else {
+                double to_prob(0.0);
+                for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
+                    const uint32_t not_trt_bits(
+                            trt_bits_new.test(*not_it) ? 1 : 0);
+
+                    to_prob += std::log(1.0 - this->all_probs_.at(*not_it)
+                            .at(*inf_it) .at(inf_trt_bits | not_trt_bits));
+                }
+                this->to_probs_.at(*inf_it) = std::exp(to_prob);
+            }
+
+            feat.at(1) += this->to_probs_.at(*inf_it);
+        }
+    }
 }
 
 
