@@ -42,6 +42,7 @@ SET(bin_file_names
   sandbox
   fit_ebola
   fit_run_ebola
+  vfn_par_history
   )
 
 foreach(bin_file ${bin_file_names})
