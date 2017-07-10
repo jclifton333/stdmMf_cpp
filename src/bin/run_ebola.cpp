@@ -273,49 +273,51 @@ void queue_sim(
     }
 
 
-    // // sweep cheat
-    // CHECK_EQ(results->results.count("sweep_cheat"), 1);
-    // CHECK_EQ(results->results.at("sweep_cheat").size(), num_reps);
-    // for (uint32_t i = 0; i < num_reps; ++i) {
-    //     pool->service().post([=]() {
-    //         System<EbolaState> s(net, mod_system->clone());
-    //         s.seed(i);
+    // sweep cheat
+    CHECK_EQ(results->results.count("sweep_cheat"), 1);
+    CHECK_EQ(results->results.at("sweep_cheat").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<EbolaState> s(net, mod_system->clone());
+            s.seed(i);
 
-    //         SweepAgent<EbolaState> a(net,
-    //                 std::shared_ptr<Features<EbolaState> >(
-    //                         new EbolaTransProbFeatures(
-    //                                 net, mod_system->clone())),
-    //                 {0.0, -2.0, -1.0},
-    //                 njm::linalg::dot_a_and_b, 2, false);
-    //         a.seed(i);
 
-    //         s.reset();
-    //         s.state(start_state);
+            auto f(std::make_shared<EbolaTransProbFeatures>(
+                            net, mod_system->clone()));
+            f->update_all_probs();
 
-    //         Outcome outcome;
+            SweepAgent<EbolaState> a(net, f,
+                    {0.0, 1.0},
+                    njm::linalg::dot_a_and_b, 2, false);
+            a.seed(i);
 
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tick =
-    //             std::chrono::steady_clock::now();
+            s.reset();
+            s.state(start_state);
 
-    //         outcome.value = runner(&s, &a, time_points, 1.0);
+            Outcome outcome;
 
-    //         std::chrono::time_point<
-    //             std::chrono::steady_clock> tock =
-    //             std::chrono::steady_clock::now();
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
 
-    //         outcome.time = std::chrono::duration_cast<
-    //             std::chrono::seconds>(tock - tick).count();
+            outcome.value = runner(&s, &a, time_points, 1.0);
 
-    //         outcome.history = s.history();
-    //         outcome.history.emplace_back(s.state(),
-    //                 boost::dynamic_bitset<>(net->size()));
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
 
-    //         results->results.at("sweep_cheat").at(i).set_value(
-    //                 std::move(outcome));
-    //         progress->update();
-    //     });
-    // }
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("sweep_cheat").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
 
 
     // // vfn max finite q
@@ -880,7 +882,7 @@ int main(int argc, char *argv[]) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
-                // "sweep_cheat",
+                "sweep_cheat",
                 "vfn"
                 // "vfn_finite_q"
                 // "vfn_finite_q_mod"
