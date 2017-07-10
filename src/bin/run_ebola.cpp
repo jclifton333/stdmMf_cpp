@@ -287,7 +287,7 @@ void queue_sim(
             f->update_all_probs();
 
             SweepAgent<EbolaState> a(net, f,
-                    {0.0, 1.0},
+                    {0.0, -1.0},
                     njm::linalg::dot_a_and_b, 2, false);
             a.seed(i);
 
@@ -413,48 +413,48 @@ void queue_sim(
     // }
 
 
-    // vfn max finite q model features
-    CHECK_EQ(results->results.count("vfn"), 1);
-    CHECK_EQ(results->results.at("vfn").size(), num_reps);
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        pool->service().post([=]() {
-            System<EbolaState> s(net, mod_system->clone());
-            s.seed(i);
-            VfnMaxSimPerturbAgent<EbolaState> a(net,
-                    std::shared_ptr<Features<EbolaState> >(
-                            new EbolaTransProbFeatures(
-                                    net, mod_agents->clone())),
-                    mod_agents->clone(),
-                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
-            a.seed(i);
+    // // vfn max finite q model features
+    // CHECK_EQ(results->results.count("vfn"), 1);
+    // CHECK_EQ(results->results.at("vfn").size(), num_reps);
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     pool->service().post([=]() {
+    //         System<EbolaState> s(net, mod_system->clone());
+    //         s.seed(i);
+    //         VfnMaxSimPerturbAgent<EbolaState> a(net,
+    //                 std::shared_ptr<Features<EbolaState> >(
+    //                         new EbolaTransProbFeatures(
+    //                                 net, mod_agents->clone())),
+    //                 mod_agents->clone(),
+    //                 2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
+    //         a.seed(i);
 
-            s.reset();
-            s.state(start_state);
+    //         s.reset();
+    //         s.state(start_state);
 
-            Outcome outcome;
+    //         Outcome outcome;
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            outcome.value = runner(&s, &a, time_points, 1.0);
+    //         outcome.value = runner(&s, &a, time_points, 1.0);
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            outcome.time = std::chrono::duration_cast<
-                std::chrono::seconds>(tock - tick).count();
+    //         outcome.time = std::chrono::duration_cast<
+    //             std::chrono::seconds>(tock - tick).count();
 
-            outcome.history = s.history();
-            outcome.history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
+    //         outcome.history = s.history();
+    //         outcome.history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("vfn").at(i).set_value(
-                    std::move(outcome));
-            progress->update();
-        });
-    }
+    //         results->results.at("vfn").at(i).set_value(
+    //                 std::move(outcome));
+    //         progress->update();
+    //     });
+    // }
 
 
     // // vfn max finite q binned features
@@ -882,8 +882,8 @@ int main(int argc, char *argv[]) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
-                "sweep_cheat",
-                "vfn"
+                "sweep_cheat"
+                // "vfn"
                 // "vfn_finite_q"
                 // "vfn_finite_q_mod"
                 // "vfn_finite_q_bin",
