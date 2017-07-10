@@ -35,7 +35,7 @@ EbolaModelFeatures::EbolaModelFeatures(
 
 EbolaModelFeatures::EbolaModelFeatures(const EbolaModelFeatures & other)
     : network_(other.network_), model_(other.model_->clone()),
-      terms_(other.terms_) {
+      dist_mean_(other.dist_mean_), terms_(other.terms_) {
 }
 
 

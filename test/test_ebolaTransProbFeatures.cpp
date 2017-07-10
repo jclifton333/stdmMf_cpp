@@ -55,8 +55,8 @@ TEST(TestEbolaTransProbFeatures, UpdateFeatures) {
         boost::to_string(inf_bits, inf_string);
         boost::to_string(trt_bits, trt_string);
 
-        ef_get.update_all_probs(EbolaState(inf_bits));
-        ef_update.update_all_probs(EbolaState(inf_bits));
+        ef_get.update_all_probs();
+        ef_update.update_all_probs();
 
 
         std::vector<double> f_orig;
@@ -144,11 +144,11 @@ TEST(TestEbolaTransProbFeatures, Copy) {
         boost::to_string(inf_bits, inf_string);
         boost::to_string(trt_bits, trt_string);
 
-        ef_get.update_all_probs(EbolaState(inf_bits));
-        ef_update.update_all_probs(EbolaState(inf_bits));
+        ef_get.update_all_probs();
+        ef_update.update_all_probs();
 
-        ef_get_cpy.update_all_probs(EbolaState(inf_bits));
-        ef_update_cpy.update_all_probs(EbolaState(inf_bits));
+        ef_get_cpy.update_all_probs();
+        ef_update_cpy.update_all_probs();
 
         std::vector<double> f_orig;
         std::vector<double> f_orig_cpy;

@@ -80,7 +80,7 @@ TEST(TestEbolaModelFeatures, UpdateFeatures) {
                     trt_bits, f_upd);
 
             for (uint32_t j = 0; j < ef_get.num_features(); ++j) {
-                EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-14)
+                EXPECT_NEAR(f_upd.at(j), f_new.at(j), 1e-12)
                     << "Flipping inf failed for node " << i <<
                     " and feature " << j << " with seed " << seed << ".";
             }
@@ -181,12 +181,12 @@ TEST(TestEbolaModelFeatures, Copy) {
                     inf_bits, trt_bits, f_upd_cpy);
 
             for (uint32_t j = 0; j < ef_get.num_features(); ++j) {
-                EXPECT_NEAR(f_new.at(j), f_new_cpy.at(j), 1e-14)
+                EXPECT_NEAR(f_new.at(j), f_new_cpy.at(j), 1e-12)
                     << "Copy failed for new";
             }
 
             for (uint32_t j = 0; j < ef_get.num_features(); ++j) {
-                EXPECT_NEAR(f_upd.at(j), f_upd_cpy.at(j), 1e-14)
+                EXPECT_NEAR(f_upd.at(j), f_upd_cpy.at(j), 1e-12)
                     << "Copy failed for synchronous update";
             }
         }
