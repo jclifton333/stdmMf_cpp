@@ -17,6 +17,7 @@
 #include "ebolaFeatures.hpp"
 #include "ebolaBinnedFeatures.hpp"
 #include "ebolaModelFeatures.hpp"
+#include "ebolaTransProbFeatures.hpp"
 #include "networkRunSymFeatures.hpp"
 
 #include "finiteQfnFeatures.hpp"
@@ -282,7 +283,7 @@ void queue_sim(
 
             SweepAgent<EbolaState> a(net,
                     std::shared_ptr<Features<EbolaState> >(
-                            new EbolaModelFeatures(
+                            new EbolaTransProbFeatures(
                                     net, mod_system->clone())),
                     {-1.63145, -28.7142, -3.33137, 7.6446, 3.38264},
                     // {0.0,
@@ -378,7 +379,7 @@ void queue_sim(
     //                         new FiniteQfnFeatures<EbolaState>(
     //                                 net, {mod_agents->clone()},
     //                                 std::shared_ptr<Features<EbolaState> >(
-    //                                         new EbolaModelFeatures(
+    //                                         new EbolaTransProbFeatures(
     //                                                 net, mod_agents->clone())),
     //                                 1, false)),
     //                 mod_agents->clone(),
@@ -423,7 +424,7 @@ void queue_sim(
             s.seed(i);
             VfnMaxSimPerturbAgent<EbolaState> a(net,
                     std::shared_ptr<Features<EbolaState> >(
-                            new EbolaModelFeatures(
+                            new EbolaTransProbFeatures(
                                     net, mod_agents->clone())),
                     mod_agents->clone(),
                     2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.0);
