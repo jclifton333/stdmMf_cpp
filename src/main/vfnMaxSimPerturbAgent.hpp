@@ -29,6 +29,8 @@ protected:
 
     std::vector<double> last_optim_par_;
 
+    std::vector<std::vector<double> > optim_par_history_;
+
 public:
     VfnMaxSimPerturbAgent(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Features<State> > & features,
@@ -56,6 +58,8 @@ public:
     std::vector<double> train(
             const std::vector<Transition<State> > & history,
             const std::vector<double> & starting_vals);
+
+    const std::vector<std::vector<double> > & history() const;
 
     using njm::tools::RngClass::rng;
     void rng(const std::shared_ptr<njm::tools::Rng> & rng) override;

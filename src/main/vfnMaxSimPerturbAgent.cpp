@@ -97,6 +97,8 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         njm::linalg::mult_b_to_a(this->last_optim_par_, 1.0 / norm);
     }
 
+    this->optim_par_history_.push_back(optim_par);
+
     // sweep to get treatments
     SweepAgent<State> a(this->network_, this->features_, optim_par,
             njm::linalg::dot_a_and_b, 2, true);
@@ -201,6 +203,13 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS);
 
     return sp.par();
+}
+
+
+template<typename State>
+const std::vector<std::vector<double> > &
+VfnMaxSimPerturbAgent<State>::history() const {
+    return this->optim_par_history_;
 }
 
 
