@@ -213,10 +213,6 @@ void EbolaModelFeatures::update_features(
     const bool trt_now(trt_bits_new.test(changed_node));
     const bool trt_before(trt_bits_old.test(changed_node));
 
-    const double prob_trt(static_cast<double>(trt_bits_new.count())
-            / static_cast<double>(this->network_->size()));
-    feat.at(this->num_features() - 1) = prob_trt * (1.0 - prob_trt);
-
     const std::vector<Term> & t(this->terms_.at(changed_node));
     std::vector<Term>::const_iterator it,end(t.end());
     if (trt_now && !trt_before) {
