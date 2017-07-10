@@ -423,7 +423,7 @@ void queue_sim(
                             new EbolaTransProbFeatures(
                                     net, mod_agents->clone())),
                     mod_agents->clone(),
-                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.0);
+                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
             a.seed(i);
 
             s.reset();
