@@ -197,7 +197,7 @@ void EbolaTransProbFeatures::update_features(
         const uint32_t inf_trt_bits_new(
                 trt_bits_new.test(changed_node) ? 2 : 0);
         const uint32_t inf_trt_bits_old(
-                trt_bits_new.test(changed_node) ? 2 : 0);
+                trt_bits_old.test(changed_node) ? 2 : 0);
 
         for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
             const uint32_t not_trt_bits(trt_bits_new.test(*not_it) ? 1 : 0);
@@ -212,7 +212,7 @@ void EbolaTransProbFeatures::update_features(
         const uint32_t not_trt_bits_new(
                 trt_bits_new.test(changed_node) ? 1 : 0);
         const uint32_t not_trt_bits_old(
-                trt_bits_new.test(changed_node) ? 1 : 0);
+                trt_bits_old.test(changed_node) ? 1 : 0);
 
         for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
             const uint32_t inf_trt_bits(trt_bits_new.test(*inf_it) ? 2 : 0);
