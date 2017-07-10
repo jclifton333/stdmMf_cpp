@@ -25,8 +25,7 @@ EbolaTransProbFeatures::EbolaTransProbFeatures(
 EbolaTransProbFeatures::EbolaTransProbFeatures(
         const EbolaTransProbFeatures & other)
     : network_(other.network_), model_(other.model_->clone()),
-      all_probs_(other.all_probs_), to_probs_(other.to_probs_),
-      from_probs_(other.from_probs_) {
+      all_probs_(other.all_probs_) {
 }
 
 
@@ -93,48 +92,48 @@ void EbolaTransProbFeatures::update(const EbolaState & curr_state,
     // // set new parameters
     // this->model_->par(par_samp);
 
-    this->update_all_probs(curr_state);
+    this->update_all_probs();
 }
 
-void EbolaTransProbFeatures::update_all_probs(
-        const EbolaState & curr_state) {
+void EbolaTransProbFeatures::update_all_probs() {
     std::shared_ptr<EbolaStateModel> mod(
             std::static_pointer_cast<EbolaStateModel>(this->model_));
 
-        const uint32_t num_nodes(this->network_->size());
+    const uint32_t num_nodes(this->network_->size());
 
-        this->all_probs_.resize(num_nodes,
-                std::vector<std::vector<double> >(num_nodes,
-                        std::vector<double>(4, 0.0)));
+    this->all_probs_.resize(num_nodes,
+            std::vector<std::vector<double> >(num_nodes,
+                    std::vector<double>(4, 0.0)));
 
-        const boost::dynamic_bitset<> blank_trt(num_nodes);
+    const boost::dynamic_bitset<> blank_trt(num_nodes);
+    const EbolaState blank_state(this->network_->size());
 
-        for (uint32_t not_idx = 0; not_idx < num_nodes; ++not_idx) {
-            for (uint32_t inf_idx = 0; inf_idx < num_nodes; ++inf_idx) {
-                const double neither(mod->a_inf_b(inf_idx, not_idx,
-                                false, false, curr_state, blank_trt));
+    for (uint32_t not_idx = 0; not_idx < num_nodes; ++not_idx) {
+        for (uint32_t inf_idx = 0; inf_idx < num_nodes; ++inf_idx) {
+            const double neither(mod->a_inf_b(inf_idx, not_idx,
+                            false, false, blank_state, blank_trt));
 
-                const double not_trt(mod->a_inf_b(inf_idx, not_idx,
-                                false, true, curr_state, blank_trt));
+            const double not_trt(mod->a_inf_b(inf_idx, not_idx,
+                            false, true, blank_state, blank_trt));
 
-                const double inf_trt(mod->a_inf_b(inf_idx, not_idx,
-                                true, false, curr_state, blank_trt));
+            const double inf_trt(mod->a_inf_b(inf_idx, not_idx,
+                            true, false, blank_state, blank_trt));
 
-                const double both(mod->a_inf_b(inf_idx, not_idx,
-                                true, true, curr_state, blank_trt));
+            const double both(mod->a_inf_b(inf_idx, not_idx,
+                            true, true, blank_state, blank_trt));
 
-                this->all_probs_.at(not_idx).at(inf_idx) =
-                    {neither, not_trt, inf_trt, both};
-            }
+            this->all_probs_.at(not_idx).at(inf_idx) =
+                {neither, not_trt, inf_trt, both};
         }
     }
+}
 
 
 std::vector<double> EbolaTransProbFeatures::get_features(
         const EbolaState & state,
         const boost::dynamic_bitset<> & trt_bits) {
     std::vector<double> feat(this->num_features(), 0.0);
-    CHECK_EQ(this->num_features(), 3);
+    CHECK_EQ(this->num_features(), 2);
     feat.at(0) = 1.0;
     const uint32_t num_nodes(this->network_->size());
 
@@ -151,36 +150,16 @@ std::vector<double> EbolaTransProbFeatures::get_features(
     inf_end = inf_vec.end();
     not_end = not_vec.end();
 
-    // clear containers
-    this->to_probs_.resize(num_nodes);
-    this->from_probs_.resize(num_nodes);
-
     for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
-        double to_prob(0.0);
         const uint32_t inf_trt_bits(trt_bits.test(*inf_it) ? 2 : 0);
         for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
             const uint32_t not_trt_bits(trt_bits.test(*not_it) ? 1 : 0);
 
-            to_prob += std::log(1.0 - this->all_probs_.at(*not_it).at(*inf_it)
-                    .at(inf_trt_bits | not_trt_bits));
+            feat.at(1) += this->all_probs_.at(*not_it).at(*inf_it)
+                .at(inf_trt_bits | not_trt_bits);
         }
-        this->to_probs_.at(*inf_it) = std::exp(to_prob);
-        feat.at(1) += std::exp(to_prob);
     }
 
-
-    for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
-        double from_prob(0.0);
-        const uint32_t not_trt_bits(trt_bits.test(*not_it) ? 1 : 0);
-        for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
-            const uint32_t inf_trt_bits(trt_bits.test(*inf_it) ? 2 : 0);
-
-            from_prob += std::log(1.0 - this->all_probs_.at(*not_it).at(*inf_it)
-                    .at(inf_trt_bits | not_trt_bits));
-        }
-        this->from_probs_.at(*not_it) = std::exp(from_prob);
-        feat.at(2) += std::exp(from_prob);
-    }
     return feat;
 }
 
@@ -213,115 +192,35 @@ void EbolaTransProbFeatures::update_features(
     std::vector<uint32_t>::const_iterator inf_it, inf_end;
     inf_end = inf_vec.end();
 
-    // update terms
     if (state_new.inf_bits.test(changed_node)) {
         // infected
+        const uint32_t inf_trt_bits_new(
+                trt_bits_new.test(changed_node) ? 2 : 0);
+        const uint32_t inf_trt_bits_old(
+                trt_bits_new.test(changed_node) ? 2 : 0);
 
-        const uint32_t inf_trt_bits_new(trt_now * 2);
-        const uint32_t inf_trt_bits_old(trt_before * 2);
-
-        // update to_prob
-        // remove old
-        feat.at(1) -= this->to_probs_.at(changed_node);
-
-        double to_prob(0.0);
         for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
             const uint32_t not_trt_bits(trt_bits_new.test(*not_it) ? 1 : 0);
 
-            to_prob += std::log(1.0 - this->all_probs_.at(*not_it)
-                    .at(changed_node).at(inf_trt_bits_new | not_trt_bits));
-        }
-        this->to_probs_.at(changed_node) = std::exp(to_prob);
-        // add new
-        feat.at(1) += std::exp(to_prob);
-
-        // update from_prob
-        feat.at(2) = 0.0;
-        bool check_okay(true);
-        for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
-            const uint32_t not_trt_bits(trt_bits_new.test(*not_it) ? 1 : 0);
-
-            const double new_val(1.0 - this->all_probs_.at(*not_it)
-                    .at(changed_node).at(inf_trt_bits_new | not_trt_bits));
-            const double old_val(1.0 - this->all_probs_.at(*not_it)
-                    .at(changed_node).at(inf_trt_bits_old | not_trt_bits));
-
-            // update
-            if (old_val > 0) {
-                double current(std::log(this->from_probs_.at(*not_it)));
-
-                current += std::log(new_val) - std::log(old_val);
-
-                this->from_probs_.at(*not_it) = std::exp(current);
-            } else {
-                double from_prob(0.0);
-                for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
-                    const uint32_t inf_trt_bits(
-                            trt_bits_new.test(*inf_it) ? 2 : 0);
-
-                    from_prob += std::log(1.0 - this->all_probs_.at(*not_it)
-                            .at(*inf_it).at(inf_trt_bits | not_trt_bits));
-                }
-                this->from_probs_.at(*not_it) = std::exp(from_prob);
-            }
-
-            feat.at(2) += this->from_probs_.at(*not_it);
+            feat.at(1) += this->all_probs_.at(*not_it).at(changed_node)
+                .at(inf_trt_bits_new | not_trt_bits);
+            feat.at(1) -= this->all_probs_.at(*not_it).at(changed_node)
+                .at(inf_trt_bits_old | not_trt_bits);
         }
     } else {
-        // not infected
+        // uninfected
+        const uint32_t not_trt_bits_new(
+                trt_bits_new.test(changed_node) ? 1 : 0);
+        const uint32_t not_trt_bits_old(
+                trt_bits_new.test(changed_node) ? 1 : 0);
 
-        const uint32_t not_trt_bits_new(trt_now);
-        const uint32_t not_trt_bits_old(trt_before);
-
-        // update from_prob
-        // remove old
-        feat.at(2) -= this->from_probs_.at(changed_node);
-
-
-        double from_prob(0.0);
         for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
             const uint32_t inf_trt_bits(trt_bits_new.test(*inf_it) ? 2 : 0);
 
-            from_prob += std::log(1.0 - this->all_probs_.at(changed_node)
-                    .at(*inf_it).at(inf_trt_bits | not_trt_bits_new));
-        }
-        this->from_probs_.at(changed_node) = std::exp(from_prob);
-
-        // add new
-        feat.at(2) += std::exp(from_prob);
-
-        // update to_prob
-        feat.at(1) = 0.0;
-        for (inf_it = inf_vec.begin(); inf_it != inf_end; ++inf_it) {
-            const uint32_t inf_trt_bits(trt_bits_new.test(*inf_it) ? 2 : 0);
-
-            const double new_val(1.0 - this->all_probs_
-                    .at(changed_node).at(*inf_it)
-                    .at(inf_trt_bits | not_trt_bits_new));
-            const double old_val(1.0 - this->all_probs_
-                    .at(changed_node).at(*inf_it)
-                    .at(inf_trt_bits | not_trt_bits_old));
-
-            // update
-            if (old_val > 0) {
-                double current(std::log(this->to_probs_.at(*inf_it)));
-
-                current += std::log(new_val) - std::log(old_val);
-
-                this->to_probs_.at(*inf_it) = std::exp(current);
-            } else {
-                double to_prob(0.0);
-                for (not_it = not_vec.begin(); not_it != not_end; ++not_it) {
-                    const uint32_t not_trt_bits(
-                            trt_bits_new.test(*not_it) ? 1 : 0);
-
-                    to_prob += std::log(1.0 - this->all_probs_.at(*not_it)
-                            .at(*inf_it) .at(inf_trt_bits | not_trt_bits));
-                }
-                this->to_probs_.at(*inf_it) = std::exp(to_prob);
-            }
-
-            feat.at(1) += this->to_probs_.at(*inf_it);
+            feat.at(1) += this->all_probs_.at(changed_node).at(*inf_it)
+                .at(inf_trt_bits | not_trt_bits_new);
+            feat.at(1) -= this->all_probs_.at(changed_node).at(*inf_it)
+                .at(inf_trt_bits | not_trt_bits_old);
         }
     }
 }
@@ -339,7 +238,7 @@ void EbolaTransProbFeatures::update_features_async(
 
 
 uint32_t EbolaTransProbFeatures::num_features() const {
-    return 1 + 2;
+    return 1 + 1;
 }
 
 

@@ -17,9 +17,6 @@ protected:
 
     std::vector<std::vector<std::vector<double> > > all_probs_;
 
-    std::vector<double> to_probs_;
-    std::vector<double> from_probs_;
-
 public:
     EbolaTransProbFeatures(const std::shared_ptr<const Network> & network,
             const std::shared_ptr<Model<EbolaState> > & model);
@@ -54,7 +51,7 @@ public:
             const boost::dynamic_bitset<> & trt_bits_old,
             std::vector<double> & feat) const override;
 
-    virtual void update_all_probs(const EbolaState & curr_state);
+    virtual void update_all_probs();
 
     virtual uint32_t num_features() const override;
 };
