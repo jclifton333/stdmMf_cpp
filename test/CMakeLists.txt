@@ -25,6 +25,7 @@ SET(test_src
   test_ebolaFeatures
   test_ebolaBinnedFeatures
   test_ebolaModelFeatures
+  test_ebolaTransProbFeatures
   test_sweepAgent
   test_polValIteration)
 

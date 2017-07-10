@@ -43,6 +43,7 @@ add_library(stdmMf network.cpp system.cpp states.cpp
 
   ## ebola features
   ebolaFeatures.cpp ebolaBinnedFeatures.cpp ebolaModelFeatures.cpp
+  ebolaTransProbFeatures.cpp
 
   ## optimization
   objFns.cpp polValIteration.cpp
