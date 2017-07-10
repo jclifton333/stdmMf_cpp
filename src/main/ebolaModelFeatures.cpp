@@ -176,7 +176,7 @@ std::vector<double> EbolaModelFeatures::get_features(
 
             // this->terms_.at(i).emplace_back(Term{11, inf_effect});
 
-            this->terms_.at(i).emplace_back(Term{3, probs.at(i)});
+            this->terms_.at(i).emplace_back(Term{2, probs.at(i)});
         }
     }
 
@@ -188,9 +188,9 @@ std::vector<double> EbolaModelFeatures::get_features(
         const std::vector<Term> & t(this->terms_.at(i));
         std::vector<Term>::const_iterator it,end(t.end());
         if (trt_bits.test(i)) {
-            for (it = t.begin(); it != end; ++it) {
-                feat.at(it->index + 1) += it->weight;
-            }
+            // for (it = t.begin(); it != end; ++it) {
+            //     feat.at(it->index + 1) += it->weight;
+            // }
         } else {
             for (it = t.begin(); it != end; ++it) {
                 feat.at(it->index) += it->weight;
@@ -213,16 +213,20 @@ void EbolaModelFeatures::update_features(
     const bool trt_now(trt_bits_new.test(changed_node));
     const bool trt_before(trt_bits_old.test(changed_node));
 
+    const double prob_trt(static_cast<double>(trt_bits_new.count())
+            / static_cast<double>(this->network_->size()));
+    feat.at(this->num_features() - 1) = prob_trt * (1.0 - prob_trt);
+
     const std::vector<Term> & t(this->terms_.at(changed_node));
     std::vector<Term>::const_iterator it,end(t.end());
     if (trt_now && !trt_before) {
         for (it = t.begin(); it != end; ++it) {
             feat.at(it->index) -= it->weight;
-            feat.at(it->index + 1) += it->weight;
+            // feat.at(it->index + 1) += it->weight;
         }
     } else if (!trt_now && trt_before) {
         for (it = t.begin(); it != end; ++it) {
-            feat.at(it->index + 1) -= it->weight;
+            // feat.at(it->index + 1) -= it->weight;
             feat.at(it->index) += it->weight;
         }
     } else {
@@ -246,7 +250,8 @@ void EbolaModelFeatures::update_features_async(
 
 
 uint32_t EbolaModelFeatures::num_features() const {
-    return 1 + this->num_inf_features_ * 2 + this->num_not_features_ * 2;
+    // return 1 + this->num_inf_features_ * 2 + this->num_not_features_ * 2 + 1;
+    return 1 + this->num_inf_features_ + this->num_not_features_;
 }
 
 
