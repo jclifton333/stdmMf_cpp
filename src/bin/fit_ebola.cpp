@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     std::cout << std::endl;
 
     // sort outbreaks
-    const double starting_prop(0.0);
+    const double starting_prop(0.10);
     std::vector<uint32_t> outbreak_dates;
     for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
         if (EbolaData::outbreaks().at(i) >= 0) {
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
     const uint32_t num_reps(100);
 
     // tune infection rate
-    const double target_tune_inf(0.35);
+    const double target_tune_inf(0.70);
     bool calibrated(false);
     bool was_above(false);
     double scale = 0.1;
