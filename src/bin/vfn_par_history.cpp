@@ -102,8 +102,13 @@ int main(int argc, char *argv[]) {
 
     njm::tools::Progress<std::ostream> progress(num_reps, &std::cout);
 
-    std::vector<std::vector<std::vector<double> > > optim_par_history(num_reps);
-    std::vector<double> values(num_reps);
+    std::vector<std::vector<std::vector<double> > > optim_par_history_emf(
+            num_reps);
+    std::vector<double> values_emf(num_reps);
+
+    std::vector<std::vector<std::vector<double> > > optim_par_history_etpf(
+            num_reps);
+    std::vector<double> values_etpf(num_reps);
 
     std::mutex mtx;
 
@@ -114,7 +119,7 @@ int main(int argc, char *argv[]) {
 
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool.service().post([=, &progress, &mtx,
-                        &optim_par_history, &values]() {
+                        &optim_par_history_emf, &values_emf]() {
             System<EbolaState> s(net, mod_system->clone());
             s.seed(i);
             VfnMaxSimPerturbAgent<EbolaState> a(net,
@@ -131,8 +136,34 @@ int main(int argc, char *argv[]) {
             const double value(runner(&s, &a, time_points, 1.0));
 
             std::lock_guard<std::mutex> lock(mtx);
-            optim_par_history.at(i) = a.history();
-            values.at(i) = value;
+            optim_par_history_emf.at(i) = a.history();
+            values_emf.at(i) = value;
+
+            progress.update();
+        });
+    }
+
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool.service().post([=, &progress, &mtx,
+                        &optim_par_history_etpf, &values_etpf]() {
+            System<EbolaState> s(net, mod_system->clone());
+            s.seed(i);
+            VfnMaxSimPerturbAgent<EbolaState> a(net,
+                    std::shared_ptr<Features<EbolaState> >(
+                            new EbolaTransProbFeatures(
+                                    net, mod_agents->clone())),
+                    mod_agents->clone(),
+                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
+            a.seed(i);
+
+            s.reset();
+            s.state(start_state);
+
+            const double value(runner(&s, &a, time_points, 1.0));
+
+            std::lock_guard<std::mutex> lock(mtx);
+            optim_par_history_etpf.at(i) = a.history();
+            values_etpf.at(i) = value;
 
             progress.update();
         });
@@ -142,28 +173,56 @@ int main(int argc, char *argv[]) {
     progress.done();
 
     // write data
-    njm::data::Entry * values_entry(tk.entry("values.txt"));
-    njm::data::Entry * coefs_entry(tk.entry("coefs.txt"));
+    njm::data::Entry * values_emf_entry(tk.entry("values_emf.txt"));
+    njm::data::Entry * coefs_emf_entry(tk.entry("coefs_emf.txt"));
 
-    *values_entry << "rep" << ","
+    *values_emf_entry << "rep" << ","
                   << "value" << "\n";
 
-    *coefs_entry << "rep" << ","
+    *coefs_emf_entry << "rep" << ","
                  << "time" << ","
                  << "index" << ","
                  << "coef" << "\n";
     for (uint32_t i = 0; i < num_reps; ++i) {
-        *values_entry << i << ","
-                      << values.at(i) << "\n";
+        *values_emf_entry << i << ","
+                      << values_emf.at(i) << "\n";
 
-        const uint32_t history_len(optim_par_history.at(i).size());
+        const uint32_t history_len(optim_par_history_emf.at(i).size());
         for (uint32_t j = 0; j < history_len; ++j) {
-            const uint32_t num_coef(optim_par_history.at(i).at(j).size());
+            const uint32_t num_coef(optim_par_history_emf.at(i).at(j).size());
             for (uint32_t k = 0; k < num_coef; ++k) {
-                *coefs_entry << i << ","
+                *coefs_emf_entry << i << ","
                              << j << ","
                              << k << ","
-                             << optim_par_history.at(i).at(j).at(k) << "\n";
+                             << optim_par_history_emf.at(i).at(j).at(k)
+                             << "\n";
+            }
+        }
+    }
+
+    njm::data::Entry * values_etpf_entry(tk.entry("values_etpf.txt"));
+    njm::data::Entry * coefs_etpf_entry(tk.entry("coefs_etpf.txt"));
+
+    *values_etpf_entry << "rep" << ","
+                  << "value" << "\n";
+
+    *coefs_etpf_entry << "rep" << ","
+                 << "time" << ","
+                 << "index" << ","
+                 << "coef" << "\n";
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        *values_etpf_entry << i << ","
+                      << values_etpf.at(i) << "\n";
+
+        const uint32_t history_len(optim_par_history_etpf.at(i).size());
+        for (uint32_t j = 0; j < history_len; ++j) {
+            const uint32_t num_coef(optim_par_history_etpf.at(i).at(j).size());
+            for (uint32_t k = 0; k < num_coef; ++k) {
+                *coefs_etpf_entry << i << ","
+                             << j << ","
+                             << k << ","
+                             << optim_par_history_etpf.at(i).at(j).at(k)
+                             << "\n";
             }
         }
     }
