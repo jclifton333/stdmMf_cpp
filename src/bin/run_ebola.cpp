@@ -424,7 +424,7 @@ void queue_sim(
                             new EbolaModelFeatures(
                                     net, mod_agents->clone())),
                     mod_agents->clone(),
-                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
+                    2, time_points, time_points, 10.0, 0.1, 10, 1, 0.4, 1.20);
             a.seed(i);
 
             s.reset();
@@ -468,7 +468,7 @@ void queue_sim(
                             new EbolaTransProbFeatures(
                                     net, mod_agents->clone())),
                     mod_agents->clone(),
-                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
+                    2, time_points, time_points, 10.0, 0.1, 10, 1, 0.4, 1.20);
             a.seed(i);
 
             s.reset();
@@ -515,7 +515,7 @@ void queue_sim(
                                                     net, mod_agents->clone())),
                                     1, false)),
                     mod_agents->clone(),
-                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
+                    2, time_points, time_points, 10.0, 0.1, 10, 1, 0.4, 1.20);
             a.seed(i);
 
             s.reset();
@@ -563,7 +563,7 @@ void queue_sim(
                                                     net, mod_agents->clone())),
                                     1, false)),
                     mod_agents->clone(),
-                    2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.20);
+                    2, time_points, time_points, 10.0, 0.1, 10, 1, 0.4, 1.20);
             a.seed(i);
 
             s.reset();
