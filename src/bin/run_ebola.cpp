@@ -921,8 +921,11 @@ int main(int argc, char *argv[]) {
         // std::vector<double> grav_par{-3.104833, 1.433642, 0.051293,
         //                              -1.486436, -1.486436};
         {
-            std::vector<double> grav_par{-3.105, 1.434, 0.051,
-                                         -1.117, -1.117};
+            // std::vector<double> grav_par{-3.105, 1.434, 0.051,
+            //                              -1.117, -1.117};
+            std::vector<double> grav_par{-7.443e+00, -2.836e-01, -1.491e-06,
+                                         -1.015e+00, -1.015e+00};
+
 
 
             { // Correct: Gravity,  Postulated: Gravity
