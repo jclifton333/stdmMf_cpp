@@ -1121,7 +1121,7 @@ int main(int argc, char *argv[]) {
                 "vfn_finite_q_mod",
 
                 "sweep_cheat_tp",
-                "vfn_tp,"
+                "vfn_tp",
                 "vfn_finite_q_tp"
                 // "vfn_finite_q_mod"
                 // "vfn_finite_q_bin",
