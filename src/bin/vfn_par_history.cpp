@@ -100,6 +100,10 @@ int main(int argc, char *argv[]) {
 
     njm::thread::Pool pool(std::thread::hardware_concurrency());
 
+    njm::data::TrapperKeeper tk(argv[0],
+            njm::info::project::PROJECT_ROOT_DIR + "/data");
+    tk.print_data_dir();
+
     njm::tools::Progress<std::ostream> progress(num_reps, &std::cout);
 
     std::vector<std::vector<std::vector<double> > > optim_par_history_emf(
@@ -112,9 +116,6 @@ int main(int argc, char *argv[]) {
 
     std::mutex mtx;
 
-    njm::data::TrapperKeeper tk(argv[0],
-            njm::info::project::PROJECT_ROOT_DIR + "/data");
-    tk.print_data_dir();
 
 
     for (uint32_t i = 0; i < num_reps; ++i) {
