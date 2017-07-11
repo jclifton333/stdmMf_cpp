@@ -140,7 +140,7 @@ TEST(TestEbolaStateGravityModel,TestLLGradient) {
     std::vector<double> par(m->par());
     par.at(0) = -4.5;
     par.at(1) = 4.0;
-    par.at(2) = 0.5;
+    par.at(2) = std::log(0.5);
     par.at(3) = -3.0;
     par.at(4) = -2.0;
     m->par(par);
@@ -243,7 +243,7 @@ TEST(TestEbolaStateGravityModel,TestLLHessian) {
     std::vector<double> par(m->par());
     par.at(0) = -4.5;
     par.at(1) = 4.0;
-    par.at(2) = 0.5;
+    par.at(2) = std::log(0.5);
     par.at(3) = -3.0;
     par.at(4) = -2.0;
     m->par(par);
@@ -334,7 +334,7 @@ TEST(TestEbolaStateGravityModel,TestLLHessian) {
 
 //         EbolaData::deinit();
 //         EbolaData::init(str_var, str_var, str_var, region,
-//                 outbreaks, population, x, y);
+//                 outbreaks, population, x, y, {});
 //     }
 
 //     // network
@@ -349,7 +349,7 @@ TEST(TestEbolaStateGravityModel,TestLLHessian) {
 //     std::vector<double> par(m->par_size());
 //     par.at(0) = -4.5;
 //     par.at(1) = 4.0;
-//     par.at(2) = 0.5;
+//     par.at(2) = std::log(0.5);
 //     par.at(3) = -3.0;
 //     par.at(4) = -2.0;
 //     m->par(par);
