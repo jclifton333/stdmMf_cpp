@@ -636,96 +636,96 @@ void queue_sim(
     // }
 
 
-    // br min
-    CHECK_EQ(results->results.count("br_min_1"), 1);
-    CHECK_EQ(results->results.at("br_min_1").size(), num_reps);
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        pool->service().post([=]() {
-            System<EbolaState> s(net, mod_system->clone());
-            s.seed(i);
+    // // br min
+    // CHECK_EQ(results->results.count("br_min_1"), 1);
+    // CHECK_EQ(results->results.at("br_min_1").size(), num_reps);
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     pool->service().post([=]() {
+    //         System<EbolaState> s(net, mod_system->clone());
+    //         s.seed(i);
 
-            BrMinSimPerturbAgent<EbolaState> a(net,
-                    std::shared_ptr<Features<EbolaState> >(
-                            new EbolaModelFeatures(net,
-                                    mod_agents->clone())),
-                    mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0);
-            a.seed(i);
+    //         BrMinSimPerturbAgent<EbolaState> a(net,
+    //                 std::shared_ptr<Features<EbolaState> >(
+    //                         new EbolaModelFeatures(net,
+    //                                 mod_agents->clone())),
+    //                 mod_agents->clone(),
+    //                 0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+    //                 true, true, false, 0, 0, 0, 0);
+    //         a.seed(i);
 
-            s.reset();
-            s.state(start_state);
+    //         s.reset();
+    //         s.state(start_state);
 
-            Outcome outcome;
+    //         Outcome outcome;
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            outcome.value = runner(&s, &a, time_points, 1.0);
+    //         outcome.value = runner(&s, &a, time_points, 1.0);
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            outcome.time = std::chrono::duration_cast<
-                std::chrono::seconds>(tock - tick).count();
+    //         outcome.time = std::chrono::duration_cast<
+    //             std::chrono::seconds>(tock - tick).count();
 
-            outcome.history = s.history();
-            outcome.history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
+    //         outcome.history = s.history();
+    //         outcome.history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("br_min_1").at(i).set_value(
-                    std::move(outcome));
-            progress->update();
-        });
-    }
+    //         results->results.at("br_min_1").at(i).set_value(
+    //                 std::move(outcome));
+    //         progress->update();
+    //     });
+    // }
 
 
-    // br min
-    CHECK_EQ(results->results.count("br_min_2"), 1);
-    CHECK_EQ(results->results.at("br_min_2").size(), num_reps);
-    for (uint32_t i = 0; i < num_reps; ++i) {
-        pool->service().post([=]() {
-            System<EbolaState> s(net, mod_system->clone());
-            s.seed(i);
+    // // br min
+    // CHECK_EQ(results->results.count("br_min_2"), 1);
+    // CHECK_EQ(results->results.at("br_min_2").size(), num_reps);
+    // for (uint32_t i = 0; i < num_reps; ++i) {
+    //     pool->service().post([=]() {
+    //         System<EbolaState> s(net, mod_system->clone());
+    //         s.seed(i);
 
-            BrMinSimPerturbAgent<EbolaState> a(net,
-                    std::shared_ptr<Features<EbolaState> >(
-                            new EbolaTransProbFeatures(net,
-                                    mod_agents->clone())),
-                    mod_agents->clone(),
-                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0);
-            a.seed(i);
+    //         BrMinSimPerturbAgent<EbolaState> a(net,
+    //                 std::shared_ptr<Features<EbolaState> >(
+    //                         new EbolaTransProbFeatures(net,
+    //                                 mod_agents->clone())),
+    //                 mod_agents->clone(),
+    //                 0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+    //                 true, true, false, 0, 0, 0, 0);
+    //         a.seed(i);
 
-            s.reset();
-            s.state(start_state);
+    //         s.reset();
+    //         s.state(start_state);
 
-            Outcome outcome;
+    //         Outcome outcome;
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tick =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tick =
+    //             std::chrono::steady_clock::now();
 
-            outcome.value = runner(&s, &a, time_points, 1.0);
+    //         outcome.value = runner(&s, &a, time_points, 1.0);
 
-            std::chrono::time_point<
-                std::chrono::steady_clock> tock =
-                std::chrono::steady_clock::now();
+    //         std::chrono::time_point<
+    //             std::chrono::steady_clock> tock =
+    //             std::chrono::steady_clock::now();
 
-            outcome.time = std::chrono::duration_cast<
-                std::chrono::seconds>(tock - tick).count();
+    //         outcome.time = std::chrono::duration_cast<
+    //             std::chrono::seconds>(tock - tick).count();
 
-            outcome.history = s.history();
-            outcome.history.emplace_back(s.state(),
-                    boost::dynamic_bitset<>(net->size()));
+    //         outcome.history = s.history();
+    //         outcome.history.emplace_back(s.state(),
+    //                 boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("br_min_2").at(i).set_value(
-                    std::move(outcome));
-            progress->update();
-        });
-    }
+    //         results->results.at("br_min_2").at(i).set_value(
+    //                 std::move(outcome));
+    //         progress->update();
+    //     });
+    // }
 }
 
 
@@ -1069,10 +1069,10 @@ int main(int argc, char *argv[]) {
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
                 "sweep_cheat_1",
-                "br_min_1",
+                // "br_min_1",
                 "vfn_1",
                 "sweep_cheat_2",
-                "br_min_2",
+                // "br_min_2",
                 "vfn_2"
                 // "vfn_finite_q"
                 // "vfn_finite_q_mod"
