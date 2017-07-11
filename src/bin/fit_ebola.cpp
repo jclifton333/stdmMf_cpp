@@ -94,19 +94,24 @@ int main(int argc, char *argv[]) {
     std::cout << std::endl;
 
     // sort outbreaks
+    const double starting_prop(0.0);
     std::vector<uint32_t> outbreak_dates;
-    for (uint32_t i = 0; i < net->size(); ++i) {
+    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
         if (EbolaData::outbreaks().at(i) >= 0) {
             outbreak_dates.push_back(EbolaData::outbreaks().at(i));
         }
     }
     std::sort(outbreak_dates.begin(), outbreak_dates.end());
-    const uint32_t outbreaks_cutoff(
-            outbreak_dates.at(static_cast<uint32_t>(
-                            outbreak_dates.size() * 0.05)));
+    const uint32_t last_index(
+            std::min(std::max(1u,
+                            static_cast<uint32_t>(
+                                    outbreak_dates.size()
+                                    * starting_prop)),
+                    static_cast<uint32_t>(outbreak_dates.size() - 1u)));
+    const uint32_t outbreaks_cutoff(outbreak_dates.at(last_index));
 
-    EbolaState start_state(EbolaState(net->size()));
-    for (uint32_t i = 0; i < net->size(); ++i) {
+    EbolaState start_state(EbolaState(EbolaData::outbreaks().size()));
+    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
         if (EbolaData::outbreaks().at(i) >= 0
                 && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
             start_state.inf_bits.set(i);
