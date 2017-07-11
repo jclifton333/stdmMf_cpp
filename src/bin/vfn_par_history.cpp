@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
             njm::info::project::PROJECT_ROOT_DIR + "/data");
     tk.print_data_dir();
 
-    njm::tools::Progress<std::ostream> progress(num_reps, &std::cout);
+    njm::tools::Progress<std::ostream> progress(num_reps * 2, &std::cout);
 
     std::vector<std::vector<std::vector<double> > > optim_par_history_emf(
             num_reps);
