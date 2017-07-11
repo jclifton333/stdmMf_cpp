@@ -82,11 +82,11 @@ int main(int argc, char *argv[]) {
     std::vector<double> par(mod->par_size(), 0.0);
     mod->par(par);
 
-    // mod->est_par(Transition<EbolaState>::from_sequence(obs_history));
+    mod->est_par(Transition<EbolaState>::from_sequence(obs_history));
 
-    // par = mod->par();
+    par = mod->par();
 
-    par = {-4.50446, 1.80575, 0.051293, 0.0, 0.0};
+    // par = {-4.50446, 1.80575, 0.051293, 0.0, 0.0};
 
     std::cout << "estimated par:";
     std::for_each(par.begin(), par.end(),
@@ -289,7 +289,8 @@ int main(int argc, char *argv[]) {
     // print final par
     std::cout << "final par:";
     std::for_each(par.begin(), par.end(),
-            [] (const double & x_) {std::cout << " " << x_;});
+            [] (const double & x_) {std::cout << " "
+                                              << std::scientific << x_;});
     std::cout << std::endl;
 
 
