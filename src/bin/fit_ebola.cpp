@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     std::cout << std::endl;
 
     // sort outbreaks
-    const double starting_prop(0.10);
+    const double starting_prop(0.25);
     std::vector<uint32_t> outbreak_dates;
     for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
         if (EbolaData::outbreaks().at(i) >= 0) {

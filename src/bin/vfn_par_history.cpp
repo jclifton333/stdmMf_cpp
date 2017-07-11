@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
     init.set_type(NetworkInit_NetType_EBOLA);
     std::shared_ptr<const Network> net(Network::gen_network(init));
 
-    std::vector<double> grav_par{-7.247e+00, -3.103e-01, -1.491e-06,
-                                 -9.230e-01, -9.230e-01};
+    std::vector<double> grav_par{-7.4429e+00, -2.8362e-01, -1.4912e-06,
+                                 -1.0153e+00, -1.0153e+00};
 
     std::shared_ptr<Model<EbolaState> > mod_system(
             new EbolaStateGravityModel(net));
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 
 
     // sort outbreaks
-    const double starting_prop(0.1);
+    const double starting_prop(0.25);
     std::vector<uint32_t> outbreak_dates;
     for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
         if (EbolaData::outbreaks().at(i) >= 0) {
