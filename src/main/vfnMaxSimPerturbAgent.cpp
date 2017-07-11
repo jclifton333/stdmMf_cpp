@@ -163,14 +163,6 @@ std::vector<double> VfnMaxSimPerturbAgent<State>::train(
     // set new parameters
     this->model_->par(par_samp);
 
-    {
-        const auto mod_par(this->model_->par());
-        std::cout << "par:";
-        std::for_each(mod_par.begin(), mod_par.end(),
-                [] (const double & _x) { std::cout << " " << _x;});
-        std::cout << std::endl;
-    }
-
     CHECK_GT(this->final_t_, history.size());
     CHECK_GE(this->final_t_, this->proj_t_);
     const uint32_t num_points(
