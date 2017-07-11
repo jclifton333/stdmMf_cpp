@@ -143,7 +143,6 @@ int main(int argc, char *argv[]) {
     std::cout << "tuning infection rate" << std::endl;
     std::cout << "target infection: "
               << std::setw(8)
-              << std::setfill('0')
               << std::setprecision(6)
               << std::fixed
               << target_tune_inf << std::endl;
@@ -172,7 +171,6 @@ int main(int argc, char *argv[]) {
 
         std::cout << "\rcurrent: "
                   << std::setw(8)
-                  << std::setfill('0')
                   << std::setprecision(6)
                   << std::fixed
                   << avg_inf << std::flush;
@@ -221,7 +219,6 @@ int main(int argc, char *argv[]) {
     std::cout << "tuning treatment effect size" << std::endl;
     std::cout << "target infection: "
               << std::setw(8)
-              << std::setfill('0')
               << std::setprecision(6)
               << std::fixed
               << target_tune_trt << std::endl;
@@ -250,7 +247,6 @@ int main(int argc, char *argv[]) {
 
         std::cout << "\rcurrent: "
                   << std::setw(8)
-                  << std::setfill('0')
                   << std::setprecision(6)
                   << std::fixed
                   << avg_inf
@@ -258,9 +254,8 @@ int main(int argc, char *argv[]) {
                   << std::setw(3)
                   << iter
                   << " -> "
-                  << std::setw(6)
-                  << std::setfill('0')
-                  << std::setprecision(3)
+                  << std::setw(8)
+                  << std::setprecision(4)
                   << std::fixed
                   << par.at(3)
                   << ")" << std::flush;
@@ -323,7 +318,6 @@ int main(int argc, char *argv[]) {
         avg_inf /= num_reps;
         std::cout << "no trt: "
                   << std::setw(8)
-                  << std::setfill('0')
                   << std::setprecision(6)
                   << std::fixed
                   << avg_inf << std::endl;
@@ -352,7 +346,6 @@ int main(int argc, char *argv[]) {
         avg_inf /= num_reps;
         std::cout << "random: "
                   << std::setw(8)
-                  << std::setfill('0')
                   << std::setprecision(6)
                   << std::fixed
                   << avg_inf << std::endl;
@@ -381,7 +374,6 @@ int main(int argc, char *argv[]) {
         avg_inf /= num_reps;
         std::cout << "proximal: "
                   << std::setw(8)
-                  << std::setfill('0')
                   << std::setprecision(6)
                   << std::fixed
                   << avg_inf << std::endl;
