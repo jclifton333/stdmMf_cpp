@@ -57,9 +57,8 @@ int main(int argc, char *argv[]) {
     init.set_type(NetworkInit_NetType_EBOLA);
     std::shared_ptr<const Network> net(Network::gen_network(init));
 
-    std::vector<double> grav_par{-7.443e+00, -2.836e-01, -1.491e-06,
-                                 -1.015e+00, -1.015e+00};
-
+    std::vector<double> grav_par{-7.314e+00, -3.010e-01, -1.491e-06,
+                                 -9.230e-01, -9.230e-01};
 
     std::shared_ptr<Model<EbolaState> > mod_system(
             new EbolaStateGravityModel(net));
