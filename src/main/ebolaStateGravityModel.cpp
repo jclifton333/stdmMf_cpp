@@ -53,8 +53,8 @@ double EbolaStateGravityModel::a_inf_b(
         const boost::dynamic_bitset<> & trt_bits) const {
     const double log_grav_term(
             std::log(this->network_->dist().at(a_node).at(b_node))
-                    - this->beta_2_ * (std::log(state.pop.at(a_node))
-                            + std::log(state.pop.at(b_node))));
+            - std::exp(this->beta_2_) * (std::log(state.pop.at(a_node))
+                    + std::log(state.pop.at(b_node))));
     double logit_prob(this->beta_0_ -
             std::exp(this->beta_1_) * std::exp(log_grav_term));
     if (a_trt) {
@@ -77,7 +77,7 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_grad(
     const double pop(state.pop.at(a_node) * state.pop.at(b_node));
     const double log_grav_term(
             std::log(this->network_->dist().at(a_node).at(b_node))
-            - this->beta_2_ * (std::log(state.pop.at(a_node))
+            - std::exp(this->beta_2_) * (std::log(state.pop.at(a_node))
                     + std::log(state.pop.at(b_node))));
 
     double logit_prob(this->beta_0_ -
@@ -95,9 +95,8 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_grad(
     std::vector<double> grad(this->par_size_, prob * (1.0 - prob));
 
     grad.at(1) *= - std::exp(this->beta_1_) * std::exp(log_grav_term);
-    grad.at(2) *= - std::exp(this->beta_1_)
-        * this->network_->dist().at(a_node).at(b_node)
-        * std::pow(pop, - this->beta_2_) * (- std::log(pop));
+    grad.at(2) *= - std::exp(this->beta_1_) * std::exp(log_grav_term)
+        * (- std::exp(this->beta_2_) * std::log(pop));
     grad.at(3) *= b_trt;
     grad.at(4) *= a_trt;
 
@@ -113,7 +112,7 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_hess(
     const double pop(state.pop.at(a_node) * state.pop.at(b_node));
     const double log_grav_term(
             std::log(this->network_->dist().at(a_node).at(b_node))
-            - this->beta_2_ * (std::log(state.pop.at(a_node))
+            - std::exp(this->beta_2_) * (std::log(state.pop.at(a_node))
                     + std::log(state.pop.at(b_node))));
 
     double logit_prob(this->beta_0_ -
@@ -130,9 +129,8 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_hess(
 
     std::vector<double> grad_logit(this->par_size_, 1.0);
     grad_logit.at(1) = - std::exp(this->beta_1_) * std::exp(log_grav_term);
-    grad_logit.at(2) = - std::exp(this->beta_1_)
-        * this->network_->dist().at(a_node).at(b_node)
-        * std::pow(pop, - this->beta_2_) * (- std::log(pop));
+    grad_logit.at(2) *= - std::exp(this->beta_1_) * std::exp(log_grav_term)
+        * (- std::exp(this->beta_2_) * std::log(pop));
     grad_logit.at(3) *= b_trt;
     grad_logit.at(4) *= a_trt;
 
@@ -149,14 +147,14 @@ std::vector<double> EbolaStateGravityModel::a_inf_b_hess(
     hess_one.at(1 * this->par_size_ + 2) =
         hess_one.at(2 * this->par_size_ + 1) =
         prob * (1.0 - prob) * (-std::exp(this->beta_1_))
-        * this->network_->dist().at(a_node).at(b_node)
-        * std::pow(pop, - this->beta_2_) * (- std::log(pop));
+        * std::exp(log_grav_term) * (-std::exp(this->beta_2_)) * std::log(pop);
 
     hess_one.at(2 * this->par_size_ + 2) =
         prob * (1.0 - prob)
         * (-std::exp(this->beta_1_))
-        * this->network_->dist().at(a_node).at(b_node)
-        * std::pow(pop, - this->beta_2_) * std::log(pop) * std::log(pop);
+        * std::exp(log_grav_term) * std::log(pop)
+        * std::exp(this->beta_2_)
+        * (std::exp(this->beta_2_) * std::log(pop) - 1.0);
 
     return njm::linalg::add_a_and_b(hess_one, hess_two);
 }
