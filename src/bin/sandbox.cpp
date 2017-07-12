@@ -23,6 +23,7 @@
 #include "ebolaFeatures.hpp"
 #include "ebolaModelFeatures.hpp"
 #include "ebolaBinnedFeatures.hpp"
+#include "ebolaTransProbFeatures.hpp"
 
 #include <njm_cpp/data/trapperKeeper.hpp>
 #include <njm_cpp/linalg/stdVectorAlgebra.hpp>
@@ -56,51 +57,52 @@ int main(int argc, char *argv[]) {
     const std::shared_ptr<EbolaStateGravityModel> mod(
             new EbolaStateGravityModel(net));
 
-    std::vector<double> par{-3.105, 1.434, 0.051, -1.117, -1.117};
+    std::vector<double> par{-7.443e+00, -2.836e-01, -1.491e-06,
+                            -1.015e+00, -1.015e+00};
+
 
     mod->par(par);
 
-    SweepAgent<EbolaState> a(net,
+    const uint32_t time_points(25);
+
+    System<EbolaState> s(net, mod->clone());
+    s.seed(1);
+    VfnMaxSimPerturbAgent<EbolaState> a(net,
             std::shared_ptr<Features<EbolaState> >(
-                    new EbolaModelFeatures(
+                    new EbolaTransProbFeatures(
                             net, mod->clone())),
-            {0.0,
-                    -1000.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    -1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-            njm::linalg::dot_a_and_b, 2, false);
+            mod->clone(),
+            2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.2);
+    a.seed(1);
 
-    njm::tools::Rng rng;
+    const double starting_prop(0.0);
+    std::vector<uint32_t> outbreak_dates;
+    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
+        if (EbolaData::outbreaks().at(i) >= 0) {
+            outbreak_dates.push_back(EbolaData::outbreaks().at(i));
+        }
+    }
+    std::sort(outbreak_dates.begin(), outbreak_dates.end());
+    const uint32_t last_index(
+            std::min(std::max(1u,
+                            static_cast<uint32_t>(
+                                    outbreak_dates.size()
+                                    * starting_prop)),
+                    static_cast<uint32_t>(outbreak_dates.size() - 1u)));
+    const uint32_t outbreaks_cutoff(outbreak_dates.at(last_index));
 
-    EbolaState state(EbolaState::random(net->size(), rng));
+    EbolaState start_state(EbolaState(EbolaData::outbreaks().size()));
+    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
+        if (EbolaData::outbreaks().at(i) >= 0
+                && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
+            start_state.inf_bits.set(i);
+        }
+    }
 
-    const boost::dynamic_bitset<> trt_bits(a.apply_trt(state));
+    s.reset();
+    s.state(start_state);
 
-    std::cout << "inf: " << (trt_bits & state.inf_bits).count()
-              << std::endl;
-    state.inf_bits.flip();
-    std::cout << "not: " << (trt_bits & state.inf_bits).count()
-              << std::endl;
-
-    // const std::vector<double> probs(mod->probs(state,
-    //                 boost::dynamic_bitset<>(net->size())));
-
-    // std::vector<std::pair<double, uint32_t> > prob_match;
-    // for (uint32_t i = 0; i < net->size(); ++i) {
-    //     if (!state.inf_bits.test(i)) {
-    //         prob_match.emplace_back(-probs.at(i), i);
-    //     }
-    // }
-
-    // std::sort(prob_match.begin(), prob_match.end());
-
-    // for (uint32_t i = 0; i < prob_match.size(); ++i) {
-    //     std::cout << prob_match.at(i).second
-    //               << ": "
-    //               << prob_match.at(i).first
-    //               << " -> "
-    //               << trt_bits.test(prob_match.at(i).second)
-    //               << std::endl;
-    // }
+    runner(&s, &a, time_points, 1.0);
 
     return 0;
 }
