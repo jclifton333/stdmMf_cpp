@@ -5,7 +5,7 @@ library(xtable)
 library(readr)
 library(reshape2)
 
-filename = "../data/2017-07-01_17-33-00/ebola_Gravity-Gravity_history.txt"
+filename = "../data/2017-07-12_15-56-35/ebola_Gravity-Gravity_0_history.txt"
 raw_data = read_delim(filename, ",", trim_ws = TRUE,
                       col_types = cols(col_character(), ## agent
                                        col_integer(), ## rep
@@ -26,7 +26,7 @@ agg_data = summarise(group_by(agg_data, agent),
 agg_data$network = "Ebola"
 
 agg_data = agg_data[which(agg_data$agent %in%
-                          c("myopic", "none", "proximal", "random", "vfn_finite_q_g")),]
+                          c("myopic", "none", "proximal", "random", "vfn_finite_q_run")),]
 
 
 proc_data = agg_data
@@ -34,7 +34,7 @@ proc_data$value_mean_sse = paste(round(agg_data$value_mean, 4), " (",
                                  round(agg_data$value_sse, 4), ")", sep="")
 proc_data = dcast(proc_data, network ~ agent, value.var = "value_mean_sse")
 proc_data$network = NULL
-proc_data = proc_data[,c("none", "random", "proximal", "myopic", "vfn_finite_q_g")]
+proc_data = proc_data[,c("none", "random", "proximal", "myopic", "vfn_finite_q_run")]
 names(proc_data) = c("None", "Random", "Proximal", "Myopic", "Model based")
 
 sink("../data/figures/ebola_sim_results.tex")
