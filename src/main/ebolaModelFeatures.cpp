@@ -14,8 +14,8 @@
 namespace stdmMf {
 
 
-const uint32_t EbolaModelFeatures::num_inf_features_ = 1;
-const uint32_t EbolaModelFeatures::num_not_features_ = 1;
+const uint32_t EbolaModelFeatures::num_inf_features_ = 3;
+const uint32_t EbolaModelFeatures::num_not_features_ = 3;
 
 
 EbolaModelFeatures::EbolaModelFeatures(
@@ -117,7 +117,7 @@ std::vector<double> EbolaModelFeatures::get_features(
     // treat all inot infected locations
     boost::dynamic_bitset<> not_trt_bits(state.inf_bits);
     not_trt_bits.flip();
-    const std::vector<double> probs_not_trt(mod->probs(state, not_trt_bits));
+    const std::vector<double> probs_trt(mod->probs(state, not_trt_bits));
 
     this->terms_.resize(this->network_->size());
 
@@ -126,57 +126,55 @@ std::vector<double> EbolaModelFeatures::get_features(
     for (uint32_t i = 0; i < this->network_->size(); ++i) {
         this->terms_.at(i).clear();
         if (state.inf_bits.test(i)) {
-            // double one_to_one(0.0);
-            // double one_to_one_diff(0.0);
+            double one_to_one(0.0);
+            double one_to_one_diff(0.0);
             double prob_dist(0.0);
             for (uint32_t j = 0; j < this->network_->size(); ++j) {
                 if (!state.inf_bits.test(j) && i != j) {
-                    // const double a_inf_b_no(mod->a_inf_b(i, j, false, false,
-                    //                 state, trt_bits // these don't matter
-                    //                 ));
-                    // const double a_inf_b_yes(mod->a_inf_b(i, j, true, false,
-                    //                 state, trt_bits // these don't matter
-                    //                 ));
-                    // one_to_one += a_inf_b_no;
-                    // one_to_one_diff += a_inf_b_no - a_inf_b_yes;
+                    const double a_inf_b_no(mod->a_inf_b(i, j, false, false,
+                                    state, trt_bits // these don't matter
+                                    ));
+                    const double a_inf_b_yes(mod->a_inf_b(i, j, true, false,
+                                    state, trt_bits // these don't matter
+                                    ));
+
+                    one_to_one += a_inf_b_no;
+
+                    one_to_one_diff += a_inf_b_no - a_inf_b_yes;
 
                     prob_dist += probs.at(j) * this->dist_mean_
                         / this->network_->dist().at(i).at(j);
                 }
             }
             if (num_not > 0) {
-                // one_to_one /= num_not;
-                // one_to_one_diff /= num_not;
+                one_to_one /= num_not;
+                one_to_one_diff /= num_not;
                 prob_dist /= num_not;
             }
 
-            // this->terms_.at(i).emplace_back(Term{1, one_to_one});
-            // this->terms_.at(i).emplace_back(Term{3, one_to_one_diff});
-            // this->terms_.at(i).emplace_back(Term{5, prob_dist});
-
-            this->terms_.at(i).emplace_back(Term{1, prob_dist});
+            this->terms_.at(i).emplace_back(Term{1, one_to_one});
+            this->terms_.at(i).emplace_back(Term{2, one_to_one_diff});
+            this->terms_.at(i).emplace_back(Term{3, prob_dist});
         } else {
-            // this->terms_.at(i).emplace_back(Term{7, probs.at(i)});
-            // // benefit of treating
-            // this->terms_.at(i).emplace_back(
-            //         Term{9, probs.at(i) - probs_not_trt.at(i)});
+            this->terms_.at(i).emplace_back(Term{4, probs.at(i)});
+            // benefit of treating
+            this->terms_.at(i).emplace_back(
+                    Term{5, probs.at(i) - probs_trt.at(i)});
 
-            // double inf_effect(0.0);
-            // for (uint32_t j = 0; j < this->network_->size(); ++j) {
-            //     if (!state.inf_bits.test(j) && i != j) {
-            //         const double a_inf_b_no(mod->a_inf_b(i, j, false, false,
-            //                         state, trt_bits // these don't matter
-            //                         ));
-            //         inf_effect += a_inf_b_no * (1.0 - probs.at(j));
-            //     }
-            // }
-            // if (num_not > 0) {
-            //     inf_effect /= num_not;
-            // }
+            double inf_effect(0.0);
+            for (uint32_t j = 0; j < this->network_->size(); ++j) {
+                if (!state.inf_bits.test(j) && i != j) {
+                    const double a_inf_b_no(mod->a_inf_b(i, j, false, false,
+                                    state, trt_bits // these don't matter
+                                    ));
+                    inf_effect += a_inf_b_no * (1.0 - probs.at(j));
+                }
+            }
+            if ((num_not - 1) > 0) {
+                inf_effect /= (num_not - 1);
+            }
 
-            // this->terms_.at(i).emplace_back(Term{11, inf_effect});
-
-            this->terms_.at(i).emplace_back(Term{2, probs.at(i)});
+            this->terms_.at(i).emplace_back(Term{6, inf_effect});
         }
     }
 
