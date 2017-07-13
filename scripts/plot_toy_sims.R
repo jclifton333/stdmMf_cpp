@@ -102,9 +102,10 @@ p = p + scale_linetype_manual("Treatment Strategy",
                                          "Model based" = 1,
                                          "Model free" = 1))
 p = p + ylab("Estimated mean value")
-p = p + xlab("Misspecification proportion")
-p = p + theme(panel.spacing = unit(1.5, "lines"),
+p = p + xlab(bquote(paste("Mixture parameter ", delta)))
+p = p + theme(panel.spacing = unit(1, "lines"),
               legend.key.width=unit(3,"line"))
+p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 print(p)
 
 ggsave("../data/figures/toy_sim_results.pdf", p)
