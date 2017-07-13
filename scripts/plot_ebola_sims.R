@@ -30,8 +30,10 @@ agg_data = agg_data[which(agg_data$agent %in%
 
 
 proc_data = agg_data
-proc_data$value_mean_sse = paste(round(agg_data$value_mean, 4), " (",
-                                 round(agg_data$value_sse, 4), ")", sep="")
+proc_data$value_mean_sse = sprintf("%.4f (%.4f)",
+                                   agg_data$value_mean,
+                                   agg_data$value_sse)
+
 proc_data = dcast(proc_data, network ~ agent, value.var = "value_mean_sse")
 proc_data$network = NULL
 proc_data = proc_data[,c("none", "random", "proximal", "myopic", "vfn_finite_q_run")]
