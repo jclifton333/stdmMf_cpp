@@ -26,11 +26,12 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
         const std::vector<std::shared_ptr<Model<State> > > & models,
         const std::shared_ptr<Features<State> > & features,
         const uint32_t & look_ahead,
+        const bool & fit_models,
         const bool & concat)
     : network_(network), num_nodes_(this->network_->size()), models_(models),
       num_models_(this->models_.size()), features_(features),
       look_ahead_(look_ahead), coef_(this->num_models_),
-      concat_(concat) {
+      fit_models_(fit_models), concat_(concat) {
 
     CHECK_GT(this->look_ahead_, 0);
 
@@ -57,7 +58,8 @@ FiniteQfnFeatures<State>::FiniteQfnFeatures(
       models_(clone_vec(other.models_)), num_models_(other.num_models_),
       features_(other.features_->clone()),
       look_ahead_(other.look_ahead_), coef_(other.coef_),
-      concat_(other.concat_), last_feat_(other.last_feat_) {
+      fit_models_(other.fit_models_), concat_(other.concat_),
+      last_feat_(other.last_feat_) {
 
     std::for_each(this->models_.begin(), this->models_.end(),
             [this] (const std::shared_ptr<Model<State> > & m_) {
@@ -80,59 +82,13 @@ void FiniteQfnFeatures<State>::update(const State & curr_state,
     // update nested features
     this->features_->update(curr_state, history, num_trt);
 
-    const std::vector<Transition<State> > all_history(
-            Transition<State>::from_sequence(history, curr_state));
-    for (uint32_t m = 0; m < this->num_models_; ++m) {
-        // fit model
-        this->models_.at(m)->est_par(all_history);
-
-        // thompson sampling
-        // get information matrix and take inverse sqrt
-        std::vector<double> hess = this->models_.at(m)->ll_hess(all_history);
-        njm::linalg::mult_b_to_a(hess, -1.0 * all_history.size());
-
-        const arma::mat hess_mat(hess.data(), this->models_.at(m)->par_size(),
-                this->models_.at(m)->par_size());
-        arma::mat eigvec;
-        arma::vec eigval;
-        arma::eig_sym(eigval, eigvec, hess_mat);
-        for (uint32_t i = 0; i < this->models_.at(m)->par_size(); ++i) {
-            if (eigval(i) > 0.1)
-                eigval(i) = std::sqrt(1.0 / eigval(i));
-            else
-                eigval(i) = 0.0;
+    if (this->fit_models_) {
+        const std::vector<Transition<State> > all_history(
+                Transition<State>::from_sequence(history, curr_state));
+        for (uint32_t m = 0; m < this->num_models_; ++m) {
+            // fit model
+            this->models_.at(m)->est_par(all_history);
         }
-        // threshold eigen vectors
-        for (auto it = eigvec.begin(); it != eigvec.end(); ++it) {
-            if (std::abs(*it) < 1e-3) {
-                *it = 0.0;
-            }
-        }
-        arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
-        // threshold sqrt matrix
-        for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
-            if (*it < 1e-3) {
-                *it = 0.0;
-            }
-        }
-
-        // sample new parameters
-        arma::vec std_norm(this->models_.at(m)->par_size());
-        for (uint32_t i = 0; i < this->models_.at(m)->par_size(); ++i) {
-            std_norm(i) = this->rng_->rnorm_01();
-        }
-        const std::vector<double> par_samp(
-                njm::linalg::add_a_and_b(this->models_.at(m)->par(),
-                        arma::conv_to<std::vector<double> >::from(
-                                var_sqrt * std_norm)));
-        // check for finite values
-        std::for_each(par_samp.begin(), par_samp.end(),
-                [] (const double & x_) {
-                    LOG_IF(FATAL, !std::isfinite(x_));
-                });
-
-        // set new parameters
-        this->models_.at(m)->par(par_samp);
     }
 
     const std::vector<std::vector<Transition<State> > > sim_data(

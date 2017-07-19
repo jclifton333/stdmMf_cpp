@@ -19,6 +19,8 @@ protected:
     const uint32_t look_ahead_;
     std::vector<std::vector<std::vector<double> > > coef_;
 
+    const bool fit_models_;
+
     const bool concat_;
 
     std::vector<double> last_feat_;
@@ -28,6 +30,7 @@ public:
             const std::vector<std::shared_ptr<Model<State> > > & model,
             const std::shared_ptr<Features<State> > & features,
             const uint32_t & look_ahead,
+            const bool & fit_models,
             const bool & concat);
 
     FiniteQfnFeatures(const FiniteQfnFeatures<State> & other);
