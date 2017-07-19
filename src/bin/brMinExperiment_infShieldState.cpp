@@ -127,7 +127,8 @@ std::pair<double, double> run_brmin(const uint32_t & seed,
                     std::shared_ptr<Features<InfShieldState> >(
                             new NetworkRunSymFeatures
                             <InfShieldState>(
-                                    net, run_length)), look_ahead, false));
+                                    net, run_length)), look_ahead,
+                    true, false));
 
     // eps agent
     std::shared_ptr<ProximalAgent<InfShieldState> > pa(
