@@ -80,11 +80,62 @@ boost::dynamic_bitset<> VfnMaxSimPerturbAgent<State>::apply_trt(
         //     return ma.apply_trt(state, history);
     }
 
-    // update features
-    this->features_->update(curr_state, history, this->num_trt());
-
     const std::vector<Transition<State> > & all_history(
             Transition<State>::from_sequence(history, curr_state));
+
+    {// fit models and update features
+        this->model_->est_par(all_history);
+
+        // get information matrix and take inverse sqrt
+        std::vector<double> hess = this->model_->ll_hess(all_history);
+        njm::linalg::mult_b_to_a(hess, -1.0 * history.size());
+
+        const arma::mat hess_mat(hess.data(), this->model_->par_size(),
+                this->model_->par_size());
+        arma::mat eigvec;
+        arma::vec eigval;
+        arma::eig_sym(eigval, eigvec, hess_mat);
+        for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
+            if (eigval(i) > 0.1)
+                eigval(i) = std::sqrt(1.0 / eigval(i));
+            else
+                eigval(i) = 0.0;
+        }
+        // threshold eigen vectors
+        for (auto it = eigvec.begin(); it != eigvec.end(); ++it) {
+            if (std::abs(*it) < 1e-3) {
+                *it = 0.0;
+            }
+        }
+        arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
+        // threshold sqrt matrix
+        for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
+            if (*it < 1e-3) {
+                *it = 0.0;
+            }
+        }
+
+        // sample new parameters
+        arma::vec std_norm(this->model_->par_size());
+        for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
+            std_norm(i) = this->rng_->rnorm_01();
+        }
+        const std::vector<double> par_samp(
+                njm::linalg::add_a_and_b(this->model_->par(),
+                        arma::conv_to<std::vector<double> >::from(
+                                var_sqrt * std_norm)));
+        // check for finite values
+        std::for_each(par_samp.begin(), par_samp.end(),
+                [] (const double & x_) {
+                    LOG_IF(FATAL, !std::isfinite(x_));
+                });
+
+        // set new parameters
+        this->model_->par(par_samp);
+
+        // update features
+        this->features_->update(curr_state, history, this->num_trt());
+    }
 
     const std::vector<double> optim_par = this->train(all_history,
             this->last_optim_par_);
@@ -113,55 +164,6 @@ template <typename State>
 std::vector<double> VfnMaxSimPerturbAgent<State>::train(
         const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
-
-    this->model_->est_par(history);
-
-    // get information matrix and take inverse sqrt
-    std::vector<double> hess = this->model_->ll_hess(history);
-    njm::linalg::mult_b_to_a(hess, -1.0 * history.size());
-
-    const arma::mat hess_mat(hess.data(), this->model_->par_size(),
-            this->model_->par_size());
-    arma::mat eigvec;
-    arma::vec eigval;
-    arma::eig_sym(eigval, eigvec, hess_mat);
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        if (eigval(i) > 0.1)
-            eigval(i) = std::sqrt(1.0 / eigval(i));
-        else
-            eigval(i) = 0.0;
-    }
-    // threshold eigen vectors
-    for (auto it = eigvec.begin(); it != eigvec.end(); ++it) {
-        if (std::abs(*it) < 1e-3) {
-            *it = 0.0;
-        }
-    }
-    arma::mat var_sqrt = eigvec * arma::diagmat(eigval) * eigvec.t();
-    // threshold sqrt matrix
-    for (auto it = var_sqrt.begin(); it != var_sqrt.end(); ++it) {
-        if (*it < 1e-3) {
-            *it = 0.0;
-        }
-    }
-
-    // sample new parameters
-    arma::vec std_norm(this->model_->par_size());
-    for (uint32_t i = 0; i < this->model_->par_size(); ++i) {
-        std_norm(i) = this->rng_->rnorm_01();
-    }
-    const std::vector<double> par_samp(
-            njm::linalg::add_a_and_b(this->model_->par(),
-                    arma::conv_to<std::vector<double> >::from(
-                            var_sqrt * std_norm)));
-    // check for finite values
-    std::for_each(par_samp.begin(), par_samp.end(),
-            [] (const double & x_) {
-                LOG_IF(FATAL, !std::isfinite(x_));
-            });
-
-    // set new parameters
-    this->model_->par(par_samp);
 
     CHECK_GT(this->final_t_, history.size());
     CHECK_GE(this->final_t_, this->proj_t_);
