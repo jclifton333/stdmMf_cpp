@@ -524,4 +524,136 @@ bellman_residual_parts<EbolaState>(
 
 
 
+// sampling variance of coefficients
+template <typename State>
+arma::mat coef_variance_sqrt(
+        const std::vector<Transition<State> > & history,
+        Agent<State> * const agent, const double gamma,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad) {
+    const uint32_t size = history.size();
+
+    CHECK_GE(size, 1) << "need at least 1 transition";
+
+    // containers
+    std::vector<double> delta;
+    delta.reserve(size);
+
+    std::vector<arma::colvec> psi, psi_next;
+    psi.reserve(size);
+    psi_next.reserve(size);
+
+    for (uint32_t i = 0; i < size; ++i) {
+        const Transition<State> & transition = history.at(i);
+
+        // R
+        const uint32_t num_inf = transition.next_state.inf_bits.count();
+        const uint32_t num_nodes = transition.next_state.inf_bits.size();
+        const double r = - static_cast<double>(num_inf)
+            / static_cast<double>(num_nodes);
+
+        // Q(S, A)
+        const double q_curr = q_fn(transition.curr_state,
+                transition.curr_trt_bits);
+
+        // current gradient
+        const std::vector<double> grad_vec(grad(transition.curr_state,
+                        transition.curr_trt_bits));
+        psi.push_back(arma::colvec(grad_vec));
+
+        // Q(S', pi(S'))
+        const boost::dynamic_bitset<> agent_trt =
+            agent->apply_trt(transition.next_state);
+        const double q_next = q_fn_next(transition.next_state, agent_trt);
+
+        // next gradient
+        const std::vector<double> grad_vec_next(grad(transition.next_state,
+                        agent_trt));
+        psi_next.push_back(arma::colvec(grad_vec));
+
+        delta.push_back(r + gamma * q_next - q_curr);
+    }
+
+    CHECK_EQ(delta.size(), size);
+    CHECK_EQ(psi.size(), size);
+    CHECK_EQ(psi_next.size(), size);
+
+    const uint32_t dim(psi.at(0).size());
+
+    arma::colvec delta_psi(dim, arma::fill::zeros);
+    arma::mat psi_next_psi(dim, dim, arma::fill::zeros);
+    arma::mat w(dim, dim, arma::fill::zeros);
+
+    for (uint32_t i = 0; i < size; ++i) {
+        delta_psi += delta.at(i) * psi.at(i);
+
+        psi_next_psi += psi_next.at(i) * psi.at(i).t();
+
+        w += psi.at(i) * psi.at(i).t();
+    }
+
+    const arma::mat sigma_mat(delta_psi * delta_psi.t());
+
+    const arma::mat w_inv(arma::pinv(w));
+
+    const arma::mat gamma_a(arma::mat(dim, dim, arma::fill::eye) -
+            gamma * w_inv * psi_next_psi);
+
+    const arma::mat gamma_b(
+            w + gamma * gamma * psi_next_psi * w_inv * psi_next_psi.t()
+            - 2 * gamma * psi_next_psi.t());
+    const arma::mat gamma_b_inv(arma::pinv(gamma_b));
+
+    // take sqrt of sigma
+    arma::mat sigma_eigvec;
+    arma::colvec sigma_eigval;
+    arma::eig_sym(sigma_eigval, sigma_eigvec, sigma_mat);
+    for (uint32_t i = 0; i < dim; ++i) {
+        if (sigma_eigvec(i) > 0.01) {
+            sigma_eigvec(i) = std::sqrt(sigma_eigvec(i));
+        }
+    }
+
+    arma::mat gamma_mat(gamma_a.t() * gamma_b_inv);
+
+    return gamma_mat.t() * sigma_eigvec * arma::diagmat(sigma_eigval);
+}
+
+template
+arma::mat coef_variance_sqrt<InfState>(
+        const std::vector<Transition<InfState> > & history,
+        Agent<InfState> * const agent, const double gamma,
+        const std::function<double(const InfState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const InfState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad);
+
+template
+arma::mat coef_variance_sqrt<InfShieldState>(
+        const std::vector<Transition<InfShieldState> > & history,
+        Agent<InfShieldState> * const agent, const double gamma,
+        const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const InfShieldState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad);
+
+template
+arma::mat coef_variance_sqrt<EbolaState>(
+        const std::vector<Transition<EbolaState> > & history,
+        Agent<EbolaState> * const agent, const double gamma,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const EbolaState & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad);
+
 } // namespace stdmMf

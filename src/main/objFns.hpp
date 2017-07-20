@@ -4,6 +4,7 @@
 #include "agent.hpp"
 #include "network.hpp"
 #include "system.hpp"
+#include <armadillo>
 
 namespace stdmMf {
 
@@ -97,6 +98,19 @@ bellman_residual_parts(
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
         const std::function<std::vector<double>(const State & state,
                 const boost::dynamic_bitset<> & trt_bits)> & grad);
+
+
+template <typename State>
+arma::mat coef_variance_sqrt(const std::vector<Transition<State> > & history,
+        Agent<State> * const agent, const double gamma,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad);
+
+
 
 
 } // namespace stdmMf
