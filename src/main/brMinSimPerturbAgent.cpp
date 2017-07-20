@@ -92,7 +92,7 @@ boost::dynamic_bitset<> BrMinSimPerturbAgent<State>::apply_trt(
             Transition<State>::from_sequence(history, curr_state));
 
     const std::vector<double> optim_par = this->train(all_history,
-            this->last_optim_par_);
+            std::vector<double>(this->features_->num_features(), 0.0));
     this->last_optim_par_ = optim_par;
 
 
