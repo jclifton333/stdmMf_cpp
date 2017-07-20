@@ -798,8 +798,6 @@ int main(int argc, char *argv[]) {
     //     networks.push_back(Network::gen_network(init));
     // }
 
-    std::reverse(networks.begin(), networks.end());
-
     // double vector since model depends on network
     std::vector<std::pair<std::string,
                           std::vector<ModelPair> > > models;
