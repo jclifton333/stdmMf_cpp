@@ -472,6 +472,49 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
         optim_par = sp.par();
     }
 
+    { // thompson sampling
+        arma::colvec par_perturb(optim_par.size());
+        std::generate(par_perturb.begin(), par_perturb.end(),
+                [this] () {
+                    return this->rng()->rnorm_01();
+                });
+
+        auto q_fn = [&](const State & state_t,
+                const boost::dynamic_bitset<> & trt_bits_t) {
+                        return njm::linalg::dot_a_and_b(optim_par,
+                                this->features_->get_features(
+                                        state_t,
+                                        trt_bits_t));
+                    };
+
+        // q function for time t + 1
+        auto q_fn_next = [&](const State & state_t,
+                const boost::dynamic_bitset<> & trt_bits_t) {
+                             return njm::linalg::dot_a_and_b(
+                                     optim_par,
+                                     this->features_->get_features(
+                                             state_t, trt_bits_t));
+                         };
+
+        // get gradient of td error
+        auto grad = [&](const State & state_t,
+                const boost::dynamic_bitset<> & trt_bits_t) {
+                        return this->features_->get_features(
+                                state_t, trt_bits_t);
+                    };
+
+        SweepAgent<State> a(this->network_, this->features_,
+                optim_par, njm::linalg::dot_a_and_b, 2,
+                this->do_sweep_);
+
+        const arma::mat var_sqrt(coef_variance_sqrt<State>(history,
+                        &a, 0.9, q_fn, q_fn_next, grad));
+
+        par_perturb = var_sqrt * par_perturb;
+
+        optim_par = arma::conv_to<std::vector<double> >::from(par_perturb);
+    }
+
     return optim_par;
 }
 
@@ -497,7 +540,6 @@ void BrMinSimPerturbAgent<State>::rng(
     this->model_->rng(rng);
     this->features_->rng(rng);
 }
-
 
 
 template class BrMinSimPerturbAgent<InfState>;
