@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
                             true, false)),
             mod->clone(),
             0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-            true, true, false, 0, 0, 0, 0);
+            true, true, false, 0, 0, 0, 0, false, true);
     // VfnMaxSimPerturbAgent<InfShieldState> a(net,
     //         std::shared_ptr<Features<InfShieldState> >(
     //                 new EbolaTransProbFeatures(

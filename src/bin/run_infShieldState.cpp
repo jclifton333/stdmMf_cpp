@@ -451,8 +451,8 @@ void queue_sim(
 
 
     // br min finite q
-    CHECK_EQ(results->results.count("br_finite_q"), 1);
-    CHECK_EQ(results->results.at("br_finite_q").size(), num_reps);
+    CHECK_EQ(results->results.count("br_finite_q_neither"), 1);
+    CHECK_EQ(results->results.at("br_finite_q_neither").size(), num_reps);
     for (uint32_t i = 0; i < num_reps; ++i) {
         pool->service().post([=]() {
             System<InfShieldState> s(net, mod_system->clone());
@@ -474,7 +474,7 @@ void queue_sim(
                                     true, false)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0);
+                    true, true, false, 0, 0, 0, 0, false, false);
             a.seed(i);
 
             s.start();
@@ -498,7 +498,172 @@ void queue_sim(
             outcome.history.emplace_back(s.state(),
                     boost::dynamic_bitset<>(net->size()));
 
-            results->results.at("br_finite_q").at(i).set_value(
+            results->results.at("br_finite_q_neither").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
+    // br min finite q
+    CHECK_EQ(results->results.count("br_finite_q_pretrain"), 1);
+    CHECK_EQ(results->results.at("br_finite_q_pretrain").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<InfShieldState> s(net, mod_system->clone());
+            s.seed(i);
+
+            std::shared_ptr<Model<InfShieldState> > modNoIm(
+                    new InfShieldStateNoImNoSoModel(net));
+            std::shared_ptr<Model<InfShieldState> > modPosIm(
+                    new InfShieldStatePosImNoSoModel(net));
+
+            BrMinSimPerturbAgent<InfShieldState> a(net,
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new FiniteQfnFeatures<InfShieldState>(
+                                    net, {modNoIm, modPosIm},
+                                    std::shared_ptr<Features<InfShieldState> >(
+                                            new NetworkRunSymFeatures<
+                                            InfShieldState>(
+                                                    net, 2)), 1,
+                                    true, false)),
+                    mod_agents->clone(),
+                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+                    true, true, false, 0, 0, 0, 0, true, false);
+            a.seed(i);
+
+            s.start();
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("br_finite_q_pretrain").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
+    // br min finite q
+    CHECK_EQ(results->results.count("br_finite_q_ts"), 1);
+    CHECK_EQ(results->results.at("br_finite_q_ts").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<InfShieldState> s(net, mod_system->clone());
+            s.seed(i);
+
+            std::shared_ptr<Model<InfShieldState> > modNoIm(
+                    new InfShieldStateNoImNoSoModel(net));
+            std::shared_ptr<Model<InfShieldState> > modPosIm(
+                    new InfShieldStatePosImNoSoModel(net));
+
+            BrMinSimPerturbAgent<InfShieldState> a(net,
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new FiniteQfnFeatures<InfShieldState>(
+                                    net, {modNoIm, modPosIm},
+                                    std::shared_ptr<Features<InfShieldState> >(
+                                            new NetworkRunSymFeatures<
+                                            InfShieldState>(
+                                                    net, 2)), 1,
+                                    true, false)),
+                    mod_agents->clone(),
+                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+                    true, true, false, 0, 0, 0, 0, false, true);
+            a.seed(i);
+
+            s.start();
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("br_finite_q_ts").at(i).set_value(
+                    std::move(outcome));
+            progress->update();
+        });
+    }
+
+
+    // br min finite q
+    CHECK_EQ(results->results.count("br_finite_q_both"), 1);
+    CHECK_EQ(results->results.at("br_finite_q_both").size(), num_reps);
+    for (uint32_t i = 0; i < num_reps; ++i) {
+        pool->service().post([=]() {
+            System<InfShieldState> s(net, mod_system->clone());
+            s.seed(i);
+
+            std::shared_ptr<Model<InfShieldState> > modNoIm(
+                    new InfShieldStateNoImNoSoModel(net));
+            std::shared_ptr<Model<InfShieldState> > modPosIm(
+                    new InfShieldStatePosImNoSoModel(net));
+
+            BrMinSimPerturbAgent<InfShieldState> a(net,
+                    std::shared_ptr<Features<InfShieldState> >(
+                            new FiniteQfnFeatures<InfShieldState>(
+                                    net, {modNoIm, modPosIm},
+                                    std::shared_ptr<Features<InfShieldState> >(
+                                            new NetworkRunSymFeatures<
+                                            InfShieldState>(
+                                                    net, 2)), 1,
+                                    true, false)),
+                    mod_agents->clone(),
+                    0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+                    true, true, false, 0, 0, 0, 0, true, true);
+            a.seed(i);
+
+            s.start();
+
+            Outcome outcome;
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tick =
+                std::chrono::steady_clock::now();
+
+            outcome.value = runner(&s, &a, time_points, 1.0);
+
+            std::chrono::time_point<
+                std::chrono::steady_clock> tock =
+                std::chrono::steady_clock::now();
+
+            outcome.time = std::chrono::duration_cast<
+                std::chrono::seconds>(tock - tick).count();
+
+            outcome.history = s.history();
+            outcome.history.emplace_back(s.state(),
+                    boost::dynamic_bitset<>(net->size()));
+
+            results->results.at("br_finite_q_both").at(i).set_value(
                     std::move(outcome));
             progress->update();
         });
@@ -1035,7 +1200,11 @@ int main(int argc, char *argv[]) {
                 // "vfn_max",
                 "vfn_finite_q", // "vfn_finite_q_concat",
                 // "br_min",
-                "br_finite_q"// , "br_finite_q_concat"
+                // "br_finite_q"// , "br_finite_q_concat"
+                "br_finite_q_neither",
+                "br_finite_q_pretrain",
+                "br_finite_q_ts",
+                "br_finite_q_both"
             });
     AllResults<std::promise> promise_results;
     AllResults<std::future> future_results;
