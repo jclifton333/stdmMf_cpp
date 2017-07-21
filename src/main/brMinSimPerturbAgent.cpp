@@ -513,7 +513,9 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
 
         par_perturb = var_sqrt * par_perturb;
 
-        optim_par = arma::conv_to<std::vector<double> >::from(par_perturb);
+        // add perturb to optim par
+        njm::linalg::add_b_to_a(optim_par,
+                arma::conv_to<std::vector<double> >::from(par_perturb));
     }
 
     return optim_par;
