@@ -49,58 +49,106 @@ int main(int argc, char *argv[]) {
     EbolaData::init();
 
     NetworkInit init;
-    init.set_type(NetworkInit_NetType_EBOLA);
+    init.set_dim_x(10);
+    init.set_dim_y(10);
+    init.set_wrap(false);
+    init.set_type(NetworkInit_NetType_GRID);
 
     std::shared_ptr<Network> net(Network::gen_network(init));
 
     // init model
-    const std::shared_ptr<EbolaStateGravityModel> mod(
-            new EbolaStateGravityModel(net));
+    const std::shared_ptr<InfShieldStatePosImNoSoModel> mod(
+            new InfShieldStatePosImNoSoModel(net));
 
-    std::vector<double> par{-7.443e+00, -2.836e-01, -1.491e-06,
-                            -1.015e+00, -1.015e+00};
+    // latent infections
+    const double prob_inf_latent = 0.01;
+    const double intcp_inf_latent =
+        std::log(1. / (1. - prob_inf_latent) - 1);
+
+    // neighbor infections
+    const double prob_inf = 0.5;
+    const uint32_t prob_num_neigh = 3;
+    const double intcp_inf =
+        std::log(std::pow((1. - prob_inf) / (1. - prob_inf_latent),
+                        -1. / prob_num_neigh)
+                - 1.);
+
+    const double trt_act_inf =
+        std::log(std::pow((1. - prob_inf * 0.25) / (1. - prob_inf_latent),
+                        -1. / prob_num_neigh)
+                - 1.)
+        - intcp_inf;
+
+    const double trt_pre_inf =
+        std::log(std::pow((1. - prob_inf * 0.75) / (1. - prob_inf_latent),
+                        -1. / prob_num_neigh)
+                - 1.)
+        - intcp_inf;
+
+    // recovery
+    const double prob_rec = 0.25;
+    const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
+    const double trt_act_rec =
+        std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
+
+    // shield
+    const double shield_coef = 0.9;
+
+
+    std::vector<double> par =
+        {intcp_inf_latent,
+         intcp_inf,
+         intcp_rec,
+         trt_act_inf,
+         trt_act_rec,
+         trt_pre_inf,
+         shield_coef};
+
+    std::vector<double> par_sep =
+        {intcp_inf_latent,
+         intcp_inf,
+         intcp_rec,
+         trt_act_inf,
+         -trt_act_inf,
+         trt_act_rec,
+         -trt_act_rec,
+         trt_pre_inf,
+         -trt_pre_inf,
+         shield_coef};
 
 
     mod->par(par);
 
     const uint32_t time_points(25);
 
-    System<EbolaState> s(net, mod->clone());
+    std::shared_ptr<Model<InfShieldState> > modNoIm(
+            new InfShieldStateNoImNoSoModel(net));
+    std::shared_ptr<Model<InfShieldState> > modPosIm(
+            new InfShieldStatePosImNoSoModel(net));
+
+    System<InfShieldState> s(net, mod->clone());
     s.seed(1);
-    VfnMaxSimPerturbAgent<EbolaState> a(net,
-            std::shared_ptr<Features<EbolaState> >(
-                    new EbolaTransProbFeatures(
-                            net, mod->clone())),
+    BrMinSimPerturbAgent<InfShieldState> a(net,
+            std::shared_ptr<Features<InfShieldState> >(
+                    new FiniteQfnFeatures<InfShieldState>(
+                            net, {modNoIm, modPosIm},
+                            std::shared_ptr<Features<InfShieldState> >(
+                                    new NetworkRunSymFeatures<
+                                    InfShieldState>(
+                                            net, 2)), 1,
+                            true, false)),
             mod->clone(),
-            2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.2);
+            0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
+            true, true, false, 0, 0, 0, 0);
+    // VfnMaxSimPerturbAgent<InfShieldState> a(net,
+    //         std::shared_ptr<Features<InfShieldState> >(
+    //                 new EbolaTransProbFeatures(
+    //                         net, mod->clone())),
+    //         mod->clone(),
+    //         2, time_points, 1, 10.0, 0.1, 10, 1, 0.4, 1.2);
     a.seed(1);
 
-    const double starting_prop(0.0);
-    std::vector<uint32_t> outbreak_dates;
-    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
-        if (EbolaData::outbreaks().at(i) >= 0) {
-            outbreak_dates.push_back(EbolaData::outbreaks().at(i));
-        }
-    }
-    std::sort(outbreak_dates.begin(), outbreak_dates.end());
-    const uint32_t last_index(
-            std::min(std::max(1u,
-                            static_cast<uint32_t>(
-                                    outbreak_dates.size()
-                                    * starting_prop)),
-                    static_cast<uint32_t>(outbreak_dates.size() - 1u)));
-    const uint32_t outbreaks_cutoff(outbreak_dates.at(last_index));
-
-    EbolaState start_state(EbolaState(EbolaData::outbreaks().size()));
-    for (uint32_t i = 0; i < EbolaData::outbreaks().size(); ++i) {
-        if (EbolaData::outbreaks().at(i) >= 0
-                && EbolaData::outbreaks().at(i) <= outbreaks_cutoff) {
-            start_state.inf_bits.set(i);
-        }
-    }
-
-    s.reset();
-    s.state(start_state);
+    s.start();
 
     runner(&s, &a, time_points, 1.0);
 
