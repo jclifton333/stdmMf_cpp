@@ -620,7 +620,10 @@ arma::mat coef_variance_sqrt(
 
     arma::mat gamma_mat(gamma_a.t() * gamma_b_inv);
 
-    return gamma_mat.t() * sigma_eigvec * arma::diagmat(sigma_eigval);
+    const uint32_t num_nodes(history.at(0).curr_state.inf_bits.size());
+
+    return gamma_mat.t() * sigma_eigvec * arma::diagmat(sigma_eigval)
+        / std::sqrt(static_cast<double>(num_nodes));
 }
 
 template
