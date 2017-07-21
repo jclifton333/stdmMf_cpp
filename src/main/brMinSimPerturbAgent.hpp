@@ -26,6 +26,9 @@ class BrMinSimPerturbAgent : public Agent<State> {
     const uint32_t max_same_trt_;
     const uint32_t steps_between_trt_test_;
 
+    const bool pre_train_;
+    const bool thompson_sampling_;
+
     std::vector<double> last_optim_par_;
 
     bool record_;
@@ -52,7 +55,9 @@ public:
             const uint32_t & num_supp_obs,
             const uint32_t & obs_per_iter,
             const uint32_t & max_same_trt,
-            const uint32_t & steps_between_trt_test);
+            const uint32_t & steps_between_trt_test,
+            const bool & pre_train,
+            const bool & thompson_sampling);
 
     BrMinSimPerturbAgent(const BrMinSimPerturbAgent<State> & other);
 
