@@ -185,145 +185,146 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
         const std::vector<Transition<State> > & history,
         const std::vector<double> & starting_vals) {
 
-    std::vector<double> optim_par;
-    { // without gradient
-        // setup optimization function
-        auto f = [&](const std::vector<double> & par,
-                const std::vector<double> & par_orig) {
-                     // q function for time t
-                     auto q_fn = [&](const State & state_t,
-                             const boost::dynamic_bitset<> & trt_bits_t) {
-                                     return njm::linalg::dot_a_and_b(par,
-                                             this->features_->get_features(
-                                                     state_t,
-                                                     trt_bits_t));
-                                 };
+    std::vector<double> optim_par(starting_vals);
 
-                     // q function for time t + 1
-                     auto q_fn_next = [&](const State & state_t,
-                             const boost::dynamic_bitset<> & trt_bits_t) {
-                                          return njm::linalg::dot_a_and_b(
-                                                  par_orig,
-                                                  this->features_->get_features(
-                                                          state_t, trt_bits_t));
-                                      };
+    // { // without gradient
+    //     // setup optimization function
+    //     auto f = [&](const std::vector<double> & par,
+    //             const std::vector<double> & par_orig) {
+    //                  // q function for time t
+    //                  auto q_fn = [&](const State & state_t,
+    //                          const boost::dynamic_bitset<> & trt_bits_t) {
+    //                                  return njm::linalg::dot_a_and_b(par,
+    //                                          this->features_->get_features(
+    //                                                  state_t,
+    //                                                  trt_bits_t));
+    //                              };
+
+    //                  // q function for time t + 1
+    //                  auto q_fn_next = [&](const State & state_t,
+    //                          const boost::dynamic_bitset<> & trt_bits_t) {
+    //                                       return njm::linalg::dot_a_and_b(
+    //                                               par_orig,
+    //                                               this->features_->get_features(
+    //                                                       state_t, trt_bits_t));
+    //                                   };
 
 
-                     if (this->gs_step_ && this->sq_total_br_) {
-                         // gauss-seidel step
-                         // (E[td-error])^2
-                         SweepAgent<State> a(this->network_, this->features_,
-                                 par_orig, njm::linalg::dot_a_and_b, 2,
-                                 this->do_sweep_);
-                         a.rng(this->rng());
-                         return sq_bellman_residual<State>(history, &a, 0.9,
-                                 q_fn, q_fn_next);
-                     } else if (this->gs_step_) {
-                         // gauss-seidel step
-                         // E[(td-error)^2]
-                         SweepAgent<State> a(this->network_, this->features_,
-                                 par_orig, njm::linalg::dot_a_and_b, 2,
-                                 this->do_sweep_);
-                         a.rng(this->rng());
-                         return bellman_residual_sq<State>(history, &a, 0.9,
-                                 q_fn, q_fn_next);
-                     } else if (this->sq_total_br_) {
-                         // update all parameters
-                         // (E[td-error])^2
-                         SweepAgent<State> a(this->network_, this->features_,
-                                 par, njm::linalg::dot_a_and_b, 2,
-                                 this->do_sweep_);
-                         a.rng(this->rng());
-                         return sq_bellman_residual<State>(history, &a, 0.9,
-                                 q_fn, q_fn);
-                     } else {
-                         // update all parameters
-                         // E[(td-error)^2]
-                         SweepAgent<State> a(this->network_, this->features_,
-                                 par, njm::linalg::dot_a_and_b, 2,
-                                 this->do_sweep_);
-                         a.rng(this->rng());
-                         return bellman_residual_sq<State>(history, &a, 0.9,
-                                 q_fn, q_fn);
-                     }
-                 };
+    //                  if (this->gs_step_ && this->sq_total_br_) {
+    //                      // gauss-seidel step
+    //                      // (E[td-error])^2
+    //                      SweepAgent<State> a(this->network_, this->features_,
+    //                              par_orig, njm::linalg::dot_a_and_b, 2,
+    //                              this->do_sweep_);
+    //                      a.rng(this->rng());
+    //                      return sq_bellman_residual<State>(history, &a, 0.9,
+    //                              q_fn, q_fn_next);
+    //                  } else if (this->gs_step_) {
+    //                      // gauss-seidel step
+    //                      // E[(td-error)^2]
+    //                      SweepAgent<State> a(this->network_, this->features_,
+    //                              par_orig, njm::linalg::dot_a_and_b, 2,
+    //                              this->do_sweep_);
+    //                      a.rng(this->rng());
+    //                      return bellman_residual_sq<State>(history, &a, 0.9,
+    //                              q_fn, q_fn_next);
+    //                  } else if (this->sq_total_br_) {
+    //                      // update all parameters
+    //                      // (E[td-error])^2
+    //                      SweepAgent<State> a(this->network_, this->features_,
+    //                              par, njm::linalg::dot_a_and_b, 2,
+    //                              this->do_sweep_);
+    //                      a.rng(this->rng());
+    //                      return sq_bellman_residual<State>(history, &a, 0.9,
+    //                              q_fn, q_fn);
+    //                  } else {
+    //                      // update all parameters
+    //                      // E[(td-error)^2]
+    //                      SweepAgent<State> a(this->network_, this->features_,
+    //                              par, njm::linalg::dot_a_and_b, 2,
+    //                              this->do_sweep_);
+    //                      a.rng(this->rng());
+    //                      return bellman_residual_sq<State>(history, &a, 0.9,
+    //                              q_fn, q_fn);
+    //                  }
+    //              };
 
-        // optimize
-        njm::optim::SimPerturb sp(f, starting_vals, this->c_, this->t_,
-                this->a_, this->b_, this->ell_, this->min_step_size_);
-        sp.rng(this->rng());
+    //     // optimize
+    //     njm::optim::SimPerturb sp(f, optim_par, this->c_, this->t_,
+    //             this->a_, this->b_, this->ell_, this->min_step_size_);
+    //     sp.rng(this->rng());
 
-        if (this->record_) {
-            this->train_history_.clear();
-            this->train_history_.emplace_back(sp.obj_fn(), starting_vals);
-        }
+    //     if (this->record_) {
+    //         this->train_history_.clear();
+    //         this->train_history_.emplace_back(sp.obj_fn(), optim_par);
+    //     }
 
-        // generate random states and treatments
-        const uint32_t num_random_states = 5;
-        std::vector<State> random_states;
-        std::vector<boost::dynamic_bitset<> > random_states_trt;
-        uint32_t num_same = 0;
-        if (this->max_same_trt_ > 0) {
-            SweepAgent<State> a(this->network_, this->features_, starting_vals,
-                    njm::linalg::dot_a_and_b, 2, this->do_sweep_);
-            for (uint32_t i = 0; i < num_random_states; ++i) {
-                State rs(State::random(this->num_nodes_, *this->rng()));
-                random_states.push_back(rs);
-                random_states_trt.push_back(a.apply_trt(rs));
-            }
-        }
+    //     // generate random states and treatments
+    //     const uint32_t num_random_states = 5;
+    //     std::vector<State> random_states;
+    //     std::vector<boost::dynamic_bitset<> > random_states_trt;
+    //     uint32_t num_same = 0;
+    //     if (this->max_same_trt_ > 0) {
+    //         SweepAgent<State> a(this->network_, this->features_, optim_par,
+    //                 njm::linalg::dot_a_and_b, 2, this->do_sweep_);
+    //         for (uint32_t i = 0; i < num_random_states; ++i) {
+    //             State rs(State::random(this->num_nodes_, *this->rng()));
+    //             random_states.push_back(rs);
+    //             random_states_trt.push_back(a.apply_trt(rs));
+    //         }
+    //     }
 
-        njm::optim::ErrorCode ec;
-        do {
-            // optimization step
-            ec = sp.step();
+    //     njm::optim::ErrorCode ec;
+    //     do {
+    //         // optimization step
+    //         ec = sp.step();
 
-            if (this->record_) {
-                this->train_history_.emplace_back(sp.obj_fn(), sp.par());
-            }
+    //         if (this->record_) {
+    //             this->train_history_.emplace_back(sp.obj_fn(), sp.par());
+    //         }
 
-            // test if treatments have changed
-            if (this->max_same_trt_ > 0
-                    && (sp.completed_steps()
-                            % this->steps_between_trt_test_ == 0)) {
-                SweepAgent<State> a(this->network_, this->features_, sp.par(),
-                        njm::linalg::dot_a_and_b, 2, this->do_sweep_);
-                bool no_change = true;
-                for (uint32_t i = 0; i < num_random_states; ++i) {
-                    const boost::dynamic_bitset<> ra(a.apply_trt(
-                                    random_states.at(i)));
-                    if (ra != random_states_trt.at(i)) {
-                        // indicate change
-                        no_change = false;
-                        // assign the new treatment
-                        random_states_trt.at(i) = ra;
-                    }
-                }
+    //         // test if treatments have changed
+    //         if (this->max_same_trt_ > 0
+    //                 && (sp.completed_steps()
+    //                         % this->steps_between_trt_test_ == 0)) {
+    //             SweepAgent<State> a(this->network_, this->features_, sp.par(),
+    //                     njm::linalg::dot_a_and_b, 2, this->do_sweep_);
+    //             bool no_change = true;
+    //             for (uint32_t i = 0; i < num_random_states; ++i) {
+    //                 const boost::dynamic_bitset<> ra(a.apply_trt(
+    //                                 random_states.at(i)));
+    //                 if (ra != random_states_trt.at(i)) {
+    //                     // indicate change
+    //                     no_change = false;
+    //                     // assign the new treatment
+    //                     random_states_trt.at(i) = ra;
+    //                 }
+    //             }
 
-                // if no change, increment counter
-                if (no_change) {
-                    ++num_same;
-                }
-            }
-        } while (ec == njm::optim::ErrorCode::CONTINUE
-                && (this->max_same_trt_ == 0
-                        || num_same < this->max_same_trt_));
+    //             // if no change, increment counter
+    //             if (no_change) {
+    //                 ++num_same;
+    //             }
+    //         }
+    //     } while (ec == njm::optim::ErrorCode::CONTINUE
+    //             && (this->max_same_trt_ == 0
+    //                     || num_same < this->max_same_trt_));
 
-        // check convergence
-        if (this->max_same_trt_ == 0 || num_same < this->max_same_trt_) {
-            CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
-                << std::endl
-                << "seed: " << this->seed() << std::endl
-                << "steps: " << sp.completed_steps() << std::endl
-                << "c: " << this->c_ << std::endl
-                << "t: " << this->t_ << std::endl
-                << "a: " << this->a_ << std::endl
-                << "b: " << this->b_ << std::endl
-                << "ell: " << this->min_step_size_ << std::endl;
-        }
+    //     // check convergence
+    //     if (this->max_same_trt_ == 0 || num_same < this->max_same_trt_) {
+    //         CHECK_EQ(ec, njm::optim::ErrorCode::SUCCESS)
+    //             << std::endl
+    //             << "seed: " << this->seed() << std::endl
+    //             << "steps: " << sp.completed_steps() << std::endl
+    //             << "c: " << this->c_ << std::endl
+    //             << "t: " << this->t_ << std::endl
+    //             << "a: " << this->a_ << std::endl
+    //             << "b: " << this->b_ << std::endl
+    //             << "ell: " << this->min_step_size_ << std::endl;
+    //     }
 
-        optim_par = sp.par();
-    }
+    //     optim_par = sp.par();
+    // }
 
     { // with gradient
         // setup optimization function
@@ -402,7 +403,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
 
         if (this->record_) {
             this->train_history_.clear();
-            this->train_history_.emplace_back(sp.obj_fn(), starting_vals);
+            this->train_history_.emplace_back(sp.obj_fn(), optim_par);
         }
 
         // generate random states and treatments
@@ -411,7 +412,7 @@ std::vector<double> BrMinSimPerturbAgent<State>::train_iter(
         std::vector<boost::dynamic_bitset<> > random_states_trt;
         uint32_t num_same = 0;
         if (this->max_same_trt_ > 0) {
-            SweepAgent<State> a(this->network_, this->features_, starting_vals,
+            SweepAgent<State> a(this->network_, this->features_, optim_par,
                     njm::linalg::dot_a_and_b, 2, this->do_sweep_);
             for (uint32_t i = 0; i < num_random_states; ++i) {
                 State rs(State::random(this->num_nodes_, *this->rng()));
