@@ -127,7 +127,9 @@ InfShieldState MixtureModel<InfShieldState, InfShieldStateModel>::turn_clock(
         const InfShieldState & curr_state,
         const boost::dynamic_bitset<> & trt_bits) const {
 
-    const uint32_t m(this->rng()->rint(0, this->num_models_));
+    CHECK_EQ(this->num_models_, 2) << "only defined for 2 models";
+    const double m_draw(this->rng()->runif_01());
+    const uint32_t m(m_draw < this->weights_.at(0) ? 0 : 1);
 
     const std::vector<double> probs(
             this->models_.at(m)->probs(curr_state, trt_bits));
