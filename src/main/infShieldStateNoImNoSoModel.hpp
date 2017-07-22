@@ -65,9 +65,6 @@ private:
             const InfShieldState & state,
             const boost::dynamic_bitset<> & trt_bits) const override;
 
-    double shield_draw(const uint32_t & loc,
-            const InfShieldState & curr_state) const override;
-
     double shield_prob(
             const uint32_t & loc, const InfShieldState & curr_state,
             const InfShieldState & next_state,
@@ -97,6 +94,10 @@ public:
     void par(const std::vector<double> & par) override;
 
     double shield_coef() const override {return this->shield_coef_;};
+
+    double shield_draw(const uint32_t & loc,
+            const InfShieldState & curr_state) const override;
+
 };
 
 

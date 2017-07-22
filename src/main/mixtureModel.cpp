@@ -126,7 +126,11 @@ template <>
 InfShieldState MixtureModel<InfShieldState, InfShieldStateModel>::turn_clock(
         const InfShieldState & curr_state,
         const boost::dynamic_bitset<> & trt_bits) const {
-    const std::vector<double> probs(this->probs(curr_state, trt_bits));
+
+    const uint32_t m(this->rng()->rint(0, this->num_models_));
+
+    const std::vector<double> probs(
+            this->models_.at(m)->probs(curr_state, trt_bits));
 
     InfShieldState next_state(curr_state);
     for (uint32_t i = 0; i < this->num_nodes_; ++i) {
@@ -137,12 +141,8 @@ InfShieldState MixtureModel<InfShieldState, InfShieldStateModel>::turn_clock(
             next_state.inf_bits.flip(i);
         }
 
-        next_state.shield.at(i) = 0.0;
-        for (uint32_t j = 0; j < this->num_models_; ++j) {
-            next_state.shield.at(i) += this->weights_.at(j)
-                * curr_state.shield.at(i) * this->models_.at(j)->shield_coef()
-                * this->rng()->rnorm_01();
-        }
+        next_state.shield.at(i) =
+            this->models_.at(m)->shield_draw(i, curr_state);
     }
 
     return next_state;

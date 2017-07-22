@@ -55,9 +55,6 @@ private:
             const InfShieldState & state,
             const boost::dynamic_bitset<> & trt_bits) const = 0;
 
-    virtual double shield_draw(
-            const uint32_t & loc, const InfShieldState & curr_state) const = 0;
-
     virtual double shield_prob(
             const uint32_t & loc, const InfShieldState & curr_state,
             const InfShieldState & next_state,
@@ -86,6 +83,9 @@ public:
     virtual void par(const std::vector<double> & par) override = 0;
 
     virtual double shield_coef() const = 0;
+
+    virtual double shield_draw(
+            const uint32_t & loc, const InfShieldState & curr_state) const = 0;
 
     std::vector<double> probs(
             const InfShieldState & state,
