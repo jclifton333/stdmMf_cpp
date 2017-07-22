@@ -182,24 +182,24 @@ int main(int argc, char *argv[]) {
              shield_coef};
 
 
-        // { // Correct: NoIm NoSo,  Postulated: NoIm NoSo
-        //     std::vector<ModelPair> models_add;
-        //     for (uint32_t i = 0; i < networks.size(); ++i) {
-        //         ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))),
-        //                 std::shared_ptr<Model<InfShieldState> >(
-        //                         new InfShieldStateNoImNoSoModel(
-        //                                 networks.at(i))));
-        //         mp.first->par(par);
-        //         mp.second->par(par);
+        { // Correct: NoIm NoSo,  Postulated: NoIm NoSo
+            std::vector<ModelPair> models_add;
+            for (uint32_t i = 0; i < networks.size(); ++i) {
+                ModelPair mp (std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStateNoImNoSoModel(
+                                        networks.at(i))),
+                        std::shared_ptr<Model<InfShieldState> >(
+                                new InfShieldStateNoImNoSoModel(
+                                        networks.at(i))));
+                mp.first->par(par);
+                mp.second->par(par);
 
-        //         models_add.push_back(mp);
-        //     }
-        //     models.push_back(std::pair<std::string,
-        //             std::vector<ModelPair> >("NoImNoSo-NoImNoSo",
-        //                     models_add));
-        // }
+                models_add.push_back(mp);
+            }
+            models.push_back(std::pair<std::string,
+                    std::vector<ModelPair> >("NoImNoSo-NoImNoSo",
+                            models_add));
+        }
 
         { // Correct: PosIm NoSo,  Postulated: PosIm NoSo
             std::vector<ModelPair> models_add;
