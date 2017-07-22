@@ -56,3 +56,6 @@ foreach(bin_file ${bin_file_names})
     target_compile_options(${bin_file} PRIVATE -Wall -Wextra)
   endif()
 endforeach(bin_file)
+
+target_sources(run_infShieldState PRIVATE
+  "${CMAKE_SOURCE_DIR}/src/main/run_infShieldState_helper.cpp")
