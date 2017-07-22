@@ -24,6 +24,25 @@ SET(bin_file_names
   run_infShieldState
   run_ebola
 
+  run_infShieldState_01_18
+  run_infShieldState_02_18
+  run_infShieldState_03_18
+  run_infShieldState_04_18
+  run_infShieldState_05_18
+  run_infShieldState_06_18
+  run_infShieldState_07_18
+  run_infShieldState_08_18
+  run_infShieldState_09_18
+  run_infShieldState_10_18
+  run_infShieldState_11_18
+  run_infShieldState_12_18
+  run_infShieldState_13_18
+  run_infShieldState_14_18
+  run_infShieldState_15_18
+  run_infShieldState_16_18
+  run_infShieldState_17_18
+  run_infShieldState_18_18
+
   ## adaptive testing
   # adaptTestData_infState
   # adaptTestLikelihood_infState
@@ -52,10 +71,12 @@ foreach(bin_file ${bin_file_names})
     ${ARMADILLO_LIBRARIES} ${BLAS_LIBRARIES} # ${Caffe_LIBRARIES}
     )
 
+  if (${bin_file} MATCHES "^run_infShieldState")
+    target_sources(${bin_file} PRIVATE
+      "${CMAKE_SOURCE_DIR}/src/main/run_infShieldState_helper.cpp")
+  endif()
+
   if (COMPILE_WITH_WARNINGS)
     target_compile_options(${bin_file} PRIVATE -Wall -Wextra)
   endif()
 endforeach(bin_file)
-
-target_sources(run_infShieldState PRIVATE
-  "${CMAKE_SOURCE_DIR}/src/main/run_infShieldState_helper.cpp")
