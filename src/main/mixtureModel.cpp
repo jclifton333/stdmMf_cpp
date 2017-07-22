@@ -140,9 +140,9 @@ InfShieldState MixtureModel<InfShieldState, InfShieldStateModel>::turn_clock(
         next_state.shield.at(i) = 0.0;
         for (uint32_t j = 0; j < this->num_models_; ++j) {
             next_state.shield.at(i) += this->weights_.at(j)
-                * curr_state.shield.at(i) * this->models_.at(j)->shield_coef();
+                * curr_state.shield.at(i) * this->models_.at(j)->shield_coef()
+                * this->rng()->rnorm_01();
         }
-        next_state.shield.at(i) += this->rng()->rnorm_01();
     }
 
     return next_state;
