@@ -7,7 +7,22 @@ library(plyr)
 library(dplyr)
 library(progress)
 
-data_dir = "../data/2017-05-28_16-13-13"
+## new results (ran on AWS)
+data_dirs = c("../data/2017-07-22_20-45-41",
+              "../data/2017-07-22_22-43-40",
+              "../data/2017-07-22_20-51-37",
+              "../data/2017-07-22_22-52-49",
+              "../data/2017-07-22_20-55-06",
+              "../data/2017-07-22_23-05-51",
+              "../data/2017-07-22_22-56-50",
+              "../data/2017-07-22_22-46-47",
+              "../data/2017-07-22_21-01-43",
+              "../data/2017-07-22_20-58-38",
+              "../data/2017-07-22_23-02-25",
+              "../data/2017-07-22_20-48-07")
+
+## old results
+## data_dir = "../data/2017-05-28_16-13-13"
 
 nets = data.frame(
          type = c("barabasi", "barabasi", "barabasi",
