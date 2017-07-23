@@ -5,7 +5,7 @@ library(xtable)
 library(readr)
 library(reshape2)
 
-filename = "../data/2017-07-12_15-56-35/ebola_Gravity-Gravity_0_history.txt"
+filename = "../data/2017-07-22_23-42-32/ebola_Gravity-Gravity_0_history.txt"
 raw_data = read_delim(filename, ",", trim_ws = TRUE,
                       col_types = cols(col_character(), ## agent
                                        col_integer(), ## rep
