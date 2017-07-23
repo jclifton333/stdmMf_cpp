@@ -32,45 +32,49 @@ mods_miss <- data.frame(
 se = function(x) sqrt(var(x)/length(x))
 
 
-pb = progress_bar$new(total = nrow(nets) * nrow(mods_miss),
+pb = progress_bar$new(total = nrow(nets) * nrow(mods_miss) * length(data_dirs),
                       format = "loading data [:bar]",
                       clear = TRUE, width = 60)
 
 sim_data = NULL
 for (net_index in 1:nrow(nets)) {
   for (mod_index in 1:nrow(mods_miss)) {
-    ## read file
-    file_name = paste(data_dir, "/",
-                      nets$label[net_index], "_",
-                      mods_miss$mod_system[mod_index], "-",
-                      mods_miss$mod_agent[mod_index], "_",
-                      "history.txt", sep="")
+    for (data_dir_index in 1:length(data_dirs)) {
+      ## read file
+      file_name = paste(data_dirs[data_dir_index], "/",
+                        nets$label[net_index], "_",
+                        mods_miss$mod_system[mod_index], "-",
+                        mods_miss$mod_agent[mod_index], "_",
+                        "history.txt", sep="")
 
-    raw_data = read_delim(file_name, ",", trim_ws = TRUE,
-                          col_types = cols(col_character(), ## agent
-                                           col_integer(), ## rep
-                                           col_integer(), ## time
-                                           col_integer(), ## node
-                                           col_integer(), ## inf
-                                           col_double(), ## shield
-                                           col_integer() ## trt
-                                           ),
-                          progress = FALSE)
+      ## read in data if exists
+      if (file.exists(file_name)) {
+        raw_data = read_delim(file_name, ",", trim_ws = TRUE,
+                              col_types = cols(col_character(), ## agent
+                                               col_integer(), ## rep
+                                               col_integer(), ## time
+                                               col_integer(), ## node
+                                               col_integer(), ## inf
+                                               col_double(), ## shield
+                                               col_integer() ## trt
+                                               ),
+                              progress = FALSE)
 
-    ## isolate last time point
-    agg_data = raw_data[which(raw_data$time == max(raw_data$time)),]
-    agg_data = summarise(group_by(agg_data, agent),
-                         value_mean = mean(inf),
-                         value_sse = se(inf))
+        ## isolate last time point
+        agg_data = raw_data[which(raw_data$time == max(raw_data$time)),]
+        agg_data = summarise(group_by(agg_data, agent),
+                             value_mean = mean(inf),
+                             value_sse = se(inf))
 
-    ## add data for plotting
-    agg_data$network_type = nets$type[net_index]
-    agg_data$network_size = nets$size[net_index]
-    agg_data$miss_prop = mods_miss$miss_prop[mod_index]
+        ## add data for plotting
+        agg_data$network_type = nets$type[net_index]
+        agg_data$network_size = nets$size[net_index]
+        agg_data$miss_prop = mods_miss$miss_prop[mod_index]
 
-    sim_data = rbind(sim_data, agg_data)
-
-    pb$tick()
+        sim_data = rbind(sim_data, agg_data)
+      }
+      pb$tick()
+    }
   }
 }
 
