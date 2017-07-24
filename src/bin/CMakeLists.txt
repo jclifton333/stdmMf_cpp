@@ -23,6 +23,7 @@ SET(bin_file_names
   run_infState
   run_infShieldState
   run_ebola
+  run_ebola_extended
 
   run_infShieldState_01_18
   run_infShieldState_02_18
