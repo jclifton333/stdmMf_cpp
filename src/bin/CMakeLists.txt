@@ -60,6 +60,7 @@ SET(bin_file_names
   networksToFile
   sandbox
   fit_ebola
+  fit_ebola_extended
   fit_run_ebola
   vfn_par_history
   )
