@@ -511,8 +511,8 @@ int main(int argc, char *argv[]) {
                           std::vector<ModelPair> > > models;
     { // models
 
-        std::vector<double> grav_par{-7.4429e+00, -2.8362e-01, -1.4912e-06,
-                                     -1.0153e+00, -1.0153e+00};
+        std::vector<double> grav_par{-1.0347e+01, 4.5867e-02, -1.4912e-06,
+                                     -1.3513e+00, -1.3513e+00};
 
 
 
