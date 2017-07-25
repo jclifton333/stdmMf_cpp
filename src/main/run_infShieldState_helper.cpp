@@ -109,7 +109,8 @@ void queue_sim(
         const std::shared_ptr<Model<InfShieldState> > & mod_system,
         const std::shared_ptr<Model<InfShieldState> > & mod_agents,
         const uint32_t & num_reps,
-        const uint32_t & time_points) {
+        const uint32_t & time_points,
+        const uint32_t & short_time_horizon) {
 
     // none
     CHECK_EQ(results->results.count("none"), 1);
@@ -284,7 +285,8 @@ void queue_sim(
                                             <InfShieldState>(
                                                     net, 2)), 1, false, false)),
                     mod_agents_clone,
-                    2, time_points, time_points, 10.0, 0.1, 5, 1, 0.4, 0.7);
+                    2, time_points, short_time_horizon,
+                    10.0, 0.1, 5, 1, 0.4, 0.7);
             a.seed(i);
 
             s.start();
@@ -379,7 +381,8 @@ void queue_all_sims(
         const std::vector<std::pair<std::string,
         std::vector<ModelPair> > > & models,
         const uint32_t & num_reps,
-        const uint32_t & time_points) {
+        const uint32_t & time_points,
+        const uint32_t & short_time_horizon) {
 
     CHECK_EQ(networks.size(), results->size());
     for (uint32_t i = 0; i < networks.size(); ++i) {
@@ -390,7 +393,8 @@ void queue_all_sims(
                     networks.at(i),
                     models.at(j).second.at(i).first,
                     models.at(j).second.at(i).second,
-                    num_reps, time_points);
+                    num_reps, time_points,
+                    short_time_horizon);
         }
     }
 }
@@ -537,11 +541,10 @@ void run_infShieldState_sim(
         const std::string & sim_name,
         const std::vector<std::shared_ptr<const Network> > & networks,
         const std::vector<std::pair<std::string,
-        std::vector<ModelPair> > > & models)
-{
-    const uint32_t num_reps = 50;
-    const uint32_t time_points = 25;
-
+        std::vector<ModelPair> > > & models,
+        const uint32_t & num_reps,
+        const uint32_t & time_points,
+        const uint32_t & short_time_horizon) {
     // set up results containers
     const std::vector<std::string> agent_names({
                 "none", "random", "proximal", "myopic",
@@ -602,7 +605,7 @@ void run_infShieldState_sim(
 
     // queue sims
     queue_all_sims(&pool, &progress, &promise_results,
-            networks, models, num_reps, time_points);
+            networks, models, num_reps, time_points, short_time_horizon);
 
     // process results
     process_results(tk, future_results, agent_names);

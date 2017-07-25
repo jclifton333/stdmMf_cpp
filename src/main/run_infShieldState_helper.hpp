@@ -14,7 +14,10 @@ void run_infShieldState_sim(
         const std::string & sim_name,
         const std::vector<std::shared_ptr<const Network> > & networks,
         const std::vector<std::pair<std::string,
-        std::vector<ModelPair> > > & models);
+        std::vector<ModelPair> > > & models,
+        const uint32_t & num_reps,
+        const uint32_t & time_points,
+        const uint32_t & short_time_horizon);
 
 
 } // namespace stdmMf
