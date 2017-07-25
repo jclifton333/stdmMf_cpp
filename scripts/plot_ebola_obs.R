@@ -60,3 +60,17 @@ ggsave("../data/figures/ebola_obs_outbreaks.pdf", p)
 ##   coord_equal() +
 ##   theme(legend.position="none")
 ## print(p)
+
+
+pops = read_csv("../src/data/ebola_population.txt", col_names = FALSE)
+names(pops) = c("pop")
+
+p = ggplot(pops) +
+  aes(x = log(pop)) +
+  geom_histogram() +
+  xlab("log(Population)") +
+  ylab("Count")
+
+print(p)
+
+ggsave("../data/figures/ebola_obs_population.pdf", p)
