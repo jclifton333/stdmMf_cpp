@@ -15,7 +15,6 @@ class EbolaData {
 protected:
     static std::vector<std::string> country_;
     static std::vector<std::string> county_;
-    static std::vector<std::string> loc_;
     static std::vector<uint32_t> region_;
     static std::vector<int> outbreaks_;
     static std::vector<double> population_;
@@ -36,11 +35,6 @@ public:
     inline static const std::vector<std::string> & county() {
         CHECK(EbolaData::init_);
         return EbolaData::county_;
-    }
-
-    inline static const std::vector<std::string> & loc() {
-        CHECK(EbolaData::init_);
-        return EbolaData::loc_;
     }
 
     inline static const std::vector<uint32_t> & region() {
@@ -78,7 +72,6 @@ public:
     static void init(
             const std::vector<std::string> & country,
             const std::vector<std::string> & county,
-            const std::vector<std::string> & loc,
             const std::vector<uint32_t> & region,
             const std::vector<int> & outbreaks,
             const std::vector<double> & population,

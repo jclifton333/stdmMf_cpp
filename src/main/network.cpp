@@ -525,7 +525,7 @@ std::shared_ptr<Network> Network::gen_ebola() {
     std::shared_ptr<Network> network = std::shared_ptr<Network>(new Network());
 
     network->kind_ = "ebola";
-    network->num_nodes_ = EbolaData::loc().size();
+    network->num_nodes_ = EbolaData::county().size();
     network->adj_ = boost::numeric::ublas::mapped_matrix<uint32_t>(
             network->num_nodes_, network->num_nodes_,
             // allocate memory because this is a fully connected

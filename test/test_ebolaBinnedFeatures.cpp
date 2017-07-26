@@ -16,7 +16,6 @@ TEST(TestNetworkRunFeatures, TestValuesEvenBins) {
     EbolaData::deinit();
     EbolaData::init({"a", "b", "c"},
             {"1", "2", "3"},
-            {"a1", "b2", "c3"},
             {1, 2, 3},
             {1, 2, 3},
             {0.5, 1.0, 1.5},
@@ -148,7 +147,6 @@ TEST(TestNetworkRunFeatures, TestValuesUnevenBins) {
     EbolaData::deinit();
     EbolaData::init({"a", "b", "c"},
             {"1", "2", "3"},
-            {"a1", "b2", "c3"},
             {1, 2, 3},
             {1, 2, 3},
             {0.5, 1.0, 1.5},
