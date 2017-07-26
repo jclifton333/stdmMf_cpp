@@ -233,10 +233,49 @@ TEST(TestInfShieldStatePosImNoSoModel, EstPar) {
             new InfShieldStatePosImNoSoModel(n));
 
     njm::tools::Rng rng;
-    std::vector<double> par;
-    for (uint32_t i = 0; i < m->par_size(); ++i) {
-        par.push_back(rng.rnorm(-2.0, 1.0));
-    }
+    // latent infections
+    const double prob_inf_latent = 0.01;
+    const double intcp_inf_latent =
+        std::log(1. / (1. - prob_inf_latent) - 1);
+
+    // neighbor infections
+    const double prob_inf = 0.5;
+    const uint32_t prob_num_neigh = 3;
+    const double intcp_inf =
+        std::log(std::pow((1. - prob_inf) / (1. - prob_inf_latent),
+                        -1. / prob_num_neigh)
+                - 1.);
+
+    const double trt_act_inf =
+        std::log(std::pow((1. - prob_inf * 0.25) / (1. - prob_inf_latent),
+                        -1. / prob_num_neigh)
+                - 1.)
+        - intcp_inf;
+
+    const double trt_pre_inf =
+        std::log(std::pow((1. - prob_inf * 0.75) / (1. - prob_inf_latent),
+                        -1. / prob_num_neigh)
+                - 1.)
+        - intcp_inf;
+
+    // recovery
+    const double prob_rec = 0.25;
+    const double intcp_rec = std::log(1. / (1. - prob_rec) - 1.);
+    const double trt_act_rec =
+        std::log(1. / ((1. - prob_rec) * 0.5) - 1.) - intcp_rec;
+
+    // shield
+    const double shield_coef = 0.9;
+
+
+    std::vector<double> par =
+        {intcp_inf_latent,
+         intcp_inf,
+         intcp_rec,
+         trt_act_inf,
+         trt_act_rec,
+         trt_pre_inf,
+         shield_coef};
 
     m->par(par);
 
@@ -267,7 +306,7 @@ TEST(TestInfShieldStatePosImNoSoModel, EstPar) {
     const std::vector<double> est_par = m->par();
     for (uint32_t i = 0; i < m->par_size(); ++i) {
         const double diff(par.at(i) - est_par.at(i));
-        EXPECT_LT(std::abs(diff / par.at(i)), 0.1)
+        EXPECT_LT(std::abs(diff / par.at(i)), 0.2)
             << "Par " << i << " failed with truth " << par.at(i)
             << " and estimate " << est_par.at(i);
     }
