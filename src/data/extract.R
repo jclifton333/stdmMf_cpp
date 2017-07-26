@@ -80,23 +80,14 @@ write.table(edges, file = "ebola_edges.txt", sep = " ",
             row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 
-## id data set
-ids = readRDS(paste(data_dir, "MobilityDataIDs.rds", sep="/"))
-## fix special character issues
-ids$county[which(ids$county=="Gbapolu")] = "Gbarpolu"
-ids$county[which(ids$county=="BafatÃ¡")] = "Bafatá"
-ids$county[which(ids$county=="GabÃº")] = "Gabú"
-
-
 ## read in supplemental data to get x and y coordinates
 admn = read.csv(paste(data_dir, "AdmUnits_WBtwn.csv", sep="/"), as.is=TRUE)
 
 
 ## combine necessary data for simulations
-ebola = data.frame(county = ids$county,
-                   country = ids$country,
+ebola = data.frame(county = polygons$county_names,
+                   country = polygons$ISO,
                    region = region,
-                   loc = ids$loc,
                    outbreaks = outbreaks$infection_date,
                    population = polygons$pop.size,
                    x = centroids$X,
@@ -106,7 +97,6 @@ ebola = data.frame(county = ids$county,
 ## fix names
 ebola$county = gsub("\\s+", "_", ebola$county)
 ebola$country = gsub("\\s+", "_", ebola$country)
-ebola$loc = gsub("\\s+", "_", ebola$loc)
 
 ## need to change date of outbreak to days
 first_date = min(ebola$outbreaks, na.rm = TRUE)
