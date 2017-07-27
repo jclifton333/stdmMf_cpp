@@ -77,7 +77,45 @@ double bellman_residual_sq(
 
 
 template<typename State>
+double bellman_residual_sq(
+        const std::vector<Transition<State> > & history,
+        Agent<State> * const agent, const double gamma,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad,
+        const std::vector<double> & weights);
+
+
+template<typename State>
 double sq_bellman_residual(const std::vector<Transition<State> > & history,
+        Agent<State> * const agent, const double gamma,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad);
+
+
+template<typename State>
+double sq_bellman_residual(const std::vector<Transition<State> > & history,
+        Agent<State> * const agent, const double gamma,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn,
+        const std::function<double(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
+        const std::function<std::vector<double>(const State & state,
+                const boost::dynamic_bitset<> & trt_bits)> & grad,
+        const std::vector<double> & weights);
+
+
+template <typename State>
+std::vector<std::pair<std::vector<double>, std::vector<double> > >
+bellman_residual_parts(
+        const std::vector<Transition<State>> & history,
         Agent<State> * const agent, const double gamma,
         const std::function<double(const State & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn,
@@ -97,7 +135,8 @@ bellman_residual_parts(
         const std::function<double(const State & state,
                 const boost::dynamic_bitset<> & trt_bits)> & q_fn_next,
         const std::function<std::vector<double>(const State & state,
-                const boost::dynamic_bitset<> & trt_bits)> & grad);
+                const boost::dynamic_bitset<> & trt_bits)> & grad,
+        const std::vector<double> & weights);
 
 
 template <typename State>
