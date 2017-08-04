@@ -63,7 +63,7 @@ def main(data_dir):
             node_list.ParseFromString(f.read())
 
         save_name = os.path.join(data_dir,
-                                 os.path.splitext(net_file)[0] + ".png")
+                                 os.path.splitext(net_file)[0] + ".svg")
         plot_network(node_list, save_name)
         print "saved %s" % os.path.basename(save_name)
 
