@@ -38,7 +38,7 @@ convert_to_date = function(x) {
 p = ggplot(obs_polygons_data) +
   aes(long,lat,group=group,fill=as.integer(date)) +
   geom_polygon() +
-  geom_path(color="gray") +
+  geom_path(color="gray", size=0.1) +
   scale_fill_viridis("Date of outbreak", labels = convert_to_date) +
   coord_equal() +
   theme(legend.position="right",
@@ -52,6 +52,7 @@ p = ggplot(obs_polygons_data) +
 print(p)
 
 ggsave("../data/figures/ebola_obs_outbreaks.pdf", p)
+ggsave("../data/figures/ebola_obs_outbreaks.svg", p)
 
 ## p = ggplot(polygons.df) +
 ##   aes(long,lat,group=group,fill=id) +
