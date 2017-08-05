@@ -40,19 +40,20 @@ p = ggplot(obs_polygons_data) +
   geom_polygon() +
   geom_path(color="gray", size=0.1) +
   scale_fill_viridis("Date of outbreak", labels = convert_to_date) +
-  coord_equal() +
   theme(legend.position="right",
         panel.background = element_blank(),
         panel.border = element_blank(),
         axis.line = element_blank(),
         axis.ticks = element_blank(),
         axis.text = element_blank(),
-        axis.title = element_blank())
+        axis.title = element_blank()) +
+  coord_fixed()
 
 print(p)
 
-ggsave("../data/figures/ebola_obs_outbreaks.pdf", p)
-ggsave("../data/figures/ebola_obs_outbreaks.svg", p)
+ggsave("../data/figures/ebola_obs_outbreaks.pdf", p, width = 7, height = 4)
+
+ggsave("../data/figures/ebola_obs_outbreaks.svg", p, width = 10, height = 6)
 
 ## p = ggplot(polygons.df) +
 ##   aes(long,lat,group=group,fill=id) +

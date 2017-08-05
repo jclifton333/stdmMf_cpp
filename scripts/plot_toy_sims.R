@@ -155,6 +155,7 @@ p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 print(p)
 
 ggsave("../data/figures/toy_sim_results.pdf", p)
+ggsave("../data/figures/toy_sim_results.svg", p)
 
 
 for(i in 1:nrow(nets)) {
@@ -193,4 +194,45 @@ for(i in 1:nrow(nets)) {
 
   ggsave(sprintf("../data/figures/toy_sim_results_%s_%04d.pdf",
                  net_type, net_size), p)
+  ggsave(sprintf("../data/figures/toy_sim_results_%s_%04d.svg",
+                 net_type, net_size), p)
+}
+
+
+for(net_type in sort(unique(nets$type))) {
+  print(paste(net_type))
+
+  type_subset = mapvalues(sim_data$network_type,
+                          to = c("barabasi", "grid", "random"),
+                          from = c("Scale-free", "Lattice", "Random")) == net_type
+
+  sim_data_subset = subset(sim_data, type_subset)
+
+  p = ggplot(data = sim_data_subset)
+  p = p + geom_line(aes(x = miss_prop, y = value_mean,
+                        color = agent, lty = agent), size = 1.0)
+  p = p + facet_wrap(~ network_size)
+  p = p + scale_color_viridis("Treatment Strategy",
+                              breaks = c("No treatment", "Proximal", "Random", "Myopic",
+                                         "Model based", "Model free"),
+                              discrete = TRUE)
+  p = p + scale_linetype_manual("Treatment Strategy",
+                                breaks = c("No treatment", "Proximal", "Random", "Myopic",
+                                           "Model based", "Model free"),
+                                values = c("No treatment" = 4,
+                                           "Proximal" = 4,
+                                           "Random" = 4,
+                                           "Myopic" = 4,
+                                           "Model based" = 1,
+                                           "Model free" = 1))
+  p = p + ylab("Estimated mean value")
+  p = p + xlab(bquote(paste("Mixture parameter ", delta)))
+  p = p + theme(panel.spacing = unit(1, "lines"),
+                legend.key.width=unit(3,"line"))
+  p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
+
+  ggsave(sprintf("../data/figures/toy_sim_results_%s.pdf",
+                 net_type), p)
+  ggsave(sprintf("../data/figures/toy_sim_results_%s.svg",
+                 net_type), p, width = 8, height = 4)
 }
