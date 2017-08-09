@@ -228,11 +228,12 @@ for(net_type in sort(unique(nets$type))) {
   p = p + ylab("Estimated mean value")
   p = p + xlab(bquote(paste("Mixture parameter ", delta)))
   p = p + theme(panel.spacing = unit(1, "lines"),
-                legend.key.width=unit(3,"line"))
+                legend.key.width=unit(3,"line"),
+                legend.position = "bottom")
   p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 
   ggsave(sprintf("../data/figures/toy_sim_results_%s.pdf",
                  net_type), p)
   ggsave(sprintf("../data/figures/toy_sim_results_%s.svg",
-                 net_type), p, width = 8, height = 4)
+                 net_type), p, width = 8, height = 3.5)
 }
