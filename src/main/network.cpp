@@ -593,6 +593,100 @@ std::shared_ptr<Network> Network::gen_ebola() {
 }
 
 
+void Network::join_subnetworks(const std::shared_ptr<Network> & network) {
+    // get list of subnetworks
+    std::list<std::set<uint32_t> > subnetworks;
+    uint32_t num_subnets(0);
+    const uint32_t size(network->size());
+    for (uint32_t i = 0; i < size; ++i) {
+        const Node & node_i(network->get_node(i));
+
+        // see if node i is part of any other subnets
+        bool linked(false);
+        std::list<std::set<uint32_t> >::iterator first, it, end;
+        it = subnetworks.begin();
+        end = subnetworks.end();
+
+        for (; it != end; /* do nothing */) {
+            const bool in_subnet(it->find(i) != it->end());
+            if (in_subnet && !linked) {
+                // first matching set, add neighbors into same set
+                auto neigh_it(node_i.neigh().begin());
+                const auto neigh_end(node_i.neigh().end());
+                for (; neigh_it != neigh_end; ++neigh_it) {
+                    it->insert(*neigh_it);
+                }
+                linked = true;
+                // assign first subnetwork and increment
+                first = it++;
+            } else if (in_subnet) {
+                // merge subsets
+                first->insert(it->begin(), it->end());
+                //
+                subnetworks.erase(it++);
+            } else {
+                // not found, increment to next set
+                ++it;
+            }
+        }
+    }
+    // join subnetworks
+    while(subnetworks.size() > 1) {
+        // find closest two nodes in different subnetworks
+        std::list<std::set<uint32_t> >::iterator sub_a, sub_b,
+            beg(subnetworks.begin()), end(subnetworks.end());
+        std::pair<uint32_t, uint32_t> closest(size, size);
+        std::list<std::set<uint32_t> >::iterator closest_a, closest_b;
+        double smallest_dist(std::numeric_limits<double>::infinity());
+        for (sub_a = beg; sub_a != end; ++sub_a) {
+            for (sub_b = beg; sub_b != end; ++sub_b) {
+                if (sub_a == sub_b) {
+                    continue;
+                }
+                // two different subnets
+                std::set<uint32_t>::iterator
+                    set_a(sub_a->begin()), set_b(sub_b->begin());
+                const std::set<uint32_t>::iterator
+                    end_a(sub_a->end()), end_b(sub_b->end());
+                for (; set_a != end_a; ++set_a) {
+                    for (; set_b != end_b; ++set_b) {
+                        // test distance between nodes a and b
+                        const Node & node_a(network->get_node(*set_a));
+                        const Node & node_b(network->get_node(*set_b));
+
+                        const double dx(node_a.x() - node_b.x());
+                        const double dy(node_a.y() - node_b.y());
+                        const double dist(dx * dx + dy * dy);
+                        if (*set_a < *set_b && dist < smallest_dist) {
+                            smallest_dist = dist;
+                            closest.first = *set_a;
+                            closest.second = *set_b;
+                            closest_a = sub_a;
+                            closest_b = sub_b;
+                        }
+                    }
+                }
+            }
+        }
+        // make sure pair was found
+        CHECK_LT(closest.first, size);
+        CHECK_LT(closest.second, size);
+
+        // join subnets
+        closest_a->insert(closest_b->begin(), closest_b->end());
+        subnetworks.erase(closest_b);
+
+        // join nodes
+        network->node_list_.mutable_nodes(closest.first)->
+            add_neigh(closest.second);
+        network->node_list_.mutable_nodes(closest.second)->
+            add_neigh(closest.first);
+
+        network->adj_(closest.first, closest.second) = 1;
+        network->adj_(closest.second, closest.first) = 1;
+    }
+}
+
 
 uint32_t Network::check_network(const std::shared_ptr<Network> & network) {
     // check network to make sure all properties match
