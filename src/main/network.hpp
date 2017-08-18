@@ -84,6 +84,8 @@ public:
     // generate network for ebola
     static std::shared_ptr<Network> gen_ebola();
 
+    static uint32_t check_network(const std::shared_ptr<Network> & network);
+
     const NodeList & node_list() const;
 };
 

@@ -587,6 +587,40 @@ std::shared_ptr<Network> Network::gen_ebola() {
 
 
 
+uint32_t Network::check_network(const std::shared_ptr<Network> & network) {
+    // check network to make sure all properties match
+    const uint32_t size(network->size());
+
+    for (uint32_t i = 0; i < size; ++i) {
+        const Node & node_i(network->get_node(i));
+        if (node_i.index() != i) {
+            return 1;
+        }
+        // get neigh into a set
+        std::set<uint32_t> neigh_i;
+        auto it(node_i.neigh().begin());
+        const auto end(node_i.neigh().end());
+        for (; it != end; ++it) {
+            neigh_i.insert(*it);
+        }
+
+        // check neigh and adj
+        for (uint32_t j = 0; j < size; ++j) {
+            const bool found(neigh_i.find(j) != neigh_i.end());
+            const uint32_t adj(network->adj_(i,j));
+            if (adj == 0 && !found) {
+                continue;
+            } else if (adj == 1 && found && i != j) {
+                continue;
+            } else {
+                return 2;
+            }
+        }
+    }
+
+    // no errors
+    return 0;
+}
 
 
 const NodeList & Network::node_list() const {
