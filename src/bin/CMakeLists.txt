@@ -44,6 +44,8 @@ SET(bin_file_names
   run_infShieldState_17_18
   run_infShieldState_18_18
 
+  run_infShieldState_random
+
   run_infShieldState_extended
 
   ## adaptive testing
