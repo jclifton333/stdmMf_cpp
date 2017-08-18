@@ -298,6 +298,8 @@ std::shared_ptr<Network> Network::gen_grid(
 
     }
 
+    CHECK_EQ(Network::check_network(network), 0);
+
     network->dist_ = network->calc_dist();
 
     return network;
@@ -356,6 +358,8 @@ std::shared_ptr<Network> Network::gen_barabasi(const uint32_t size) {
         ++edge_deg.at(connect_to);
         edge_deg.push_back(1);
     }
+
+    CHECK_EQ(Network::check_network(network), 0);
 
     network->dist_ = network->calc_dist();
 
@@ -514,6 +518,7 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
         subnets.at(subnet_index) = subnets.at(subnets.size() - 1);
         subnets.resize(subnets.size() - 1);
     }
+    CHECK_EQ(Network::check_network(network), 0);
 
     network->dist_ = network->calc_dist();
 
@@ -581,6 +586,8 @@ std::shared_ptr<Network> Network::gen_ebola() {
         Node * const node(network->node_list_.mutable_nodes(i));
         std::sort(node->mutable_neigh()->begin(), node->mutable_neigh()->end());
     }
+
+    CHECK_EQ(Network::check_network(network), 0);
 
     return network;
 }
