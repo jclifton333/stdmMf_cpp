@@ -92,5 +92,8 @@ int main(int argc, char *argv[])
         std::cout << "saved " << network->kind() << std::endl;
     }
 
+    tk.finished();
+    tk.print_data_dir();
+
     return 0;
 }
