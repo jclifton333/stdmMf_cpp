@@ -67,7 +67,7 @@ const std::vector<std::vector<double> > & Network::dist() const {
 
 
 // Retrieve the adjacency matrix
-boost::numeric::ublas::mapped_matrix<int> Network::get_adj() const {
+boost::numeric::ublas::mapped_matrix<uint32_t> Network::get_adj() const {
     return this->adj_;
 }
 

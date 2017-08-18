@@ -50,7 +50,7 @@ public:
     const Node & get_node(const uint32_t index) const;
 
     // Retrieve the adjacency matrix
-    boost::numeric::ublas::mapped_matrix<int> get_adj() const;
+    boost::numeric::ublas::mapped_matrix<uint32_t> get_adj() const;
 
     const std::vector<std::vector<double> > & dist() const;
 
