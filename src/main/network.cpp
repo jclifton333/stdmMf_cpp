@@ -419,106 +419,11 @@ std::shared_ptr<Network> Network::gen_random(const uint32_t size) {
             // neighbor list
             node_i->add_neigh(new_neigh);
             network->node_list_.mutable_nodes(new_neigh)->add_neigh(i);
-
-            if (new_neigh < i) {
-                const uint32_t new_neigh_subnet(subnet_by_node.at(new_neigh));
-                subnets.at(new_neigh_subnet).insert(i);
-                if (!linked) {
-                    subnet_by_node.emplace(i, new_neigh_subnet);
-                }
-                linked = true;
-            }
-        }
-
-        // could not find link, need to add new subnet
-        if (!linked) {
-            // set index of subnet
-            subnet_by_node.emplace(i, subnets.size());
-
-            // create new subnet
-            std::set<uint32_t> new_subnet;
-            new_subnet.insert(i);
-            subnets.push_back(new_subnet);
         }
     }
 
-    // subnets need to be merged if they have common neighbors
-    bool merged = false;
-    uint32_t num_subnets(subnets.size());
-    do {
-        merged = false;
-        for (uint32_t i = 0; i < num_subnets; ++i) {
-            const std::set<uint32_t> & subnet_i(subnets.at(i));
-            for (uint32_t j = i + 1; j < num_subnets; ++j) {
-                const std::set<uint32_t> & subnet_j(subnets.at(j));
-                if (std::any_of(subnet_i.begin(), subnet_i.end(),
-                                [&] (const uint32_t & index) {
-                                    return subnet_j.count(index) > 0;
-                                })) {
-                    merged = true;
-                    // combine subnet j into subnet i
-                    subnets.at(i).insert(subnet_j.begin(), subnet_j.end());
-                    // swap subnet j for the last subnet
-                    subnets.at(j) = subnets.at(num_subnets - 1);
-                    // decrement effective size
-                    --num_subnets;
-
-                    break;
-                }
-            }
-            if (merged) {
-                break;
-            }
-        }
-    } while(merged);
-
-    // trim vector
-    CHECK_GT(num_subnets, 0);
-    subnets.resize(num_subnets);
-
-    // combine subnets
-    while (subnets.size() > 1) {
-        std::set<uint32_t> & curr(subnets.at(0));
-        uint32_t curr_index = size;
-        uint32_t next_index = size;
-        uint32_t subnet_index = subnets.size();
-        double smallest_dist = std::numeric_limits<double>::infinity();
-        for (uint32_t i = 1; i < subnets.size(); i++) {
-            std::set<uint32_t> & next(subnets.at(i));
-            for (auto currit = curr.begin(); currit != curr.end(); ++currit) {
-                const Node & curr_node(network->get_node(*currit));
-                for (auto nextit = next.begin(); nextit != next.end();
-                     ++nextit) {
-                    const Node & next_node(network->get_node(*nextit));
-                    const double diff_x(curr_node.x() - next_node.x());
-                    const double diff_y(curr_node.y() - next_node.y());
-                    const double dist(diff_x * diff_x + diff_y * diff_y);
-
-                    if (dist < smallest_dist) {
-                        smallest_dist = dist;
-                        curr_index = *currit;
-                        next_index = *nextit;
-                        subnet_index = i;
-                    }
-                }
-            }
-        }
-
-        // set adjancey
-        network->adj_(curr_index, next_index) = 1;
-        network->adj_(next_index, curr_index) = 1;
-
-        // add neighbors
-        network->node_list_.mutable_nodes(curr_index)->add_neigh(next_index);
-        network->node_list_.mutable_nodes(next_index)->add_neigh(curr_index);
-
-        // combine subnets
-        curr.insert(subnets.at(subnet_index).begin(),
-                subnets.at(subnet_index).end());
-        subnets.at(subnet_index) = subnets.at(subnets.size() - 1);
-        subnets.resize(subnets.size() - 1);
-    }
     CHECK_EQ(Network::check_network(network), 0);
+    Network::join_subnetworks(network);
 
     network->dist_ = network->calc_dist();
 
