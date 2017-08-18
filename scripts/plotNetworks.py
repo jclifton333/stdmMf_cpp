@@ -47,9 +47,9 @@ def plot_network(node_list, save_name):
 
 
 def main(data_dir):
-    net_check = re.compile("(grid_[0-9]+x[0-9]+\.pb"
-                           "|barabasi_[0-9]+\.pb"
-                           "|random_[0-9]+\.pb)")
+    net_check = re.compile("(grid-[0-9]+x[0-9]+\.pb"
+                           "|barabasi-[0-9]+\.pb"
+                           "|random-[0-9]+\.pb)")
 
     net_files = []
     for file_name in os.listdir(data_dir):
