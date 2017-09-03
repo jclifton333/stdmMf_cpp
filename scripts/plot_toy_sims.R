@@ -150,8 +150,8 @@ p = p + theme(panel.spacing = unit(1, "lines"),
 p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 print(p)
 
-ggsave("../data/figures/toy_sim_results.pdf", p)
-ggsave("../data/figures/toy_sim_results.svg", p)
+ggsave("../data/figures/toy_sim_results.pdf", p, width = 5.6, height = 8)
+ggsave("../data/figures/toy_sim_results.svg", p, width = 5.6, height = 8)
 
 
 for(i in 1:nrow(nets)) {
