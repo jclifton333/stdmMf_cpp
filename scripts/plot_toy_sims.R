@@ -145,7 +145,8 @@ p = p + scale_linetype_manual("Treatment Strategy",
 p = p + ylab("Estimated mean value")
 p = p + xlab(bquote(paste("Mixture parameter ", delta)))
 p = p + theme(panel.spacing = unit(1, "lines"),
-              legend.key.width=unit(3,"line"))
+              legend.key.width=unit(3,"line"),
+              legend.position="bottom")
 p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 print(p)
 
