@@ -30,6 +30,7 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
         const bool & do_sweep,
         const bool & gs_step,
         const bool & sq_total_br,
+        const uint32_t & max_num_obs,
         const uint32_t & num_supp_obs,
         const uint32_t & obs_per_iter,
         const uint32_t & max_same_trt,
@@ -39,6 +40,7 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
 : Agent<State>(network), features_(features), model_(model),
   c_(c), t_(t), a_(a), b_(b), ell_(ell), min_step_size_(min_step_size),
   do_sweep_(do_sweep), gs_step_(gs_step), sq_total_br_(sq_total_br),
+  max_num_obs_(max_num_obs),
   num_supp_obs_(num_supp_obs), obs_per_iter_(obs_per_iter),
   max_same_trt_(max_same_trt),
   steps_between_trt_test_(steps_between_trt_test),
@@ -47,6 +49,9 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
   train_history_() {
     if (this->max_same_trt_ > 0) {
         CHECK_GT(this->steps_between_trt_test_, 0);
+    }
+    if (this->num_supp_obs_ > 0 && this->max_num_obs_ > 0) {
+        CHECK_GE(this->max_num_obs_, this->num_supp_obs_);
     }
     this->model_->rng(this->rng());
     this->features_->rng(this->rng());
@@ -60,7 +65,9 @@ BrMinSimPerturbAgent<State>::BrMinSimPerturbAgent(
       model_(other.model_->clone()), c_(other.c_), t_(other.t_), a_(other.a_),
       b_(other.b_), ell_(other.ell_), min_step_size_(other.min_step_size_),
       do_sweep_(other.do_sweep_), gs_step_(other.gs_step_),
-      sq_total_br_(other.sq_total_br_), num_supp_obs_(other.num_supp_obs_),
+      sq_total_br_(other.sq_total_br_),
+      max_num_obs_(other.max_num_obs_),
+      num_supp_obs_(other.num_supp_obs_),
       obs_per_iter_(other.obs_per_iter_), max_same_trt_(other.max_same_trt_),
       steps_between_trt_test_(other.steps_between_trt_test_),
       pre_train_(other.pre_train_),
@@ -159,6 +166,13 @@ std::vector<double> BrMinSimPerturbAgent<State>::train(
                 trans_to_supp.end());
 
         CHECK_EQ(supp_history.size(), this->num_supp_obs_);
+    }
+
+    if (this->max_num_obs_ > 0 && supp_history.size() > this->max_num_obs_) {
+        // erase early observations of past max number of observations
+        const uint32_t pos_to_erase(supp_history.size() - this->max_num_obs_);
+        supp_history.erase(supp_history.begin(),
+                supp_history.begin() + pos_to_erase);
     }
 
     // fit q-function

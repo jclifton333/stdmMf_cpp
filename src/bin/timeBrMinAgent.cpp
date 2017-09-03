@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
             std::shared_ptr<Features<InfShieldState> >(
                     new NetworkRunSymFeatures<InfShieldState>(net->clone(), 2)),
             mod->clone(),
-            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5, true, true, false, 0, 5, 5, 5,
+            1e-1, 1.0, 1e-3, 1, 0.85, 1e-5, true, true, false, 0, 0, 5, 5, 5,
             false, true);
     a.rng(rng);
 

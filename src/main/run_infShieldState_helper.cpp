@@ -341,7 +341,8 @@ void queue_sim(
                                     true, false)),
                     mod_agents->clone(),
                     0.1, 0.2, 1.41, 1, 0.85, 7.15e-3,
-                    true, true, false, 0, 0, 0, 0, true, true);
+                    true, true, false, short_time_horizon,
+                    0, 0, 0, 0, true, true);
             a.seed(i);
 
             s.start();
