@@ -52,23 +52,23 @@ int main(int argc, char *argv[]) {
 
     // setup networks
     std::vector<std::shared_ptr<const Network> > networks;
-    { // grid network 100
-        NetworkInit init;
-        init.set_dim_x(10);
-        init.set_dim_y(10);
-        init.set_wrap(false);
-        init.set_type(NetworkInit_NetType_GRID);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // grid network 100
+    //     NetworkInit init;
+    //     init.set_dim_x(10);
+    //     init.set_dim_y(10);
+    //     init.set_wrap(false);
+    //     init.set_type(NetworkInit_NetType_GRID);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
-    { // grid network 500
-        NetworkInit init;
-        init.set_dim_x(20);
-        init.set_dim_y(25);
-        init.set_wrap(false);
-        init.set_type(NetworkInit_NetType_GRID);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // grid network 500
+    //     NetworkInit init;
+    //     init.set_dim_x(20);
+    //     init.set_dim_y(25);
+    //     init.set_wrap(false);
+    //     init.set_type(NetworkInit_NetType_GRID);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     { // grid network 1000
         NetworkInit init;

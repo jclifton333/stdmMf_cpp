@@ -52,12 +52,12 @@ int main(int argc, char *argv[]) {
 
     // setup networks
     std::vector<std::shared_ptr<const Network> > networks;
-    { // random 100
-        NetworkInit init;
-        init.set_size(100);
-        init.set_type(NetworkInit_NetType_RANDOM);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // random 100
+    //     NetworkInit init;
+    //     init.set_size(100);
+    //     init.set_type(NetworkInit_NetType_RANDOM);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     { // random 500
         NetworkInit init;
@@ -66,12 +66,12 @@ int main(int argc, char *argv[]) {
         networks.push_back(Network::gen_network(init));
     }
 
-    { // random 1000
-        NetworkInit init;
-        init.set_size(1000);
-        init.set_type(NetworkInit_NetType_RANDOM);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // random 1000
+    //     NetworkInit init;
+    //     init.set_size(1000);
+    //     init.set_type(NetworkInit_NetType_RANDOM);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     // double vector since model depends on network
     std::vector<std::pair<std::string,

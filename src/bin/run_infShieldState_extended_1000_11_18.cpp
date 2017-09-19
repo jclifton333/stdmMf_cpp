@@ -52,19 +52,19 @@ int main(int argc, char *argv[]) {
 
     // setup networks
     std::vector<std::shared_ptr<const Network> > networks;
-    { // barabasi 100
-        NetworkInit init;
-        init.set_size(100);
-        init.set_type(NetworkInit_NetType_BARABASI);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // barabasi 100
+    //     NetworkInit init;
+    //     init.set_size(100);
+    //     init.set_type(NetworkInit_NetType_BARABASI);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
-    { // barabasi 500
-        NetworkInit init;
-        init.set_size(500);
-        init.set_type(NetworkInit_NetType_BARABASI);
-        networks.push_back(Network::gen_network(init));
-    }
+    // { // barabasi 500
+    //     NetworkInit init;
+    //     init.set_size(500);
+    //     init.set_type(NetworkInit_NetType_BARABASI);
+    //     networks.push_back(Network::gen_network(init));
+    // }
 
     { // barabasi 1000
         NetworkInit init;
