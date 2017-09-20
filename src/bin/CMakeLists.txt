@@ -44,6 +44,44 @@ SET(bin_file_names
   run_infShieldState_17_18
   run_infShieldState_18_18
 
+  run_infShieldState_extended_500_01_18
+  run_infShieldState_extended_500_02_18
+  run_infShieldState_extended_500_03_18
+  run_infShieldState_extended_500_04_18
+  run_infShieldState_extended_500_05_18
+  run_infShieldState_extended_500_06_18
+  run_infShieldState_extended_500_07_18
+  run_infShieldState_extended_500_08_18
+  run_infShieldState_extended_500_09_18
+  run_infShieldState_extended_500_10_18
+  run_infShieldState_extended_500_11_18
+  run_infShieldState_extended_500_12_18
+  run_infShieldState_extended_500_13_18
+  run_infShieldState_extended_500_14_18
+  run_infShieldState_extended_500_15_18
+  run_infShieldState_extended_500_16_18
+  run_infShieldState_extended_500_17_18
+  run_infShieldState_extended_500_18_18
+
+  run_infShieldState_extended_1000_01_18
+  run_infShieldState_extended_1000_02_18
+  run_infShieldState_extended_1000_03_18
+  run_infShieldState_extended_1000_04_18
+  run_infShieldState_extended_1000_05_18
+  run_infShieldState_extended_1000_06_18
+  run_infShieldState_extended_1000_07_18
+  run_infShieldState_extended_1000_08_18
+  run_infShieldState_extended_1000_09_18
+  run_infShieldState_extended_1000_10_18
+  run_infShieldState_extended_1000_11_18
+  run_infShieldState_extended_1000_12_18
+  run_infShieldState_extended_1000_13_18
+  run_infShieldState_extended_1000_14_18
+  run_infShieldState_extended_1000_15_18
+  run_infShieldState_extended_1000_16_18
+  run_infShieldState_extended_1000_17_18
+  run_infShieldState_extended_1000_18_18
+
   run_infShieldState_random
 
   run_infShieldState_extended
