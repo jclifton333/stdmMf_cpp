@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
     }
 
     const uint32_t num_reps(50);
-    const uint32_t time_points(25);
+    const uint32_t time_points(300);
     const uint32_t short_time_horizon(25);
 
     run_infShieldState_sim(argv[0], networks, models,
