@@ -7,28 +7,30 @@ library(plyr)
 library(dplyr)
 library(progress)
 
-data_dirs_extended = c("../data/2017-09-03_15-24-07", ## all 100
-                       "../data/2017-09-22_15-24-56", ## begin 500
-                       "../data/2017-09-22_15-23-46",
-                       "../data/2017-09-22_15-26-09",
-                       "../data/2017-09-22_15-21-27",
-                       "../data/2017-09-22_15-20-18",
-                       "../data/2017-09-22_15-22-37",
-                       "../data/2017-09-22_15-13-22",
-                       "../data/2017-09-22_15-16-49",
-                       "../data/2017-09-22_15-17-59",
-                       "../data/2017-09-22_15-19-08",
-                       "../data/2017-09-22_15-30-04",
-                       "../data/2017-09-22_15-31-14",
-                       "../data/2017-09-22_15-32-22",
-                       "../data/2017-09-22_15-27-18",
-                       "../data/2017-09-22_15-28-29",
-                       "../data/2017-09-22_15-33-31",
-                       "../data/2017-09-25_23-07-39",
-                       "../data/2017-10-01_21-01-26")
-
+## 300 time points
+data_dirs = c("../data/2017-09-03_15-24-07", ## all 100
+              "../data/2017-09-22_15-24-56", ## begin 500
+              "../data/2017-09-22_15-23-46",
+              "../data/2017-09-22_15-26-09",
+              "../data/2017-09-22_15-21-27",
+              "../data/2017-09-22_15-20-18",
+              "../data/2017-09-22_15-22-37",
+              "../data/2017-09-22_15-13-22",
+              "../data/2017-09-22_15-16-49",
+              "../data/2017-09-22_15-17-59",
+              "../data/2017-09-22_15-19-08",
+              "../data/2017-09-22_15-30-04",
+              "../data/2017-09-22_15-31-14",
+              "../data/2017-09-22_15-32-22",
+              "../data/2017-09-22_15-27-18",
+              "../data/2017-09-22_15-28-29",
+              "../data/2017-09-22_15-33-31",
+              "../data/2017-09-25_23-07-39",
+              "../data/2017-10-01_21-01-26")
+time_points = 300
 
 ## TS using weighted estimating equations
+## 25 time points
 data_dirs = c("../data/2017-07-28_14-50-12", ## next 6 are grid
               "../data/2017-07-28_15-37-34",
               "../data/2017-07-28_15-39-58",
@@ -42,7 +44,8 @@ data_dirs = c("../data/2017-07-28_14-50-12", ## next 6 are grid
               "../data/2017-07-28_16-11-10",
               "../data/2017-07-28_16-13-37",
               "../data/2017-08-18_20-17-55" ## all random sims
-            )
+              )
+time_points = 25
 
 ## TS using Ashkan's distributional results
 ## data_dirs = c("../data/2017-07-22_20-45-41",
@@ -90,13 +93,14 @@ mods_miss <- data.frame(
 se = function(x) sqrt(var(x)/length(x))
 
 
-pb = progress_bar$new(total = nrow(nets) * nrow(mods_miss) * length(data_dirs),
-                      format = "loading data [:bar]",
-                      clear = TRUE, width = 60)
+## pb = progress_bar$new(total = nrow(nets) * nrow(mods_miss) * length(data_dirs),
+##                       format = "loading data [:bar]",
+##                       clear = TRUE, width = 60)
 
 sim_data = NULL
 for (net_index in 1:nrow(nets)) {
   for (mod_index in 1:nrow(mods_miss)) {
+    cat(sprintf("net %d mod %d\n", net_index, mod_index))
     for (data_dir_index in 1:length(data_dirs)) {
       ## read file
       file_name = paste(data_dirs[data_dir_index], "/",
@@ -107,6 +111,7 @@ for (net_index in 1:nrow(nets)) {
 
       ## read in data if exists
       if (file.exists(file_name)) {
+        cat(sprintf("found in %s\n", data_dirs[data_dir_index]))
         raw_data = read_delim(file_name, ",", trim_ws = TRUE,
                               col_types = cols(col_character(), ## agent
                                                col_integer(), ## rep
@@ -116,7 +121,7 @@ for (net_index in 1:nrow(nets)) {
                                                col_double(), ## shield
                                                col_integer() ## trt
                                                ),
-                              progress = FALSE)
+                              progress = TRUE)
 
         ## isolate last time point
         agg_data = raw_data[which(raw_data$time == max(raw_data$time)),]
@@ -131,7 +136,8 @@ for (net_index in 1:nrow(nets)) {
 
         sim_data = rbind(sim_data, agg_data)
       }
-      pb$tick()
+      gc()
+      ## pb$tick()
     }
   }
 }
@@ -171,8 +177,8 @@ p = p + theme(panel.spacing = unit(1, "lines"),
 p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 print(p)
 
-ggsave("../data/figures/toy_sim_results.pdf", p, width = 5.6, height = 8)
-ggsave("../data/figures/toy_sim_results.svg", p, width = 5.6, height = 8)
+ggsave(sprintf("../data/figures/toy_sim_results_%03dtp.pdf", time_points), p, width = 5.6, height = 8)
+## ggsave(sprintf("../data/figures/toy_sim_results_%03dtp.svg", time_points), p, width = 5.6, height = 8)
 
 
 for(i in 1:nrow(nets)) {
@@ -209,10 +215,10 @@ for(i in 1:nrow(nets)) {
                 legend.key.width=unit(3,"line"))
   p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 
-  ggsave(sprintf("../data/figures/toy_sim_results_%s_%04d.pdf",
-                 net_type, net_size), p)
-  ggsave(sprintf("../data/figures/toy_sim_results_%s_%04d.svg",
-                 net_type, net_size), p)
+  ggsave(sprintf("../data/figures/toy_sim_results_%s_%04d_%03dtp.pdf",
+                 net_type, net_size, time_points), p)
+  ## ggsave(sprintf("../data/figures/toy_sim_results_%s_%04d_%03dtp.svg",
+  ##                net_type, net_size, time_points), p)
 }
 
 
@@ -249,8 +255,8 @@ for(net_type in sort(unique(nets$type))) {
                 legend.position = "bottom")
   p = p + scale_x_continuous(breaks = c(0, 0.5, 1.0))
 
-  ggsave(sprintf("../data/figures/toy_sim_results_%s.pdf",
-                 net_type), p)
-  ggsave(sprintf("../data/figures/toy_sim_results_%s.svg",
-                 net_type), p, width = 8, height = 3.5)
+  ggsave(sprintf("../data/figures/toy_sim_results_%s_%03dtp.pdf",
+                 net_type, time_points), p)
+  ## ggsave(sprintf("../data/figures/toy_sim_results_%s_%03dtp.svg",
+  ##                net_type, time_points), p, width = 8, height = 3.5)
 }
